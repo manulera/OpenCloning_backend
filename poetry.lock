@@ -1287,6 +1287,34 @@ wcwidth = "*"
 tests = ["pytest", "pytest-cov", "pytest-lazy-fixtures"]
 
 [[package]]
+name = "primer3-py"
+version = "2.0.3"
+description = "Python bindings for Primer3"
+optional = false
+python-versions = "*"
+groups = ["main"]
+markers = "python_version == \"3.11\" or python_version >= \"3.12\""
+files = [
+    {file = "primer3-py-2.0.3.tar.gz", hash = "sha256:1ec6ce99ea149b1c82361c654a0eab824e698ce32d5f9ed2dd8f8f37564b3f5f"},
+    {file = "primer3_py-2.0.3-cp310-cp310-macosx_10_14_x86_64.whl", hash = "sha256:388c5ab6fcaed112d2374eed7b08ad4f547b1b314e0f9253994674c15e4eee9c"},
+    {file = "primer3_py-2.0.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c9e834567abf2e9e39af6531e04de3192ffdf40fbfe99835ccadcd574c33c36c"},
+    {file = "primer3_py-2.0.3-cp310-cp310-win_amd64.whl", hash = "sha256:5b7ec07124fe9d7d7018e98e99c0a6510d314e5f1875a14b6cf1030dd95e1790"},
+    {file = "primer3_py-2.0.3-cp311-cp311-macosx_10_14_x86_64.whl", hash = "sha256:c9c88f95913d68f1915300eb0c1d1d464e0fe761ea101793f4b577ff8594e80d"},
+    {file = "primer3_py-2.0.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:da85e4b64418b9501c98d512263a80c5c7f0f3e322d2845aaec05fdd3c42f8d2"},
+    {file = "primer3_py-2.0.3-cp311-cp311-win_amd64.whl", hash = "sha256:50529ac5124eb76ca9c4cf7389e3dd4cc3c58f7da7f515e4e454ac34f1be7212"},
+    {file = "primer3_py-2.0.3-cp312-cp312-macosx_10_14_x86_64.whl", hash = "sha256:7998c9dc66aef1df3191039963d127d0db2ea03d843360e2aa7a417516ac49c9"},
+    {file = "primer3_py-2.0.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ac6aab27d68e56e73d381d50e5a152a83a0f6d644f62c4eb0ce632bddb7284bb"},
+    {file = "primer3_py-2.0.3-cp312-cp312-win_amd64.whl", hash = "sha256:9632336197c8b5223f802cb6cbf96ddaa29fd640b3d3bb268bb43fd31a8a3660"},
+    {file = "primer3_py-2.0.3-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:3104de534e5db7fc32bc876e1d9149a9d4a7f2e03dde443cbb90d9b1f79c8f6a"},
+    {file = "primer3_py-2.0.3-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2e575704c96ec88e1b9e41613493c78caabef29ea4f1e70fa1009d39282d8b6a"},
+    {file = "primer3_py-2.0.3-cp38-cp38-win_amd64.whl", hash = "sha256:ea2b714ba4cd8855c83ecd04d65eb40b184233fe35f66e2b8790641d6c2410f8"},
+    {file = "primer3_py-2.0.3-cp39-cp39-macosx_10_14_x86_64.whl", hash = "sha256:9d33c2a4602d111fe2bd94eb696a17f464d856c5ae98bbdc1c45689280f37eeb"},
+    {file = "primer3_py-2.0.3-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:54c374596ff2c4977aedbb5ec1582fdde613f09a65bcc7aa96df08a71facd100"},
+    {file = "primer3_py-2.0.3-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ee7c3b181250b447ffafc8e57cd00758f88ced8a37b90e098f59c25676715723"},
+    {file = "primer3_py-2.0.3-cp39-cp39-win_amd64.whl", hash = "sha256:fa8ff8398bcc48b73bc200a8712f9381af7366a45d97fa7d83a364a4a4220542"},
+]
+
+[[package]]
 name = "prompt-toolkit"
 version = "3.0.48"
 description = "Library for building powerful interactive command lines in Python"
@@ -2362,4 +2390,4 @@ test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "be5d0ca855de1c9d0fe1d72d68618ce3824f155c6fcbc05e6128b14622d05516"
+content-hash = "15d7759a1a68dae818c4aafd89143862cb7ca71b81a3f45017862d78cbb287f9"
