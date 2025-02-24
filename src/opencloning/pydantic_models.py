@@ -60,8 +60,6 @@ class TextFileSequence(_TextFileSequence):
 class PrimerModel(_Primer):
     """Called PrimerModel not to be confused with the class from pydna."""
 
-    database_id: Optional[Any] = None
-
     def to_pydna_primer(self) -> _PydnaPrimer:
         """
         Convert the PrimerModel to a pydna Primer object.

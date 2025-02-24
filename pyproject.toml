@@ -22,7 +22,7 @@ pydantic = "^2.7.1"
 pandas = "^2.2.3"
 openpyxl = "^3.1.5"
 pyyaml = "^6.0.2"
-opencloning-linkml = "0.2.4a0"
+opencloning-linkml = "0.2.5.1a"
 
 [tool.poetry.group.dev.dependencies]
 autopep8 = "^2.0.4"
