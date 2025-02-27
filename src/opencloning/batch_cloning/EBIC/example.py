@@ -31,7 +31,7 @@ adapter_right_fwd = 'ataGGTCTCtGCTT'
 adapter_right_rvs = 'ataGGTCTCtAGCG'
 
 
-async def design_primers_ebic(seq: str, seq_args: dict):
+def design_primers_ebic(seq: str, seq_args: dict):
 
     report = bindings.design_primers(
         seq_args={
@@ -95,8 +95,8 @@ async def main():
         'SEQUENCE_PRIMER_PAIR_OK_REGION_LIST': f'0,{max_outside + max_inside},{len(right_template) - int(padding/2)},{int(padding/2)}',
     }
 
-    report_left = await design_primers_ebic(str(left_template.seq), seq_args_left)
-    report_right = await design_primers_ebic(str(right_template.seq), seq_args_right)
+    report_left = design_primers_ebic(str(left_template.seq), seq_args_left)
+    report_right = design_primers_ebic(str(right_template.seq), seq_args_right)
 
     primer_names = ['left_fwd', 'left_rvs', 'right_fwd', 'right_rvs']
     primer_seqs = [
