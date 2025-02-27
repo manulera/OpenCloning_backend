@@ -20,7 +20,7 @@ amanda_settings = {
     # A 1 or 2nt GC clamp at the 3’ end of the primer helps with PCR efficiency.
     'PRIMER_GC_CLAMP': 1,  # Number of GC bases required at the 3’ end
     # Product size: ~950bp homologous arms, though this can be shortened if necessary.
-    'PRIMER_PRODUCT_SIZE_RANGE': [[800, 1000]],  # Product size range in base pairs
+    'PRIMER_PRODUCT_SIZE_RANGE': [[900, 1000]],  # Product size range in base pairs
     # Avoid primers with long repetitions of nucleotides in a row (e.g., TTTTT).
     'PRIMER_MAX_POLY_X': 4,  # Maximum allowable repetitions of a single nucleotide
     # Dimer and hairpin structure considerations:
