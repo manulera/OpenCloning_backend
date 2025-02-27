@@ -1,0 +1,23 @@
+LOCUS       barcode         151 bp DNA     linear   UNA 15-SEP-2024
+DEFINITION  natural linear DNA
+ACCESSION   .
+VERSION     .
+KEYWORDS    .
+SOURCE      natural DNA sequence
+  ORGANISM  unspecified
+REFERENCE   1  (bases 1 to 151)
+  AUTHORS   SnapGene License
+  TITLE     Direct Submission
+  JOURNAL   Exported Dec 20, 2024 from SnapGene 7.2.1
+            https://www.snapgene.com
+FEATURES             Location/Qualifiers
+     source          1..151
+                     /mol_type="genomic DNA"
+                     /organism="unspecified"
+     misc_feature    15..137
+                     /label=CG_Barcode1
+ORIGIN
+        1 ataggtctct aatggctctt attcgggaca tttacaatgc cacccactgg gagtgattat
+       61 gagtctcatt gagactgctc accacagcat gaattctctg gttcggtggc gcatagctat
+      121 cgctgttcct gccactggct tagagaccta t
+//

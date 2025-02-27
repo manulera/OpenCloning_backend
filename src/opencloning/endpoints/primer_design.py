@@ -12,7 +12,7 @@ from ..primer_design import (
     simple_pair_primers,
 )
 from ..get_router import get_router
-
+from ..ebic.primer_design import ebic_primers
 
 router = get_router()
 
@@ -187,6 +187,19 @@ async def primer_design_simple_pair(
         raise HTTPException(400, *e.args)
 
     return {'primers': [fwd, rvs]}
+
+
+@router.post('/primer_design/ebic', response_model=PrimerDesignResponse)
+async def primer_design_ebic(
+    template: PrimerDesignQuery,
+    max_inside: int = Query(..., description='The maximum length of the inside edge of the EBIC primer.'),
+    max_outside: int = Query(..., description='The maximum length of the outside edge of the EBIC primer.'),
+):
+    """Design primers for EBIC"""
+    dseqr = read_dsrecord_from_json(template.sequence)
+    location = template.location.to_biopython_location(dseqr.circular, len(dseqr))
+
+    return {'primers': ebic_primers(dseqr, location, max_inside, max_outside)}
 
 
 # @router.post('/primer_design/gateway_attB', response_model=PrimerDesignResponse)

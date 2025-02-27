@@ -400,7 +400,23 @@ class BaseCloningStrategy(_CloningStrategy):
         description="""The primers that are used in the cloning strategy""",
         json_schema_extra={'linkml_meta': {'alias': 'primers', 'domain_of': ['CloningStrategy']}},
     )
-    pass
+
+    def next_primer_id(self):
+        return max([p.id for p in self.primers], default=0) + 1
+
+    def add_primer(self, primer: PrimerModel):
+        primer.id = self.next_primer_id()
+        self.primers.append(primer)
+
+    def next_node_id(self):
+        return max([s.id for s in self.sources + self.sequences], default=0) + 1
+
+    def add_source_and_sequence(self, source: SourceCommonClass, sequence: TextFileSequence):
+        source.id = self.next_node_id()
+        self.sources.append(source)
+        sequence.id = self.next_node_id()
+        self.sequences.append(sequence)
+        source.output = sequence.id
 
 
 class PrimerDesignQuery(BaseModel):
