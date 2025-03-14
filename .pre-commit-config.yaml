@@ -1,16 +1,26 @@
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
     hooks:
       - id: trailing-whitespace
       - id: check-yaml
       - id: end-of-file-fixer
       - id: double-quote-string-fixer
--   repo: https://github.com/psf/black
+  - repo: https://github.com/psf/black
     rev: 24.4.0
     hooks:
-    -   id: black
-- repo: https://github.com/PyCQA/flake8
-  rev: 7.0.0
-  hooks:
-  - id: flake8
+      - id: black
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+  # Hook to remove metadata changes from notebooks to avoid diff contamination
+  - repo: local
+    hooks:
+      - id: nbstripout
+        name: nbstripout with keep-output
+        entry: |
+          python -m nbstripout --keep-output $@
+        language: system
+        files: \.ipynb$
+        exclude: tests/

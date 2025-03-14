@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, model_validator
-from typing import Optional, List, Any
+from typing import Optional, List
 
 from Bio.SeqFeature import (
     SeqFeature,
@@ -405,6 +405,8 @@ class BaseCloningStrategy(_CloningStrategy):
         return max([p.id for p in self.primers], default=0) + 1
 
     def add_primer(self, primer: PrimerModel):
+        if primer in self.primers:
+            return
         primer.id = self.next_primer_id()
         self.primers.append(primer)
 
@@ -412,6 +414,12 @@ class BaseCloningStrategy(_CloningStrategy):
         return max([s.id for s in self.sources + self.sequences], default=0) + 1
 
     def add_source_and_sequence(self, source: SourceCommonClass, sequence: TextFileSequence):
+        if source in self.sources:
+            if sequence not in self.sequences:
+                raise ValueError(
+                    f"Source {source.id} already exists in the cloning strategy, but sequence {sequence.id} it's not its output."
+                )
+            return
         source.id = self.next_node_id()
         self.sources.append(source)
         sequence.id = self.next_node_id()

@@ -13,6 +13,10 @@ Read [main project readme](https://github.com/manulera/OpenCloning) first.
 
 This API provides a series of entry points. The API documentation can be accessed [here](https://OpenCloning.api.genestorian.org/docs). You can use the documentation page to try some request directly on the browser. Otherwise, the API is open for you to make requests from a python script or command line at: [https://opencloning.api.genestorian.org/](https://opencloning.api.genestorian.org/).
 
+## Scripting
+
+The API functions can also be used to write python scripts to automate cloning. See the [scripting examples](examples/scripting) for more information.
+
 ## Getting started
 
 If you want to quickly set up a local instance of the frontend and backend of the application, check [getting started in 5 minutes](https://github.com/manulera/OpenCloning#timer_clock-getting-started-in-5-minutes) in the main repository.
