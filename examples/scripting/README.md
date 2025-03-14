@@ -14,7 +14,7 @@ If you want to install a particular github commit, you can do so by specifying t
 ```bash
 pip install git+https://github.com/OpenCloning/OpenCloning_backend.git@<commit_hash>
 ```
-For examples, see the scripts in this folder.
+For examples, see the jupyter notebooks in this folder.
 
 ## Is OpenCloning the right tool for me?
 
