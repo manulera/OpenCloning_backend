@@ -15,7 +15,7 @@ from opencloning.pydantic_models import (
     TextFileSequence,
     UploadedFileSource,
     GenomeCoordinatesSource,
-    AddGeneIdSource,
+    AddgeneIdSource,
     BenchlingUrlSource,
     EuroscarfSource,
     SnapGenePlasmidSource,
@@ -310,9 +310,9 @@ class GenBankTest(unittest.TestCase):
         self.assertIn('sequence is too long', response.json()['detail'])
 
 
-class AddGeneTest(unittest.TestCase):
+class AddgeneTest(unittest.TestCase):
     def test_request_plasmid(self):
-        """Test whether the gene is requested from AddGene and returns the right info"""
+        """Test whether the gene is requested from Addgene and returns the right info"""
         examples = [
             {
                 'id': '39282',
@@ -328,7 +328,7 @@ class AddGeneTest(unittest.TestCase):
             },
         ]
         for example in examples:
-            source = AddGeneIdSource(
+            source = AddgeneIdSource(
                 id=1,
                 repository_name='addgene',
                 repository_id=example['id'],
@@ -340,7 +340,7 @@ class AddGeneTest(unittest.TestCase):
             resulting_sequences = [
                 read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']
             ]
-            sources = [AddGeneIdSource.model_validate(s) for s in payload['sources']]
+            sources = [AddgeneIdSource.model_validate(s) for s in payload['sources']]
 
             self.assertEqual(len(resulting_sequences), 1)
             self.assertEqual(len(sources), 1)
@@ -352,10 +352,10 @@ class AddGeneTest(unittest.TestCase):
             response2 = client.post('/repository_id/addgene', json=payload['sources'][0])
             self.assertEqual(response.json(), response2.json())
 
-    @pytest.mark.xfail(reason='This file was removed from AddGene, not sure what the ideal behavior should be')
+    @pytest.mark.xfail(reason='This file was removed from Addgene, not sure what the ideal behavior should be')
     def test_old_url(self):
-        """Works for an AddGene url that has now been replaced by a newer one"""
-        source = AddGeneIdSource(
+        """Works for an Addgene url that has now been replaced by a newer one"""
+        source = AddgeneIdSource(
             id=1,
             repository_name='addgene',
             repository_id='65109',
@@ -368,7 +368,7 @@ class AddGeneTest(unittest.TestCase):
         resulting_sequences = [
             read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']
         ]
-        sources = [AddGeneIdSource.model_validate(s) for s in payload['sources']]
+        sources = [AddgeneIdSource.model_validate(s) for s in payload['sources']]
 
         self.assertEqual(len(resulting_sequences), 1)
         self.assertEqual(len(sources), 1)
@@ -381,7 +381,7 @@ class AddGeneTest(unittest.TestCase):
 
     def test_missing_sequences(self):
         # Non-existing id
-        source = AddGeneIdSource(
+        source = AddgeneIdSource(
             id=1,
             repository_name='addgene',
             repository_id='DUMMYTEST',
@@ -392,7 +392,7 @@ class AddGeneTest(unittest.TestCase):
         self.assertIn('wrong addgene id', response.json()['detail'])
 
         # Id that has no full-sequences
-        source = AddGeneIdSource(
+        source = AddgeneIdSource(
             id=1,
             repository_name='addgene',
             repository_id='39291',
@@ -402,7 +402,7 @@ class AddGeneTest(unittest.TestCase):
         self.assertIn('The requested plasmid does not have full sequences', response.json()['detail'])
 
         # url does not exist
-        source = AddGeneIdSource(
+        source = AddgeneIdSource(
             id=1,
             repository_name='addgene',
             repository_id='39282',
@@ -415,7 +415,7 @@ class AddGeneTest(unittest.TestCase):
 
     def test_redirect(self):
         """Test repository_id endpoint should redirect based on repository_name value"""
-        source = AddGeneIdSource(
+        source = AddgeneIdSource(
             id=1,
             repository_name='addgene',
             repository_id='39282',
@@ -429,14 +429,14 @@ class AddGeneTest(unittest.TestCase):
     @respx.mock
     def test_addgene_down(self):
         respx.get('https://www.addgene.org/39282/sequences/').mock(side_effect=httpx.ConnectError('Connection error'))
-        source = AddGeneIdSource(
+        source = AddgeneIdSource(
             id=1,
             repository_name='addgene',
             repository_id='39282',
         )
         response = client.post('/repository_id/addgene', json=source.model_dump())
         self.assertEqual(response.status_code, 504)
-        self.assertIn('unable to connect to AddGene', response.json()['detail'])
+        self.assertIn('unable to connect to Addgene', response.json()['detail'])
 
 
 class WekWikGeneSourceTest(unittest.TestCase):

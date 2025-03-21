@@ -32,7 +32,7 @@ from opencloning_linkml.datamodel import (
     Primer as _Primer,
     AssemblyFragment as _AssemblyFragment,
     SimpleSequenceLocation as _SimpleSequenceLocation,
-    AddGeneIdSource as _AddGeneIdSource,
+    AddgeneIdSource as _AddgeneIdSource,
     WekWikGeneIdSource as _WekWikGeneIdSource,
     BenchlingUrlSource as _BenchlingUrlSource,
     CloningStrategy as _CloningStrategy,
@@ -115,7 +115,7 @@ class RepositoryIdSource(SourceCommonClass, _RepositoryIdSource):
     pass
 
 
-class AddGeneIdSource(SourceCommonClass, _AddGeneIdSource):
+class AddgeneIdSource(SourceCommonClass, _AddgeneIdSource):
     # TODO: add this to LinkML
     # repository_name: RepositoryName = RepositoryName('addgene')
     pass

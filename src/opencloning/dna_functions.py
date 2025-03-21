@@ -4,7 +4,7 @@ from Bio.Restriction.Restriction import RestrictionBatch
 from Bio.Seq import reverse_complement
 from pydna.dseqrecord import Dseqrecord
 from pydna.dseq import Dseq
-from .pydantic_models import TextFileSequence, AddGeneIdSource, SequenceFileFormat, WekWikGeneIdSource, SEVASource
+from .pydantic_models import TextFileSequence, AddgeneIdSource, SequenceFileFormat, WekWikGeneIdSource, SEVASource
 from opencloning_linkml.datamodel import PlannotateAnnotationReport
 from pydna.parsers import parse as pydna_parse
 import requests
@@ -93,7 +93,7 @@ def get_sequence_from_snagene_url(url: str) -> Dseqrecord:
     return Dseqrecord(parsed_seq, circular=circularize)
 
 
-async def request_from_addgene(source: AddGeneIdSource) -> tuple[Dseqrecord, AddGeneIdSource]:
+async def request_from_addgene(source: AddgeneIdSource) -> tuple[Dseqrecord, AddgeneIdSource]:
 
     url = f'https://www.addgene.org/{source.repository_id}/sequences/'
     async with httpx.AsyncClient() as client:

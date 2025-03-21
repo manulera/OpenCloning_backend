@@ -11,7 +11,7 @@ This python API is built with [FastAPI](https://fastapi.tiangolo.com/) and is fo
 
 Read [main project readme](https://github.com/manulera/OpenCloning) first.
 
-This API provides a series of entry points. The API documentation can be accessed [here](https://OpenCloning.api.genestorian.org/docs). You can use the documentation page to try some request directly on the browser. Otherwise, the API is open for you to make requests from a python script or command line at: [https://opencloning.api.genestorian.org/](https://opencloning.api.genestorian.org/).
+This API provides a series of entry points. The API documentation can be accessed [here](https://api.opencloning.org/docs). You can use the documentation page to try some request directly on the browser. Otherwise, the API is open for you to make requests from a python script or command line at: [https://api.opencloning.org/](https://api.opencloning.org/).
 
 ## Scripting
 
@@ -77,7 +77,7 @@ docker run -d --name backendcontainer -p 8000:8000 manulera/opencloningbackend
 
 ```
 
-If you don't want to download the repository and build the image, you can fetch the latest image from dockerhub (same image that is used in [https://opencloning.api.genestorian.org/](https://opencloning.api.genestorian.org/))
+If you don't want to download the repository and build the image, you can fetch the latest image from dockerhub (same image that is used in [https://api.opencloning.org/](https://api.opencloning.org/))
 
 ```bash
 docker pull manulera/opencloningbackend
