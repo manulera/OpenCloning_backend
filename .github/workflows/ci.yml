@@ -13,6 +13,11 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Run the tests with exact poetry dependencies and with
+        # The dependencies you would get if you pip install the package
+        mode: [lock, fresh]
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -35,19 +40,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry
       - name: Load cached venv
+        if: ${{ matrix.mode == 'lock' }}
         id: cached-poetry-dependencies
         uses: actions/cache@v4
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}-${{ hashFiles('**/pyproject.toml') }}
+      - name: Remove poetry.lock
+        if: ${{ matrix.mode == 'fresh' }}
+        run: rm poetry.lock
       - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --with test
+        if: ${{ matrix.mode != 'lock' }} || steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install
       - name: Run tests
         env:
           PYTHONUNBUFFERED: "1"
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
         run: poetry run python -u -m pytest --tb=short -v --capture=no --cov='.' --cov-report term --cov-report xml:coverage.xml
+
+      - name: Stop workflow if mode is fresh
+        if: ${{ matrix.mode == 'fresh' }}
+        run: exit 0
 
       - uses: actions/cache@v4
         id: cache-precommit
