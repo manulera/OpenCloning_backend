@@ -14,6 +14,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         # Run the tests with exact poetry dependencies and with
         # The dependencies you would get if you pip install the package
