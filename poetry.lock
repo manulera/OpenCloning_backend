@@ -1807,22 +1807,22 @@ wheel = "*"
 
 [[package]]
 name = "pydna"
-version = "5.3.0"
+version = "5.5.0"
 description = "Representing double stranded DNA and functions for simulating cloning and homologous recombination between DNA molecules."
 optional = false
-python-versions = "<4.0,>=3.8"
+python-versions = "<4.0,>=3.9"
 groups = ["main"]
 markers = "python_version == \"3.11\" or python_version >= \"3.12\""
 files = [
-    {file = "pydna-5.3.0-py3-none-any.whl", hash = "sha256:97572c15250c1a51e2facee5b85d85f80e519bd5368f46604ca0227a1000d060"},
-    {file = "pydna-5.3.0.tar.gz", hash = "sha256:84c4847753fd8d22e6cf5e6a6d973ea4a96cf99fee1007d12e53129418fc34dd"},
+    {file = "pydna-5.5.0-py3-none-any.whl", hash = "sha256:56957bf60451e56538820389076bb6cae005ab4ba588c2a0c86903aad29a1760"},
+    {file = "pydna-5.5.0.tar.gz", hash = "sha256:6408e5928c26cda38a60fb2373fc049deca06986da06e420ac56ee8f2ccbe3ae"},
 ]
 
 [package.dependencies]
 appdirs = ">=1.4.4"
 biopython = ">=1.80"
 networkx = ">=2.8.8"
-numpy = {version = ">1.26", markers = "python_version >= \"3.9\""}
+numpy = ">1.26"
 prettytable = ">=3.5.0"
 pydivsufsort = ">=0.0.14"
 pyfiglet = "0.8.post1"
@@ -2810,4 +2810,4 @@ test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "a143d35e583391b7b3a9a06a4687fc5e227e0a9d68c51178988b8f63a826d8d2"
+content-hash = "dd055eddc52a794736058ddfa45efb794736e632b4a6c554023e21fa64fd7707"
