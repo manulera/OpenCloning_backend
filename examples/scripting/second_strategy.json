@@ -73,7 +73,7 @@
       "id": 5,
       "input": [],
       "output": 6,
-      "type": "AddGeneIdSource",
+      "type": "AddgeneIdSource",
       "output_name": null,
       "database_id": null,
       "repository_id": "52691",

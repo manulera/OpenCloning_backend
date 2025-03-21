@@ -4,7 +4,7 @@ from ...endpoints.assembly import pcr, homologous_recombination
 from ...pydantic_models import (
     GenomeCoordinatesSource,
     TextFileSequence,
-    AddGeneIdSource,
+    AddgeneIdSource,
     PCRSource,
     PrimerModel,
     HomologousRecombinationSource,
@@ -81,13 +81,13 @@ async def main(
         plasmid_source: UploadedFileSource = UploadedFileSource.model_validate(resp['sources'][0])
         plasmid_source.output = 4
     else:
-        addgene_source = AddGeneIdSource(
+        addgene_source = AddgeneIdSource(
             id=3,
             repository_id=plasmid,
             repository_name='addgene',
         )
         resp = await get_from_repository_id_addgene(addgene_source)
-        plasmid_source: AddGeneIdSource = AddGeneIdSource.model_validate(resp['sources'][0])
+        plasmid_source: AddgeneIdSource = AddgeneIdSource.model_validate(resp['sources'][0])
         plasmid_source.output = 4
 
     plasmid_seq: TextFileSequence = TextFileSequence.model_validate(resp['sequences'][0])
@@ -175,7 +175,7 @@ if __name__ == '__main__':
         '--plasmid',
         type=str,
         default='19343',
-        help='AddGene ID for the plasmid (default: 19343)',
+        help='Addgene ID for the plasmid (default: 19343)',
     )
 
     args = parser.parse_args()

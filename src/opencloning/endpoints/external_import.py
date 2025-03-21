@@ -13,7 +13,7 @@ from ..pydantic_models import (
     TextFileSequence,
     UploadedFileSource,
     RepositoryIdSource,
-    AddGeneIdSource,
+    AddgeneIdSource,
     WekWikGeneIdSource,
     BenchlingUrlSource,
     SnapGenePlasmidSource,
@@ -179,7 +179,7 @@ def repository_id_http_error_handler(exception: HTTPError, source: RepositoryIdS
         'RepositoryIdResponse',
         sources=(
             list[RepositoryIdSource]
-            | list[AddGeneIdSource]
+            | list[AddgeneIdSource]
             | list[BenchlingUrlSource]
             | list[EuroscarfSource]
             | list[WekWikGeneIdSource]
@@ -192,7 +192,7 @@ def repository_id_http_error_handler(exception: HTTPError, source: RepositoryIdS
 async def get_from_repository_id(
     source: (
         RepositoryIdSource
-        | AddGeneIdSource
+        | AddgeneIdSource
         | BenchlingUrlSource
         | SnapGenePlasmidSource
         | EuroscarfSource
@@ -225,16 +225,16 @@ async def get_from_repository_id_genbank(source: RepositoryIdSource):
 @router.post(
     '/repository_id/addgene',
     response_model=create_model(
-        'AddgeneIdResponse', sources=(list[AddGeneIdSource], ...), sequences=(list[TextFileSequence], ...)
+        'AddgeneIdResponse', sources=(list[AddgeneIdSource], ...), sequences=(list[TextFileSequence], ...)
     ),
 )
-async def get_from_repository_id_addgene(source: AddGeneIdSource):
+async def get_from_repository_id_addgene(source: AddgeneIdSource):
     try:
         dseq, out_source = await request_from_addgene(source)
     except HTTPError as exception:
         repository_id_http_error_handler(exception, source)
     except httpx.ConnectError:
-        raise HTTPException(504, 'unable to connect to AddGene')
+        raise HTTPException(504, 'unable to connect to Addgene')
 
     return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [out_source]}
 

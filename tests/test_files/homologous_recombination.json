@@ -38,7 +38,7 @@
       "id": 1,
       "input": [],
       "output": 2,
-      "type": "AddGeneIdSource",
+      "type": "AddgeneIdSource",
       "repository_name": "addgene",
       "repository_id": "19342",
       "sequence_file_url": "https://media.addgene.org/snapgene-media/v1.7.9-0-g88a3305/sequences/8997/a6b027f8-013a-4b68-bf7e-359f34a653d0/addgene-plasmid-19342-sequence-8997.gbk",
