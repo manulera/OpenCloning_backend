@@ -2,6 +2,8 @@ from fastapi import Body, Query, HTTPException
 from pydantic import create_model
 import re
 from Bio.Restriction import RestrictionBatch
+from Bio.SeqUtils import gc_fraction
+from primer3 import bindings
 
 from ..dna_functions import get_invalid_enzyme_names
 from ..pydantic_models import PrimerModel, PrimerDesignQuery
@@ -13,6 +15,7 @@ from ..primer_design import (
 )
 from ..get_router import get_router
 from ..ebic.primer_design import ebic_primers
+from pydantic import BaseModel
 
 router = get_router()
 
@@ -235,3 +238,21 @@ async def primer_design_ebic(
 #         raise HTTPException(400, *e.args)
 
 #     return {'primers': primers}
+
+
+class PrimerDetailsResponse(BaseModel):
+    melting_temperature: float
+    gc_content: float
+    # homodimer: float
+
+
+@router.get('/primer_details', response_model=PrimerDetailsResponse)
+async def primer_details(
+    sequence: str = Query(..., description='Primer sequence', regex=r'^[ACGTacgt]+$'),
+):
+    """Get information about a primer"""
+
+    tm = bindings.calc_tm(sequence)
+    # homodimer = bindings.calc_homodimer(sequence)
+    gc_content = gc_fraction(sequence)
+    return {'melting_temperature': tm, 'gc_content': gc_content}
