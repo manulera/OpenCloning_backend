@@ -240,10 +240,24 @@ async def primer_design_ebic(
 #     return {'primers': primers}
 
 
+class ThermodynamicResult(BaseModel):
+    melting_temperature: float
+    deltaG: float
+    figure: str | None
+
+    @classmethod
+    def from_binding(cls, result):
+        return cls(
+            melting_temperature=result.tm,
+            deltaG=result.dg,
+            figure='\n'.join(result.ascii_structure_lines),
+        )
+
+
 class PrimerDetailsResponse(BaseModel):
     melting_temperature: float
     gc_content: float
-    # homodimer: float
+    homodimer: ThermodynamicResult | None
 
 
 @router.get('/primer_details', response_model=PrimerDetailsResponse)
@@ -251,8 +265,16 @@ async def primer_details(
     sequence: str = Query(..., description='Primer sequence', regex=r'^[ACGTacgt]+$'),
 ):
     """Get information about a primer"""
-
+    sequence = sequence.upper()
     tm = bindings.calc_tm(sequence)
-    # homodimer = bindings.calc_homodimer(sequence)
+    homodimer = None
+    if len(sequence) <= 60:
+        homodimer_result = bindings.calc_homodimer(sequence, output_structure=True)
+        if homodimer_result.structure_found:
+            homodimer = ThermodynamicResult.from_binding(homodimer_result)
     gc_content = gc_fraction(sequence)
-    return {'melting_temperature': tm, 'gc_content': gc_content}
+    return {
+        'melting_temperature': tm,
+        'gc_content': gc_content,
+        'homodimer': homodimer,
+    }
