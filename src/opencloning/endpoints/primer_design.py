@@ -4,6 +4,7 @@ import re
 from Bio.Restriction import RestrictionBatch
 from Bio.SeqUtils import gc_fraction
 from primer3 import bindings
+from itertools import product
 
 from ..dna_functions import get_invalid_enzyme_names
 from ..pydantic_models import PrimerModel, PrimerDesignQuery
@@ -254,10 +255,23 @@ class ThermodynamicResult(BaseModel):
         )
 
 
+def get_sequence_thermodynamic_result(sequences: list[str], method: callable) -> ThermodynamicResult | None:
+    """Get the thermodynamic result for a sequence, if the sequence is longer than primer3 60bp limit, it will be split into two
+    and the result with the lowest deltaG will be returned."""
+    results = [method(seq, output_structure=True) for seq in sequences]
+    results = [r for r in results if r.structure_found]
+    if len(results) == 0:
+        return None
+
+    result = min(results, key=lambda r: r.dg)
+    return ThermodynamicResult.from_binding(result)
+
+
 class PrimerDetailsResponse(BaseModel):
     melting_temperature: float
     gc_content: float
     homodimer: ThermodynamicResult | None
+    hairpin: ThermodynamicResult | None
 
 
 @router.get('/primer_details', response_model=PrimerDetailsResponse)
@@ -267,14 +281,38 @@ async def primer_details(
     """Get information about a primer"""
     sequence = sequence.upper()
     tm = bindings.calc_tm(sequence)
-    homodimer = None
-    if len(sequence) <= 60:
-        homodimer_result = bindings.calc_homodimer(sequence, output_structure=True)
-        if homodimer_result.structure_found:
-            homodimer = ThermodynamicResult.from_binding(homodimer_result)
     gc_content = gc_fraction(sequence)
+
+    thermodynamic_sequences = [sequence]
+    if len(sequence) > 60:
+        thermodynamic_sequences = [sequence[:60], sequence[-60:]]
+    homodimer = get_sequence_thermodynamic_result(thermodynamic_sequences, bindings.calc_homodimer)
+    hairpin = get_sequence_thermodynamic_result(thermodynamic_sequences, bindings.calc_hairpin)
+
     return {
         'melting_temperature': tm,
         'gc_content': gc_content,
         'homodimer': homodimer,
+        'hairpin': hairpin,
     }
+
+
+@router.get('/primer_heterodimer', response_model=ThermodynamicResult | None)
+async def primer_heterodimer(
+    sequence1: str = Query(..., description='First primer sequence', regex=r'^[ACGTacgt]+$'),
+    sequence2: str = Query(..., description='Second primer sequence', regex=r'^[ACGTacgt]+$'),
+):
+    """Get information about a primer pair"""
+
+    if len(sequence1) <= 60 or len(sequence2) <= 60:
+        sequence_pairs = [(sequence1, sequence2)]
+    else:
+        sequence_pairs = list(product((sequence1[:60], sequence1[-60:]), (sequence2[:60], sequence2[-60:])))
+
+    results = [bindings.calc_heterodimer(s1, s2, output_structure=True) for s1, s2 in sequence_pairs]
+    results = [r for r in results if r.structure_found]
+    if len(results) == 0:
+        return None
+
+    result = min(results, key=lambda r: r.dg)
+    return ThermodynamicResult.from_binding(result)
