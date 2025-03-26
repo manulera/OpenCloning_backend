@@ -4,6 +4,8 @@ import unittest
 import copy
 from Bio.Seq import reverse_complement
 import os
+from primer3 import bindings
+from itertools import product
 
 from opencloning.dna_functions import format_sequence_genbank
 import opencloning.main as _main
@@ -11,7 +13,10 @@ from opencloning.pydantic_models import (
     PrimerModel,
     SimpleSequenceLocation as PydanticSimpleLocation,
 )
-
+from opencloning.endpoints.primer_design import (
+    PrimerDetailsResponse,
+    ThermodynamicResult,
+)
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
@@ -330,3 +335,95 @@ class PrimerDesignTest(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 422)
         self.assertIn('The number of spacers must be', response.json()['detail'])
+
+    def test_primer_details(self):
+        # Works with short sequences
+        SEQUENCE = 'ATGCATGCATGCATGC'
+        response = client.get('/primer_details', params={'sequence': SEQUENCE})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        resp = PrimerDetailsResponse.model_validate(payload)
+        self.assertEqual(resp.gc_content, 0.5)
+        self.assertEqual(resp.melting_temperature, bindings.calc_tm(SEQUENCE))
+        homodimerResult = bindings.calc_homodimer(SEQUENCE, output_structure=True)
+        self.assertEqual(resp.homodimer.melting_temperature, homodimerResult.tm)
+        self.assertEqual(resp.homodimer.deltaG, homodimerResult.dg)
+        self.assertEqual(resp.homodimer.figure, '\n'.join(homodimerResult.ascii_structure_lines))
+        hairpinResult = bindings.calc_hairpin(SEQUENCE, output_structure=True)
+        self.assertEqual(resp.hairpin.melting_temperature, hairpinResult.tm)
+        self.assertEqual(resp.hairpin.deltaG, hairpinResult.dg)
+        self.assertEqual(resp.hairpin.figure, '\n'.join(hairpinResult.ascii_structure_lines))
+
+        # Splits long sequence
+        LONG_SEQUENCE = 'GGAAAAGCATTTTTCTAAAATTGAAAGGCTTCACCAAGTCCTTGGAACAGATGGAGACAATTCATCATTA'
+        response = client.get('/primer_details', params={'sequence': LONG_SEQUENCE})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        resp = PrimerDetailsResponse.model_validate(payload)
+        # Use the homodimer result with the lowest deltaG
+        min_deltaG_homodimer = min(
+            bindings.calc_homodimer(seq, output_structure=True).dg for seq in [LONG_SEQUENCE[:60], LONG_SEQUENCE[60:]]
+        )
+        self.assertEqual(resp.homodimer.deltaG, min_deltaG_homodimer)
+
+        # Same with hairpin
+        min_deltaG_hairpin = min(
+            bindings.calc_hairpin(seq, output_structure=True).dg for seq in [LONG_SEQUENCE[:60], LONG_SEQUENCE[60:]]
+        )
+        self.assertEqual(resp.hairpin.deltaG, min_deltaG_hairpin)
+
+        # Response is the same for upper and lower case
+        response_lower = client.get('/primer_details', params={'sequence': LONG_SEQUENCE.lower()})
+        self.assertEqual(response_lower.json()['melting_temperature'], response.json()['melting_temperature'])
+
+        # Error 422 if sequence is not DNA
+        response = client.get('/primer_details', params={'sequence': 'ATGCATGCATGCATGCX'})
+        self.assertEqual(response.status_code, 422)
+
+        # Handles the case where there is no hairpin / homodimer
+        response = client.get('/primer_details', params={'sequence': 'AAAA'})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        resp = PrimerDetailsResponse.model_validate(payload)
+        self.assertIsNone(resp.homodimer)
+        self.assertIsNone(resp.hairpin)
+
+    def test_primer_heterodimer(self):
+        # Works with short sequences
+        SEQUENCE1 = 'ATGCATGCATGCATGC'
+        SEQUENCE2 = 'CTAAAATTGAAAGGCTTCACCAAGT'
+        response = client.get('/primer_heterodimer', params={'sequence1': SEQUENCE1, 'sequence2': SEQUENCE2})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        resp = ThermodynamicResult.model_validate(payload)
+        heterodimer = bindings.calc_heterodimer(SEQUENCE1, SEQUENCE2, output_structure=True)
+        self.assertEqual(resp.melting_temperature, heterodimer.tm)
+        self.assertEqual(resp.deltaG, heterodimer.dg)
+        self.assertEqual(resp.figure, '\n'.join(heterodimer.ascii_structure_lines))
+
+        # Same with lower case
+        response_lower = client.get(
+            '/primer_heterodimer', params={'sequence1': SEQUENCE1.lower(), 'sequence2': SEQUENCE2.lower()}
+        )
+        self.assertEqual(response_lower.json()['melting_temperature'], response.json()['melting_temperature'])
+
+        # Error 422 if sequence is not DNA
+        response = client.get('/primer_heterodimer', params={'sequence1': 'ATGCATGCATGCATGCX', 'sequence2': SEQUENCE2})
+        self.assertEqual(response.status_code, 422)
+
+        # Handles long sequences
+        LONG_SEQUENCE1 = 'GGAAAAGCATTTTTCTAAAATTGAAAGGCTTCACCAAGTCCTTGGAACAGATGGAGACAATTCATCATTA'
+        LONG_SEQUENCE2 = 'GGAAAAGCATTTTTCTAAAATTGAAAGGCTTCGACTATTCCTTGGAACAGATGGAGACAATTCATCATTA'
+        response = client.get('/primer_heterodimer', params={'sequence1': LONG_SEQUENCE1, 'sequence2': LONG_SEQUENCE2})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        resp = ThermodynamicResult.model_validate(payload)
+        combs = list(product([LONG_SEQUENCE1[:60], LONG_SEQUENCE1[60:]], [LONG_SEQUENCE2[:60], LONG_SEQUENCE2[60:]]))
+        min_deltaG = min(bindings.calc_heterodimer(seq1, seq2, output_structure=True).dg for seq1, seq2 in combs)
+        self.assertEqual(resp.deltaG, min_deltaG)
+
+        # Handles case where there is no heterodimer
+        response = client.get('/primer_heterodimer', params={'sequence1': 'AAA', 'sequence2': 'AAA'})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIsNone(payload)
