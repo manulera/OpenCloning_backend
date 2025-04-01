@@ -7,6 +7,13 @@ from .pydantic_models import PrimerModel
 from Bio.Seq import reverse_complement
 from Bio.Restriction.Restriction import RestrictionType
 from Bio.Data.IUPACData import ambiguous_dna_values as _ambiguous_dna_values
+from primer3.bindings import calc_tm as _calc_tm
+from typing import Callable
+
+
+def primer3_calc_tm(seq: str) -> float:
+    return _calc_tm(seq.upper())
+
 
 ambiguous_dna_values = _ambiguous_dna_values.copy()
 # Remove acgt
@@ -24,10 +31,13 @@ def homologous_recombination_primers(
     insert_forward: bool,
     target_tm: float,
     spacers: list[str] | None = None,
+    tm_func: Callable[[str], float] = primer3_calc_tm,
 ) -> tuple[str, str]:
 
     fragment2amplify = pcr_loc.extract(pcr_seq)
-    amplicon = primer_design(fragment2amplify, limit=minimal_hybridization_length, target_tm=target_tm)
+    amplicon = primer_design(
+        fragment2amplify, limit=minimal_hybridization_length, target_tm=target_tm, tm_func=tm_func
+    )
 
     if insert_forward:
         fwd_primer, rvs_primer = amplicon.primers()
@@ -76,10 +86,12 @@ def gibson_assembly_primers(
     target_tm: float,
     circular: bool,
     spacers: list[str] | None = None,
+    tm_func: Callable[[str], float] = primer3_calc_tm,
 ) -> list[PrimerModel]:
 
     initial_amplicons = [
-        primer_design(template, limit=minimal_hybridization_length, target_tm=target_tm) for template in templates
+        primer_design(template, limit=minimal_hybridization_length, target_tm=target_tm, tm_func=tm_func)
+        for template in templates
     ]
 
     for i, amplicon in enumerate(initial_amplicons):
@@ -133,6 +145,7 @@ def simple_pair_primers(
     spacers: list[str] | None = None,
     left_enzyme_inverted: bool = False,
     right_enzyme_inverted: bool = False,
+    tm_func: Callable[[str], float] = primer3_calc_tm,
 ) -> tuple[PrimerModel, PrimerModel]:
     """
     Design primers to amplify a DNA fragment, if left_enzyme or right_enzyme are set, the primers will be designed
@@ -145,7 +158,7 @@ def simple_pair_primers(
     if len(spacers) != 2:
         raise ValueError("The 'spacers' list must contain exactly two elements.")
 
-    amplicon = primer_design(template, limit=minimal_hybridization_length, target_tm=target_tm)
+    amplicon = primer_design(template, limit=minimal_hybridization_length, target_tm=target_tm, tm_func=tm_func)
     fwd_primer, rvs_primer = amplicon.primers()
 
     if fwd_primer is None or rvs_primer is None:

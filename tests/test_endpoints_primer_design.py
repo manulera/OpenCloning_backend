@@ -26,9 +26,9 @@ client = TestClient(_main.app)
 class PrimerDesignTest(unittest.TestCase):
 
     def test_homologous_recombination(self):
-        pcr_seq = format_sequence_genbank(Dseqrecord('GAAATGGAACAGTGCCAGAAATTTTT'))
+        pcr_seq = format_sequence_genbank(Dseqrecord('AATGATGGATGACATTCAAAGCACTGATTCTATTGCTGAAAAAGATAAT'))
         pcr_seq.id = 1
-        pcr_loc = PydanticSimpleLocation(start=1, end=23)
+        pcr_loc = PydanticSimpleLocation(start=4, end=44)
         hr_seq = format_sequence_genbank(Dseqrecord('AAACGTTT'))
         hr_seq.id = 2
         hr_loc_replace = PydanticSimpleLocation(start=3, end=5)
@@ -59,8 +59,8 @@ class PrimerDesignTest(unittest.TestCase):
         payload = response.json()
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(payload['primers'][0]['sequence'], 'aaaAAATGGAACAG')
-        self.assertEqual(payload['primers'][1]['sequence'], 'aaaAATTTCTGGC')
+        self.assertEqual(payload['primers'][0]['sequence'], 'aaaATGGATGACATT')
+        self.assertEqual(payload['primers'][1]['sequence'], 'aaaCTTTTTCAGCAA')
 
         # Raise valuerror
         params['homology_length'] = 10
@@ -71,14 +71,14 @@ class PrimerDesignTest(unittest.TestCase):
 
         # Test an insertion with spacers and reversed insert
         params['homology_length'] = 3
-        data['homologous_recombination_target']['forward_orientation'] = False
+        data['pcr_template']['forward_orientation'] = False
         data['homologous_recombination_target']['location'] = PydanticSimpleLocation(start=3, end=3).model_dump()
         data['spacers'] = ['attt', 'cggg']
         response = client.post('/primer_design/homologous_recombination', json=data, params=params)
         self.assertEqual(response.status_code, 200)
         payload = response.json()
-        self.assertEqual(payload['primers'][0]['sequence'], 'aaaatttAAATGGAACAG')
-        self.assertEqual(payload['primers'][1]['sequence'], 'acgcccgAATTTCTGGC')
+        self.assertEqual(payload['primers'][0]['sequence'], 'aaaatttCTTTTTCAGCAA')
+        self.assertEqual(payload['primers'][1]['sequence'], 'acgcccgATGGATGACATT')
 
         # Raise error if the number of spacers is incorrect
         data['spacers'] = ['attt', 'cggg', 'tttt']
