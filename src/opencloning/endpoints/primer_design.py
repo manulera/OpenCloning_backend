@@ -209,8 +209,8 @@ async def primer_design_ebic(
 # @router.post('/primer_design/gateway_attB', response_model=PrimerDesignResponse)
 # async def primer_design_gateway_attB(
 #     template: PrimerDesignQuery,
-#     left_site: str = Query(..., description='The left attB site to recombine.', regex=r'^attB[1-5]$'),
-#     right_site: str = Query(..., description='The right attB site to recombine.', regex=r'^attB[1-5]$'),
+#     left_site: str = Query(..., description='The left attB site to recombine.', pattern=r'^attB[1-5]$'),
+#     right_site: str = Query(..., description='The right attB site to recombine.', pattern=r'^attB[1-5]$'),
 #     spacers: list[str] | None = Body(None, description='Spacers to add between the attB site and the primer.'),
 #     filler_bases: str = Query(
 #         'GGGG',
@@ -276,7 +276,7 @@ class PrimerDetailsResponse(BaseModel):
 
 @router.get('/primer_details', response_model=PrimerDetailsResponse)
 async def primer_details(
-    sequence: str = Query(..., description='Primer sequence', regex=r'^[ACGTacgt]+$'),
+    sequence: str = Query(..., description='Primer sequence', pattern=r'^[ACGTacgt]+$'),
 ):
     """Get information about a primer"""
     sequence = sequence.upper()
@@ -299,8 +299,8 @@ async def primer_details(
 
 @router.get('/primer_heterodimer', response_model=ThermodynamicResult | None)
 async def primer_heterodimer(
-    sequence1: str = Query(..., description='First primer sequence', regex=r'^[ACGTacgt]+$'),
-    sequence2: str = Query(..., description='Second primer sequence', regex=r'^[ACGTacgt]+$'),
+    sequence1: str = Query(..., description='First primer sequence', pattern=r'^[ACGTacgt]+$'),
+    sequence2: str = Query(..., description='Second primer sequence', pattern=r'^[ACGTacgt]+$'),
 ):
     """Get information about a primer pair"""
 

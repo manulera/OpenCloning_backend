@@ -21,9 +21,9 @@ class TestHomologousRecombinationPrimers(TestCase):
         Test the homologous_recombination_primers function.
         """
 
-        #                      >>>>>>>>>>> <<<<<<<<<<
-        pcr_seq = Dseqrecord('GAAATGGAACAGTGCCAGAAATTTTT')
-        pcr_loc = SimpleLocation(1, 23)
+        #
+        pcr_seq = Dseqrecord('AATGATGGATGACATTCAAAGCACTGATTCTATTGCTGAAAAAGATAAT')
+        pcr_loc = SimpleLocation(4, 44)
         hr_seq = Dseqrecord('AAACGTTT')
         homology_length = 3
         minimal_hybridization_length = 10
@@ -42,7 +42,7 @@ class TestHomologousRecombinationPrimers(TestCase):
             insert_forward,
             target_tm,
         )
-        self.assertEqual(primers, ('aaaAAATGGAACAG', 'aaaAATTTCTGGC'))
+        self.assertEqual(primers, ('aaaATGGATGACATT', 'aaaCTTTTTCAGCAA'))
 
         # An insertion
         hr_loc_insert = SimpleLocation(3, 3)
@@ -56,7 +56,7 @@ class TestHomologousRecombinationPrimers(TestCase):
             insert_forward,
             target_tm,
         )
-        self.assertEqual(primers, ('aaaAAATGGAACAG', 'acgAATTTCTGGC'))
+        self.assertEqual(primers, ('aaaATGGATGACATT', 'acgCTTTTTCAGCAA'))
 
         # Same, circular and we loop
         pcr_seq = pcr_seq.looped()
@@ -73,16 +73,16 @@ class TestHomologousRecombinationPrimers(TestCase):
             hr_loc_replace = hr_shifted.features[0].location
             hr_loc_insert = hr_shifted.features[1].location
             solutions = (
-                ('aaaAAATGGAACAG', 'aaaAATTTCTGGC'),
-                ('aaaAAATGGAACAG', 'acgAATTTCTGGC'),
+                ('aaaATGGATGACATT', 'aaaCTTTTTCAGCAA'),
+                ('aaaATGGATGACATT', 'acgCTTTTTCAGCAA'),
             )
             for shift_hr in range(len(hr_seq)):
                 hr_shifted = hr_seq.shifted(shift_hr)
                 hr_loc_replace = hr_shifted.features[0].location
                 hr_loc_insert = hr_shifted.features[1].location
                 solutions = (
-                    ('aaaAAATGGAACAG', 'aaaAATTTCTGGC'),
-                    ('aaaAAATGGAACAG', 'acgAATTTCTGGC'),
+                    ('aaaATGGATGACATT', 'aaaCTTTTTCAGCAA'),
+                    ('aaaATGGATGACATT', 'acgCTTTTTCAGCAA'),
                 )
                 for hr_loc, solution in zip([hr_loc_replace, hr_loc_insert], solutions):
                     for insert_forward in (True, False):
@@ -116,8 +116,7 @@ class TestHomologousRecombinationPrimers(TestCase):
             target_tm,
             spacers,
         )
-
-        solution = ('aaaatttAAATGGAACAG', 'acgcccgAATTTCTGGC')
+        solution = ('aaaatttATGGATGACATT', 'acgcccgCTTTTTCAGCAA')
         self.assertEqual(primers, solution)
 
         # The spacer is defined with respect to the locus, not the insert
@@ -135,13 +134,13 @@ class TestHomologousRecombinationPrimers(TestCase):
             spacers,
         )
 
-        solution = ('aaaatttAATTTCTGGC', 'acgcccgAAATGGAACAG')
+        solution = ('aaaatttCTTTTTCAGCAA', 'acgcccgATGGATGACATT')
         self.assertEqual(primers, solution)
 
     def test_clashing_homology(self):
 
-        pcr_seq = Dseqrecord('GAAATGGAACAGTGCCAGAAATTTTT')
-        pcr_loc = SimpleLocation(1, 23)
+        pcr_seq = Dseqrecord('AATGATGGATGACATTCAAAGCACTGATTCTATTGCTGAAAAAGATAAT')
+        pcr_loc = SimpleLocation(4, 44)
         hr_seq = Dseqrecord('AAACGTTT')
         homology_length = 5
         minimal_hybridization_length = 10
@@ -214,8 +213,8 @@ class TestHomologousRecombinationPrimers(TestCase):
             self.assertEqual(str(e), 'Homology arms overlap.')
 
     def test_errors(self):
-        pcr_seq = Dseqrecord('GAAATGGAACAGTGCCAGAAATTTTT')
-        pcr_loc = SimpleLocation(1, 23)
+        pcr_seq = Dseqrecord('AATGATGGATGACATTCAAAGCACTGATTCTATTGCTGAAAAAGATAAT')
+        pcr_loc = SimpleLocation(4, 44)
         hr_seq = Dseqrecord('AAACGTTT')
         homology_length = 3
         minimal_hybridization_length = 10
@@ -519,7 +518,7 @@ class TestSimplePairPrimers(TestCase):
         """
         Test the restriction_enzyme_primers function without restriction enzymes.
         """
-        template = Dseqrecord('ATGCAAACAGTGAACAGATGGAGACAATAATGATGGATGAC')
+        template = Dseqrecord('ATGCAAACAGTGAACAGATACAGATGGAGACAATGGAGACAATAATGATGGATGAC')
         minimal_hybridization_length = 10
         target_tm = 55
         filler_bases = 'GC'
