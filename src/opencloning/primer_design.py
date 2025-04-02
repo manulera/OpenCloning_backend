@@ -32,11 +32,16 @@ def homologous_recombination_primers(
     target_tm: float,
     spacers: list[str] | None = None,
     tm_func: Callable[[str], float] = primer3_calc_tm,
+    estimate_function: Callable[[str], float] | None = None,
 ) -> tuple[str, str]:
 
     fragment2amplify = pcr_loc.extract(pcr_seq)
     amplicon = primer_design(
-        fragment2amplify, limit=minimal_hybridization_length, target_tm=target_tm, tm_func=tm_func
+        fragment2amplify,
+        limit=minimal_hybridization_length,
+        target_tm=target_tm,
+        tm_func=tm_func,
+        estimate_function=estimate_function,
     )
 
     if insert_forward:
@@ -87,10 +92,17 @@ def gibson_assembly_primers(
     circular: bool,
     spacers: list[str] | None = None,
     tm_func: Callable[[str], float] = primer3_calc_tm,
+    estimate_function: Callable[[str], float] | None = None,
 ) -> list[PrimerModel]:
 
     initial_amplicons = [
-        primer_design(template, limit=minimal_hybridization_length, target_tm=target_tm, tm_func=tm_func)
+        primer_design(
+            template,
+            limit=minimal_hybridization_length,
+            target_tm=target_tm,
+            tm_func=tm_func,
+            estimate_function=estimate_function,
+        )
         for template in templates
     ]
 
@@ -146,6 +158,7 @@ def simple_pair_primers(
     left_enzyme_inverted: bool = False,
     right_enzyme_inverted: bool = False,
     tm_func: Callable[[str], float] = primer3_calc_tm,
+    estimate_function: Callable[[str], float] | None = None,
 ) -> tuple[PrimerModel, PrimerModel]:
     """
     Design primers to amplify a DNA fragment, if left_enzyme or right_enzyme are set, the primers will be designed
@@ -158,7 +171,13 @@ def simple_pair_primers(
     if len(spacers) != 2:
         raise ValueError("The 'spacers' list must contain exactly two elements.")
 
-    amplicon = primer_design(template, limit=minimal_hybridization_length, target_tm=target_tm, tm_func=tm_func)
+    amplicon = primer_design(
+        template,
+        limit=minimal_hybridization_length,
+        target_tm=target_tm,
+        tm_func=tm_func,
+        estimate_function=estimate_function,
+    )
     fwd_primer, rvs_primer = amplicon.primers()
 
     if fwd_primer is None or rvs_primer is None:
