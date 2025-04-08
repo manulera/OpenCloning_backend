@@ -32,9 +32,11 @@ async def get_sequence_accessions_from_assembly_accession(assembly_accession: st
     resp = await async_get(url, headers=headers)
     data = resp.json()
     if 'reports' in data:
-        return [report['refseq_accession'] for report in data['reports']] + [
-            report['genbank_accession'] for report in data['reports']
+        refseq_accessions = [report['refseq_accession'] for report in data['reports'] if 'refseq_accession' in report]
+        genbank_accessions = [
+            report['genbank_accession'] for report in data['reports'] if 'genbank_accession' in report
         ]
+        return refseq_accessions + genbank_accessions
     elif 'total_count' in data:
         raise HTTPException(400, f'No sequence accessions linked, see {url}')
     else:
