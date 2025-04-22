@@ -160,6 +160,7 @@ def generate_assemblies(
     allow_insertion_assemblies: bool,
     assembly_kwargs: dict | None = None,
     product_callback: Callable[[Dseqrecord], Dseqrecord] = lambda x: x,
+    recombination_mode: bool = False,
 ) -> dict[Literal['sources', 'sequences'], list[AssemblySource] | list[TextFileSequence]]:
     if assembly_kwargs is None:
         assembly_kwargs = {}
@@ -175,13 +176,16 @@ def generate_assemblies(
             )
             circular_assemblies = asm.get_circular_assemblies()
             out_sources += [create_source(a, True) for a in circular_assemblies]
-            if not circular_only and not allow_insertion_assemblies:
-                out_sources += [
-                    create_source(a, False)
-                    for a in filter_linear_subassemblies(asm.get_linear_assemblies(), circular_assemblies, fragments)
-                ]
-            elif not circular_only and allow_insertion_assemblies:
-                out_sources += [create_source(a, False) for a in asm.get_insertion_assemblies()]
+            if not circular_only:
+                if not recombination_mode:
+                    out_sources += [
+                        create_source(a, False)
+                        for a in filter_linear_subassemblies(
+                            asm.get_linear_assemblies(), circular_assemblies, fragments
+                        )
+                    ]
+                else:
+                    out_sources += [create_source(a, False) for a in asm.get_insertion_assemblies()]
         else:
             asm = SingleFragmentAssembly(fragments, algorithm=algo, **assembly_kwargs)
             out_sources.extend(create_source(a, True) for a in asm.get_circular_assemblies())
@@ -544,7 +548,9 @@ async def cre_lox_recombination(source: CreLoxRecombinationSource, sequences: co
             assembly=a, circular=is_circular, id=source.id, fragments=fragments
         )
 
-    resp = generate_assemblies(source, create_source, fragments, False, cre_loxP_overlap, True)
+    resp = generate_assemblies(
+        source, create_source, fragments, False, cre_loxP_overlap, True, recombination_mode=True
+    )
 
     if len(resp['sources']) == 0:
         raise HTTPException(400, 'No compatible Cre/Lox recombination was found.')
