@@ -5,7 +5,7 @@ from pydna.primer import Primer as PydnaPrimer
 from pydna.crispr import cas9
 from pydantic import conlist, create_model
 from Bio.Restriction.Restriction import RestrictionBatch
-
+from opencloning.cre_lox import cre_loxP_overlap
 from ..dna_functions import (
     get_invalid_enzyme_names,
     format_sequence_genbank,
@@ -24,6 +24,7 @@ from ..pydantic_models import (
     AssemblySource,
     OverlapExtensionPCRLigationSource,
     GatewaySource,
+    CreLoxRecombinationSource,
 )
 from ..assembly2 import (
     Assembly,
@@ -174,11 +175,13 @@ def generate_assemblies(
             )
             circular_assemblies = asm.get_circular_assemblies()
             out_sources += [create_source(a, True) for a in circular_assemblies]
-            if not circular_only:
+            if not circular_only and not allow_insertion_assemblies:
                 out_sources += [
                     create_source(a, False)
                     for a in filter_linear_subassemblies(asm.get_linear_assemblies(), circular_assemblies, fragments)
                 ]
+            elif not circular_only and allow_insertion_assemblies:
+                out_sources += [create_source(a, False) for a in asm.get_insertion_assemblies()]
         else:
             asm = SingleFragmentAssembly(fragments, algorithm=algo, **assembly_kwargs)
             out_sources.extend(create_source(a, True) for a in asm.get_circular_assemblies())
@@ -520,5 +523,30 @@ async def gateway(
         sources = [resp['sources'][i] for i in multi_site_sources]
         sequences = [resp['sequences'][i] for i in multi_site_sources]
         return {'sources': sources, 'sequences': sequences}
+
+    return resp
+
+
+@router.post(
+    '/cre_lox_recombination',
+    response_model=create_model(
+        'CreLoxRecombinationResponse',
+        sources=(list[CreLoxRecombinationSource], ...),
+        sequences=(list[TextFileSequence], ...),
+    ),
+)
+async def cre_lox_recombination(source: CreLoxRecombinationSource, sequences: conlist(TextFileSequence, min_length=1)):
+    fragments = [read_dsrecord_from_json(seq) for seq in sequences]
+
+    # Lambda function for code clarity
+    def create_source(a, is_circular):
+        return CreLoxRecombinationSource.from_assembly(
+            assembly=a, circular=is_circular, id=source.id, fragments=fragments
+        )
+
+    resp = generate_assemblies(source, create_source, fragments, False, cre_loxP_overlap, True)
+
+    if len(resp['sources']) == 0:
+        raise HTTPException(400, 'No compatible Cre/Lox recombination was found.')
 
     return resp

@@ -45,6 +45,7 @@ from opencloning_linkml.datamodel import (
     IGEMSource as _IGEMSource,
     ReverseComplementSource as _ReverseComplementSource,
     SEVASource as _SEVASource,
+    CreLoxRecombinationSource as _CreLoxRecombinationSource,
 )
 from pydna.utils import shift_location as _shift_location
 from .assembly2 import edge_representation2subfragment_representation, subfragment_representation2edge_representation
@@ -382,6 +383,10 @@ class GatewaySource(AssemblySourceCommonClass, _GatewaySource):
         reaction_type: str,
     ):
         return super().from_assembly(assembly, id, circular, fragments, reaction_type=reaction_type)
+
+
+class CreLoxRecombinationSource(AssemblySourceCommonClass, _CreLoxRecombinationSource):
+    pass
 
 
 class OligoHybridizationSource(SourceCommonClass, _OligoHybridizationSource):

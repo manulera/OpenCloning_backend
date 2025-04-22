@@ -11,8 +11,14 @@ import os
 import shutil
 from pydna.parsers import parse
 from Bio.Align import PairwiseAligner
+from Bio.Data.IUPACData import ambiguous_dna_values as _ambiguous_dna_values
+import re
 
 aligner = PairwiseAligner(scoring='blastn')
+
+ambiguous_only_dna_values = {**_ambiguous_dna_values}
+for normal_base in 'ACGT':
+    del ambiguous_only_dna_values[normal_base]
 
 
 def sum_is_sticky(three_prime_end: tuple[str, str], five_prime_end: tuple[str, str], partial: bool = False) -> int:
@@ -144,3 +150,20 @@ def align_sanger_traces(dseqr: Dseqrecord, sanger_traces: list[str]) -> list[str
         sanger_traces = traces_oriented
 
     return align_with_mafft([query_str, *sanger_traces], True)
+
+
+def compute_regex_site(site: str) -> str:
+    upper_site = site.upper()
+    for k, v in ambiguous_only_dna_values.items():
+        if len(v) > 1:
+            upper_site = upper_site.replace(k, f"[{''.join(v)}]")
+
+    # Make case insensitive
+    upper_site = f'(?i){upper_site}'
+    return upper_site
+
+
+def dseqrecord_finditer(pattern: str, seq: Dseqrecord) -> list[re.Match]:
+    query = str(seq.seq) if not seq.circular else str(seq.seq) * 2
+    matches = re.finditer(pattern, query)
+    return (m for m in matches if m.start() <= len(seq))
