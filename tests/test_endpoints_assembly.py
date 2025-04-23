@@ -1253,11 +1253,41 @@ class CreLoxRecombinationTest(unittest.TestCase):
         # The plasmid that "comes out" of the genome
         plasmid = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
         self.assertTrue(plasmid.circular)
-        self.assertEqual(str(plasmid.seq).upper(), (LOXP_SEQUENCE + 'acgt').upper())
+
+        self.assertEqual(plasmid.seq.seguid(), Dseqrecord(LOXP_SEQUENCE + 'acgt', circular=True).seguid())
 
         # The locus sequence that remains
         locus = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][1]))
         self.assertEqual(str(locus.seq).upper(), ('aa' + LOXP_SEQUENCE + 'cc').upper())
+
+        # Example from the paper PMID:12202778
+        lox66 = 'ATAACTTCGTATAGCATACATTATACGAACGGTA'
+        lox71 = 'TACCGTTCGTATAGCATACATTATACGAAGTTAT'
+        double_mutant_lox = 'TACCGTTCGTATAGCATACATTATACGAACGGTA'
+
+        seqA = Dseqrecord('aa' + lox71 + 'acgt' + lox66 + 'cc')
+
+        fragments = [format_sequence_genbank(seqA)]
+        fragments[0].id = 1
+
+        source = CreLoxRecombinationSource(id=0)
+        data = {
+            'source': source.model_dump(),
+            'sequences': [f.model_dump() for f in fragments],
+        }
+        response = client.post('/cre_lox_recombination', json=data)
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(len(payload['sources']), 2)
+
+        # The plasmid that "comes out" of the genome
+        plasmid = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
+        self.assertTrue(plasmid.circular)
+        self.assertEqual(plasmid.seq.seguid(), Dseqrecord(LOXP_SEQUENCE + 'acgt', circular=True).seguid())
+
+        # The locus sequence that remains
+        locus = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][1]))
+        self.assertEqual(str(locus.seq).upper(), ('aa' + double_mutant_lox + 'cc').upper())
 
     def test_insertion(self):
         seqA = Dseqrecord(LOXP_SEQUENCE + 'acgt', circular=True)
