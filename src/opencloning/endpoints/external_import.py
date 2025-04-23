@@ -95,11 +95,6 @@ async def read_from_file(
 ):
     """Return a json sequence from a sequence file"""
 
-    if start is not None and start < 0:
-        raise HTTPException(422, 'Start position cannot be negative.')
-    if end is not None and end < 0:
-        raise HTTPException(422, 'End position cannot be negative.')
-
     if sequence_file_format is None:
         extension_dict = {
             'gbk': 'genbank',
