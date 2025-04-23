@@ -1,31 +1,10 @@
-from Bio.Data.IUPACData import ambiguous_dna_values as _ambiguous_dna_values
 from Bio.Seq import reverse_complement
 from pydna.dseqrecord import Dseqrecord as _Dseqrecord
 import re
 import itertools as _itertools
 from Bio.SeqFeature import SimpleLocation, SeqFeature
 from pydna.utils import shift_location
-
-ambiguous_only_dna_values = {**_ambiguous_dna_values}
-for normal_base in 'ACGT':
-    del ambiguous_only_dna_values[normal_base]
-
-
-def compute_regex_site(site: str) -> str:
-    upper_site = site.upper()
-    for k, v in ambiguous_only_dna_values.items():
-        if len(v) > 1:
-            upper_site = upper_site.replace(k, f"[{''.join(v)}]")
-
-    # Make case insensitive
-    upper_site = f'(?i){upper_site}'
-    return upper_site
-
-
-def dseqrecord_finditer(pattern: str, seq: _Dseqrecord) -> list[re.Match]:
-    query = str(seq.seq) if not seq.circular else str(seq.seq) * 2
-    matches = re.finditer(pattern, query)
-    return (m for m in matches if m.start() <= len(seq))
+from .dna_utils import compute_regex_site, dseqrecord_finditer
 
 
 raw_gateway_common = {

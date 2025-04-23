@@ -5,6 +5,7 @@ from Bio.SeqFeature import SimpleLocation
 from pydna.dseqrecord import Dseqrecord
 import unittest
 from pydna.dseq import Dseq
+from opencloning.cre_lox import LOXP_SEQUENCE
 import os
 
 from opencloning.dna_functions import format_sequence_genbank, read_dsrecord_from_json
@@ -19,6 +20,7 @@ from opencloning.pydantic_models import (
     RestrictionAndLigationSource,
     CRISPRSource,
     GatewaySource,
+    CreLoxRecombinationSource,
 )
 
 
@@ -619,7 +621,12 @@ class GibsonAssemblyTest(unittest.TestCase):
 
         # All equivalent classes should give the same result
         data = {'source': source.model_dump(), 'sequences': [f.model_dump() for f in json_fragments]}
-        for cls_name in ['GibsonAssemblySource', 'OverlapExtensionPCRLigationSource', 'InFusionSource']:
+        for cls_name in [
+            'GibsonAssemblySource',
+            'OverlapExtensionPCRLigationSource',
+            'InFusionSource',
+            'InVivoAssemblySource',
+        ]:
             data['source']['type'] = cls_name
             response = client.post('/gibson_assembly', json=data, params={'minimal_homology': 4})
             self.assertEqual(response.status_code, 200)
@@ -1222,3 +1229,74 @@ class GatewaySourceTest(unittest.TestCase):
         ).upper()
         seqs = [read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']]
         self.assertEqual(str(seqs[0].seq), product)
+
+
+class CreLoxRecombinationTest(unittest.TestCase):
+
+    def test_deletion(self):
+        seqA = Dseqrecord('aa' + LOXP_SEQUENCE + 'acgt' + LOXP_SEQUENCE + 'cc')
+
+        fragments = [format_sequence_genbank(seqA)]
+        fragments[0].id = 1
+
+        source = CreLoxRecombinationSource(id=0)
+
+        data = {
+            'source': source.model_dump(),
+            'sequences': [f.model_dump() for f in fragments],
+        }
+        response = client.post('/cre_lox_recombination', json=data)
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(len(payload['sources']), 2)
+
+        # The plasmid that "comes out" of the genome
+        plasmid = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
+        self.assertTrue(plasmid.circular)
+        self.assertEqual(str(plasmid.seq).upper(), (LOXP_SEQUENCE + 'acgt').upper())
+
+        # The locus sequence that remains
+        locus = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][1]))
+        self.assertEqual(str(locus.seq).upper(), ('aa' + LOXP_SEQUENCE + 'cc').upper())
+
+    def test_insertion(self):
+        seqA = Dseqrecord(LOXP_SEQUENCE + 'acgt', circular=True)
+        seqB = Dseqrecord('aa' + LOXP_SEQUENCE + 'cc')
+
+        fragments = [format_sequence_genbank(seqA), format_sequence_genbank(seqB)]
+        fragments[0].id = 1
+        fragments[1].id = 2
+
+        source = CreLoxRecombinationSource(id=0)
+        data = {
+            'source': source.model_dump(),
+            'sequences': [f.model_dump() for f in fragments],
+        }
+        response = client.post('/cre_lox_recombination', json=data)
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+
+        out_sequences = [read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']]
+
+        self.assertEqual(len(out_sequences), 1)
+        self.assertEqual(out_sequences[0].circular, False)
+
+        # This is the intended product
+        self.assertEqual(
+            str(out_sequences[0].seq).upper(), ('aa' + LOXP_SEQUENCE + 'acgt' + LOXP_SEQUENCE + 'cc').upper()
+        )
+
+    def test_no_results(self):
+        seqA = Dseqrecord('aa' + LOXP_SEQUENCE + 'cc')
+        fragments = [format_sequence_genbank(seqA)]
+        fragments[0].id = 1
+
+        source = CreLoxRecombinationSource(id=0)
+        data = {
+            'source': source.model_dump(),
+            'sequences': [f.model_dump() for f in fragments],
+        }
+        response = client.post('/cre_lox_recombination', json=data)
+        self.assertEqual(response.status_code, 400)
+        payload = response.json()
+        self.assertIn('No compatible Cre/Lox', payload['detail'])
