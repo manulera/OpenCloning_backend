@@ -25,6 +25,7 @@ from ..pydantic_models import (
     OverlapExtensionPCRLigationSource,
     GatewaySource,
     CreLoxRecombinationSource,
+    InVivoAssemblySource,
 )
 from ..assembly2 import (
     Assembly,
@@ -392,13 +393,16 @@ async def homologous_recombination(
     '/gibson_assembly',
     response_model=create_model(
         'GibsonAssemblyResponse',
-        sources=(list[Union[GibsonAssemblySource, OverlapExtensionPCRLigationSource, InFusionSource]], ...),
+        sources=(
+            list[Union[GibsonAssemblySource, OverlapExtensionPCRLigationSource, InFusionSource, InVivoAssemblySource]],
+            ...,
+        ),
         sequences=(list[TextFileSequence], ...),
     ),
 )
 async def gibson_assembly(
     sequences: conlist(TextFileSequence, min_length=1),
-    source: Union[GibsonAssemblySource, OverlapExtensionPCRLigationSource, InFusionSource],
+    source: Union[GibsonAssemblySource, OverlapExtensionPCRLigationSource, InFusionSource, InVivoAssemblySource],
     minimal_homology: int = Query(
         40, description='The minimum homology between consecutive fragments in the assembly.'
     ),

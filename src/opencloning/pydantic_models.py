@@ -46,6 +46,7 @@ from opencloning_linkml.datamodel import (
     ReverseComplementSource as _ReverseComplementSource,
     SEVASource as _SEVASource,
     CreLoxRecombinationSource as _CreLoxRecombinationSource,
+    InVivoAssemblySource as _InVivoAssemblySource,
 )
 from pydna.utils import shift_location as _shift_location
 from .assembly2 import edge_representation2subfragment_representation, subfragment_representation2edge_representation
@@ -336,6 +337,10 @@ class OverlapExtensionPCRLigationSource(AssemblySourceCommonClass, _OverlapExten
 
 
 class InFusionSource(AssemblySourceCommonClass, _InFusionSource):
+    pass
+
+
+class InVivoAssemblySource(AssemblySourceCommonClass, _InVivoAssemblySource):
     pass
 
 
