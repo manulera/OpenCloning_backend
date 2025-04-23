@@ -621,7 +621,12 @@ class GibsonAssemblyTest(unittest.TestCase):
 
         # All equivalent classes should give the same result
         data = {'source': source.model_dump(), 'sequences': [f.model_dump() for f in json_fragments]}
-        for cls_name in ['GibsonAssemblySource', 'OverlapExtensionPCRLigationSource', 'InFusionSource']:
+        for cls_name in [
+            'GibsonAssemblySource',
+            'OverlapExtensionPCRLigationSource',
+            'InFusionSource',
+            'InVivoAssemblySource',
+        ]:
             data['source']['type'] = cls_name
             response = client.post('/gibson_assembly', json=data, params={'minimal_homology': 4})
             self.assertEqual(response.status_code, 200)
