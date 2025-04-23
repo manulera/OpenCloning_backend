@@ -1280,3 +1280,18 @@ class CreLoxRecombinationTest(unittest.TestCase):
         self.assertEqual(
             str(out_sequences[0].seq).upper(), ('aa' + LOXP_SEQUENCE + 'acgt' + LOXP_SEQUENCE + 'cc').upper()
         )
+
+    def test_no_results(self):
+        seqA = Dseqrecord('aa' + LOXP_SEQUENCE + 'cc')
+        fragments = [format_sequence_genbank(seqA)]
+        fragments[0].id = 1
+
+        source = CreLoxRecombinationSource(id=0)
+        data = {
+            'source': source.model_dump(),
+            'sequences': [f.model_dump() for f in fragments],
+        }
+        response = client.post('/cre_lox_recombination', json=data)
+        self.assertEqual(response.status_code, 400)
+        payload = response.json()
+        self.assertIn('No compatible Cre/Lox', payload['detail'])
