@@ -2,9 +2,12 @@ from opencloning.cre_lox import cre_loxP_overlap
 from pydna.dseqrecord import Dseqrecord
 import unittest
 
-
+# ATAACTTCGTATANNNTANNNTATACGAAGTTAT
 loxP_sequence = 'ATAACTTCGTATAGCATACATTATACGAAGTTAT'
 loxP_sequence2 = 'ATAACTTCGTATAGTTTACATTATACGAAGTTAT'
+
+lox66_sequence = 'ATAACTTCGTATAGTTTACATTATACGAACGGTA'
+lox71_sequence = 'TACCGTTCGTATAGTTTACATTATACGAAGTTAT'
 
 
 class TestCreLox(unittest.TestCase):
@@ -13,8 +16,8 @@ class TestCreLox(unittest.TestCase):
         for loxP in [loxP_sequence, loxP_sequence2]:
             seqA = Dseqrecord('aa' + loxP + 'acgt')
             seqB = Dseqrecord('ccc' + loxP + 'acgt')
-            self.assertEqual(cre_loxP_overlap(seqA, seqB), [(2, 3, 34)])
-            self.assertEqual(cre_loxP_overlap(seqA.reverse_complement(), seqB.reverse_complement()), [(4, 4, 34)])
+            self.assertEqual(cre_loxP_overlap(seqA, seqB), [(15, 16, 8)])
+            self.assertEqual(cre_loxP_overlap(seqA.reverse_complement(), seqB.reverse_complement()), [(17, 17, 8)])
             self.assertEqual(cre_loxP_overlap(seqA, seqB.reverse_complement()), [])
             self.assertEqual(cre_loxP_overlap(seqA.reverse_complement(), seqB), [])
 
@@ -23,5 +26,13 @@ class TestCreLox(unittest.TestCase):
         seqB = Dseqrecord('ccc' + loxP_sequence2 + 'acgt')
         self.assertEqual(cre_loxP_overlap(seqA, seqB), [])
         self.assertEqual(cre_loxP_overlap(seqA.reverse_complement(), seqB.reverse_complement()), [])
+        self.assertEqual(cre_loxP_overlap(seqA, seqB.reverse_complement()), [])
+        self.assertEqual(cre_loxP_overlap(seqA.reverse_complement(), seqB), [])
+
+        # Works for the lox66 and lox71
+        seqA = Dseqrecord('aa' + lox66_sequence + 'acgt')
+        seqB = Dseqrecord('ccc' + lox71_sequence + 'acgt')
+        self.assertEqual(cre_loxP_overlap(seqA, seqB), [(15, 16, 8)])
+        self.assertEqual(cre_loxP_overlap(seqA.reverse_complement(), seqB.reverse_complement()), [(17, 17, 8)])
         self.assertEqual(cre_loxP_overlap(seqA, seqB.reverse_complement()), [])
         self.assertEqual(cre_loxP_overlap(seqA.reverse_complement(), seqB), [])
