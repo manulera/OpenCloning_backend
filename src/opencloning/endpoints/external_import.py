@@ -8,6 +8,8 @@ from starlette.responses import RedirectResponse
 from Bio import BiopythonParserWarning
 from typing import Annotated
 from urllib.error import HTTPError
+from pydna.utils import location_boundaries
+
 from ..get_router import get_router
 from ..pydantic_models import (
     TextFileSequence,
@@ -22,6 +24,7 @@ from ..pydantic_models import (
     GenomeCoordinatesSource,
     SequenceFileFormat,
     SEVASource,
+    SimpleSequenceLocation,
 )
 from ..dna_functions import (
     format_sequence_genbank,
@@ -51,13 +54,13 @@ router = get_router()
             'description': 'The sequence was successfully parsed',
             'headers': {
                 'x-warning': {
-                    'description': 'A warning returned if the file can be read but is not in the expected format',
+                    'description': 'A warning returned if the file can be read but is not in the expected format or if some sequences were not extracted because they are incompatible with the provided coordinates',
                     'schema': {'type': 'string'},
                 },
             },
         },
         422: {
-            'description': 'Biopython cannot process this file.',
+            'description': 'Biopython cannot process this file or provided coordinates are invalid.',
         },
         404: {
             'description': 'The index_in_file is out of range.',
@@ -83,6 +86,12 @@ async def read_from_file(
         None,
         description='Name of the output sequence',
     ),
+    start: int | None = Query(None, description='Start position of the sequence to read (0-based)', ge=0),
+    end: int | None = Query(
+        None,
+        description='End position of the sequence to read (0-based)',
+        ge=0,
+    ),
 ):
     """Return a json sequence from a sequence file"""
 
@@ -107,6 +116,7 @@ async def read_from_file(
         sequence_file_format = SequenceFileFormat(extension_dict[extension])
 
     dseqs = list()
+    warning_messages = list()
 
     file_content = await file.read()
     if sequence_file_format == 'snapgene':
@@ -124,7 +134,6 @@ async def read_from_file(
 
         if warnings_captured:
             warning_messages = [str(w.message) for w in warnings_captured]
-            response.headers['x-warning'] = '; '.join(warning_messages)
 
     except ValueError as e:
         raise HTTPException(422, f'Biopython cannot process this file: {e}.')
@@ -134,25 +143,62 @@ async def read_from_file(
     if len(dseqs) == 0:
         raise HTTPException(422, 'Biopython cannot process this file.')
 
-    # The common part
-    # TODO: using id=0 is not great
-    parent_source = UploadedFileSource(
-        id=0, sequence_file_format=sequence_file_format, file_name=file.filename, circularize=circularize
-    )
-    out_sources = list()
-    for i in range(len(dseqs)):
-        new_source = parent_source.model_copy()
-        new_source.index_in_file = i
-        out_sources.append(new_source)
-
-    out_sequences = [format_sequence_genbank(s, output_name) for s in dseqs]
-
     if index_in_file is not None:
-        if index_in_file >= len(out_sources):
+        if index_in_file >= len(dseqs):
             raise HTTPException(404, 'The index_in_file is out of range.')
-        return {'sequences': [out_sequences[index_in_file]], 'sources': [out_sources[index_in_file]]}
-    else:
-        return {'sequences': out_sequences, 'sources': out_sources}
+        dseqs = [dseqs[index_in_file]]
+
+    seq_feature = None
+    if start is not None and end is not None:
+        seq_feature = SimpleSequenceLocation(start=start, end=end)
+        extracted_sequences = list()
+        for dseq in dseqs:
+            try:
+                # TODO: We could use extract when this is addressed: https://github.com/biopython/biopython/issues/4989
+                location = seq_feature.to_biopython_location(circular=dseq.circular, seq_len=len(dseq))
+                i, j = location_boundaries(location)
+                extracted_sequence = dseq[i:j]
+                # Only add the sequence if the interval is not out of bounds
+                if len(extracted_sequence) == len(location):
+                    extracted_sequences.append(extracted_sequence)
+                else:
+                    extracted_sequences.append(None)
+            except Exception:
+                extracted_sequences.append(None)
+        dseqs = extracted_sequences
+
+    # The common part
+    parent_source = UploadedFileSource(
+        id=0,
+        sequence_file_format=sequence_file_format,
+        file_name=file.filename,
+        circularize=circularize,
+        coordinates=seq_feature,
+    )
+
+    # If coordinates are provided, we only keep the sequences compatible with those coordinates
+    out_sources = list()
+    out_sequences = list()
+    for i in range(len(dseqs)):
+        if dseqs[i] is None:
+            continue
+        new_source = parent_source.model_copy()
+        new_source.index_in_file = index_in_file if index_in_file is not None else i
+        out_sources.append(new_source)
+        out_sequences.append(format_sequence_genbank(dseqs[i], output_name))
+
+    if len(out_sequences) == 0:
+        raise HTTPException(422, 'Provided coordinates are incompatible with sequences in the file.')
+
+    if len(out_sequences) < len(dseqs):
+        warning_messages.append(
+            'Some sequences were not extracted because they are incompatible with the provided coordinates.'
+        )
+
+    if len(warning_messages) > 0:
+        response.headers['x-warning'] = '; '.join(warning_messages)
+
+    return {'sequences': out_sequences, 'sources': out_sources}
 
 
 # TODO: a bit inconsistent that here you don't put {source: {...}} in the request, but
