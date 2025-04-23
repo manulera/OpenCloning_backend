@@ -22,7 +22,7 @@ pydantic = "^2.7.1"
 pandas = "^2.2.3"
 openpyxl = "^3.1.5"
 pyyaml = "^6.0.2"
-opencloning-linkml = {git = "https://github.com/OpenCloning/OpenCloning_LinkML", rev = "source-cre"}
+opencloning-linkml = "0.2.6a0"
 primer3-py = "^2.0.3"
 biopython = "1.84"
 
