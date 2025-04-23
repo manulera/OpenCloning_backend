@@ -201,6 +201,97 @@ class ReadFileTest(unittest.TestCase):
             self.assertTrue(sources[0].circularize)
             self.assertTrue(resulting_sequences[0].circular)
 
+    def test_coordinates_provided(self):
+        # Single sequence
+        with open(f'{test_files}/dummy_EcoRI.fasta', 'rb') as f:
+            response = client.post('/read_from_file?start=0&end=7', files={'file': f})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(len(payload['sequences']), 1)
+        self.assertEqual(len(payload['sources']), 1)
+        self.assertEqual(payload['sources'][0]['coordinates']['start'], 0)
+        self.assertEqual(payload['sources'][0]['coordinates']['end'], 7)
+        seq = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
+        self.assertEqual(str(seq.seq), 'AAAAAAG')
+
+        # Multiple sequences where both can be extracted
+        with open(f'{test_files}/dummy_multi_fasta.fasta', 'rb') as f:
+            response = client.post('/read_from_file?start=0&end=7', files={'file': f})
+        payload = response.json()
+        self.assertEqual(len(payload['sequences']), 2)
+        self.assertEqual(len(payload['sources']), 2)
+        seqs = [read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']]
+        self.assertEqual(str(seqs[0].seq), 'TATTAAT')
+        self.assertEqual(str(seqs[1].seq), 'AAAAAAG')
+
+        # Multiple sequences where only one can be extracted
+        with open(f'{test_files}/dummy_multi_fasta.fasta', 'rb') as f:
+            response = client.post('/read_from_file?start=2&end=15', files={'file': f})
+        payload = response.json()
+        seqs = [read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']]
+        self.assertEqual(len(payload['sequences']), 1)
+        self.assertEqual(len(payload['sources']), 1)
+        seq = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
+        self.assertEqual(str(seq.seq), 'AAAAGAATTCTTT')
+        self.assertEqual(payload['sources'][0]['index_in_file'], 1)
+        # Gives the warning
+        self.assertIn('x-warning', response.headers)
+        self.assertIn('Some sequences were not extracted', response.headers['x-warning'])
+
+        # Same result if index is provided
+        with open(f'{test_files}/dummy_multi_fasta.fasta', 'rb') as f:
+            response = client.post('/read_from_file?index_in_file=1&start=2&end=15', files={'file': f})
+        payload = response.json()
+        self.assertEqual(len(payload['sequences']), 1)
+        self.assertEqual(len(payload['sources']), 1)
+        self.assertEqual(payload['sources'][0]['index_in_file'], 1)
+        seq = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
+        self.assertEqual(str(seq.seq), 'AAAAGAATTCTTT')
+
+        # Spanning the origin
+        with open(f'{test_files}/dummy_multi_fasta.fasta', 'rb') as f:
+            response = client.post('/read_from_file?start=5&end=2&circularize=True', files={'file': f})
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(len(payload['sequences']), 2)
+        self.assertEqual(len(payload['sources']), 2)
+        seqs = [read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']]
+        self.assertEqual(str(seqs[0].seq), 'ATATAATA')
+        self.assertEqual(str(seqs[1].seq), 'AGAATTCTTTTTTAA')
+
+        # Handles origin-spanning features
+        with open(f'{test_files}/plasmid_origin_spanning.gb', 'rb') as f:
+            response = client.post('/read_from_file?start=140&end=3', files={'file': f})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(len(payload['sequences']), 1)
+        self.assertEqual(len(payload['sources']), 1)
+        seq = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
+        self.assertEqual(len(seq.features), 1)
+
+    def test_coordinates_provided_errors(self):
+        # Out of bounds
+        with open(f'{test_files}/dummy_EcoRI.fasta', 'rb') as f:
+            response = client.post('/read_from_file?start=0&end=100', files={'file': f})
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(
+            response.json()['detail'], 'Provided coordinates are incompatible with sequences in the file.'
+        )
+
+        # Negative coordinates
+        with open(f'{test_files}/dummy_EcoRI.fasta', 'rb') as f:
+            response = client.post('/read_from_file?start=-1&end=0', files={'file': f})
+        self.assertEqual(response.status_code, 422)
+
+        # Start is after end in linear sequence
+        with open(f'{test_files}/dummy_EcoRI.fasta', 'rb') as f:
+            response = client.post('/read_from_file?start=4&end=2', files={'file': f})
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(
+            response.json()['detail'], 'Provided coordinates are incompatible with sequences in the file.'
+        )
+
 
 class GenBankTest(unittest.TestCase):
 
