@@ -241,16 +241,23 @@ def find_sequence_regex(pattern: str, seq: str, is_circular: bool) -> list[Locat
 def oligonucleotide_hybridization_overhangs(
     fwd_oligo_seq: str, rvs_oligo_seq: str, minimal_annealing: int
 ) -> list[int]:
+    """
+    Returns possible overhangs between two oligos, and returns an error if mismatches are found.
+
+    see https://github.com/manulera/OpenCloning_backend/issues/302 for notation
+
+    """
     matches = common_sub_strings(fwd_oligo_seq.lower(), reverse_complement(rvs_oligo_seq.lower()), minimal_annealing)
 
-    for m in matches:
-        if not (
-            (m[0] == 0 and m[1] + m[2] == len(fwd_oligo_seq)) or (m[1] == 0 and m[0] + m[2] == len(rvs_oligo_seq))
+    for pos_fwd, pos_rvs, length in matches:
+
+        if (pos_fwd != 0 and pos_rvs != 0) or (
+            pos_fwd + length < len(fwd_oligo_seq) and pos_rvs + length < len(rvs_oligo_seq)
         ):
             raise ValueError('The oligonucleotides can anneal with mismatches')
 
     # Return possible overhangs
-    return [start_on_rvs - start_on_fwd for start_on_fwd, start_on_rvs, length in matches]
+    return [pos_rvs - pos_fwd for pos_fwd, pos_rvs, length in matches]
 
 
 class MyGenBankScanner(GenBankScanner):
