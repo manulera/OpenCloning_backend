@@ -3,6 +3,8 @@ import unittest
 import os
 import respx
 import httpx
+from pydna.dseq import Dseq
+from Bio.Seq import reverse_complement
 
 from opencloning.dna_functions import (
     find_sequence_regex,
@@ -10,6 +12,7 @@ from opencloning.dna_functions import (
     correct_name,
     MyGenBankScanner,
     get_sequence_from_euroscarf_url,
+    oligonucleotide_hybridization_overhangs,
 )
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
@@ -172,3 +175,28 @@ class MinorFunctionsAsyncTest(unittest.IsolatedAsyncioTestCase):
             await get_sequence_from_euroscarf_url('blah')
         self.assertEqual(e.exception.code, 503)
         self.assertIn('Could not retrieve plasmid details', str(e.exception))
+
+
+class OligonucleotideHybridizationTest(unittest.TestCase):
+
+    def test_oligonucleotide_hybridization_overhangs(self):
+        self.assertEqual(
+            [-4], oligonucleotide_hybridization_overhangs('CTCGatcggtgtgaaaagtcagtatccagtcgtgtag', 'tttcacaccgat', 12)
+        )
+        self.assertEqual(
+            [21], oligonucleotide_hybridization_overhangs('tttcacaccgat', 'CTCGatcggtgtgaaaagtcagtatccagtcgtgtag', 12)
+        )
+
+        for ovhgs in [[3, 0], [0, 2], [3, 2], [-3, -2], [3, -2]]:
+            dseq = Dseq.from_full_sequence_and_overhangs('GGACAATATATGGCAC', *ovhgs)
+            self.assertEqual([ovhgs[0]], oligonucleotide_hybridization_overhangs(dseq.watson, dseq.crick, 10))
+            self.assertEqual([ovhgs[1]], oligonucleotide_hybridization_overhangs(dseq.crick, dseq.watson, 10))
+
+        seq1 = 'GGACAATATATGGCAC'
+        seq2 = 'a' + reverse_complement(seq1)
+        seq1 += 'c'
+
+        self.assertRaises(ValueError, oligonucleotide_hybridization_overhangs, seq1, seq2, 10)
+        self.assertRaises(
+            ValueError, oligonucleotide_hybridization_overhangs, reverse_complement(seq1), reverse_complement(seq2), 10
+        )
