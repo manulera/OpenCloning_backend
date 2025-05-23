@@ -507,7 +507,6 @@ class HomologousRecombinationTest(unittest.TestCase):
                 'sequences': [json_template.model_dump(), json_insert.model_dump()],
             },
         )
-        print(response.json())
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         sequences = [read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']]
