@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 from pydna.dseqrecord import Dseqrecord
+from pydna.amplify import pcr
 import unittest
 import copy
 from Bio.Seq import reverse_complement
@@ -19,6 +20,7 @@ from opencloning.endpoints.primer_design import (
 )
 
 from pydna.parsers import parse
+from opencloning.assembly2 import Assembly, gibson_overlap
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
@@ -132,9 +134,40 @@ class PrimerDesignTest(unittest.TestCase):
             else:
                 self.assertEqual(p.name, f'seq_{i//2}_rvs')
 
-        # Primer naming also work for named sequences
+        # Validate that it gives the right result
+        primers = [PrimerModel.model_validate(p).to_pydna_primer() for p in payload['primers']]
+        p1 = pcr(primers[0], primers[1], templates[0])
+        p2 = pcr(primers[2], primers[3], templates[1])
+        p3 = pcr(primers[4], primers[5], templates[2])
+        asm = Assembly(
+            [p1, p2, p3], algorithm=gibson_overlap, limit=20, use_all_fragments=True, use_fragment_order=False
+        )
+        result = asm.assemble_circular()[0]
+        expected = sum(templates, Dseqrecord('')).looped()
+        self.assertEqual(result.seguid(), expected.seguid())
+        # Also works with forward_orientation = False
+        queries[1]['forward_orientation'] = False
+        response = client.post(
+            '/primer_design/gibson_assembly', json={'pcr_templates': queries, 'spacers': None}, params=params
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(len(payload['primers']), 6)  # 2 primers per template
+        # Primer naming also works for named sequences
         for i, t in enumerate(templates):
             t.name = f'template_{i}'
+
+        primers = [PrimerModel.model_validate(p).to_pydna_primer() for p in payload['primers']]
+        p1 = pcr(primers[0], primers[1], templates[0])
+        p2 = pcr(primers[2], primers[3], templates[1])
+        p3 = pcr(primers[4], primers[5], templates[2])
+        asm = Assembly(
+            [p1, p2, p3], algorithm=gibson_overlap, limit=20, use_all_fragments=True, use_fragment_order=False
+        )
+        result = asm.assemble_circular()[0]
+        templates2 = [templates[0], templates[1].reverse_complement(), templates[2]]
+        expected = sum(templates2, Dseqrecord('')).looped()
+        self.assertEqual(result.seguid(), expected.seguid())
 
         queries = []
         for i, template in enumerate(templates):
@@ -432,7 +465,7 @@ class PrimerDesignTest(unittest.TestCase):
 
 
 class TestEbicPrimers(unittest.TestCase):
-    async def test_normal_examples(self):
+    def test_normal_examples(self):
         """
         Test the ebic_primers function.
         """
