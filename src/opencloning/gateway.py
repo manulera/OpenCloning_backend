@@ -105,7 +105,8 @@ def gateway_overlap(seqx: _Dseqrecord, seqy: _Dseqrecord, reaction: str, greedy:
                     continue
 
                 for match_x, match_y in _itertools.product(matches_x, matches_y):
-                    # Find the overlap sequence within each match
+                    # Find the overlap sequence within each match, and use the
+                    # core 7 pbs that are constant
                     overlap_x = re.search(overlap_regex, match_x.group())
                     overlap_y = re.search(overlap_regex, match_y.group())
 
@@ -116,9 +117,9 @@ def gateway_overlap(seqx: _Dseqrecord, seqy: _Dseqrecord, reaction: str, greedy:
 
                     out.append(
                         (
-                            match_x.start() + overlap_x.start(),
-                            match_y.start() + overlap_y.start(),
-                            len(overlap_x.group()),
+                            match_x.start() + overlap_x.start() + 3,
+                            match_y.start() + overlap_y.start() + 3,
+                            7,
                         )
                     )
 

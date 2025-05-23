@@ -1,8 +1,9 @@
 from unittest import TestCase
-from opencloning.pydantic_models import AssemblySource, SimpleSequenceLocation as SimpleSequenceLocationModel
+from opencloning.pydantic_models import AssemblySource, SequenceLocationStr, AssemblyFragment
 from opencloning.assembly2 import edge_representation2subfragment_representation
 from Bio.SeqFeature import SimpleLocation
 from pydna.utils import shift_location
+from pydna.dseqrecord import Dseqrecord
 
 
 class DummyFragment:
@@ -38,17 +39,20 @@ class AssemblySourceTest(TestCase):
                 self.assertEqual(assembly_source.assembly[0].reverse_complemented, False)
                 self.assertEqual(assembly_source.assembly[0].left_location, None)
                 self.assertEqual(
-                    assembly_source.assembly[0].right_location, SimpleSequenceLocationModel(start=0, end=10)
+                    assembly_source.assembly[0].right_location,
+                    SequenceLocationStr.from_start_and_end(start=0, end=10),
                 )
 
                 # Check second fragment
                 self.assertEqual(assembly_source.assembly[1].sequence, 5)
                 self.assertEqual(assembly_source.assembly[1].reverse_complemented, False)
                 self.assertEqual(
-                    assembly_source.assembly[1].left_location, SimpleSequenceLocationModel(start=10, end=20)
+                    assembly_source.assembly[1].left_location,
+                    SequenceLocationStr.from_start_and_end(start=10, end=20),
                 )
                 self.assertEqual(
-                    assembly_source.assembly[1].right_location, SimpleSequenceLocationModel(start=0, end=10)
+                    assembly_source.assembly[1].right_location,
+                    SequenceLocationStr.from_start_and_end(start=0, end=10),
                 )
 
                 # Check other fields
@@ -84,16 +88,64 @@ class AssemblySourceTest(TestCase):
         self.assertEqual(assembly_plan, assembly)
 
 
-class SimpleSequenceLocationTest(TestCase):
+class SequenceLocationStrTest(TestCase):
     def test_methods(self):
 
-        for strand in [1, -1, None]:
+        for strand in [1, -1]:
             self.assertEqual(
-                SimpleSequenceLocationModel.from_simple_location(SimpleLocation(100, 200, strand)),
-                SimpleSequenceLocationModel(start=100, end=200, strand=strand),
+                SequenceLocationStr.from_biopython_location(SimpleLocation(100, 200, strand)),
+                SequenceLocationStr.from_start_and_end(start=100, end=200, strand=strand),
             )
-            loc = SimpleSequenceLocationModel(start=20, end=12, strand=strand)
+            loc = SequenceLocationStr.from_start_and_end(start=20, end=12, strand=strand, seq_len=25)
             self.assertEqual(
-                loc.to_biopython_location(circular=True, seq_len=25),
+                loc.to_biopython_location(),
                 shift_location(SimpleLocation(20, 37, strand), 0, 25),
             )
+
+        # Test shift
+        seq = Dseqrecord('TTTGAGTTGTTTACAACGG', circular=True)
+        seq.add_feature(0, 4, type_='CDS', strand=1)
+        for shift in range(len(seq)):
+            seq_shifted = seq.shifted(shift)
+            feat = seq_shifted.features[0]
+            loc_pydantic = SequenceLocationStr.from_biopython_location(feat.location)
+            loc_biopython = loc_pydantic.to_biopython_location()
+            self.assertEqual(loc_biopython, feat.location)
+
+    def test_origin_spanning_start_and_end(self):
+        loc = SequenceLocationStr.from_start_and_end(start=20, end=10, strand=1, seq_len=30)
+        self.assertEqual(loc.to_biopython_location(), shift_location(SimpleLocation(20, 40, strand=1), 0, 30))
+
+        with self.assertRaises(ValueError):
+            SequenceLocationStr.from_start_and_end(start=20, end=10, strand=1)
+
+        with self.assertRaises(ValueError):
+            SequenceLocationStr.from_start_and_end(start=20, end=10, strand=1, seq_len=5)
+
+    def test_field_validator(self):
+        SequenceLocationStr.field_validator('1..3')
+        SequenceLocationStr.field_validator(SequenceLocationStr('1..3'))
+
+        with self.assertRaises(ValueError):
+            SequenceLocationStr.field_validator(None)
+        with self.assertRaises(ValueError) as e:
+            SequenceLocationStr.field_validator(1)
+        self.assertEqual(e.exception.args[0], 'Location must be a string or a SequenceLocationStr')
+        with self.assertRaises(ValueError) as e:
+            SequenceLocationStr.field_validator('aaa')
+        self.assertEqual(e.exception.args[0], 'Location "aaa" is not a valid location')
+
+
+class AssemblyFragmentTest(TestCase):
+    def test_field_validator(self):
+        # No locations
+        AssemblyFragment(sequence=1, reverse_complemented=False, left_location=None, right_location=None)
+        location_str = SequenceLocationStr.from_start_and_end(start=0, end=10)
+        # SequenceLocationStr
+        AssemblyFragment(
+            sequence=1, reverse_complemented=False, left_location=location_str, right_location=location_str
+        )
+        # Normal string
+        AssemblyFragment(
+            sequence=1, reverse_complemented=False, left_location=str(location_str), right_location=str(location_str)
+        )

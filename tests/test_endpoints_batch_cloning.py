@@ -36,7 +36,7 @@ class ZiqiangEtAl2024Test(unittest.TestCase):
         self.assertIsNotNone(seq)
         dseq = read_dsrecord_from_json(TextFileSequence.model_validate(seq))
         self.assertEqual(dseq.name, 'expression_clone')
-        self.assertEqual(dseq.seguid(), 'cdseguid=EihEtfg4Rqb6wFAzOCPGrbdc7sk')
+        self.assertEqual(dseq.seguid(), 'cdseguid=kzzhO-94Zw1KwHwS1vRcggoXxqU')
 
         # If we stop after BP, we should get the same sequence
         response = client.post('/batch_cloning/ziqiang_et_al2024', json=protospacers, params={'until_bp': True})

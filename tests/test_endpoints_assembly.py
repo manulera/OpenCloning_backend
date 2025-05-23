@@ -1225,7 +1225,7 @@ class GatewaySourceTest(unittest.TestCase):
         self.assertEqual(len(payload['sources']), 1)
 
         product = (
-            'TTTGTACAAAAAAGCAGAAGcccAAAATAATGATTTTATTTGACTGATAGTGACCTGTTCGTTGCAACAAATTGATGAGCAATGCTTTTTTATAATGCCAAC'
+            'GTACAAAAAAGCAGAAGcccAAAATAATGATTTTATTTGACTGATAGTGACCTGTTCGTTGCAACAAATTGATGAGCAATGCTTTTTTATAATGCCAACTTT'
         ).upper()
         seqs = [read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']]
         self.assertEqual(str(seqs[0].seq), product)

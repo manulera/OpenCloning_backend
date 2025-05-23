@@ -870,7 +870,7 @@ def test_pcr_assembly_uracil():
 
 
 def test_pcr_with_mistmaches():
-    primer1 = Primer('atcTtcagacgtgtattt')
+    primer1 = Primer('atcttGagacgtgtattt')
     primer2 = Primer(reverse_complement('ccaagtgcctccGtttta'))
 
     seq = Dseqrecord('atcatcagacgtgtatttcacaagccagaagtgcatttggatccaagtgcctccatttta')
@@ -878,11 +878,10 @@ def test_pcr_with_mistmaches():
     # Works for 1 and 2 mismatches
     for i in [1, 2]:
         asm = assembly.PCRAssembly([primer1, seq, primer2], limit=14, mismatches=i)
-
         prods = asm.assemble_linear()
 
         assert len(prods) == 1
-        assert str(prods[0].seq) == 'atcTtcagacgtgtatttcacaagccagaagtgcatttggatccaagtgcctccGtttta'
+        assert str(prods[0].seq) == 'atcttGagacgtgtatttcacaagccagaagtgcatttggatccaagtgcctccGtttta'
 
     asm = assembly.PCRAssembly([primer1, seq, primer2], limit=14, mismatches=0)
     prods = asm.assemble_linear()
