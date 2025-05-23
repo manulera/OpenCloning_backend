@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, model_validator, field_validator
 from typing import Optional, List
 from pydantic_core import core_schema
+from ._version import __version__
 
 from Bio.SeqFeature import (
     SeqFeature,
@@ -478,6 +479,11 @@ class BaseCloningStrategy(_CloningStrategy):
         default_factory=list,
         description="""The primers that are used in the cloning strategy""",
         json_schema_extra={'linkml_meta': {'alias': 'primers', 'domain_of': ['CloningStrategy']}},
+    )
+    backend_version: Optional[str] = Field(
+        default=__version__,
+        description="""The version of the backend that was used to generate this cloning strategy""",
+        json_schema_extra={'linkml_meta': {'alias': 'backend_version', 'domain_of': ['CloningStrategy']}},
     )
 
     def next_primer_id(self):
