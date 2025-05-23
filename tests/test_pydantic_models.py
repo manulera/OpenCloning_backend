@@ -112,6 +112,16 @@ class SequenceLocationStrTest(TestCase):
             loc_biopython = loc_pydantic.to_biopython_location()
             self.assertEqual(loc_biopython, feat.location)
 
+    def test_origin_spanning_start_and_end(self):
+        loc = SequenceLocationStr.from_start_and_end(start=20, end=10, strand=1, seq_len=30)
+        self.assertEqual(loc.to_biopython_location(), shift_location(SimpleLocation(20, 40, strand=1), 0, 30))
+
+        with self.assertRaises(ValueError):
+            SequenceLocationStr.from_start_and_end(start=20, end=10, strand=1)
+
+        with self.assertRaises(ValueError):
+            SequenceLocationStr.from_start_and_end(start=20, end=10, strand=1, seq_len=5)
+
     def test_field_validator(self):
         SequenceLocationStr.field_validator('1..3')
         SequenceLocationStr.field_validator(SequenceLocationStr('1..3'))
