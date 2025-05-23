@@ -36,7 +36,8 @@
       "sequence_file_format": "genbank",
       "file_name": "pFA6a-hphMX6.gb",
       "index_in_file": 0,
-      "circularize": true
+      "circularize": true,
+      "coordinates": null
     },
     {
       "id": 3,
@@ -68,5 +69,8 @@
   ],
   "primers": [],
   "description": "My example cloning strategy",
-  "files": null
+  "files": null,
+  "schema_version": "0.2.9",
+  "backend_version": null,
+  "frontend_version": null
 }

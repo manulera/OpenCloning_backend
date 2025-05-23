@@ -11,12 +11,14 @@ from opencloning.dna_functions import format_sequence_genbank
 import opencloning.main as _main
 from opencloning.pydantic_models import (
     PrimerModel,
-    SimpleSequenceLocation as PydanticSimpleLocation,
+    SequenceLocationStr as PydanticSimpleLocation,
 )
 from opencloning.endpoints.primer_design import (
     PrimerDetailsResponse,
     ThermodynamicResult,
 )
+
+from pydna.parsers import parse
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
@@ -28,10 +30,10 @@ class PrimerDesignTest(unittest.TestCase):
     def test_homologous_recombination(self):
         pcr_seq = format_sequence_genbank(Dseqrecord('AATGATGGATGACATTCAAAGCACTGATTCTATTGCTGAAAAAGATAAT'))
         pcr_seq.id = 1
-        pcr_loc = PydanticSimpleLocation(start=4, end=44)
+        pcr_loc = PydanticSimpleLocation('5..44')
         hr_seq = format_sequence_genbank(Dseqrecord('AAACGTTT'))
         hr_seq.id = 2
-        hr_loc_replace = PydanticSimpleLocation(start=3, end=5)
+        hr_loc_replace = PydanticSimpleLocation('4..5')
 
         homology_length = 3
         minimal_hybridization_length = 10
@@ -42,11 +44,11 @@ class PrimerDesignTest(unittest.TestCase):
         data = {
             'pcr_template': {
                 'sequence': pcr_seq.model_dump(),
-                'location': pcr_loc.model_dump(),
+                'location': pcr_loc,
             },
             'homologous_recombination_target': {
                 'sequence': hr_seq.model_dump(),
-                'location': hr_loc_replace.model_dump(),
+                'location': hr_loc_replace,
             },
         }
         params = {
@@ -72,7 +74,7 @@ class PrimerDesignTest(unittest.TestCase):
         # Test an insertion with spacers and reversed insert
         params['homology_length'] = 3
         data['pcr_template']['forward_orientation'] = False
-        data['homologous_recombination_target']['location'] = PydanticSimpleLocation(start=3, end=3).model_dump()
+        data['homologous_recombination_target']['location'] = PydanticSimpleLocation.from_start_and_end(start=3, end=3)
         data['spacers'] = ['attt', 'cggg']
         response = client.post('/primer_design/homologous_recombination', json=data, params=params)
         self.assertEqual(response.status_code, 200)
@@ -107,7 +109,7 @@ class PrimerDesignTest(unittest.TestCase):
             queries.append(
                 {
                     'sequence': json_seq.model_dump(),
-                    'location': PydanticSimpleLocation(start=0, end=len(template)).model_dump(),
+                    'location': PydanticSimpleLocation.from_start_and_end(start=0, end=len(template)),
                     'forward_orientation': True,
                 }
             )
@@ -141,7 +143,7 @@ class PrimerDesignTest(unittest.TestCase):
             queries.append(
                 {
                     'sequence': json_seq.model_dump(),
-                    'location': PydanticSimpleLocation(start=0, end=len(template)).model_dump(),
+                    'location': PydanticSimpleLocation.from_start_and_end(start=0, end=len(template)),
                     'forward_orientation': True,
                 }
             )
@@ -218,7 +220,7 @@ class PrimerDesignTest(unittest.TestCase):
 
         query = {
             'sequence': json_seq.model_dump(),
-            'location': PydanticSimpleLocation(start=3, end=27).model_dump(),
+            'location': PydanticSimpleLocation.from_start_and_end(start=3, end=27),
             'forward_orientation': True,
         }
 
@@ -427,3 +429,46 @@ class PrimerDesignTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertIsNone(payload)
+
+
+class TestEbicPrimers(unittest.TestCase):
+    async def test_normal_examples(self):
+        """
+        Test the ebic_primers function.
+        """
+
+        template = parse(os.path.join(test_files, 'lacZ_EBIC_example.gb'))[0]
+        json_seq = format_sequence_genbank(template)
+        json_seq.id = 1
+
+        query = {
+            'sequence': json_seq.model_dump(),
+            'location': PydanticSimpleLocation.from_start_and_end(start=1000, end=4075),
+        }
+
+        params = {'max_inside': 50, 'max_outside': 20}
+        response = client.post('/primer_design/ebic', json=query, params=params)
+        self.assertEqual(response.status_code, 200)
+
+        expected = (
+            (
+                'left_fwd',
+                'ataGGTCTCtGGAGAAATTGTCGCGGCGATTAAATC',
+            ),
+            (
+                'left_rvs',
+                'ataGGTCTCtCATTTCATGGTCATAGCTGTTTCCTG',
+            ),
+            (
+                'right_fwd',
+                'ataGGTCTCtGCTTAATAATAATAACCGGGCAGGCC',
+            ),
+            (
+                'right_rvs',
+                'ataGGTCTCtAGCGGATGCGATTAATGATCAGTGGC',
+            ),
+        )
+
+        for expect, primer in zip(expected, response.json()['primers']):
+            self.assertEqual(primer['name'], expect[0])
+            self.assertEqual(primer['sequence'], expect[1])

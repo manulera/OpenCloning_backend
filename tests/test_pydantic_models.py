@@ -1,8 +1,9 @@
 from unittest import TestCase
-from opencloning.pydantic_models import AssemblySource, SimpleSequenceLocation as SimpleSequenceLocationModel
+from opencloning.pydantic_models import AssemblySource, SequenceLocationStr as SimpleSequenceLocationModel
 from opencloning.assembly2 import edge_representation2subfragment_representation
 from Bio.SeqFeature import SimpleLocation
 from pydna.utils import shift_location
+from pydna.dseqrecord import Dseqrecord
 
 
 class DummyFragment:
@@ -38,17 +39,20 @@ class AssemblySourceTest(TestCase):
                 self.assertEqual(assembly_source.assembly[0].reverse_complemented, False)
                 self.assertEqual(assembly_source.assembly[0].left_location, None)
                 self.assertEqual(
-                    assembly_source.assembly[0].right_location, SimpleSequenceLocationModel(start=0, end=10)
+                    assembly_source.assembly[0].right_location,
+                    SimpleSequenceLocationModel.from_start_and_end(start=0, end=10),
                 )
 
                 # Check second fragment
                 self.assertEqual(assembly_source.assembly[1].sequence, 5)
                 self.assertEqual(assembly_source.assembly[1].reverse_complemented, False)
                 self.assertEqual(
-                    assembly_source.assembly[1].left_location, SimpleSequenceLocationModel(start=10, end=20)
+                    assembly_source.assembly[1].left_location,
+                    SimpleSequenceLocationModel.from_start_and_end(start=10, end=20),
                 )
                 self.assertEqual(
-                    assembly_source.assembly[1].right_location, SimpleSequenceLocationModel(start=0, end=10)
+                    assembly_source.assembly[1].right_location,
+                    SimpleSequenceLocationModel.from_start_and_end(start=0, end=10),
                 )
 
                 # Check other fields
@@ -87,13 +91,23 @@ class AssemblySourceTest(TestCase):
 class SimpleSequenceLocationTest(TestCase):
     def test_methods(self):
 
-        for strand in [1, -1, None]:
+        for strand in [1, -1]:
             self.assertEqual(
-                SimpleSequenceLocationModel.from_simple_location(SimpleLocation(100, 200, strand)),
-                SimpleSequenceLocationModel(start=100, end=200, strand=strand),
+                SimpleSequenceLocationModel.from_biopython_location(SimpleLocation(100, 200, strand)),
+                SimpleSequenceLocationModel.from_start_and_end(start=100, end=200, strand=strand),
             )
-            loc = SimpleSequenceLocationModel(start=20, end=12, strand=strand)
+            loc = SimpleSequenceLocationModel.from_start_and_end(start=20, end=12, strand=strand, seq_len=25)
             self.assertEqual(
-                loc.to_biopython_location(circular=True, seq_len=25),
+                loc.to_biopython_location(),
                 shift_location(SimpleLocation(20, 37, strand), 0, 25),
             )
+
+        # Test shift
+        seq = Dseqrecord('TTTGAGTTGTTTACAACGG', circular=True)
+        seq.add_feature(0, 4, type_='CDS', strand=1)
+        for shift in range(len(seq)):
+            seq_shifted = seq.shifted(shift)
+            feat = seq_shifted.features[0]
+            loc_pydantic = SimpleSequenceLocationModel.from_biopython_location(feat.location)
+            loc_biopython = loc_pydantic.to_biopython_location()
+            self.assertEqual(loc_biopython, feat.location)

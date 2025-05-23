@@ -62,10 +62,10 @@ async def primer_design_homologous_recombination(
     validate_spacers(spacers, 1, False)
 
     pcr_seq = read_dsrecord_from_json(pcr_template.sequence)
-    pcr_loc = pcr_template.location.to_biopython_location(pcr_seq.circular, len(pcr_seq))
+    pcr_loc = pcr_template.location.to_biopython_location()
 
     hr_seq = read_dsrecord_from_json(homologous_recombination_target.sequence)
-    hr_loc = homologous_recombination_target.location.to_biopython_location(hr_seq.circular, len(hr_seq))
+    hr_loc = homologous_recombination_target.location.to_biopython_location()
 
     insert_forward = pcr_template.forward_orientation
 
@@ -112,7 +112,7 @@ async def primer_design_gibson_assembly(
     templates = list()
     for query in pcr_templates:
         dseqr = read_dsrecord_from_json(query.sequence)
-        location = query.location.to_biopython_location(dseqr.circular, len(dseqr))
+        location = query.location.to_biopython_location()
         template = location.extract(dseqr)
         if not query.forward_orientation:
             template = template.reverse_complement()
@@ -167,7 +167,7 @@ async def primer_design_simple_pair(
     validate_spacers(spacers, 1, False)
 
     dseqr = read_dsrecord_from_json(pcr_template.sequence)
-    location = pcr_template.location.to_biopython_location(dseqr.circular, len(dseqr))
+    location = pcr_template.location.to_biopython_location()
     template = location.extract(dseqr)
     if not pcr_template.forward_orientation:
         template = template.reverse_complement()
@@ -201,8 +201,7 @@ async def primer_design_ebic(
 ):
     """Design primers for EBIC"""
     dseqr = read_dsrecord_from_json(template.sequence)
-    location = template.location.to_biopython_location(dseqr.circular, len(dseqr))
-
+    location = template.location.to_biopython_location()
     return {'primers': ebic_primers(dseqr, location, max_inside, max_outside)}
 
 

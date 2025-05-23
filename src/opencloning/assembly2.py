@@ -465,6 +465,17 @@ def assemble(fragments, assembly, is_insertion=False):
         is_circular = assembly_is_circular(assembly, fragments)
 
     subfragment_representation = edge_representation2subfragment_representation(assembly, is_circular)
+
+    # Sanity check
+    for asm_edge in assembly:
+        u, v, loc_u, loc_v = asm_edge
+        f_u = fragments[u - 1] if u > 0 else fragments[-u - 1].reverse_complement()
+        f_v = fragments[v - 1] if v > 0 else fragments[-v - 1].reverse_complement()
+        seq_u = str(loc_u.extract(f_u).seq).upper()
+        seq_v = str(loc_v.extract(f_v).seq).upper()
+        if seq_u != seq_v:
+            raise ValueError('Mismatch in assembly')
+
     # We transform into Dseqrecords (for primers)
     dseqr_fragments = [f if isinstance(f, _Dseqrecord) else _Dseqrecord(f) for f in fragments]
     subfragments = get_assembly_subfragments(dseqr_fragments, subfragment_representation)

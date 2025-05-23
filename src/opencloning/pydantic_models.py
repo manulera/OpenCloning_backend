@@ -1,10 +1,10 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, field_validator
 from typing import Optional, List
 
 from Bio.SeqFeature import (
     SeqFeature,
     Location,
-    SimpleLocation as BioSimpleLocation,
+    SimpleLocation,
     FeatureLocation as BioFeatureLocation,
 )
 from Bio.SeqIO.InsdcIO import _insdc_location_string as format_feature_location
@@ -31,7 +31,6 @@ from opencloning_linkml.datamodel import (
     CRISPRSource as _CRISPRSource,
     Primer as _Primer,
     AssemblyFragment as _AssemblyFragment,
-    SimpleSequenceLocation as _SimpleSequenceLocation,
     AddgeneIdSource as _AddgeneIdSource,
     WekWikGeneIdSource as _WekWikGeneIdSource,
     BenchlingUrlSource as _BenchlingUrlSource,
@@ -48,8 +47,11 @@ from opencloning_linkml.datamodel import (
     CreLoxRecombinationSource as _CreLoxRecombinationSource,
     InVivoAssemblySource as _InVivoAssemblySource,
 )
-from pydna.utils import shift_location as _shift_location
-from .assembly2 import edge_representation2subfragment_representation, subfragment_representation2edge_representation
+from .assembly2 import (
+    edge_representation2subfragment_representation,
+    subfragment_representation2edge_representation,
+)
+from pydna.utils import location_boundaries, shift_location
 
 
 SequenceFileFormat = _SequenceFileFormat
@@ -110,7 +112,17 @@ class ManuallyTypedSource(SourceCommonClass, _ManuallyTypedSource):
 
 
 class UploadedFileSource(SourceCommonClass, _UploadedFileSource):
-    pass
+    coordinates: Optional['SequenceLocationStr'] = Field(
+        default=None,
+        description="""If provided, coordinates within the sequence of the file to extract a subsequence""",
+        json_schema_extra={'linkml_meta': {'alias': 'coordinates', 'domain_of': ['UploadedFileSource']}},
+    )
+
+    @field_validator('coordinates', mode='before')
+    def parse_coordinates(cls, v):
+        if v is None:
+            return None
+        return SequenceLocationStr.field_validator(v)
 
 
 class RepositoryIdSource(SourceCommonClass, _RepositoryIdSource):
@@ -218,35 +230,70 @@ class RestrictionEnzymeDigestionSource(SourceCommonClass, _RestrictionEnzymeDige
         return sorted(list(set(out)), key=out.index)
 
 
-class SimpleSequenceLocation(_SimpleSequenceLocation):
+class SequenceLocationStr(str):
+    """A string representation of a sequence location, genbank-like."""
+
     # TODO: this should handle origin-spanning simple locations (splitted)
     @classmethod
-    def from_simple_location(cls, location: BioSimpleLocation):
-        return cls(
-            start=location.start,
-            end=location.end,
-            strand=location.strand,
-        )
+    def from_biopython_location(cls, location: Location):
+        return cls(format_feature_location(location, None))
 
-    def to_biopython_location(self, circular: bool = False, seq_len: int = None) -> BioFeatureLocation:
-        if circular and self.start > self.end and seq_len is not None:
-            unwrapped_location = BioSimpleLocation(self.start, self.end + seq_len, self.strand)
-            return _shift_location(unwrapped_location, 0, seq_len)
-        return BioSimpleLocation(self.start, self.end, self.strand)
+    @classmethod
+    def from_start_and_end(cls, start: int, end: int, seq_len: int | None = None, strand: int | None = 1):
+        if end >= start:
+            return cls.from_biopython_location(SimpleLocation(start, end, strand=strand))
+        else:
+            if seq_len is None:
+                raise ValueError('Sequence length is required to handle origin-spanning simple locations')
+            unwrapped_location = SimpleLocation(start, end + seq_len, strand=strand)
+            wrapped_location = shift_location(unwrapped_location, 0, seq_len)
+            return cls.from_biopython_location(wrapped_location)
+
+    def to_biopython_location(self) -> BioFeatureLocation:
+        return Location.fromstring(self)
+
+    @classmethod
+    def field_validator(cls, v):
+        if isinstance(v, str):
+            return cls(v)
+        if isinstance(v, cls):
+            return v
+        raise ValueError('Location must be a string or a SequenceLocationStr')
+
+    @property
+    def start(self) -> int:
+        return location_boundaries(self.to_biopython_location())[0]
+
+    @property
+    def end(self) -> int:
+        return location_boundaries(self.to_biopython_location())[1]
 
 
 class AssemblyFragment(_AssemblyFragment):
-    left_location: Optional[SimpleSequenceLocation] = None
-    right_location: Optional[SimpleSequenceLocation] = None
+    left_location: Optional[SequenceLocationStr] = None
+    right_location: Optional[SequenceLocationStr] = None
 
-    def to_fragment_tuple(self, fragments) -> tuple[int, BioSimpleLocation, BioSimpleLocation]:
+    def to_fragment_tuple(self, fragments) -> tuple[int, Location, Location]:
         fragment_ids = [int(f.id) for f in fragments]
+        # By convention, these have no strand
+        left_loc = None if self.left_location is None else self.left_location.to_biopython_location()
+        right_loc = None if self.right_location is None else self.right_location.to_biopython_location()
+        if left_loc is not None:
+            left_loc.strand = None
+        if right_loc is not None:
+            right_loc.strand = None
 
         return (
             (fragment_ids.index(self.sequence) + 1) * (-1 if self.reverse_complemented else 1),
-            None if self.left_location is None else self.left_location.to_biopython_location(),
-            None if self.right_location is None else self.right_location.to_biopython_location(),
+            left_loc,
+            right_loc,
         )
+
+    @field_validator('left_location', 'right_location', mode='before')
+    def parse_location(cls, v):
+        if v is None:
+            return None
+        return SequenceLocationStr.field_validator(v)
 
 
 class AssemblySourceCommonClass(SourceCommonClass):
@@ -290,8 +337,8 @@ class AssemblySourceCommonClass(SourceCommonClass):
         assembly_fragments = [
             AssemblyFragment(
                 sequence=fragment_ids[abs(pos) - 1],
-                left_location=None if left_loc is None else SimpleSequenceLocation.from_simple_location(left_loc),
-                right_location=None if right_loc is None else SimpleSequenceLocation.from_simple_location(right_loc),
+                left_location=None if left_loc is None else SequenceLocationStr.from_biopython_location(left_loc),
+                right_location=None if right_loc is None else SequenceLocationStr.from_biopython_location(right_loc),
                 reverse_complemented=pos < 0,
             )
             for pos, left_loc, right_loc in fragment_assembly_positions
@@ -438,6 +485,11 @@ class BaseCloningStrategy(_CloningStrategy):
 
 
 class PrimerDesignQuery(BaseModel):
+    model_config = {'arbitrary_types_allowed': True}
     sequence: TextFileSequence
-    location: SimpleSequenceLocation
+    location: SequenceLocationStr
     forward_orientation: bool = True
+
+    @field_validator('location', mode='before')
+    def parse_location(cls, v):
+        return SequenceLocationStr.field_validator(v)

@@ -83,34 +83,18 @@
         {
           "sequence": 1,
           "left_location": null,
-          "right_location": {
-            "start": 39,
-            "end": 61,
-            "strand": null
-          },
+          "right_location": "40..61",
           "reverse_complemented": false
         },
         {
           "sequence": 6,
-          "left_location": {
-            "start": 1684,
-            "end": 1706,
-            "strand": null
-          },
-          "right_location": {
-            "start": 1657,
-            "end": 1685,
-            "strand": null
-          },
+          "left_location": "1685..1706",
+          "right_location": "1658..1685",
           "reverse_complemented": false
         },
         {
           "sequence": 2,
-          "left_location": {
-            "start": 0,
-            "end": 28,
-            "strand": null
-          },
+          "left_location": "1..28",
           "right_location": null,
           "reverse_complemented": true
         }
@@ -131,34 +115,18 @@
         {
           "sequence": 3,
           "left_location": null,
-          "right_location": {
-            "start": 39,
-            "end": 61,
-            "strand": null
-          },
+          "right_location": "40..61",
           "reverse_complemented": false
         },
         {
           "sequence": 4,
-          "left_location": {
-            "start": 999,
-            "end": 1021,
-            "strand": null
-          },
-          "right_location": {
-            "start": 3628,
-            "end": 3658,
-            "strand": null
-          },
+          "left_location": "1000..1021",
+          "right_location": "3629..3658",
           "reverse_complemented": false
         },
         {
           "sequence": 4,
-          "left_location": {
-            "start": 0,
-            "end": 30,
-            "strand": null
-          },
+          "left_location": "1..30",
           "right_location": null,
           "reverse_complemented": true
         }
@@ -179,30 +147,14 @@
       "assembly": [
         {
           "sequence": 8,
-          "left_location": {
-            "start": 0,
-            "end": 80,
-            "strand": null
-          },
-          "right_location": {
-            "start": 8315,
-            "end": 8395,
-            "strand": null
-          },
+          "left_location": "1..80",
+          "right_location": "8316..8395",
           "reverse_complemented": false
         },
         {
           "sequence": 10,
-          "left_location": {
-            "start": 0,
-            "end": 80,
-            "strand": null
-          },
-          "right_location": {
-            "start": 2658,
-            "end": 2738,
-            "strand": null
-          },
+          "left_location": "1..80",
+          "right_location": "2659..2738",
           "reverse_complemented": false
         }
       ]
@@ -239,5 +191,8 @@
     }
   ],
   "description": "My example cloning strategy",
-  "files": null
+  "files": null,
+  "schema_version": "0.2.9",
+  "backend_version": null,
+  "frontend_version": null
 }

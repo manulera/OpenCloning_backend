@@ -209,8 +209,7 @@ class ReadFileTest(unittest.TestCase):
         payload = response.json()
         self.assertEqual(len(payload['sequences']), 1)
         self.assertEqual(len(payload['sources']), 1)
-        self.assertEqual(payload['sources'][0]['coordinates']['start'], 0)
-        self.assertEqual(payload['sources'][0]['coordinates']['end'], 7)
+        self.assertEqual(payload['sources'][0]['coordinates'], '1..7')
         seq = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
         self.assertEqual(str(seq.seq), 'AAAAAAG')
 

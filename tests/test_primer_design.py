@@ -3,15 +3,20 @@ from opencloning.primer_design import (
     gibson_assembly_primers,
     simple_pair_primers,
 )
+from opencloning.ebic.primer_design import ebic_primers
 from Bio.SeqFeature import SimpleLocation, SeqFeature
 from unittest import TestCase
 from pydna.dseqrecord import Dseqrecord
 from opencloning.pydantic_models import PrimerModel
 from pydna.amplify import pcr
+from pydna.parsers import parse
 from opencloning.assembly2 import Assembly, gibson_overlap
 import pytest
 from Bio.Data.IUPACData import ambiguous_dna_values
 from Bio.Seq import reverse_complement
+import os
+
+test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
 
 class TestHomologousRecombinationPrimers(TestCase):
@@ -530,6 +535,48 @@ class TestSimplePairPrimers(TestCase):
         # Check that primers are correct
         self.assertTrue(fwd.sequence.startswith('ATGCA'))
         self.assertTrue(rvs.sequence.startswith('GTCAT'))
+
+
+class TestEbicPrimers(TestCase):
+    def test_normal_examples(self):
+        """
+        Test the ebic_primers function.
+        """
+
+        template = parse(os.path.join(test_files, 'lacZ_EBIC_example.gb'))[0]
+
+        result = ebic_primers(template, SimpleLocation(1000, 4075), 50, 20)
+        expected = (
+            (
+                'left_fwd',
+                'ataGGTCTCtGGAGAAATTGTCGCGGCGATTAAATC',
+            ),
+            (
+                'left_rvs',
+                'ataGGTCTCtCATTTCATGGTCATAGCTGTTTCCTG',
+            ),
+            (
+                'right_fwd',
+                'ataGGTCTCtGCTTAATAATAATAACCGGGCAGGCC',
+            ),
+            (
+                'right_rvs',
+                'ataGGTCTCtAGCGGATGCGATTAATGATCAGTGGC',
+            ),
+        )
+
+        for primer, expected in zip(result, expected):
+            self.assertEqual(primer.name, expected[0])
+            self.assertEqual(primer.sequence, expected[1])
+
+    def test_errors(self):
+        """
+        Test the ebic_primers function.
+        """
+        template = parse(os.path.join(test_files, 'lacZ_EBIC_example.gb'))[0]
+        with self.assertRaises(ValueError) as e:
+            ebic_primers(template, SimpleLocation(0, 4075), 50, 20)
+        self.assertIn('The template is too short for the padding.', str(e.exception))
 
 
 # class TestGatewayAttBPrimers(TestCase):

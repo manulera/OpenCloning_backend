@@ -24,7 +24,7 @@ from ..pydantic_models import (
     GenomeCoordinatesSource,
     SequenceFileFormat,
     SEVASource,
-    SimpleSequenceLocation,
+    SequenceLocationStr,
 )
 from ..dna_functions import (
     format_sequence_genbank,
@@ -150,12 +150,12 @@ async def read_from_file(
 
     seq_feature = None
     if start is not None and end is not None:
-        seq_feature = SimpleSequenceLocation(start=start, end=end)
         extracted_sequences = list()
         for dseq in dseqs:
             try:
+                seq_feature = SequenceLocationStr.from_start_and_end(start=start, end=end, seq_len=len(dseq))
                 # TODO: We could use extract when this is addressed: https://github.com/biopython/biopython/issues/4989
-                location = seq_feature.to_biopython_location(circular=dseq.circular, seq_len=len(dseq))
+                location = seq_feature.to_biopython_location()
                 i, j = location_boundaries(location)
                 extracted_sequence = dseq[i:j]
                 # Only add the sequence if the interval is not out of bounds
