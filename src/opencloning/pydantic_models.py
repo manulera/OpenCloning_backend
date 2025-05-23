@@ -6,6 +6,7 @@ from Bio.SeqFeature import (
     Location,
     SimpleLocation,
     FeatureLocation as BioFeatureLocation,
+    LocationParserError,
 )
 from Bio.SeqIO.InsdcIO import _insdc_location_string as format_feature_location
 from Bio.Restriction.Restriction import RestrictionType, RestrictionBatch
@@ -255,10 +256,13 @@ class SequenceLocationStr(str):
     @classmethod
     def field_validator(cls, v):
         if isinstance(v, str):
-            return cls(v)
-        if isinstance(v, cls):
-            return v
-        raise ValueError('Location must be a string or a SequenceLocationStr')
+            value = cls(v)
+            try:
+                value.to_biopython_location()
+            except LocationParserError:
+                raise ValueError(f'Location "{v}" is not a valid location')
+            return value
+        raise ValueError(f'Location must be a string or a {cls.__name__}')
 
     @property
     def start(self) -> int:
