@@ -54,10 +54,10 @@ jobs:
       - name: Install Poetry
         run: |
           pip install poetry
+          poetry self add "poetry-dynamic-versioning[plugin]"
 
       - name: Build source and wheel archives
         run: |
-          sed -i 's/^version = "0.1.0"$/version = "${{ github.ref_name }}"/' pyproject.toml
           poetry build
 
       - name: Publish distribution 📦 to PyPI
