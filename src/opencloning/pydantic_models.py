@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, model_validator, field_validator
 from typing import Optional, List
+from pydantic_core import core_schema
 
 from Bio.SeqFeature import (
     SeqFeature,
@@ -271,6 +272,23 @@ class SequenceLocationStr(str):
     @property
     def end(self) -> int:
         return location_boundaries(self.to_biopython_location())[1]
+
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls,
+        source_type,
+        handler,
+    ) -> core_schema.CoreSchema:
+        """Generate Pydantic core schema for SequenceLocationStr."""
+        return core_schema.with_info_after_validator_function(
+            cls._validate,
+            core_schema.str_schema(),
+        )
+
+    @classmethod
+    def _validate(cls, value: str, info):
+        """Validate and create SequenceLocationStr instance."""
+        return cls.field_validator(value)
 
 
 class AssemblyFragment(_AssemblyFragment):
