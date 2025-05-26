@@ -511,6 +511,20 @@ class BaseCloningStrategy(_CloningStrategy):
         self.sequences.append(sequence)
         source.output = sequence.id
 
+    def all_children_source_ids(self, source_id: int, source_children: list | None = None) -> list[int]:
+        """Returns the ids of all source children ids of a source"""
+        source = next(s for s in self.sources if s.id == source_id)
+        if source_children is None:
+            source_children = []
+
+        sources_that_take_output_as_input = [s for s in self.sources if source.output in s.input]
+        new_source_ids = [s.id for s in sources_that_take_output_as_input]
+
+        source_children.extend(new_source_ids)
+        for new_source_id in new_source_ids:
+            self.all_children_source_ids(new_source_id, source_children)
+        return source_children
+
 
 class PrimerDesignQuery(BaseModel):
     model_config = {'arbitrary_types_allowed': True}
