@@ -15,7 +15,7 @@ class TestBugFixing(unittest.TestCase):
         template_sources = set()
         with open(file_path, 'r') as f:
             data = json.load(f)
-        self.assertEqual(data['backend_version'], '0.3')
+
         template_sequence_ids = set(s['id'] for s in data['sequences'] if s['type'] == 'TemplateSequence')
         for source in data['sources']:
             if source['output'] in template_sequence_ids:
@@ -39,11 +39,16 @@ class TestBugFixing(unittest.TestCase):
                 temp_files.append(temp_file_path)
             for file_path in temp_files:
                 fix_backend_v0_3(file_path)
-                fixed_path = file_path.replace('.json', '_fixed.json')
+                fixed_path = file_path.replace('.json', '_needs_fixing.json')
+
+                # Homologous recombination does not have a problem
                 if 'homologous_recombination' not in file_path:
                     self.assertTrue(os.path.exists(fixed_path))
                 else:
                     self.assertFalse(os.path.exists(fixed_path))
+                    with open(fixed_path, 'r') as f:
+                        data = json.load(f)
+                    self.assertEqual(data['backend_version'], '0.3')
 
                 # Tests which source ids are expected to be transformed into templates
                 if 'pcr_spanning_origin' in file_path:

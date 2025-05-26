@@ -17,6 +17,12 @@ This API provides a series of entry points. The API documentation can be accesse
 
 The API functions can also be used to write python scripts to automate cloning. See the [scripting examples](examples/scripting) for more information.
 
+## Migrating between model versions and fixing model bugs
+
+* The data model changes, so the json files you created may not be compatible with the newest version of the library, which uses the latest data mode. You can easily fix this using `python -m opencloning_linkml.migrations.migrate file.json
+` see [full documentation](https://github.com/OpenCloning/OpenCloning_LinkML?tab=readme-ov-file#migration-from-previous-versions-of-the-schema).
+* Before version 0.3, there was a bug for assembly fields that included locations spanning the origin. See the details and how to fix it in the documentation of [this file](./src/opencloning/bug_fixing/README.md).
+
 ## Getting started
 
 If you want to quickly set up a local instance of the frontend and backend of the application, check [getting started in 5 minutes](https://github.com/manulera/OpenCloning#timer_clock-getting-started-in-5-minutes) in the main repository.
@@ -30,7 +36,7 @@ You can install this as a python package:
 python -m venv .venv
 # Activate the virtual environment
 source .venv/bin/activate
-# Install the package from github (will be in pypi at some point)
+# Install the package from pypi
 pip install opencloning
 # Run the API (uvicorn should be installed in the virtual environment)
 uvicorn opencloning.main:app

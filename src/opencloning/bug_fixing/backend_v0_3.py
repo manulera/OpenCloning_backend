@@ -1,3 +1,7 @@
+"""
+See info in README.md
+"""
+
 from ..pydantic_models import (
     BaseCloningStrategy as CloningStrategy,
     AssemblySource,
@@ -6,33 +10,20 @@ from ..pydantic_models import (
 )
 from .._version import __version__
 import json
-from opencloning_linkml.migrations import migrate
 import os
 from packaging import version
-import shutil
+from pydantic import ValidationError
+import copy
 
 
-def fix_backend_v0_3(data: dict) -> dict | None:
-    """
-    Fix the bug in `SimpleSequenceLocation.from_simple_location`, where origin-spanning
-    features were not being read correctly and turned into the entire sequence. This was being used in
-    `generate_assemblies` and producing wrong assembly products.
+def fix_backend_v0_3(input_data: dict, input_file_path: str = '') -> CloningStrategy | None:
 
-    ## Error fixing
-    There were two errors, fixed in https://github.com/manulera/OpenCloning_backend/pull/305
-
-    The first error concerned gateway assemblies. `gateway_overlap` was returning the entire
-    overlap, which matched regex like twtGTACAAAaaa (for attB1). That created assemblies in which
-    the overlapping part may have mismatches on the w. Now, instead of returning the whole twtGTACAAAaaa
-    as overlap, it returns only the common part GTACAAA.
-
-    The second error was a bug in `SimpleSequenceLocation.from_simple_location`, where origin-spanning
-    features were not being read correctly and turned into the entire sequence. This was being used in
-    `generate_assemblies` and producing wrong assembly products. There is an example in the pull request.
-    """
-
+    data = copy.deepcopy(input_data)
     # Make sure that it is a valid CloningStrategy
-    cs = CloningStrategy.model_validate(data)
+    try:
+        cs = CloningStrategy.model_validate(data)
+    except ValidationError:
+        raise ValueError(f'Error validating input file {input_file_path}')
 
     # First fix gateway assemblies
     problematic_source_ids = set()
@@ -81,34 +72,26 @@ def fix_backend_v0_3(data: dict) -> dict | None:
         output_seq.clear()
         output_seq.update(seq_keep)
 
-    return data
+    return CloningStrategy.model_validate(data)
 
 
 def main(file_path: str):
     file_dir = os.path.dirname(file_path)
     file_base = os.path.splitext(os.path.basename(file_path))[0]
-    backup_file_path = os.path.join(file_dir, f'{file_base}_backup.json')
     new_file_path = os.path.join(file_dir, f'{file_base}_needs_fixing.json')
 
     with open(file_path, 'r') as f:
         data = json.load(f)
+
     if 'backend_version' not in data or data['backend_version'] is None:
-        old_version = data['schema_version'] if 'schema_version' in data else None
-        migrated_data = migrate(data)
-        if migrated_data['schema_version'] != old_version:
-            # If the data was migrated, create a backup file
-            shutil.copy(file_path, backup_file_path)
-            # Overwrite the original file with the migrated data
-            with open(file_path, 'w') as f:
-                f.write(json.dumps(migrated_data, indent=2))
 
         # Fix the data
-        new_data = fix_backend_v0_3(migrated_data)
-        if new_data is not None:
-            cs = CloningStrategy.model_validate(new_data)
+        cs = fix_backend_v0_3(data, file_path)
+
+        if cs is not None:
             cs.backend_version = __version__ if version.parse(__version__) > version.parse('0.3') else '0.3'
             with open(new_file_path, 'w') as f:
-                f.write(cs.model_dump_json(indent=2))
+                f.write(cs.model_dump_json(indent=2, exclude_none=True))
 
 
 if __name__ == '__main__':
@@ -121,7 +104,7 @@ if __name__ == '__main__':
     file_paths = sys.argv[1:]
 
     for file_path in file_paths:
-        if file_path.endswith('_needs_fixing.json') or file_path.endswith('_backup.json'):
+        if file_path.endswith('_needs_fixing.json'):
             print(f'Skipping {file_path}')
             continue
         main(file_path)
