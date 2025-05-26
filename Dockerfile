@@ -45,7 +45,7 @@ FROM python:3.11-slim-bookworm
 # directly output things to stdout/stderr, without buffering
 ENV PYTHONUNBUFFERED=1
 
-RUN apt-get update && apt-get install -y mafft libgomp1
+RUN apt-get update && apt-get install --no-install-recommends -y mafft libgomp1 && rm -rf /var/lib/apt/lists/*
 
 # create a user to run the app
 RUN useradd -ms /bin/bash backend
