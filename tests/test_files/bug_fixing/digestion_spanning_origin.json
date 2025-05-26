@@ -64,30 +64,14 @@
       "assembly": [
         {
           "sequence": 2,
-          "left_location": {
-            "start": 0,
-            "end": 10,
-            "strand": null
-          },
-          "right_location": {
-            "start": 0,
-            "end": 10,
-            "strand": null
-          },
+          "left_location": "1..10",
+          "right_location": "1..10",
           "reverse_complemented": false
         },
         {
           "sequence": 4,
-          "left_location": {
-            "start": 0,
-            "end": 12,
-            "strand": null
-          },
-          "right_location": {
-            "start": 0,
-            "end": 12,
-            "strand": null
-          },
+          "left_location": "1..12",
+          "right_location": "1..12",
           "reverse_complemented": false
         }
       ],
@@ -96,6 +80,10 @@
       ]
     }
   ],
+  "primers": [],
   "description": "",
-  "primers": []
+  "files": null,
+  "schema_version": "0.2.9",
+  "backend_version": null,
+  "frontend_version": null
 }

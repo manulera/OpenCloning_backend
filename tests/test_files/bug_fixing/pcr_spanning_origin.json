@@ -44,34 +44,18 @@
         {
           "sequence": 1,
           "left_location": null,
-          "right_location": {
-            "start": 0,
-            "end": 17,
-            "strand": null
-          },
+          "right_location": "1..17",
           "reverse_complemented": false
         },
         {
           "sequence": 2,
-          "left_location": {
-            "start": 0,
-            "end": 89,
-            "strand": null
-          },
-          "right_location": {
-            "start": 19,
-            "end": 37,
-            "strand": null
-          },
+          "left_location": "1..89",
+          "right_location": "20..37",
           "reverse_complemented": false
         },
         {
           "sequence": 2,
-          "left_location": {
-            "start": 0,
-            "end": 18,
-            "strand": null
-          },
+          "left_location": "1..18",
           "right_location": null,
           "reverse_complemented": true
         }
@@ -79,17 +63,25 @@
       "add_primer_features": false
     }
   ],
-  "description": "",
   "primers": [
     {
       "id": 1,
+      "type": "Primer",
       "name": "fwd",
+      "database_id": null,
       "sequence": "tttacttgatgcaaaca"
     },
     {
       "id": 2,
+      "type": "Primer",
       "name": "rvs",
+      "database_id": null,
       "sequence": "cagtgctttgaatgtcat"
     }
-  ]
+  ],
+  "description": "",
+  "files": null,
+  "schema_version": "0.2.9",
+  "backend_version": null,
+  "frontend_version": null
 }
