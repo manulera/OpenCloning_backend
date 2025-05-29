@@ -3,7 +3,7 @@ import tempfile
 import os
 import glob
 import shutil
-from opencloning.bug_fixing.backend_v0_3 import main as fix_backend_v0_3
+from opencloning.bug_fixing.backend_v0_3 import main as fix_backend_v0_3_script
 import json
 
 test_files_dir = os.path.join(os.path.dirname(__file__), 'test_files', 'bug_fixing')
@@ -22,7 +22,7 @@ class TestBugFixing(unittest.TestCase):
                 template_sources.add(source['id'])
         return template_sources
 
-    def test_backend_v0_3(self):
+    def test_backend_v0_3_script(self):
         # Copy JSON files from test_files/bug_fixing directory, excluding 'fixed.json' files
 
         # Find JSON files to test
@@ -38,14 +38,14 @@ class TestBugFixing(unittest.TestCase):
                 shutil.copy(file_path, temp_file_path)
                 temp_files.append(temp_file_path)
             for file_path in temp_files:
-                fix_backend_v0_3(file_path)
+                fix_backend_v0_3_script(file_path)
                 fixed_path = file_path.replace('.json', '_needs_fixing.json')
 
                 # Homologous recombination does not have a problem
-                if 'homologous_recombination' not in file_path:
-                    self.assertTrue(os.path.exists(fixed_path))
-                else:
+                if 'homologous_recombination' in file_path:
                     self.assertFalse(os.path.exists(fixed_path))
+                else:
+                    self.assertTrue(os.path.exists(fixed_path))
                     with open(fixed_path, 'r') as f:
                         data = json.load(f)
                     self.assertEqual(data['backend_version'], '0.3')

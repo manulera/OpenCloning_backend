@@ -12,18 +12,14 @@ from .._version import __version__
 import json
 import os
 from packaging import version
-from pydantic import ValidationError
 import copy
 
 
-def fix_backend_v0_3(input_data: dict, input_file_path: str = '') -> CloningStrategy | None:
+def fix_backend_v0_3(input_data: dict) -> CloningStrategy | None:
 
     data = copy.deepcopy(input_data)
     # Make sure that it is a valid CloningStrategy
-    try:
-        cs = CloningStrategy.model_validate(data)
-    except ValidationError:
-        raise ValueError(f'Error validating input file {input_file_path}')
+    cs = CloningStrategy.model_validate(data)
 
     # First fix gateway assemblies
     problematic_source_ids = set()
@@ -86,7 +82,7 @@ def main(file_path: str):
     if 'backend_version' not in data or data['backend_version'] is None:
 
         # Fix the data
-        cs = fix_backend_v0_3(data, file_path)
+        cs = fix_backend_v0_3(data)
 
         if cs is not None:
             cs.backend_version = __version__ if version.parse(__version__) > version.parse('0.3') else '0.3'

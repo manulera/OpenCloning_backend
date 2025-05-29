@@ -7,6 +7,7 @@ from pydna.parsers import parse
 import opencloning.main as _main
 from opencloning.dna_functions import format_sequence_genbank, read_dsrecord_from_json
 from opencloning.pydantic_models import TextFileSequence, BaseCloningStrategy
+from opencloning_linkml._version import __version__ as schema_version
 
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
@@ -54,15 +55,54 @@ class ValidatorTest(unittest.TestCase):
 class ValidateEndPointTest(unittest.TestCase):
 
     def test_validate(self):
+        # Valid file
         with open(f'{test_files}/homologous_recombination.json') as ins:
             # Read it to json
             data = json.load(ins)
         response = client.post('/validate', json=data)
         self.assertEqual(response.status_code, 200)
+        self.assertNotIn('x-warning', response.headers)
 
+        # Invalid file
         data['dummy'] = 'dummy'
         response = client.post('/validate', json=data)
         self.assertEqual(response.status_code, 422)
+
+        # Completely wrong file
+        data = {'dummy': 'dummy'}
+        response = client.post('/validate', json=data)
+        self.assertEqual(response.status_code, 422)
+
+        # Old format file
+        with open(f'{test_files}/homologous_recombination_old_format.json') as ins:
+            # Read it to json
+            data = json.load(ins)
+        response = client.post('/validate', json=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('x-warning', response.headers)
+        self.assertNotIn('contained an error', response.headers['x-warning'])
+        self.assertIn(
+            'The cloning strategy is in a previous version of the model and has been migrated to the latest version.',
+            response.headers['x-warning'],
+        )
+        # The data has been migrated to the latest version
+        cs = BaseCloningStrategy.model_validate(response.json())
+        self.assertEqual(cs.schema_version, schema_version)
+
+        # File with errors
+        with open(f'{test_files}/bug_fixing/digestion_spanning_origin.json') as ins:
+            # Read it to json
+            data = json.load(ins)
+        response = client.post('/validate', json=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('x-warning', response.headers)
+        self.assertIn('previous version', response.headers['x-warning'])
+        self.assertIn('contained an error', response.headers['x-warning'])
+
+        # The right source has been turned into a template
+        data = response.json()
+        seq = next(s for s in data['sequences'] if s['id'] == 6)
+        self.assertEqual(seq['type'], 'TemplateSequence')
 
 
 class RenameSequenceTest(unittest.TestCase):

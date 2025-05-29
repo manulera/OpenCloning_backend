@@ -1,6 +1,9 @@
-from fastapi import Query, HTTPException
+from fastapi import Query, HTTPException, Response
 from Bio.Restriction.Restriction_Dictionary import rest_dict
+from pydantic import ValidationError
+from opencloning_linkml.migrations import migrate
 
+from ..bug_fixing.backend_v0_3 import fix_backend_v0_3
 
 from ..dna_functions import (
     format_sequence_genbank,
@@ -32,12 +35,46 @@ async def get_restriction_enzyme_list():
 @router.post(
     '/validate',
     summary='Validate a cloning strategy',
+    responses={
+        200: {
+            'description': 'The cloning strategy is valid',
+            'headers': {
+                'x-warning': {
+                    'description': 'A warning returned if the file either contains errors or is in a previous version of the model',
+                    'schema': {'type': 'string'},
+                },
+            },
+        },
+        422: {
+            'description': 'The cloning strategy is invalid',
+        },
+    },
 )
-async def cloning_strategy_is_valid(
-    cloning_strategy: BaseCloningStrategy,
-) -> bool:
+async def cloning_strategy_is_valid(data: dict, response: Response):
     """Validate a cloning strategy"""
-    return True
+    warnings = []
+    if any(key not in data for key in ['primers', 'sources', 'sequences']):
+        raise HTTPException(status_code=422, detail='The cloning strategy is invalid')
+
+    try:
+        migrated_data = migrate(data)
+        if migrated_data is not None:
+            data = migrated_data
+            warnings.append(
+                'The cloning strategy is in a previous version of the model and has been migrated to the latest version.'
+            )
+        fixed_data = fix_backend_v0_3(data)
+        if fixed_data is not None:
+            data = fixed_data
+            warnings.append('The cloning strategy contained an error and has been turned into a template.')
+        cs = BaseCloningStrategy.model_validate(data)
+        if len(warnings) > 0:
+            response.headers['x-warning'] = ';'.join(warnings)
+            return cs
+        return None
+
+    except ValidationError:
+        raise HTTPException(status_code=422, detail='The cloning strategy is invalid')
 
 
 @router.post('/rename_sequence', response_model=TextFileSequence)
