@@ -115,5 +115,3 @@ jobs:
           push: true
           tags: manulera/opencloningbackend:latest
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            COMMIT_SHA=${{ github.sha }}

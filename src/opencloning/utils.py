@@ -43,15 +43,3 @@ class TemporaryFolderOverride:
         if self.target_folder_exists:
             os.mkdir(self.target_folder)
             move_all_contents(self.backup_folder, self.target_folder)
-
-
-def api_version() -> dict[str, str | None]:
-    version = None
-    commit_sha = None
-    if os.path.exists('version.txt'):
-        with open('version.txt', 'r') as f:
-            version = f.read().strip()
-    if os.path.exists('commit_sha.txt'):
-        with open('commit_sha.txt', 'r') as f:
-            commit_sha = f.read().strip()
-    return {'version': version, 'commit_sha': commit_sha}

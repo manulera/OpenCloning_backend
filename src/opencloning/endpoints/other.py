@@ -2,6 +2,7 @@ from fastapi import Query, HTTPException, Response
 from Bio.Restriction.Restriction_Dictionary import rest_dict
 from pydantic import ValidationError
 from opencloning_linkml.migrations import migrate
+from opencloning_linkml._version import __version__ as schema_version
 
 from ..bug_fixing.backend_v0_3 import fix_backend_v0_3
 
@@ -15,7 +16,7 @@ from ..pydantic_models import (
     BaseCloningStrategy,
 )
 from ..get_router import get_router
-from ..utils import api_version
+from .._version import __version__ as backend_version
 
 
 router = get_router()
@@ -23,7 +24,7 @@ router = get_router()
 
 @router.get('/version')
 async def get_version():
-    return api_version()
+    return {'backend_version': backend_version, 'schema_version': schema_version}
 
 
 @router.get('/restriction_enzyme_list', response_model=dict[str, list[str]])
