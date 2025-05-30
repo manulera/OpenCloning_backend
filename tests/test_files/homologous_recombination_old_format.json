@@ -40,7 +40,6 @@
       "output": 2,
       "type": "AddgeneIdSource",
       "output_name": null,
-      "database_id": null,
       "repository_id": "19342",
       "repository_name": "addgene",
       "sequence_file_url": "https://media.addgene.org/snapgene-media/v2.0.0/sequences/8997/a6b027f8-013a-4b68-bf7e-359f34a653d0/addgene-plasmid-19342-sequence-8997.gbk",
@@ -54,29 +53,43 @@
       "output": 4,
       "type": "PCRSource",
       "output_name": "pcr_product",
-      "database_id": null,
       "circular": false,
       "assembly": [
         {
           "sequence": 1,
           "left_location": null,
-          "right_location": "80..100",
+          "right_location": {
+            "start": 79,
+            "end": 100,
+            "strand": null
+          },
           "reverse_complemented": false
         },
         {
           "sequence": 2,
-          "left_location": "41..61",
-          "right_location": "2095..2114",
+          "left_location": {
+            "start": 40,
+            "end": 61,
+            "strand": null
+          },
+          "right_location": {
+            "start": 2094,
+            "end": 2114,
+            "strand": null
+          },
           "reverse_complemented": false
         },
         {
           "sequence": 2,
-          "left_location": "1..20",
+          "left_location": {
+            "start": 0,
+            "end": 20,
+            "strand": null
+          },
           "right_location": null,
           "reverse_complemented": true
         }
-      ],
-      "add_primer_features": false
+      ]
     },
     {
       "id": 5,
@@ -84,7 +97,6 @@
       "output": 6,
       "type": "GenomeCoordinatesSource",
       "output_name": null,
-      "database_id": null,
       "assembly_accession": "GCA_000002945.3",
       "sequence_accession": "CU329670.1",
       "locus_tag": "SPOM_SPAPB1A10.09",
@@ -102,49 +114,56 @@
       "output": 8,
       "type": "HomologousRecombinationSource",
       "output_name": "modified_locus",
-      "database_id": null,
       "circular": false,
       "assembly": [
         {
           "sequence": 6,
           "left_location": null,
-          "right_location": "1094..1173",
+          "right_location": {
+            "start": 1093,
+            "end": 1173,
+            "strand": null
+          },
           "reverse_complemented": false
         },
         {
           "sequence": 4,
-          "left_location": "1..80",
-          "right_location": "2154..2233",
+          "left_location": {
+            "start": 0,
+            "end": 80,
+            "strand": null
+          },
+          "right_location": {
+            "start": 2153,
+            "end": 2233,
+            "strand": null
+          },
           "reverse_complemented": false
         },
         {
           "sequence": 6,
-          "left_location": "3417..3496",
+          "left_location": {
+            "start": 3416,
+            "end": 3496,
+            "strand": null
+          },
           "right_location": null,
           "reverse_complemented": false
         }
       ]
     }
   ],
+  "description": "Deletion of the ORF of ase1 by homologous recombination in S.pombe",
   "primers": [
     {
       "id": 1,
-      "type": "Primer",
       "name": "fwd",
-      "database_id": null,
       "sequence": "AGTTTTCATATCTTCCTTTATATTCTATTAATTGAATTTCAAACATCGTTTTATTGAGCTCATTTACATCAACCGGTTCACGGATCCCCGGGTTAATTAA"
     },
     {
       "id": 2,
-      "type": "Primer",
       "name": "rvs",
-      "database_id": null,
       "sequence": "CTTTTATGAATTATCTATATGCTGTATTCATATGCAAAAATATGTATATTTAAATTTGATCGATTAGGTAAATAAGAAGCGAATTCGAGCTCGTTTAAAC"
     }
-  ],
-  "description": "Deletion of the ORF of ase1 by homologous recombination in S.pombe",
-  "files": null,
-  "schema_version": "0.2.12a0",
-  "backend_version": null,
-  "frontend_version": null
+  ]
 }

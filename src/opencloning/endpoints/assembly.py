@@ -57,7 +57,9 @@ def format_known_assembly_response(
     # If a specific assembly is requested
     assembly_plan = source.get_assembly_plan(fragments)
     for s in out_sources:
-        if s == source:
+        # TODO: it seems that assemble() is not getting is_insertion ever
+        other_assembly_plan = s.get_assembly_plan(fragments)
+        if assembly_plan == other_assembly_plan:
             return {
                 'sequences': [
                     format_sequence_genbank(product_callback(assemble(fragments, assembly_plan)), s.output_name)

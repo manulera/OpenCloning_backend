@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, model_validator, field_validator
 from typing import Optional, List
 from pydantic_core import core_schema
+from ._version import __version__
 
 from Bio.SeqFeature import (
     SeqFeature,
@@ -479,6 +480,11 @@ class BaseCloningStrategy(_CloningStrategy):
         description="""The primers that are used in the cloning strategy""",
         json_schema_extra={'linkml_meta': {'alias': 'primers', 'domain_of': ['CloningStrategy']}},
     )
+    backend_version: Optional[str] = Field(
+        default=__version__,
+        description="""The version of the backend that was used to generate this cloning strategy""",
+        json_schema_extra={'linkml_meta': {'alias': 'backend_version', 'domain_of': ['CloningStrategy']}},
+    )
 
     def next_primer_id(self):
         return max([p.id for p in self.primers], default=0) + 1
@@ -504,6 +510,20 @@ class BaseCloningStrategy(_CloningStrategy):
         sequence.id = self.next_node_id()
         self.sequences.append(sequence)
         source.output = sequence.id
+
+    def all_children_source_ids(self, source_id: int, source_children: list | None = None) -> list[int]:
+        """Returns the ids of all source children ids of a source"""
+        source = next(s for s in self.sources if s.id == source_id)
+        if source_children is None:
+            source_children = []
+
+        sources_that_take_output_as_input = [s for s in self.sources if source.output in s.input]
+        new_source_ids = [s.id for s in sources_that_take_output_as_input]
+
+        source_children.extend(new_source_ids)
+        for new_source_id in new_source_ids:
+            self.all_children_source_ids(new_source_id, source_children)
+        return source_children
 
 
 class PrimerDesignQuery(BaseModel):
