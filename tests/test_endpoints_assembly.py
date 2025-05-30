@@ -407,7 +407,7 @@ class PCRTest(unittest.TestCase):
                 (1, 2, SimpleLocation(0, 8), SimpleLocation(4, 12)),
                 (2, -3, SimpleLocation(18, 26), SimpleLocation(0, 8)),
             ],
-            circular=False,
+            circular=True,  # The wrong thing
             fragments=[primer_fwd, json_seq, primer_rvs],
         )
 
@@ -425,7 +425,7 @@ class PCRTest(unittest.TestCase):
             id=0,
             assembly=[
                 (2, -3, SimpleLocation(18, 26), SimpleLocation(0, 8)),
-                (1, 2, SimpleLocation(0, 8), SimpleLocation(4, 12)),
+                (1, 2, SimpleLocation(0, 8), SimpleLocation(4, 12)),  # Reverted order
             ],
             circular=False,
             fragments=[primer_fwd, json_seq, primer_rvs],
