@@ -9,9 +9,7 @@ from .pombe_summary import main as pombe_summary
 from .pombe_gather import main as pombe_gather
 import shutil
 import traceback
-import json
 from ...get_router import get_router
-from ...utils import api_version
 from fastapi import Request
 
 router = get_router()
@@ -74,10 +72,6 @@ async def post_batch_cloning(
             pombe_gather(temp_dir)
         except Exception:
             raise HTTPException(status_code=400, detail='Summary failed')
-
-        # Write the version
-        with open(os.path.join(temp_dir, 'version.json'), 'w') as f:
-            f.write(json.dumps(api_version(), indent=2))
 
         # zip the temp dir and return it
         zip_filename = f'{temp_dir}_archive'

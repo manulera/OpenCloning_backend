@@ -31,9 +31,6 @@ jobs:
             manulera/opencloningbackend:prod
             manulera/opencloningbackend:${{ github.ref_name }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            COMMIT_SHA=${{ github.sha }}
-            VERSION=${{ github.ref_name }}
 
   publish_to_pypi:
     runs-on: ubuntu-latest

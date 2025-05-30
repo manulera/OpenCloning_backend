@@ -8,40 +8,20 @@ import opencloning.main as _main
 from opencloning.dna_functions import format_sequence_genbank, read_dsrecord_from_json
 from opencloning.pydantic_models import TextFileSequence, BaseCloningStrategy
 from opencloning_linkml._version import __version__ as schema_version
-
+from opencloning._version import __version__ as backend_version
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
 client = TestClient(_main.app)
 
 
-class VersionTestWithFiles(unittest.TestCase):
-
-    def setUp(self):
-        with open('./version.txt', 'w') as f:
-            f.write('1.2.3')
-        with open('./commit_sha.txt', 'w') as f:
-            f.write('1234567890')
-
-    def tearDown(self):
-        os.remove('./version.txt')
-        os.remove('./commit_sha.txt')
-
-    def test_version_file(self):
-        response = client.get('/version')
-        self.assertEqual(response.status_code, 200)
-        resp = response.json()
-        self.assertEqual(resp['version'], '1.2.3')
-        self.assertEqual(resp['commit_sha'], '1234567890')
-
-
-class VersionTestWithoutFiles(unittest.TestCase):
+class VersionTest(unittest.TestCase):
     def test_version_empty(self):
         response = client.get('/version')
         self.assertEqual(response.status_code, 200)
         resp = response.json()
-        self.assertIsNone(resp['version'])
-        self.assertIsNone(resp['commit_sha'])
+        self.assertEqual(resp['backend_version'], backend_version)
+        self.assertEqual(resp['schema_version'], schema_version)
 
 
 class ValidatorTest(unittest.TestCase):

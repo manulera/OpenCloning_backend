@@ -52,14 +52,6 @@ RUN useradd -ms /bin/bash backend
 USER backend
 WORKDIR /home/backend
 
-# Accept the COMMIT_SHA as a build argument
-ARG COMMIT_SHA
-ARG VERSION
-
-# Store the COMMIT_SHA and VERSION in files
-RUN echo "${COMMIT_SHA}" > commit_sha.txt
-RUN echo "${VERSION}" > version.txt
-
 ENV VIRTUAL_ENV="/home/backend/venv"
 COPY --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
 COPY --from=builder /usr/local/bin/mars /usr/local/bin/mars
