@@ -60,6 +60,7 @@ async def cloning_strategy_is_valid(data: dict, response: Response):
     try:
         migrated_data = migrate(data)
         if migrated_data is None:
+            BaseCloningStrategy.model_validate(data)
             return None
 
         data = migrated_data
