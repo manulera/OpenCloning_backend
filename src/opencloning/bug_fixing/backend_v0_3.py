@@ -7,6 +7,7 @@ from ..pydantic_models import (
     AssemblySource,
     TextFileSequence,
     PrimerModel,
+    SequenceLocationStr,
 )
 from .._version import __version__
 import json
@@ -26,7 +27,17 @@ def fix_backend_v0_3(input_data: dict) -> CloningStrategy | None:
 
     for source in data['sources']:
         if source['type'] == 'GatewaySource':
-            problematic_source_ids.add(source['id'])
+            # Take the first assembly value and check that the length of features is 7
+            assembly = source['assembly']
+            if len(assembly):
+                feat2check = (
+                    assembly[0]['left_location']
+                    if assembly[0]['left_location'] is not None
+                    else assembly[0]['right_location']
+                )
+                if len(SequenceLocationStr(feat2check).to_biopython_location()) != 7:
+                    problematic_source_ids.add(source['id'])
+
         elif 'assembly' in source:
             assembly_source = AssemblySource(
                 id=source['id'],

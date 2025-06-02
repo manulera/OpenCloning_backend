@@ -41,8 +41,8 @@ class TestBugFixing(unittest.TestCase):
                 fix_backend_v0_3_script(file_path)
                 fixed_path = file_path.replace('.json', '_needs_fixing.json')
 
-                # Homologous recombination does not have a problem
-                if 'homologous_recombination' in file_path:
+                # Homologous recombination and gateway correct do not have a problem
+                if 'homologous_recombination' in file_path or 'gateway_correct' in file_path:
                     self.assertFalse(os.path.exists(fixed_path))
                 else:
                     self.assertTrue(os.path.exists(fixed_path))
