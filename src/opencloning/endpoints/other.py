@@ -59,11 +59,15 @@ async def cloning_strategy_is_valid(data: dict, response: Response):
 
     try:
         migrated_data = migrate(data)
-        if migrated_data is not None:
-            data = migrated_data
-            warnings.append(
-                'The cloning strategy is in a previous version of the model and has been migrated to the latest version.'
-            )
+        if migrated_data is None:
+            BaseCloningStrategy.model_validate(data)
+            return None
+
+        data = migrated_data
+        warnings.append(
+            'The cloning strategy is in a previous version of the model and has been migrated to the latest version.'
+        )
+
         fixed_data = fix_backend_v0_3(data)
         if fixed_data is not None:
             data = fixed_data
