@@ -121,7 +121,7 @@ If you want to fix several bugs from the command line, you can use the `backend_
 Before running this script, you need to migrate the data to the latest version of the schema. See [full documentation](https://github.com/OpenCloning/OpenCloning_LinkML?tab=readme-ov-file#migration-from-previous-versions-of-the-schema), but basically:
 
 ```bash
-python -m opencloning.migrations.migrate file1.json file2.json ...
+python -m opencloning_linkl.migrations.migrate file1.json file2.json ...
 ```
 
 Then, you can run the script:
