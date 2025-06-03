@@ -30,6 +30,7 @@ pyyaml = "^6.0.2"
 opencloning-linkml = "0.2.12a0"
 primer3-py = "2.0.3"
 biopython = "1.84"
+packaging = "^25.0"
 
 [tool.poetry.group.dev.dependencies]
 autopep8 = "^2.0.4"
