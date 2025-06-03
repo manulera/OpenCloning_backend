@@ -144,7 +144,7 @@
   ],
   "description": "Deletion of the ORF of ase1 by homologous recombination in S.pombe",
   "files": null,
-  "schema_version": "0.2.12a0",
+  "schema_version": "0.3.0a0",
   "backend_version": null,
   "frontend_version": null
 }
