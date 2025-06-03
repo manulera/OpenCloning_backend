@@ -5,7 +5,7 @@ from pydna.primer import Primer as PydnaPrimer
 from pydna.crispr import cas9
 from pydantic import conlist, create_model
 from Bio.Restriction.Restriction import RestrictionBatch
-from opencloning.cre_lox import cre_loxP_overlap
+from opencloning.cre_lox import cre_loxP_overlap, annotate_loxP_sites
 from ..dna_functions import (
     get_invalid_enzyme_names,
     format_sequence_genbank,
@@ -555,7 +555,14 @@ async def cre_lox_recombination(source: CreLoxRecombinationSource, sequences: co
         )
 
     resp = generate_assemblies(
-        source, create_source, fragments, False, cre_loxP_overlap, True, recombination_mode=True
+        source,
+        create_source,
+        fragments,
+        False,
+        cre_loxP_overlap,
+        True,
+        recombination_mode=True,
+        product_callback=annotate_loxP_sites,
     )
 
     if len(resp['sources']) == 0:

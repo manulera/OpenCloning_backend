@@ -1255,6 +1255,7 @@ class CreLoxRecombinationTest(unittest.TestCase):
         self.assertTrue(plasmid.circular)
 
         self.assertEqual(plasmid.seq.seguid(), Dseqrecord(LOXP_SEQUENCE + 'acgt', circular=True).seguid())
+        self.assertIn('loxP', get_all_feature_labels(plasmid))
 
         # The locus sequence that remains
         locus = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][1]))
