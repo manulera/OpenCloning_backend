@@ -37,6 +37,10 @@ COPY ./poetry.lock .
 COPY ./pyproject.toml .
 COPY ./README.md .
 
+# Set version in pyproject.toml before installing
+ARG PACKAGE_VERSION
+RUN sed -i "s/^version = .*/version = \"${PACKAGE_VERSION}\"/" pyproject.toml
+
 RUN poetry install --only main
 
 # FINAL IMAGE
