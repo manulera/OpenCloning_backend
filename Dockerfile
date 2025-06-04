@@ -2,9 +2,9 @@
 # https://github.com/manulera/OpenCloning_backend
 
 # BUILDER IMAGE
-FROM python:3.11-slim-bookworm AS builder
+FROM python:3.12-slim-bookworm AS builder
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y gcc git g++ wget
+RUN apt-get update && apt-get upgrade -y && apt-get install -y gcc git g++ wget
 
 # Download MARS executable
 RUN wget https://github.com/manulera/MARS/releases/download/v0.2/mars-Debian-Bookworm && \
@@ -38,13 +38,13 @@ COPY ./pyproject.toml .
 COPY ./README.md .
 
 # Set version in pyproject.toml before installing
-ARG PACKAGE_VERSION
+ARG PACKAGE_VERSION="0.1.0"
 RUN sed -i "s/^version = .*/version = \"${PACKAGE_VERSION}\"/" pyproject.toml
 
 RUN poetry install --only main
 
 # FINAL IMAGE
-FROM python:3.11-slim-bookworm
+FROM python:3.12-slim-bookworm
 
 # directly output things to stdout/stderr, without buffering
 ENV PYTHONUNBUFFERED=1
