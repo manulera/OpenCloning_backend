@@ -115,3 +115,4 @@ jobs:
           push: true
           tags: manulera/opencloningbackend:latest
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: PACKAGE_VERSION=${{ github.ref_name }}
