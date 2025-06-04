@@ -2,7 +2,7 @@
 # https://github.com/manulera/OpenCloning_backend
 
 # BUILDER IMAGE
-FROM python:3.11-slim-bookworm as builder
+FROM python:3.11-slim-bookworm AS builder
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y gcc git g++ wget
 
