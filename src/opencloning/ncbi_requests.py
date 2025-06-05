@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from pydna.parsers import parse as pydna_parse
 from pydna.dseqrecord import Dseqrecord
 from .app_settings import settings
-from .httpClient import get_http_client, Response
+from .http_client import get_http_client, Response
 
 headers = None if settings.NCBI_API_KEY is None else {'api_key': settings.NCBI_API_KEY}
 
@@ -17,8 +17,7 @@ async def get_assembly_accession_from_sequence_accession(sequence_accession: str
     """Get the assembly accession from a sequence accession"""
 
     url = f'https://api.ncbi.nlm.nih.gov/datasets/v2alpha/genome/sequence_accession/{sequence_accession}/sequence_assemblies'
-    async with get_http_client() as client:
-        resp = await client.get(url, headers=headers)
+    resp = await async_get(url, headers=headers)
     data = resp.json()
     if 'accessions' in data:
         return data['accessions']

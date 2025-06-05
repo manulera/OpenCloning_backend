@@ -37,7 +37,7 @@ from ..dna_functions import (
 )
 from .. import request_examples
 from .. import ncbi_requests
-from ..httpClient import ConnectError
+from ..http_client import ConnectError
 
 
 router = get_router()

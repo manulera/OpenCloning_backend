@@ -6,7 +6,7 @@ import argparse
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from ...httpClient import get_http_client, Response
+from ...http_client import get_http_client, Response
 
 default_settings_primer_design = {
     'length': 80,

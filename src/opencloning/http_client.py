@@ -13,9 +13,6 @@ if settings.PROXY_URL:
         ctx.load_verify_locations(cafile=settings.PROXY_CERT_FILE)
     proxy = settings.PROXY_URL
 
-    print(ctx.sslsocket_class)
-
 
 def get_http_client():
-
     return AsyncClient(proxy=proxy, verify=ctx)

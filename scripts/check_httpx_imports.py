@@ -20,10 +20,10 @@ def check_file(file_path):
         if isinstance(node, (ast.Import, ast.ImportFrom)):
             for name in node.names:
                 if name.name == 'httpx':
-                    # Only allow imports in httpClient.py
-                    if file_path.name != 'httpClient.py':
+                    # Only allow imports in http_client.py
+                    if file_path.name != 'http_client.py':
                         print(f'Error: httpx import found in {file_path}')
-                        print('httpx should only be imported in httpClient.py')
+                        print('httpx should only be imported in http_client.py')
                         return False
     return True
 

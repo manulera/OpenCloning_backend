@@ -17,7 +17,7 @@ import io
 import warnings
 from Bio.SeqIO.InsdcIO import GenBankIterator, GenBankScanner
 import re
-from .httpClient import get_http_client, ConnectError, TimeoutException
+from .http_client import get_http_client, ConnectError, TimeoutException
 from .ncbi_requests import get_genbank_sequence
 
 
