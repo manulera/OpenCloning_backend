@@ -9,19 +9,6 @@ from fastapi import HTTPException
 import unittest
 
 
-def test_empty_get_assembly_accession_from_sequence_accession():
-    # For accessions that are not linked to assemblies
-    assert [] == ncbi_requests.get_assembly_accession_from_sequence_accession('DQ208311.2')
-
-
-@pytest.mark.xfail(reason='waiting on https://github.com/ncbi/datasets/issues/380#issuecomment-2231142816')
-def test_get_assembly_accession_from_sequence_accession():
-    # For accessions that are linked to assemblies
-    assert ['GCF_000002945.2', 'GCF_000002945.1'] == ncbi_requests.get_assembly_accession_from_sequence_accession(
-        'NC_003424.3'
-    )
-
-
 class NcbiAsyncRequestsTest(unittest.IsolatedAsyncioTestCase):
 
     @respx.mock
@@ -83,3 +70,15 @@ class NcbiAsyncRequestsTest(unittest.IsolatedAsyncioTestCase):
             await ncbi_requests.get_annotation_from_locus_tag('bluh5', 'blah5')
         assert e.value.status_code == 400
         assert e.value.detail == 'multiple matches for locus_tag'
+
+    async def test_empty_get_assembly_accession_from_sequence_accession(self):
+        # For accessions that are not linked to assemblies
+        self.assertEqual([], await ncbi_requests.get_assembly_accession_from_sequence_accession('DQ208311.2'))
+
+    @pytest.mark.xfail(reason='waiting on https://github.com/ncbi/datasets/issues/380#issuecomment-2231142816')
+    async def test_get_assembly_accession_from_sequence_accession(self):
+        # For accessions that are linked to assemblies
+        self.assertEqual(
+            ['GCF_000002945.2', 'GCF_000002945.1'],
+            await ncbi_requests.get_assembly_accession_from_sequence_accession('NC_003424.3'),
+        )

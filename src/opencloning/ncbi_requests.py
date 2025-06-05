@@ -1,4 +1,3 @@
-import requests
 from fastapi import HTTPException
 from pydna.parsers import parse as pydna_parse
 from pydna.dseqrecord import Dseqrecord
@@ -14,11 +13,12 @@ async def async_get(url, headers, params=None) -> Response:
 
 
 # TODO: this does not return old assembly accessions, see https://github.com/ncbi/datasets/issues/380#issuecomment-2231142816
-def get_assembly_accession_from_sequence_accession(sequence_accession: str) -> list[str]:
+async def get_assembly_accession_from_sequence_accession(sequence_accession: str) -> list[str]:
     """Get the assembly accession from a sequence accession"""
 
     url = f'https://api.ncbi.nlm.nih.gov/datasets/v2alpha/genome/sequence_accession/{sequence_accession}/sequence_assemblies'
-    resp = requests.get(url, headers=headers)
+    async with get_http_client() as client:
+        resp = await client.get(url, headers=headers)
     data = resp.json()
     if 'accessions' in data:
         return data['accessions']
