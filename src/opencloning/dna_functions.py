@@ -7,7 +7,6 @@ from pydna.dseq import Dseq
 from .pydantic_models import TextFileSequence, AddgeneIdSource, SequenceFileFormat, WekWikGeneIdSource, SEVASource
 from opencloning_linkml.datamodel import PlannotateAnnotationReport
 from pydna.parsers import parse as pydna_parse
-import requests
 from bs4 import BeautifulSoup
 import regex
 from Bio.SeqFeature import SimpleLocation, Location
@@ -18,7 +17,7 @@ import io
 import warnings
 from Bio.SeqIO.InsdcIO import GenBankIterator, GenBankScanner
 import re
-import httpx
+from .httpClient import get_http_client, ConnectError, TimeoutException
 from .ncbi_requests import get_genbank_sequence
 
 
@@ -72,7 +71,7 @@ async def get_sequences_from_file_url(
     url: str, format: SequenceFileFormat = SequenceFileFormat('genbank')
 ) -> list[Dseqrecord]:
     # TODO once pydna parse is fixed it should handle urls that point to non-gb files
-    async with httpx.AsyncClient() as client:
+    async with get_http_client() as client:
         resp = await client.get(url)
 
     if resp.status_code != 200:
@@ -83,8 +82,9 @@ async def get_sequences_from_file_url(
         return custom_file_parser(io.StringIO(resp.text), format)
 
 
-def get_sequence_from_snagene_url(url: str) -> Dseqrecord:
-    resp = requests.get(url)
+async def get_sequence_from_snapgene_url(url: str) -> Dseqrecord:
+    async with get_http_client() as client:
+        resp = await client.get(url)
     # Check that resp.content is not empty
     if len(resp.content) == 0:
         raise HTTPError(url, 404, 'invalid snapgene id', 'invalid snapgene id', None)
@@ -96,7 +96,7 @@ def get_sequence_from_snagene_url(url: str) -> Dseqrecord:
 async def request_from_addgene(source: AddgeneIdSource) -> tuple[Dseqrecord, AddgeneIdSource]:
 
     url = f'https://www.addgene.org/{source.repository_id}/sequences/'
-    async with httpx.AsyncClient() as client:
+    async with get_http_client() as client:
         resp = await client.get(url)
     if resp.status_code == 404:
         raise HTTPError(url, 404, 'wrong addgene id', 'wrong addgene id', None)
@@ -150,7 +150,7 @@ async def request_from_addgene(source: AddgeneIdSource) -> tuple[Dseqrecord, Add
 
 async def request_from_wekwikgene(source: WekWikGeneIdSource) -> tuple[Dseqrecord, WekWikGeneIdSource]:
     url = f'https://wekwikgene.wllsb.edu.cn/plasmids/{source.repository_id}'
-    async with httpx.AsyncClient() as client:
+    async with get_http_client() as client:
         resp = await client.get(url)
     if resp.status_code == 404:
         raise HTTPError(url, 404, 'invalid wekwikgene id', 'invalid wekwikgene id', None)
@@ -333,10 +333,10 @@ def custom_file_parser(
 
 async def get_sequence_from_euroscarf_url(plasmid_id: str) -> Dseqrecord:
     url = f'http://www.euroscarf.de/plasmid_details.php?accno={plasmid_id}'
-    async with httpx.AsyncClient() as client:
+    async with get_http_client() as client:
         try:
             resp = await client.get(url)
-        except httpx.ConnectError as e:
+        except ConnectError as e:
             raise HTTPError(url, 504, 'could not connect to euroscarf', 'could not connect to euroscarf', None) from e
     # I don't think this ever happens
     if resp.status_code != 200:
@@ -365,7 +365,7 @@ async def get_sequence_from_euroscarf_url(plasmid_id: str) -> Dseqrecord:
 async def annotate_with_plannotate(
     file_content: str, file_name: str, url: str, timeout: int = 20
 ) -> tuple[Dseqrecord, PlannotateAnnotationReport, str]:
-    async with httpx.AsyncClient() as client:
+    async with get_http_client() as client:
         try:
             response = await client.post(
                 url,
@@ -379,9 +379,9 @@ async def annotate_with_plannotate(
             dseqr = custom_file_parser(io.StringIO(data['gb_file']), 'genbank')[0]
             report = [PlannotateAnnotationReport.model_validate(r) for r in data['report']]
             return dseqr, report, data['version']
-        except httpx.TimeoutException as e:
+        except TimeoutException as e:
             raise HTTPError(url, 504, 'plannotate server timeout', 'plannotate server timeout', None) from e
-        except httpx.ConnectError as e:
+        except ConnectError as e:
             raise HTTPError(
                 url, 500, 'cannot connect to plannotate server', 'cannot connect to plannotate server', None
             ) from e

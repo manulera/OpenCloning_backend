@@ -3,7 +3,6 @@ from pydantic import create_model
 import io
 import warnings
 import asyncio
-import httpx
 from starlette.responses import RedirectResponse
 from Bio import BiopythonParserWarning
 from typing import Annotated
@@ -31,13 +30,14 @@ from ..dna_functions import (
     request_from_addgene,
     request_from_wekwikgene,
     get_sequences_from_file_url,
-    get_sequence_from_snagene_url,
+    get_sequence_from_snapgene_url,
     custom_file_parser,
     get_sequence_from_euroscarf_url,
     get_seva_plasmid,
 )
 from .. import request_examples
 from .. import ncbi_requests
+from ..httpClient import ConnectError
 
 
 router = get_router()
@@ -262,7 +262,7 @@ async def get_from_repository_id_genbank(source: RepositoryIdSource):
         if seq_length > 100000:
             raise HTTPException(400, 'sequence is too long (max 100000 bp)')
         seq = await ncbi_requests.get_genbank_sequence(source.repository_id)
-    except httpx.ConnectError as exception:
+    except ConnectError as exception:
         raise HTTPException(504, f'Unable to connect to NCBI: {exception}')
 
     return {'sequences': [format_sequence_genbank(seq, source.output_name)], 'sources': [source.model_copy()]}
@@ -279,7 +279,7 @@ async def get_from_repository_id_addgene(source: AddgeneIdSource):
         dseq, out_source = await request_from_addgene(source)
     except HTTPError as exception:
         repository_id_http_error_handler(exception, source)
-    except httpx.ConnectError:
+    except ConnectError:
         raise HTTPException(504, 'unable to connect to Addgene')
 
     return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [out_source]}
@@ -296,7 +296,7 @@ async def get_from_repository_id_wekwikgene(source: WekWikGeneIdSource):
         dseq, out_source = await request_from_wekwikgene(source)
     except HTTPError as exception:
         repository_id_http_error_handler(exception, source)
-    except httpx.ConnectError:
+    except ConnectError:
         raise HTTPException(504, 'unable to connect to WekWikGene')
     return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [out_source]}
 
@@ -332,7 +332,7 @@ async def get_from_repository_id_snapgene(
     try:
         plasmid_set, plasmid_name = source.repository_id.split('/')
         url = f'https://www.snapgene.com/local/fetch.php?set={plasmid_set}&plasmid={plasmid_name}'
-        dseq = get_sequence_from_snagene_url(url)
+        dseq = await get_sequence_from_snapgene_url(url)
         # Unless a name is provided, we use the plasmid name from snapgene
         if source.output_name is None:
             source.output_name = plasmid_name
@@ -467,7 +467,7 @@ async def get_from_repository_id_seva(source: SEVASource):
         return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [source]}
     except HTTPError as exception:
         repository_id_http_error_handler(exception, source)
-    except httpx.ConnectError:
+    except ConnectError:
         raise HTTPException(504, 'unable to connect to SEVA')
     except Exception as exception:
         raise HTTPException(400, f'Error parsing file: {exception}')

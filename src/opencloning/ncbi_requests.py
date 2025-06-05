@@ -1,16 +1,16 @@
 import requests
 from fastapi import HTTPException
 from pydna.parsers import parse as pydna_parse
-from httpx import AsyncClient, Response
 from pydna.dseqrecord import Dseqrecord
 from .app_settings import settings
+from .httpClient import get_http_client, Response
 
 headers = None if settings.NCBI_API_KEY is None else {'api_key': settings.NCBI_API_KEY}
 
 
 async def async_get(url, headers, params=None) -> Response:
-    async with AsyncClient(timeout=20.0) as client:
-        return await client.get(url, headers=headers, params=params)
+    async with get_http_client() as client:
+        return await client.get(url, headers=headers, params=params, timeout=20.0)
 
 
 # TODO: this does not return old assembly accessions, see https://github.com/ncbi/datasets/issues/380#issuecomment-2231142816

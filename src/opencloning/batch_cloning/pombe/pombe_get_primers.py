@@ -1,12 +1,12 @@
 from bs4 import BeautifulSoup
 import asyncio
-from httpx import AsyncClient, Response
 import re
 import os
 import argparse
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
+from ...httpClient import get_http_client, Response
 
 default_settings_primer_design = {
     'length': 80,
@@ -25,8 +25,8 @@ default_settings_primer_design = {
 
 
 async def async_post(url, headers, data, params=None) -> Response:
-    async with AsyncClient(timeout=20.0) as client:
-        return await client.post(url, headers=headers, data=data, params=params)
+    async with get_http_client() as client:
+        return await client.post(url, headers=headers, data=data, params=params, timeout=20.0)
 
 
 async def get_primers(gene):
