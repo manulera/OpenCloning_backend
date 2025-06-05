@@ -81,10 +81,12 @@ COPY --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
 COPY --from=builder /usr/local/bin/mars /usr/local/bin/mars
 COPY --from=builder /usr/local/bin/mafft /usr/local/bin/mafft
 
+COPY ./src ./src
 ENV PATH="/usr/local/bin/mafft/bin:$VIRTUAL_ENV/bin:$PATH"
 # For example, ROOT_PATH="/syc"
 ENV ROOT_PATH=""
+ENV USE_HTTPS=false
 
-COPY ./src ./src
-# Only add --root-path if ROOT_PATH is not empty, otherwise uvicorn will throw an error
-CMD uvicorn opencloning.main:app --host 0.0.0.0 --port 8000 ${ROOT_PATH:+--root-path ${ROOT_PATH}}
+COPY ./docker_entrypoint.sh ./docker_entrypoint.sh
+
+CMD ["sh", "./docker_entrypoint.sh"]
