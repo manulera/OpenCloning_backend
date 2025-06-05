@@ -17,6 +17,8 @@ class TestAppSettings(unittest.TestCase):
             'ALLOWED_ORIGINS': os.getenv('ALLOWED_ORIGINS'),
             'PLANNOTATE_URL': os.getenv('PLANNOTATE_URL'),
             'PLANNOTATE_TIMEOUT': os.getenv('PLANNOTATE_TIMEOUT'),
+            'PROXY_URL': os.getenv('PROXY_URL'),
+            'PROXY_CERT_FILE': os.getenv('PROXY_CERT_FILE'),
         }
 
     def tearDown(self):
@@ -38,6 +40,8 @@ class TestAppSettings(unittest.TestCase):
         self.assertEqual(app_settings.settings.ALLOWED_ORIGINS, ['http://localhost:3000', 'http://localhost:5173'])
         self.assertEqual(app_settings.settings.PLANNOTATE_URL, None)
         self.assertEqual(app_settings.settings.PLANNOTATE_TIMEOUT, 20)
+        self.assertEqual(app_settings.settings.PROXY_URL, None)
+        self.assertEqual(app_settings.settings.PROXY_CERT_FILE, None)
 
     def test_settings_from_env(self):
         monkeypatch = pytest.MonkeyPatch()
@@ -48,6 +52,8 @@ class TestAppSettings(unittest.TestCase):
         monkeypatch.setenv('ALLOWED_ORIGINS', 'hello,bye')
         monkeypatch.setenv('PLANNOTATE_URL', 'http://dummy/url')
         monkeypatch.setenv('PLANNOTATE_TIMEOUT', '30')
+        monkeypatch.setenv('PROXY_URL', 'http://dummy/url')
+        monkeypatch.setenv('PROXY_CERT_FILE', 'dummy/cert.pem')
 
         reload(app_settings)
 
@@ -58,6 +64,8 @@ class TestAppSettings(unittest.TestCase):
         self.assertEqual(app_settings.settings.ALLOWED_ORIGINS, ['hello', 'bye'])
         self.assertEqual(app_settings.settings.PLANNOTATE_URL, 'http://dummy/url/')  # Trailing slash added
         self.assertEqual(app_settings.settings.PLANNOTATE_TIMEOUT, 30)
+        self.assertEqual(app_settings.settings.PROXY_URL, 'http://dummy/url')
+        self.assertEqual(app_settings.settings.PROXY_CERT_FILE, 'dummy/cert.pem')
 
         # Test boolean inputs
         monkeypatch.setenv('SERVE_FRONTEND', 'True')
