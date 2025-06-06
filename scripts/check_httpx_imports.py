@@ -17,14 +17,21 @@ def check_file(file_path):
 
     # Check for httpx imports
     for node in ast.walk(tree):
-        if isinstance(node, (ast.Import, ast.ImportFrom)):
-            for name in node.names:
-                if name.name == 'httpx':
-                    # Only allow imports in http_client.py
-                    if file_path.name != 'http_client.py':
-                        print(f'Error: httpx import found in {file_path}')
-                        print('httpx should only be imported in http_client.py')
+        if isinstance(node, (ast.Import, ast.ImportFrom)) and hasattr(node, 'module'):
+            if node.module == 'httpx':
+                # Only allow imports in http_client.py
+                if file_path.name != 'http_client.py':
+                    print(f'Error: httpx import found in {file_path}')
+                    print('httpx should only be imported in http_client.py')
+                    return False
+            elif node.module == 'http_client':
+                allowed_imports = {'get_http_client', 'ConnectError', 'TimeoutException', 'Response'}
+                for name in node.names:
+                    if name.name not in allowed_imports:
+                        print(f'Error: import of {name.name} found in {file_path}')
+                        print(f'Allowed imports: {", ".join(allowed_imports)}')
                         return False
+
     return True
 
 
