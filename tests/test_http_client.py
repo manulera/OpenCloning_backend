@@ -38,5 +38,7 @@ class TestHttpClientProxy(unittest.IsolatedAsyncioTestCase):
         # provide invalid path and test the error
         MonkeyPatch().setenv('PROXY_CERT_FILE', 'invalid_path')
         reload(app_settings)
+        reload(http_client)
         with self.assertRaises(FileNotFoundError):
-            reload(http_client)
+            async with http_client.get_http_client():
+                pass
