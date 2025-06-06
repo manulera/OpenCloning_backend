@@ -21,8 +21,7 @@ jobs:
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
           images: manulera/opencloningbackend
-      - name: Build and push Docker image (release)
-        if: github.event_name == 'release'
+      - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -32,6 +31,15 @@ jobs:
             manulera/opencloningbackend:${{ github.ref_name }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: PACKAGE_VERSION=${{ github.ref_name }}
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: manulera/opencloningbackend:latest
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
   publish_to_pypi:
     runs-on: ubuntu-latest
@@ -47,7 +55,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: 3.12
 
       - name: Install Poetry
         run: |
