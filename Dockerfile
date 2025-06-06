@@ -17,16 +17,13 @@ RUN cd mafft-7.525-without-extensions/core && \
     make install
 
 # Build MARS from source
-# RUN wget https://github.com/manulera/MARS/archive/refs/tags/v0.2.tar.gz && \
-# tar -xzf v0.2.tar.gz && \
-# cd MARS-0.2 && \
-# ./pre-install.sh && \
-# make -f Makefile && \
-# mv mars /usr/local/bin/mars
+RUN wget https://github.com/manulera/MARS/archive/refs/tags/v0.2.tar.gz && \
+tar -xzf v0.2.tar.gz && \
+cd MARS-0.2 && \
+./pre-install.sh && \
+make -f Makefile && \
+mv mars /usr/local/bin/mars
 
-RUN wget https://github.com/manulera/MARS/releases/download/v0.2/mars-Debian-Bookworm && \
-    chmod +x mars-Debian-Bookworm && \
-    mv mars-Debian-Bookworm /usr/local/bin/mars
 
 RUN useradd -ms /bin/bash backend
 USER backend
