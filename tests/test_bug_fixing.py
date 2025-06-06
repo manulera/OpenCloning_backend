@@ -5,6 +5,7 @@ import glob
 import shutil
 from opencloning.bug_fixing.backend_v0_3 import main as fix_backend_v0_3_script
 import json
+from opencloning._version import __version__
 
 test_files_dir = os.path.join(os.path.dirname(__file__), 'test_files', 'bug_fixing')
 
@@ -48,7 +49,7 @@ class TestBugFixing(unittest.TestCase):
                     self.assertTrue(os.path.exists(fixed_path))
                     with open(fixed_path, 'r') as f:
                         data = json.load(f)
-                    self.assertEqual(data['backend_version'], '0.3')
+                    self.assertEqual(data['backend_version'], __version__)
 
                 # Tests which source ids are expected to be transformed into templates
                 if 'pcr_spanning_origin' in file_path:

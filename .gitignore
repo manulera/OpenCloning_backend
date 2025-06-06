@@ -24,3 +24,6 @@ batch_cloning_output/
 dist/
 
 bin/
+
+# dummy certs for testing
+certs/

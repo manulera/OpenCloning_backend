@@ -16,12 +16,11 @@ repository = "https://github.com/manulera/OpenCloning_backend"
 [tool.poetry.dependencies]
 beautifulsoup4 = "^4.11.1"
 fastapi = "*"
-httpx = "^0.25.0"
+httpx = "^0.28.1"
 python = "^3.11"
 python-multipart = "*"
 uvicorn = "*"
 pydna = "5.5.0"
-requests = "^2.31.0"
 regex = "^2023.10.3"
 pydantic = "^2.7.1"
 pandas = "^2.2.3"
@@ -45,7 +44,7 @@ pytest = "8.3.4"
 pre-commit = "^3.6.2"
 pytest-cov = "^4.1.0"
 pytest-rerunfailures = "^14.0"
-respx = "^0.21.1"
+respx = "^0.22.0"
 
 
 [tool.poetry.group.ipython.dependencies]

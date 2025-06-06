@@ -11,6 +11,7 @@ import os
 
 from opencloning.dna_functions import format_sequence_genbank, read_dsrecord_from_json, annotate_with_plannotate
 import opencloning.app_settings as app_settings
+import opencloning.http_client as http_client
 import opencloning.endpoints.annotation as annotation_endpoints
 import opencloning.main as _main
 from opencloning.pydantic_models import (
@@ -23,13 +24,16 @@ test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
 client = TestClient(_main.app)
 
+dummy_url = 'http://dummy/url'
+
 
 class PlannotateTest(unittest.TestCase):
     def setUp(self):
         # Has to be imported here to get the right environment variable
-        pytest.MonkeyPatch().setenv('PLANNOTATE_URL', 'http://dummy/url')
+        pytest.MonkeyPatch().setenv('PLANNOTATE_URL', dummy_url)
 
         reload(app_settings)
+        reload(http_client)
         reload(annotation_endpoints)
         reload(_main)
         self.client = TestClient(_main.app)
@@ -37,6 +41,7 @@ class PlannotateTest(unittest.TestCase):
     def tearDown(self):
         pytest.MonkeyPatch().setenv('PLANNOTATE_URL', '')
         reload(app_settings)
+        reload(http_client)
         reload(annotation_endpoints)
         reload(_main)
 
@@ -48,7 +53,7 @@ class PlannotateTest(unittest.TestCase):
         seq = format_sequence_genbank(seq)
         mock_response_success = json.load(open(f'{test_files}/planottate/mock_response_success.json'))
         # Mock the HTTPX GET request
-        respx.post('http://dummy/url/annotate').respond(200, json=mock_response_success)
+        respx.post(f'{dummy_url}/annotate').respond(200, json=mock_response_success)
 
         source = AnnotationSource(id=0, annotation_tool='plannotate')
         response = self.client.post(
@@ -67,7 +72,7 @@ class PlannotateTest(unittest.TestCase):
 
     @respx.mock
     def test_plannotate_down(self):
-        respx.post('http://dummy/url/annotate').mock(side_effect=httpx.ConnectError('Connection error'))
+        respx.post(f'{dummy_url}/annotate').mock(side_effect=httpx.ConnectError('Connection error'))
         seq = Dseqrecord('aaa')
         seq = format_sequence_genbank(seq)
         source = AnnotationSource(id=0, annotation_tool='plannotate')
@@ -78,7 +83,7 @@ class PlannotateTest(unittest.TestCase):
 
     @respx.mock
     def test_plannotate_timeout(self):
-        respx.post('http://dummy/url/annotate').mock(side_effect=httpx.TimeoutException('Timeout error'))
+        respx.post(f'{dummy_url}/annotate').mock(side_effect=httpx.TimeoutException('Timeout error'))
         seq = Dseqrecord('aaa')
         seq = format_sequence_genbank(seq)
         source = AnnotationSource(id=0, annotation_tool='plannotate')
@@ -89,13 +94,30 @@ class PlannotateTest(unittest.TestCase):
 
 
 class PlannotateAsyncTest(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        # Has to be imported here to get the right environment variable
+        pytest.MonkeyPatch().setenv('PLANNOTATE_URL', dummy_url)
+
+        reload(app_settings)
+        reload(http_client)
+        reload(annotation_endpoints)
+        reload(_main)
+        self.client = TestClient(_main.app)
+
+    def tearDown(self):
+        pytest.MonkeyPatch().setenv('PLANNOTATE_URL', '')
+        reload(app_settings)
+        reload(http_client)
+        reload(annotation_endpoints)
+        reload(_main)
+
     @respx.mock
     async def test_plannotate_other_error(self):
         # This is tested here because it's impossible to send a malformed request from the backend
-        respx.post('http://dummy/url/annotate').respond(400, json={'error': 'bad request'})
+        respx.post(f'{dummy_url}/annotate').respond(400, json={'error': 'bad request'})
 
         with pytest.raises(HTTPError) as e:
-            await annotate_with_plannotate('hello', 'hello.blah', 'http://dummy/url/annotate')
+            await annotate_with_plannotate('hello', 'hello.blah', f'{dummy_url}/annotate')
         self.assertEqual(e.value.code, 400)
 
 

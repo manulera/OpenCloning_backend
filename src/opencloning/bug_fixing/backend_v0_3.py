@@ -12,7 +12,6 @@ from ..pydantic_models import (
 from .._version import __version__
 import json
 import os
-from packaging import version
 import copy
 
 
@@ -96,7 +95,7 @@ def main(file_path: str):
         cs = fix_backend_v0_3(data)
 
         if cs is not None:
-            cs.backend_version = __version__ if version.parse(__version__) > version.parse('0.3') else '0.3'
+            cs.backend_version = __version__
             with open(new_file_path, 'w') as f:
                 f.write(cs.model_dump_json(indent=2, exclude_none=True))
 

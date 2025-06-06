@@ -28,6 +28,9 @@ PLANNOTATE_TIMEOUT = int(os.environ['PLANNOTATE_TIMEOUT']) if 'PLANNOTATE_TIMEOU
 if PLANNOTATE_URL is not None and not PLANNOTATE_URL.endswith('/'):
     PLANNOTATE_URL += '/'
 
+PROXY_URL = os.environ.get('PROXY_URL')
+PROXY_CERT_FILE = os.environ.get('PROXY_CERT_FILE')
+
 
 class Settings(BaseModel):
     SERVE_FRONTEND: bool
@@ -37,6 +40,9 @@ class Settings(BaseModel):
     ALLOWED_ORIGINS: list[str]
     PLANNOTATE_URL: str | None
     PLANNOTATE_TIMEOUT: int
+    PROXY_URL: str | None
+    # Must be a full path to the proxy certificate file
+    PROXY_CERT_FILE: str | None
 
 
 settings = Settings(
@@ -47,4 +53,6 @@ settings = Settings(
     ALLOWED_ORIGINS=ALLOWED_ORIGINS,
     PLANNOTATE_URL=PLANNOTATE_URL,
     PLANNOTATE_TIMEOUT=PLANNOTATE_TIMEOUT,
+    PROXY_URL=PROXY_URL,
+    PROXY_CERT_FILE=PROXY_CERT_FILE,
 )

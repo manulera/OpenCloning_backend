@@ -17,16 +17,13 @@ RUN cd mafft-7.525-without-extensions/core && \
     make install
 
 # Build MARS from source
-# RUN wget https://github.com/manulera/MARS/archive/refs/tags/v0.2.tar.gz && \
-# tar -xzf v0.2.tar.gz && \
-# cd MARS-0.2 && \
-# ./pre-install.sh && \
-# make -f Makefile && \
-# mv mars /usr/local/bin/mars
+RUN wget https://github.com/manulera/MARS/archive/refs/tags/v0.2.tar.gz && \
+tar -xzf v0.2.tar.gz && \
+cd MARS-0.2 && \
+./pre-install.sh && \
+make -f Makefile && \
+mv mars /usr/local/bin/mars
 
-RUN wget https://github.com/manulera/MARS/releases/download/v0.2/mars-Debian-Bookworm && \
-    chmod +x mars-Debian-Bookworm && \
-    mv mars-Debian-Bookworm /usr/local/bin/mars
 
 RUN useradd -ms /bin/bash backend
 USER backend
@@ -81,10 +78,12 @@ COPY --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
 COPY --from=builder /usr/local/bin/mars /usr/local/bin/mars
 COPY --from=builder /usr/local/bin/mafft /usr/local/bin/mafft
 
+COPY ./src ./src
 ENV PATH="/usr/local/bin/mafft/bin:$VIRTUAL_ENV/bin:$PATH"
 # For example, ROOT_PATH="/syc"
 ENV ROOT_PATH=""
+ENV USE_HTTPS=false
 
-COPY ./src ./src
-# Only add --root-path if ROOT_PATH is not empty, otherwise uvicorn will throw an error
-CMD uvicorn opencloning.main:app --host 0.0.0.0 --port 8000 ${ROOT_PATH:+--root-path ${ROOT_PATH}}
+COPY ./docker_entrypoint.sh ./docker_entrypoint.sh
+
+CMD ["sh", "./docker_entrypoint.sh"]
