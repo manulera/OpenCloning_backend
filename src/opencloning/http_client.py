@@ -38,17 +38,16 @@ class WhiteListTransport(AsyncHTTPTransport):
         raise RequestError(f'Request to {request.url} is not whitelisted')
 
 
-transport = WhiteListTransport()
-
-ctx = None
 proxy = None
 if settings.PROXY_URL:
-    ctx = ssl.create_default_context(cafile=certifi.where())
-    # See https://www.python-httpx.org/advanced/ssl/
-    if settings.PROXY_CERT_FILE:
-        ctx.load_verify_locations(cafile=settings.PROXY_CERT_FILE)
     proxy = settings.PROXY_URL
 
 
 def get_http_client():
-    return AsyncClient(proxy=proxy, verify=ctx, transport=transport)
+    transport = WhiteListTransport()
+    client_ctx = None
+    if proxy is not None:
+        client_ctx = ssl.create_default_context(cafile=certifi.where())
+        if settings.PROXY_CERT_FILE:
+            client_ctx.load_verify_locations(cafile=settings.PROXY_CERT_FILE)
+    return AsyncClient(proxy=proxy, verify=client_ctx, transport=transport)
