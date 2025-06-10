@@ -38,5 +38,13 @@ class TestHttpClientProxy(unittest.IsolatedAsyncioTestCase):
         # provide invalid path and test the error
         MonkeyPatch().setenv('PROXY_CERT_FILE', 'invalid_path')
         reload(app_settings)
+        reload(http_client)
         with self.assertRaises(FileNotFoundError):
-            reload(http_client)
+            async with http_client.get_http_client():
+                pass
+
+    async def test_whitelist(self):
+        with self.assertRaises(http_client.RequestError) as e:
+            async with http_client.get_http_client() as client:
+                await client.get('https://dummy.com')
+        self.assertIn('not whitelisted', str(e.exception))
