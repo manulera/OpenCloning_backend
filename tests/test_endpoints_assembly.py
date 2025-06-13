@@ -608,9 +608,9 @@ class GibsonAssemblyTest(unittest.TestCase):
     def test_gibson_assembly(self):
         # A circular one
         fragments = [
-            Dseqrecord('TTTTacgatAAtgctccCCCC', circular=False),
-            Dseqrecord('CCCCtcatGGGG', circular=False),
-            Dseqrecord('GGGGatataTTTT', circular=False),
+            Dseqrecord('TATTTTTTacgatAAtgctccCCCCCCGC', circular=False),
+            Dseqrecord('CCCCCCGCtcatGGGAGGGG', circular=False),
+            Dseqrecord('GGGAGGGGatataTATTTTTT', circular=False),
         ]
 
         json_fragments = [format_sequence_genbank(f) for f in fragments]
@@ -628,14 +628,13 @@ class GibsonAssemblyTest(unittest.TestCase):
             'InVivoAssemblySource',
         ]:
             data['source']['type'] = cls_name
-            response = client.post('/gibson_assembly', json=data, params={'minimal_homology': 4})
+            response = client.post('/gibson_assembly', json=data, params={'minimal_homology': 8})
             self.assertEqual(response.status_code, 200)
             payload = response.json()
             sequences = [read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']]
             self.assertEqual(payload['sources'][0]['type'], cls_name)
-            self.assertEqual(len(sequences), 2)
-            self.assertEqual(str(sequences[0].seq), 'TTTTacgatAAtgctccCCCCtcatGGGGatata'.upper())
-            self.assertEqual(str(sequences[1].seq), 'TTTTacgatAAtgctccCCCCatgaGGGGatata'.upper())
+            self.assertEqual(len(sequences), 1)
+            self.assertEqual(str(sequences[0].seq), 'TATTTTTTacgatAAtgctccCCCCCCGCtcatGGGAGGGGatata'.upper())
 
         # Circularisation works
         f1 = Dseqrecord('AGAGACCaaaAGAGACC')
