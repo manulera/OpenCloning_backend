@@ -745,7 +745,14 @@ class Assembly:
     Examples
     --------
 
-    from assembly2 import Assembly, example_fragments, assembly2str
+    from assembly2 import Assembly, assembly2str
+    from pydna.dseqrecord import Dseqrecord
+
+    example_fragments = (
+        Dseqrecord('AacgatCAtgctcc', name='a'),
+        Dseqrecord('TtgctccTAAattctgc', name='b'),
+        Dseqrecord('CattctgcGAGGacgatG', name='c'),
+    )
 
     asm = Assembly(example_fragments, limit=5, use_fragment_order=False)
     print('Linear ===============')
@@ -1337,22 +1344,3 @@ class SingleFragmentAssembly(Assembly):
 
     def get_linear_assemblies(self):
         raise NotImplementedError('Linear assembly does not make sense')
-
-
-example_fragments = (
-    _Dseqrecord('AacgatCAtgctcc', name='a'),
-    _Dseqrecord('TtgctccTAAattctgc', name='b'),
-    _Dseqrecord('CattctgcGAGGacgatG', name='c'),
-)
-
-
-'CattctgcGAGGacgatCAtgctcc'
-
-linear_results = (
-    _Dseqrecord('AacgatCAtgctccTAAattctgcGAGGacgatG', name='abc'),
-    _Dseqrecord('ggagcaTGatcgtCCTCgcagaatG', name='ac_rc'),
-    _Dseqrecord('AacgatG', name='ac'),
-)
-
-
-circular_results = (_Dseqrecord('acgatCAtgctccTAAattctgcGAGG', name='abc', circular=True),)

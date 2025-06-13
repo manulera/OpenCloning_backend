@@ -681,6 +681,44 @@ class GibsonAssemblyTest(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertTrue('Too many possible paths' in response.json()['detail'])
 
+    def test_in_vivo_assembly(self):
+        # in vivo assembly should use common_sub_strings and not gibson_overlap
+        overlap1 = 'AACAAAGTCAATTTGGCGAT'
+        overlap2 = 'TTCTAGAGAACTTCCTAAGGT'
+        overlap3 = 'TTTGCAAGCAAAAAGAAGTT'
+
+        fragments = [
+            Dseqrecord(f'tc{overlap1}acgatAAtgctcc{overlap2}c', circular=False),  # Note the extra flanking bases
+            Dseqrecord(f'tt{overlap2}tcat{overlap3}cccccc', circular=False),
+            Dseqrecord(f'aa{overlap3}atata{overlap1}tttt', circular=False),
+        ]
+
+        json_fragments = [format_sequence_genbank(f) for f in fragments]
+        for i, f in enumerate(json_fragments):
+            f.id = i + 1
+
+        source = GibsonAssemblySource(id=0)
+
+        # Only in vivo assembly should work
+        data = {'source': source.model_dump(), 'sequences': [f.model_dump() for f in json_fragments]}
+        for cls_name in [
+            'GibsonAssemblySource',
+            'OverlapExtensionPCRLigationSource',
+            'InFusionSource',
+            'InVivoAssemblySource',
+        ]:
+            data['source']['type'] = cls_name
+            response = client.post('/gibson_assembly', json=data, params={'minimal_homology': 20})
+            if cls_name != 'InVivoAssemblySource':
+                self.assertEqual(response.status_code, 400)
+                continue
+            self.assertEqual(response.status_code, 200)
+            payload = response.json()
+            sequences = [read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']]
+            self.assertEqual(payload['sources'][0]['type'], cls_name)
+            self.assertEqual(len(sequences), 1)
+            self.assertEqual(str(sequences[0].seq), f'{overlap1}acgatAAtgctcc{overlap2}tcat{overlap3}atata'.upper())
+
     def test_equivalent_classes(self):
         pass
 
