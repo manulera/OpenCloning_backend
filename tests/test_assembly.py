@@ -18,14 +18,30 @@ import os
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
 
+example_fragments = (
+    Dseqrecord('AacgatCAtgctcc', name='a'),
+    Dseqrecord('TtgctccTAAattctgc', name='b'),
+    Dseqrecord('CattctgcGAGGacgatG', name='c'),
+)
+
+
+linear_results = (
+    Dseqrecord('AacgatCAtgctccTAAattctgcGAGGacgatG', name='abc'),
+    Dseqrecord('ggagcaTGatcgtCCTCgcagaatG', name='ac_rc'),
+    Dseqrecord('AacgatG', name='ac'),
+)
+
+circular_results = (Dseqrecord('acgatCAtgctccTAAattctgcGAGG', name='abc', circular=True),)
+
+
 def test_built():
 
-    asm = assembly.Assembly(assembly.example_fragments, limit=5)
+    asm = assembly.Assembly(example_fragments, limit=5)
     lin = sorted(asm.assemble_linear(), key=len)
     crc = asm.assemble_circular()
 
-    assert [dseqr.seq for dseqr in lin] == [dseqr.seq for dseqr in sorted(assembly.linear_results, key=len)]
-    assert [c.seq.seguid() for c in crc] == [c.seq.seguid() for c in assembly.circular_results]
+    assert [dseqr.seq for dseqr in lin] == [dseqr.seq for dseqr in sorted(linear_results, key=len)]
+    assert [c.seq.seguid() for c in crc] == [c.seq.seguid() for c in circular_results]
 
 
 def test_new_assembly():

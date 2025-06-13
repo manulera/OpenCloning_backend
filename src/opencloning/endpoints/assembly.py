@@ -39,6 +39,7 @@ from ..assembly2 import (
     blunt_overlap,
     combine_algorithms,
     annotate_primer_binding_sites,
+    common_sub_strings,
 )
 
 from ..gateway import gateway_overlap, find_gateway_sites, annotate_gateway_sites
@@ -417,8 +418,9 @@ async def gibson_assembly(
     def create_source(a, is_circular):
         return source.__class__.from_assembly(assembly=a, circular=is_circular, id=source.id, fragments=fragments)
 
+    algo = gibson_overlap if not isinstance(source, InVivoAssemblySource) else common_sub_strings
     resp = generate_assemblies(
-        source, create_source, fragments, circular_only, gibson_overlap, False, {'limit': minimal_homology}
+        source, create_source, fragments, circular_only, algo, False, {'limit': minimal_homology}
     )
 
     if len(resp['sources']) == 0:
