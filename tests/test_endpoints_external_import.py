@@ -730,11 +730,9 @@ class EuroscarfSourceTest(unittest.TestCase):
 
 
 class IGEMSourceTest(unittest.TestCase):
-    good_url = 'https://raw.githubusercontent.com/manulera/annotated-igem-distribution/master/results/plasmids/1.gb'
+    good_url = 'https://assets.opencloning.org/annotated-igem-distribution/results/plasmids/1.gb'
     no_gb_url = 'https://blah.com/1.txt'
-    wrong_url = (
-        'https://raw.githubusercontent.com/manulera/annotated-igem-distribution/master/results/plasmids/dummy.gb'
-    )
+    wrong_url = 'https://assets.opencloning.org/annotated-igem-distribution/results/plasmids/dummy.gb'
 
     @pytest.mark.flaky(reruns=3, reruns_delay=2)
     def test_igem(self):
