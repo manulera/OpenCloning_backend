@@ -22,7 +22,7 @@ white_listed_urls = {
     r'^https://eutils.ncbi.nlm.nih.gov/entrez/eutils/',
     r'^https://www.snapgene.com/local/fetch.php',
     r'^https://benchling.com/',
-    r'^https://raw.githubusercontent.com/manulera/annotated-igem-distribution',
+    r'^https://assets.opencloning.org/annotated-igem-distribution',
     r'^http://www.euroscarf.de/',
 }
 
