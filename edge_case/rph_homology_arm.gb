@@ -1,0 +1,12 @@
+LOCUS       rph_homology_arm          96 bp    DNA     linear   SYN 16-JUN-2025
+DEFINITION  description.
+ACCESSION  21
+VERSION  21
+KEYWORDS    .
+SOURCE
+  ORGANISM  .
+            .
+ORIGIN
+        1 gtttgccagc gccgccttct gcgtcgctac aatggattcg attccccctc gggccagagc
+       61 caacaagatg agtagctctt catgggtgaa cggctc
+//

@@ -1052,6 +1052,15 @@ class Assembly:
             left_of_insertion = _location_boundaries(end_location)[0]
             if not fragment.circular and (
                 right_of_insertion > left_of_insertion
+                # The below condition is for single-site integration.
+                # The reason to use locations_overlap instead of equality is because the location might extend
+                # left of right. For example, let's take ACCGGTTT as homology arm for an integration:
+                #
+                # insert aaACCGGTTTccACCGGTTTtt
+                # genome aaACCGGTTTtt
+                #
+                # The locations of homology on the genome are [0:10] and [2:12], so not identical
+                # but they overlap.
                 or _locations_overlap(start_location, end_location, len(fragment))
             ):
                 edge_pair_index.append(i)
@@ -1061,6 +1070,54 @@ class Assembly:
 
         shift_by = (edge_pair_index[0] + 1) % len(assembly)
         return assembly[shift_by:] + assembly[:shift_by]
+
+    def format_insertion_assembly_edge_case(self, assembly):
+        """
+        Edge case from https://github.com/manulera/OpenCloning_backend/issues/329
+        """
+        same_assembly = assembly[:]
+
+        if len(assembly) != 2:
+            return same_assembly
+        ((f1, f2, loc_f1_1, loc_f2_1), (_f2, _f1, loc_f2_2, loc_f1_2)) = assembly
+
+        if f1 != _f1 or _f2 != f2:
+            return same_assembly
+
+        if loc_f2_1 == loc_f2_2 or loc_f1_2 == loc_f1_1:
+            return same_assembly
+
+        fragment1 = self.fragments[abs(f1) - 1]
+        fragment2 = self.fragments[abs(f2) - 1]
+
+        if not _locations_overlap(loc_f1_1, loc_f1_2, len(fragment1)) or not _locations_overlap(
+            loc_f2_2, loc_f2_1, len(fragment2)
+        ):
+            return same_assembly
+
+        # Sort by the first location in the edge
+        new_assembly = sorted(assembly, key=lambda x: _location_boundaries(x[2])[0])
+
+        ((f1, f2, loc_f1_1, loc_f2_1), (_f2, _f1, loc_f2_2, loc_f1_2)) = new_assembly
+
+        fragment1 = self.fragments[abs(f1) - 1]
+        if fragment1.circular:
+            return same_assembly
+
+        fragment2 = self.fragments[abs(_f1) - 1]
+        start = _location_boundaries(loc_f2_1)[0]
+        end = _location_boundaries(loc_f2_2)[1]
+        subfragment = fragment2[start:end]
+
+        new_loc_f2_1 = _shift_location(SimpleLocation(start, start + len(subfragment) // 2), 0, len(fragment2))
+        new_loc_f2_2 = _shift_location(SimpleLocation(start + len(subfragment) // 2, end), 0, len(fragment2))
+
+        new_assembly = [
+            (f1, f2, loc_f1_1, new_loc_f2_1),
+            (f2, f1, new_loc_f2_2, loc_f1_2),
+        ]
+
+        return new_assembly
 
     def get_insertion_assemblies(self, only_adjacent_edges: bool = False, max_assemblies: int = 50):
         """Assemblies that represent the insertion of a fragment or series of fragment inside a linear construct. For instance,
@@ -1088,6 +1145,8 @@ class Assembly:
         # We find cycles first
         iterator = limit_iterator(_nx.cycles.simple_cycles(self.G), 10000)
         assemblies = sum(map(lambda x: self.node_path2assembly_list(x, True), iterator), [])
+        # We format the edge case
+        assemblies = [self.format_insertion_assembly_edge_case(a) for a in assemblies]
         # We select those that contain exactly only one suitable edge
         assemblies = [b for a in assemblies if (b := self.format_insertion_assembly(a)) is not None]
         # First fragment should be in the + orientation
