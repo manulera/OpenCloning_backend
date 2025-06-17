@@ -1042,16 +1042,16 @@ class Assembly:
         edge_pair_index = list()
 
         # Pair edges with one another
-        for i, ((_u1, v1, _, start_location), (_u2, _v2, end_location, _)) in enumerate(
+        for i, ((_u1, v1, _, end_location), (_u2, _v2, start_location, _)) in enumerate(
             zip(assembly, assembly[1:] + assembly[:1])
         ):
             fragment = self.fragments[abs(v1) - 1]
             # Find the pair of edges that should be last and first  ((3, 1, [8:10], [9:11)]), (1, 2, [4:6], [0:2]) in
             # the example above. Only one of the pairs of edges should satisfy this condition for the topology to make sense.
-            right_of_insertion = _location_boundaries(start_location)[0]
-            left_of_insertion = _location_boundaries(end_location)[0]
+            left_of_insertion = _location_boundaries(start_location)[0]
+            right_of_insertion = _location_boundaries(end_location)[0]
             if not fragment.circular and (
-                right_of_insertion > left_of_insertion
+                right_of_insertion >= left_of_insertion
                 # The below condition is for single-site integration.
                 # The reason to use locations_overlap instead of equality is because the location might extend
                 # left of right. For example, let's take ACCGGTTT as homology arm for an integration:

@@ -2042,3 +2042,14 @@ def test_single_fragment_assembly_error():
 
     assert len(f.assemble_insertion()) == 0
     assert len(f.assemble_circular()) == 1
+
+
+def test_insertion_edge_case():
+    a = Dseqrecord('cccgaggggaatcgaa')
+    b = Dseqrecord('Acccgagggggaatc')
+
+    asm = assembly.Assembly([a, b], limit=5, use_all_fragments=True, use_fragment_order=False)
+
+    product_seqs = set(prod.seq for prod in asm.assemble_insertion())
+
+    print(product_seqs)

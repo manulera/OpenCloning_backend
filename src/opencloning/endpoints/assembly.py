@@ -90,6 +90,9 @@ async def crispr(
     """
     template, insert = [read_dsrecord_from_json(seq) for seq in sequences]
 
+    if template.circular:
+        raise HTTPException(400, 'Circular DNA targets are not supported for CRISPR editing.')
+
     # TODO: check input method for guide (currently as a primer)
     # TODO: support user input PAM
 
@@ -150,7 +153,8 @@ async def crispr(
         return format_known_assembly_response(source, out_sources, [template, insert])
 
     out_sequences = [
-        format_sequence_genbank(assemble([template, insert], a), source.output_name) for a in valid_assemblies
+        format_sequence_genbank(assemble([template, insert], a, is_insertion=True), source.output_name)
+        for a in valid_assemblies
     ]
     return {'sources': out_sources, 'sequences': out_sequences}
 
@@ -386,7 +390,10 @@ async def homologous_recombination(
         return format_known_assembly_response(source, out_sources, [template, insert])
 
     out_sequences = [
-        format_sequence_genbank(assemble([template, insert], a), source.output_name) for a in possible_assemblies
+        format_sequence_genbank(
+            assemble([template, insert], a, is_insertion=not template.circular), source.output_name
+        )
+        for a in possible_assemblies
     ]
 
     return {'sources': out_sources, 'sequences': out_sequences}
