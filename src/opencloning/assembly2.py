@@ -1095,26 +1095,40 @@ class Assembly:
         ):
             return same_assembly
 
-        # Sort by the first location in the edge
-        new_assembly = sorted(assembly, key=lambda x: _location_boundaries(x[2])[0])
+        # Sort to make compatible with insertion assembly
+        if _location_boundaries(loc_f1_1)[0] > _location_boundaries(loc_f1_2)[0]:
+            new_assembly = same_assembly[::-1]
+        else:
+            new_assembly = same_assembly[:]
 
         ((f1, f2, loc_f1_1, loc_f2_1), (_f2, _f1, loc_f2_2, loc_f1_2)) = new_assembly
 
         fragment1 = self.fragments[abs(f1) - 1]
         if fragment1.circular:
             return same_assembly
+        fragment2 = self.fragments[abs(f2) - 1]
 
-        fragment2 = self.fragments[abs(_f1) - 1]
-        start = _location_boundaries(loc_f2_1)[0]
-        end = _location_boundaries(loc_f2_2)[1]
-        subfragment = fragment2[start:end]
+        # Extract boundaries
+        f2_1_start, _ = _location_boundaries(loc_f2_1)
+        f2_2_start, f2_2_end = _location_boundaries(loc_f2_2)
+        f1_1_start, _ = _location_boundaries(loc_f1_1)
+        f1_2_start, f1_2_end = _location_boundaries(loc_f1_2)
 
-        new_loc_f2_1 = _shift_location(SimpleLocation(start, start + len(subfragment) // 2), 0, len(fragment2))
-        new_loc_f2_2 = _shift_location(SimpleLocation(start + len(subfragment) // 2, end), 0, len(fragment2))
+        overlap_diff = len(fragment1[f1_1_start:f1_2_end]) - len(fragment2[f2_1_start:f2_2_end])
+
+        if overlap_diff == 0:
+            assert False, 'Overlap is 0'
+
+        if overlap_diff > 0:
+            new_loc_f1_1 = _shift_location(SimpleLocation(f1_1_start, f1_2_start - overlap_diff), 0, len(fragment1))
+            new_loc_f2_1 = _shift_location(SimpleLocation(f2_1_start, f2_2_start), 0, len(fragment2))
+        else:
+            new_loc_f2_1 = _shift_location(SimpleLocation(f2_1_start, f2_2_start + overlap_diff), 0, len(fragment2))
+            new_loc_f1_1 = _shift_location(SimpleLocation(f1_1_start, f1_2_start), 0, len(fragment1))
 
         new_assembly = [
-            (f1, f2, loc_f1_1, new_loc_f2_1),
-            (f2, f1, new_loc_f2_2, loc_f1_2),
+            (f1, f2, new_loc_f1_1, new_loc_f2_1),
+            new_assembly[1],
         ]
 
         return new_assembly
