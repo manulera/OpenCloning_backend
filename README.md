@@ -55,8 +55,8 @@ poetry install
 # Install the pre-commit hooks
 pre-commit install
 
-# Activate the virtual environment
-poetry shell
+# Activate the virtual environment (used to be `poetry shell`)
+poetry env activate
 
 ```
 
