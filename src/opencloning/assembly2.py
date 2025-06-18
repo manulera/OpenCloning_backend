@@ -15,7 +15,7 @@ from pydna.seqrecord import SeqRecord as _SeqRecord
 import networkx as _nx
 import itertools as _itertools
 from Bio.SeqFeature import SimpleLocation, Location
-from .dna_utils import sum_is_sticky
+from .dna_utils import sum_is_sticky, create_location
 from Bio.Seq import reverse_complement
 from Bio.Restriction.Restriction import RestrictionBatch, AbstractCut
 import regex
@@ -156,7 +156,55 @@ def blunt_overlap(seqx: _Dseqrecord, seqy: _Dseqrecord, limit=None):
 
 
 def common_sub_strings(seqx: _Dseqrecord, seqy: _Dseqrecord, limit=25):
-    return common_sub_strings_str(str(seqx.seq).upper(), str(seqy.seq).upper(), limit)
+    query_seqx = str(seqx.seq).upper()
+    query_seqy = str(seqy.seq).upper()
+    if seqx.circular:
+        query_seqx = query_seqx * 2
+    if seqy.circular:
+        query_seqy = query_seqy * 2
+    results = common_sub_strings_str(query_seqx, query_seqy, limit)
+
+    if not seqx.circular and not seqy.circular:
+        return results
+
+    # Remove matches that start on the second copy of the sequence
+    if seqx.circular:
+        results = [r for r in results if r[0] < len(seqx)]
+    if seqy.circular:
+        results = [r for r in results if r[1] < len(seqy)]
+
+    # Trim lengths that span more than the sequence
+    if seqx.circular or seqy.circular:
+        max_match_length = min(len(seqx), len(seqy))
+        results = [(r[0], r[1], min(r[2], max_match_length)) for r in results]
+
+    # Edge case where the sequences are identical
+    if len(seqx.seq) == len(seqy.seq):
+        full_match = next((r for r in results if r[2] == len(seqx.seq)), None)
+        if full_match is not None:
+            return [full_match]
+
+    # Remove duplicate matches, see example below
+    # Let's imagine the following two sequences, where either seqy or both are circular
+    # seqx: 01234
+    # seqy: 123450, circular
+    #
+    # common_sub_strings would return [(0, 5, 5), (1, 0, 4)]
+    # Actually, (1, 0, 4) is a subset of (0, 5, 5), the part
+    # that does not span the origin. To remove matches like this,
+    # We find matches where the origin is spanned in one of the sequences
+    # only, and then remove the subset of that match that does not span the origin.
+    shifted_matches = set()
+    for x, y, length in results:
+        x_span_origin = seqx.circular and x + length > len(seqx)
+        y_span_origin = seqy.circular and y + length > len(seqy)
+        if x_span_origin and not y_span_origin:
+            shift = len(seqx) - x
+            shifted_matches.add((0, y + shift, length - shift))
+        elif not x_span_origin and y_span_origin:
+            shift = len(seqy) - y
+            shifted_matches.add((x + shift, 0, length - shift))
+    return [r for r in results if r not in shifted_matches]
 
 
 def gibson_overlap(seqx: _Dseqrecord, seqy: _Dseqrecord, limit=25):
@@ -1120,11 +1168,11 @@ class Assembly:
             assert False, 'Overlap is 0'
 
         if overlap_diff > 0:
-            new_loc_f1_1 = _shift_location(SimpleLocation(f1_1_start, f1_2_start - overlap_diff), 0, len(fragment1))
-            new_loc_f2_1 = _shift_location(SimpleLocation(f2_1_start, f2_2_start), 0, len(fragment2))
+            new_loc_f1_1 = create_location(f1_1_start, f1_2_start - overlap_diff, len(fragment1))
+            new_loc_f2_1 = create_location(f2_1_start, f2_2_start, len(fragment2))
         else:
-            new_loc_f2_1 = _shift_location(SimpleLocation(f2_1_start, f2_2_start + overlap_diff), 0, len(fragment2))
-            new_loc_f1_1 = _shift_location(SimpleLocation(f1_1_start, f1_2_start), 0, len(fragment1))
+            new_loc_f2_1 = create_location(f2_1_start, f2_2_start + overlap_diff, len(fragment2))
+            new_loc_f1_1 = create_location(f1_1_start, f1_2_start, len(fragment1))
 
         new_assembly = [
             (f1, f2, new_loc_f1_1, new_loc_f2_1),
