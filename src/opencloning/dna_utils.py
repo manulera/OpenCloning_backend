@@ -13,6 +13,8 @@ from pydna.parsers import parse
 from Bio.Align import PairwiseAligner
 from Bio.Data.IUPACData import ambiguous_dna_values as _ambiguous_dna_values
 import re
+from Bio.SeqFeature import Location, SimpleLocation
+from pydna.utils import shift_location
 
 aligner = PairwiseAligner(scoring='blastn')
 
@@ -167,3 +169,14 @@ def dseqrecord_finditer(pattern: str, seq: Dseqrecord) -> list[re.Match]:
     query = str(seq.seq) if not seq.circular else str(seq.seq) * 2
     matches = re.finditer(pattern, query)
     return (m for m in matches if m.start() <= len(seq))
+
+
+def create_location(start: int, end: int, lim: int) -> Location:
+    while start < 0:
+        start += lim
+    while end < 0:
+        end += lim
+    if end > start:
+        return SimpleLocation(start, end)
+    else:
+        return shift_location(SimpleLocation(start, end + lim), 0, lim)
