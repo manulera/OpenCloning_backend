@@ -20,15 +20,15 @@ httpx = "^0.28.1"
 python = "^3.11"
 python-multipart = "*"
 uvicorn = "*"
-pydna = "5.5.0"
-regex = "^2023.10.3"
+pydna = {git = "https://github.com/BjornFJohansson/pydna", rev = "new-assembly-model"}
+regex = "^2024.11.6"
 pydantic = "^2.7.1"
 pandas = "^2.2.3"
 openpyxl = "^3.1.5"
 pyyaml = "^6.0.2"
 opencloning-linkml = "0.3.0a0"
 primer3-py = "2.0.3"
-biopython = "1.84"
+biopython = "^1.85"
 packaging = "^25.0"
 
 [tool.poetry.group.dev.dependencies]

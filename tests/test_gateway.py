@@ -1,5 +1,5 @@
 from opencloning.gateway import gateway_overlap, find_gateway_sites
-import opencloning.assembly2 as assembly
+import pydna.assembly2 as assembly
 import glob
 from opencloning.dna_functions import custom_file_parser
 from pydna.dseqrecord import Dseqrecord

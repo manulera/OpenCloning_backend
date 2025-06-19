@@ -17,7 +17,7 @@ from opencloning.endpoints.primer_design import (
 )
 
 from pydna.parsers import parse
-from opencloning.assembly2 import Assembly, gibson_overlap
+from pydna.assembly2 import Assembly, gibson_overlap
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 

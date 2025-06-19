@@ -10,7 +10,7 @@ from pydna.dseqrecord import Dseqrecord
 from opencloning.pydantic_models import PrimerModel
 from pydna.amplify import pcr
 from pydna.parsers import parse
-from opencloning.assembly2 import Assembly, gibson_overlap
+from pydna.assembly2 import Assembly, gibson_overlap
 import pytest
 from Bio.Data.IUPACData import ambiguous_dna_values
 from Bio.Seq import reverse_complement

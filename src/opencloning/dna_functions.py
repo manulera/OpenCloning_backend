@@ -15,7 +15,7 @@ from pydna.common_sub_strings import common_sub_strings
 from Bio.SeqIO import parse as seqio_parse
 import io
 import warnings
-from Bio.SeqIO.InsdcIO import GenBankIterator, GenBankScanner
+from Bio.SeqIO.InsdcIO import GenBankScanner, GenBankIterator
 import re
 from .http_client import get_http_client, ConnectError, TimeoutException
 from .ncbi_requests import get_genbank_sequence
@@ -280,10 +280,9 @@ class MyGenBankScanner(GenBankScanner):
 
 class MyGenBankIterator(GenBankIterator):
 
-    def parse(self, handle):
-        """Start parsing the file, and return a SeqRecord generator."""
-        records = MyGenBankScanner(debug=0).parse_records(handle)
-        return records
+    def __init__(self, source):
+        super(GenBankIterator, self).__init__(source, fmt='GenBank')
+        self.records = MyGenBankScanner(debug=0).parse_records(self.stream)
 
 
 def custom_file_parser(
