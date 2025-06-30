@@ -18,9 +18,9 @@ RUN cd mafft-7.525-without-extensions/core && \
     make install
 
 # Build MARS from source
-RUN wget https://github.com/manulera/MARS/archive/refs/tags/v0.2.1.tar.gz && \
-tar -xzf v0.2.1.tar.gz && \
-cd MARS-0.2.1 && \
+RUN wget https://github.com/manulera/MARS/archive/refs/tags/v0.2.3.tar.gz && \
+tar -xzf v0.2.3.tar.gz && \
+cd MARS-0.2.3 && \
 ./pre-install.sh && \
 make -f Makefile && \
 mv mars /usr/local/bin/mars
@@ -58,32 +58,32 @@ RUN sed -i "s/^version = .*/version = \"${PACKAGE_VERSION}\"/" pyproject.toml
 
 RUN poetry install --only main
 
-# # FINAL IMAGE
-# FROM python:3.12-alpine
+# FINAL IMAGE
+FROM python:3.12-alpine
 
-# RUN apk update
-# # You need bash to run mafft and runtime libraries for MARS
-# RUN apk add bash libstdc++ libgomp libgcc
+RUN apk update
+# You need bash to run mafft and runtime libraries for MARS
+RUN apk add bash libstdc++ libgomp libgcc
 
-# # directly output things to stdout/stderr, without buffering
-# ENV PYTHONUNBUFFERED=1
+# directly output things to stdout/stderr, without buffering
+ENV PYTHONUNBUFFERED=1
 
-# # create a user to run the app
-# RUN adduser -s /bin/bash -D backend
-# USER backend
-# WORKDIR /home/backend
+# create a user to run the app
+RUN adduser -s /bin/bash -D backend
+USER backend
+WORKDIR /home/backend
 
-# ENV VIRTUAL_ENV="/home/backend/venv"
-# COPY --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
-# COPY --from=builder /usr/local/bin/mars /usr/local/bin/mars
-# COPY --from=builder /usr/local/bin/mafft /usr/local/bin/mafft
+ENV VIRTUAL_ENV="/home/backend/venv"
+COPY --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
+COPY --from=builder /usr/local/bin/mars /usr/local/bin/mars
+COPY --from=builder /usr/local/bin/mafft /usr/local/bin/mafft
 
-# COPY ./src ./src
-# ENV PATH="/usr/local/bin/mafft/bin:$VIRTUAL_ENV/bin:$PATH"
-# # For example, ROOT_PATH="/syc"
-# ENV ROOT_PATH=""
-# ENV USE_HTTPS=false
+COPY ./src ./src
+ENV PATH="/usr/local/bin/mafft/bin:$VIRTUAL_ENV/bin:$PATH"
+# For example, ROOT_PATH="/syc"
+ENV ROOT_PATH=""
+ENV USE_HTTPS=false
 
-# COPY ./docker_entrypoint.sh ./docker_entrypoint.sh
+COPY ./docker_entrypoint.sh ./docker_entrypoint.sh
 
-# CMD ["sh", "./docker_entrypoint.sh"]
+CMD ["sh", "./docker_entrypoint.sh"]
