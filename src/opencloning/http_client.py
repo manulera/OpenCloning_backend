@@ -15,7 +15,7 @@ from .app_settings import settings
 allowed_external_urls = settings.ALLOWED_EXTERNAL_URLS
 
 if settings.PLANNOTATE_URL:
-    allowed_external_urls.add(settings.PLANNOTATE_URL)
+    allowed_external_urls.append(settings.PLANNOTATE_URL)
 
 
 class AllowedExternalUrlsTransport(AsyncHTTPTransport):
