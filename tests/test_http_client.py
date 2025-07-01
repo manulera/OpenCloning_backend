@@ -43,8 +43,17 @@ class TestHttpClientProxy(unittest.IsolatedAsyncioTestCase):
             async with http_client.get_http_client():
                 pass
 
-    async def test_whitelist(self):
+    async def test_allowed_external_urls(self):
+        MonkeyPatch().setenv('ALLOWED_EXTERNAL_URLS', 'https://dummy.com,https://google.com')
+        reload(app_settings)
+        reload(http_client)
+
+        # Does not raise an error
+        async with http_client.get_http_client() as client:
+            await client.get('https://google.com')
+
+        # Raises an error
         with self.assertRaises(http_client.RequestError) as e:
             async with http_client.get_http_client() as client:
-                await client.get('https://dummy.com')
-        self.assertIn('not whitelisted', str(e.exception))
+                await client.get('https://dummy2.com')
+        self.assertIn('not allowed', str(e.exception))
