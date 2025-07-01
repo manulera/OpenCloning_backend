@@ -27,9 +27,10 @@ pandas = "^2.2.3"
 openpyxl = "^3.1.5"
 pyyaml = "^6.0.2"
 opencloning-linkml = "0.3.0a0"
-primer3-py = "2.0.3"
+primer3-py = "2.2.0"
 biopython = "1.84"
 packaging = "^25.0"
+pairwise-alignments-to-msa = "^0.1.1"
 
 [tool.poetry.group.dev.dependencies]
 autopep8 = "^2.0.4"
@@ -38,6 +39,7 @@ black = "^24.2.0"
 pre-commit = "^3.6.2"
 watchfiles = "^0.21.0"
 nbstripout = "^0.8.1"
+uvicorn = "^0.34.3"
 
 [tool.poetry.group.test.dependencies]
 pytest = "8.3.4"
