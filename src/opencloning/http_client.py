@@ -6,36 +6,24 @@ from httpx import (  # noqa: F401
     TimeoutException,
     AsyncHTTPTransport,
     Request,
-    RequestError,
 )
+from urllib.error import HTTPError
 import ssl
 import certifi
 from .app_settings import settings
-import re
 
-white_listed_urls = {
-    r'^https://www.addgene.org/',
-    r'^https://media.addgene.org/',
-    r'^https://wekwikgene.wllsb.edu.cn',
-    r'^https://seva-plasmids.com/',
-    r'^https://api.ncbi.nlm.nih.gov/datasets/v2alpha/',
-    r'^https://eutils.ncbi.nlm.nih.gov/entrez/eutils/',
-    r'^https://www.snapgene.com/local/fetch.php',
-    r'^https://benchling.com/',
-    r'^https://assets.opencloning.org/annotated-igem-distribution',
-    r'^http://www.euroscarf.de/',
-}
+allowed_external_urls = settings.ALLOWED_EXTERNAL_URLS
 
 if settings.PLANNOTATE_URL:
-    white_listed_urls.add(settings.PLANNOTATE_URL)
+    allowed_external_urls.append(settings.PLANNOTATE_URL)
 
 
-class WhiteListTransport(AsyncHTTPTransport):
+class AllowedExternalUrlsTransport(AsyncHTTPTransport):
     async def handle_async_request(self, request: Request) -> Response:
-        if any(re.match(url, str(request.url)) for url in white_listed_urls):
+        if any(str(request.url).startswith(url) for url in allowed_external_urls):
             return await super().handle_async_request(request)
 
-        raise RequestError(f'Request to {request.url} is not whitelisted')
+        raise HTTPError(request.url, 403, f'Request to {request.url} is not allowed', None, None)
 
 
 proxy = None
@@ -44,7 +32,7 @@ if settings.PROXY_URL:
 
 
 def get_http_client():
-    transport = WhiteListTransport()
+    transport = AllowedExternalUrlsTransport()
     client_ctx = None
     if proxy is not None:
         client_ctx = ssl.create_default_context(cafile=certifi.where())

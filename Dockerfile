@@ -4,8 +4,7 @@
 # BUILDER IMAGE
 FROM python:3.12-alpine AS builder
 
-RUN apk update
-RUN apk add build-base bash cmake
+RUN apk update --no-cache && apk add --no-cache build-base bash cmake
 
 # Build mafft from source
 # mafft creates an entire directory, that's what we copy later and that's why it needs
@@ -63,9 +62,8 @@ RUN poetry install --only main
 # FINAL IMAGE
 FROM python:3.12-alpine
 
-RUN apk update
 # You need bash to run mafft and runtime libraries for MARS
-RUN apk add bash libstdc++ libgomp libgcc
+RUN apk update --no-cache && apk add --no-cache bash libstdc++ libgomp libgcc
 
 # directly output things to stdout/stderr, without buffering
 ENV PYTHONUNBUFFERED=1

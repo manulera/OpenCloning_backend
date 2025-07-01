@@ -31,6 +31,25 @@ if PLANNOTATE_URL is not None and not PLANNOTATE_URL.endswith('/'):
 PROXY_URL = os.environ.get('PROXY_URL')
 PROXY_CERT_FILE = os.environ.get('PROXY_CERT_FILE')
 
+# Allowed external URLs ===========================================
+default_allowed_urls = [
+    'https://www.addgene.org/',
+    'https://media.addgene.org/',
+    'https://seva-plasmids.com/',
+    'https://api.ncbi.nlm.nih.gov/datasets/v2alpha/',
+    'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/',
+    'https://www.snapgene.com/local/fetch.php',
+    'https://benchling.com/',
+    'https://assets.opencloning.org/annotated-igem-distribution',
+    'http://www.euroscarf.de/',
+    'https://wekwikgene.wllsb.edu.cn',
+]
+
+if os.environ.get('ALLOWED_EXTERNAL_URLS') is not None:
+    ALLOWED_EXTERNAL_URLS = os.environ['ALLOWED_EXTERNAL_URLS'].split(',')
+else:
+    ALLOWED_EXTERNAL_URLS = default_allowed_urls
+
 
 class Settings(BaseModel):
     SERVE_FRONTEND: bool
@@ -43,6 +62,8 @@ class Settings(BaseModel):
     PROXY_URL: str | None
     # Must be a full path to the proxy certificate file
     PROXY_CERT_FILE: str | None
+    # Allowed external URLs
+    ALLOWED_EXTERNAL_URLS: list[str]
 
 
 settings = Settings(
@@ -55,4 +76,5 @@ settings = Settings(
     PLANNOTATE_TIMEOUT=PLANNOTATE_TIMEOUT,
     PROXY_URL=PROXY_URL,
     PROXY_CERT_FILE=PROXY_CERT_FILE,
+    ALLOWED_EXTERNAL_URLS=ALLOWED_EXTERNAL_URLS,
 )
