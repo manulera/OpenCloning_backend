@@ -6,6 +6,7 @@ import pytest
 import os
 import respx
 import httpx
+from importlib import reload
 
 import opencloning.request_examples as request_examples
 from opencloning.dna_functions import read_dsrecord_from_json
@@ -23,6 +24,7 @@ from opencloning.pydantic_models import (
     WekWikGeneIdSource,
     SEVASource,
 )
+from opencloning import app_settings, http_client
 
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
@@ -1040,3 +1042,24 @@ class SEVASourceTest(unittest.TestCase):
             payload = response.json()
             seq = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
             self.assertEqual(seq.circular, True)
+
+
+class NotAllowedExternalUrlTest(unittest.TestCase):
+    def tearDown(self):
+        pytest.MonkeyPatch().delenv('ALLOWED_EXTERNAL_URLS', raising=False)
+        reload(app_settings)
+        reload(http_client)
+
+    def test_not_allowed_external_url(self):
+        pytest.MonkeyPatch().setenv('ALLOWED_EXTERNAL_URLS', 'https://dummy.com,https://google.com')
+        reload(app_settings)
+        reload(http_client)
+        source = SEVASource(
+            id=0,
+            repository_id='pSEVA261',
+            repository_name='seva',
+            sequence_file_url='https://seva-plasmids.com/dummy.gbk',
+        )
+        response = client.post('/repository_id/seva', json=source.model_dump())
+        self.assertEqual(response.status_code, 403)
+        self.assertIn('not allowed', response.json()['detail'])

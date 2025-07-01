@@ -1,6 +1,7 @@
 import unittest
 from importlib import reload
 from opencloning import http_client
+from urllib.error import HTTPError
 from opencloning import app_settings
 from pytest import MonkeyPatch
 from unittest.mock import patch, AsyncMock
@@ -53,7 +54,7 @@ class TestHttpClientProxy(unittest.IsolatedAsyncioTestCase):
             await client.get('https://google.com')
 
         # Raises an error
-        with self.assertRaises(http_client.RequestError) as e:
+        with self.assertRaises(HTTPError) as e:
             async with http_client.get_http_client() as client:
                 await client.get('https://dummy2.com')
         self.assertIn('not allowed', str(e.exception))
