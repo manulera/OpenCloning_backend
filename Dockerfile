@@ -22,6 +22,8 @@ RUN wget https://github.com/manulera/MARS/archive/refs/tags/v0.2.3.tar.gz && \
 tar -xzf v0.2.3.tar.gz && \
 cd MARS-0.2.3 && \
 ./pre-install.sh && \
+# Fix https://github.com/lorrainea/MARS/issues/20
+sed -i '/template <size_t PAGESIZE>/i\ #ifdef PAGESIZE\n#undef PAGESIZE\n#endif' ./seqan/file/file_page.h && \
 make -f Makefile && \
 mv mars /usr/local/bin/mars
 
