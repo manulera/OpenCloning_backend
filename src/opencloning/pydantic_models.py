@@ -50,7 +50,7 @@ from opencloning_linkml.datamodel import (
     CreLoxRecombinationSource as _CreLoxRecombinationSource,
     InVivoAssemblySource as _InVivoAssemblySource,
 )
-from .assembly2 import (
+from pydna.assembly2 import (
     edge_representation2subfragment_representation,
     subfragment_representation2edge_representation,
 )
