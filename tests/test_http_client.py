@@ -15,6 +15,7 @@ class TestHttpClientProxy(unittest.IsolatedAsyncioTestCase):
     def tearDown(self):
         MonkeyPatch().delenv('PROXY_URL', raising=False)
         MonkeyPatch().delenv('PROXY_CERT_FILE', raising=False)
+        MonkeyPatch().delenv('ALLOWED_EXTERNAL_URLS', raising=False)
         reload(app_settings)
         reload(http_client)
 
