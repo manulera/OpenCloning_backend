@@ -537,7 +537,7 @@ async def gateway(
         multi_site_sources = [
             i
             for i, s in enumerate(resp['sources'])
-            if all(join.left_location != join.right_location for join in s.assembly)
+            if all(join.left_location != join.right_location for join in s.input)
         ]
         sources = [resp['sources'][i] for i in multi_site_sources]
         sequences = [resp['sequences'][i] for i in multi_site_sources]
