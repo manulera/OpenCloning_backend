@@ -1,7 +1,8 @@
 from fastapi import Query, HTTPException
 from pydna.dseqrecord import Dseqrecord
 from pydna.dseq import Dseq
-from pydantic import conlist, create_model
+from pydantic import create_model, Field
+from typing import Annotated
 
 from ..dna_functions import (
     format_sequence_genbank,
@@ -54,7 +55,7 @@ async def manually_typed(source: ManuallyTypedSource):
 )
 async def oligonucleotide_hybridization(
     source: OligoHybridizationSource,
-    primers: conlist(PrimerModel, min_length=1, max_length=2),
+    primers: Annotated[list[PrimerModel], Field(min_length=1, max_length=2)],
     minimal_annealing: int = Query(20, description='The minimal annealing length for each primer.'),
 ):
     watson_seq = next((p.sequence for p in primers if p.id == source.forward_oligo), None)
