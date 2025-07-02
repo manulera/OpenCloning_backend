@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field, model_validator, field_validator
-from typing import Optional, List
+from pydantic import BaseModel, Field, model_validator, field_validator, Discriminator, Tag
+from typing import Optional, List, Union, Annotated
 from pydantic_core import core_schema
 from ._version import __version__
 
@@ -49,6 +49,7 @@ from opencloning_linkml.datamodel import (
     SEVASource as _SEVASource,
     CreLoxRecombinationSource as _CreLoxRecombinationSource,
     InVivoAssemblySource as _InVivoAssemblySource,
+    SourceInput as _SourceInput,
 )
 from pydna.assembly2 import (
     edge_representation2subfragment_representation,
@@ -94,8 +95,31 @@ class SeqFeatureModel(BaseModel):
 # Sources =========================================
 
 
-class SourceCommonClass:
-    input: Optional[List[int]] = Field(
+def input_discriminator(v) -> str | None:
+    """
+    Discriminator that yields SourceInput by default
+    """
+    if isinstance(v, dict):
+        input_type = v.get('type', None)
+        if input_type is None:
+            return 'SourceInput'
+        else:
+            return input_type
+    return None
+
+
+class SourceCommonClass(BaseModel):
+    input: Optional[
+        List[
+            Annotated[
+                Union[
+                    Annotated[_SourceInput, Tag('SourceInput')],
+                    Annotated['AssemblyFragment', Tag('AssemblyFragment')],
+                ],
+                Discriminator(input_discriminator),
+            ]
+        ]
+    ] = Field(
         default_factory=list,
         description="""The sequences that are an input to this source. If the source represents external import of a sequence, it's empty.""",
         json_schema_extra={'linkml_meta': {'alias': 'input', 'domain_of': ['Source']}},
@@ -322,14 +346,16 @@ class AssemblyFragment(_AssemblyFragment):
 class AssemblySourceCommonClass(SourceCommonClass):
     # TODO: This is different in the LinkML model, because there it is not required,
     # and here we make it default to list.
-    assembly: List[AssemblyFragment] = Field(
-        default_factory=list, description="""The joins between the fragments in the assembly"""
+    input: Optional[list[_SourceInput | AssemblyFragment]] = Field(
+        default=None,
+        description="""The inputs to this source. If the source represents external import of a sequence, it's empty.""",
+        json_schema_extra={'linkml_meta': {'alias': 'input', 'domain_of': ['Source'], 'slot_uri': 'schema:object'}},
     )
 
     def minimal_overlap(self):
         """Returns the minimal overlap between the fragments in the assembly"""
         all_overlaps = list()
-        for f in self.assembly:
+        for f in self.input:
             if f.left_location is not None:
                 all_overlaps.append(f.left_location.end - f.left_location.start)
             if f.right_location is not None:
@@ -338,8 +364,12 @@ class AssemblySourceCommonClass(SourceCommonClass):
 
     def get_assembly_plan(self, fragments: list[_SeqRecord]) -> tuple:
         """Returns the assembly plan"""
-        subf = [f.to_fragment_tuple(fragments) for f in self.assembly]
+        subf = [f.to_fragment_tuple(fragments) for f in self.input]
         return subfragment_representation2edge_representation(subf, self.circular)
+
+    def is_assembly_complete(self) -> bool:
+        """Returns True if the assembly is complete"""
+        return any(f.type == 'AssemblyFragment' for f in self.input)
 
     @classmethod
     def from_assembly(
@@ -353,7 +383,6 @@ class AssemblySourceCommonClass(SourceCommonClass):
 
         # Replace the positions with the actual ids
         fragment_ids = [int(f.id) for f in fragments]
-        input_ids = [int(f.id) for f in fragments if not isinstance(f, _PydnaPrimer)]
 
         # Here the ids are still the positions in the fragments list
         fragment_assembly_positions = edge_representation2subfragment_representation(assembly, circular)
@@ -368,8 +397,7 @@ class AssemblySourceCommonClass(SourceCommonClass):
         ]
         return cls(
             id=id,
-            input=input_ids,
-            assembly=assembly_fragments,
+            input=assembly_fragments,
             circular=circular,
             **kwargs,
         )
@@ -505,11 +533,11 @@ class BaseCloningStrategy(_CloningStrategy):
                     f"Source {source.id} already exists in the cloning strategy, but sequence {sequence.id} it's not its output."
                 )
             return
-        source.id = self.next_node_id()
+        new_id = self.next_node_id()
+        source.id = new_id
         self.sources.append(source)
-        sequence.id = self.next_node_id()
+        sequence.id = new_id
         self.sequences.append(sequence)
-        source.output = sequence.id
 
     def all_children_source_ids(self, source_id: int, source_children: list | None = None) -> list[int]:
         """Returns the ids of all source children ids of a source"""
@@ -517,7 +545,7 @@ class BaseCloningStrategy(_CloningStrategy):
         if source_children is None:
             source_children = []
 
-        sources_that_take_output_as_input = [s for s in self.sources if source.output in s.input]
+        sources_that_take_output_as_input = [s for s in self.sources if source.id in [inp.sequence for inp in s.input]]
         new_source_ids = [s.id for s in sources_that_take_output_as_input]
 
         source_children.extend(new_source_ids)

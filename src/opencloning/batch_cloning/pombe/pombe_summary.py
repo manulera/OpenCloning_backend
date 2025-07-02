@@ -16,11 +16,11 @@ chromosomes = {
 
 def find_primer_aligned_sequence(pcr_sources: list[PCRSource], primer: PrimerModel) -> str:
     for source in pcr_sources:
-        if source.assembly[0].sequence == primer.id:
-            loc = source.assembly[0].right_location
+        if source.input[0].sequence == primer.id:
+            loc = source.input[0].right_location
             return str(primer.sequence[loc.start : loc.end])
-        if source.assembly[-1].sequence == primer.id:
-            loc = source.assembly[-1].left_location
+        if source.input[-1].sequence == primer.id:
+            loc = source.input[-1].left_location
             return str(reverse_complement(primer.sequence)[loc.start : loc.end])
     raise ValueError(f"Primer {primer.id} not found in any PCR source")
 
@@ -34,8 +34,8 @@ def process_folder(working_dir: str):
     hrec_source = next(s for s in strategy.sources if s.type == 'HomologousRecombinationSource')
 
     chromosome = chromosomes[locus_source.sequence_accession]
-    insertion_start = locus_source.start + hrec_source.assembly[0].right_location.end
-    insertion_end = locus_source.start + hrec_source.assembly[-1].left_location.start
+    insertion_start = locus_source.start + hrec_source.input[0].right_location.end
+    insertion_end = locus_source.start + hrec_source.input[-1].left_location.start
 
     # Write out the sequences in genbank format and extract some relevant info
     sequences = [pydna_parse(sequence.file_content)[0] for sequence in strategy.sequences]

@@ -102,7 +102,10 @@ class RestrictionTest(unittest.TestCase):
 
         # Now we specify the output
         source = RestrictionEnzymeDigestionSource(
-            id=0, left_edge=None, right_edge=RestrictionSequenceCut.from_cutsite_tuple(((7, -4), 'EcoRI'))
+            id=0,
+            input=[{'sequence': 1}],
+            left_edge=None,
+            right_edge=RestrictionSequenceCut.from_cutsite_tuple(((7, -4), 'EcoRI')),
         )
         data = {'source': source.model_dump(), 'sequences': [json_seq.model_dump()]}
         response = client.post('/restriction', json=data)
@@ -232,7 +235,12 @@ class RestrictionTest(unittest.TestCase):
         # Submitting the known fragments
 
         for i in range(len(edges)):
-            source = RestrictionEnzymeDigestionSource(id=0, left_edge=edges[i][0], right_edge=edges[i][1])
+            source = RestrictionEnzymeDigestionSource(
+                id=0,
+                input=[{'sequence': 1}],
+                left_edge=edges[i][0],
+                right_edge=edges[i][1],
+            )
             data = {'source': source.model_dump(), 'sequences': [json_seq.model_dump()]}
             response = client.post('/restriction', json=data)
             payload = response.json()
@@ -310,6 +318,7 @@ class RestrictionTest(unittest.TestCase):
         for i in range(len(edges)):
             source = RestrictionEnzymeDigestionSource(
                 id=0,
+                input=[{'sequence': 1}],
                 left_edge=edges[i][0],
                 right_edge=edges[i][1],
             )

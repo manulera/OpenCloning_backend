@@ -151,9 +151,7 @@ async def main():
     resp = await homologous_recombination(homologous_recombination_source, [locus_seq, golgen_gate_product], 17)
 
     multi_site_sources = [
-        i
-        for i, s in enumerate(resp['sources'])
-        if all(join.left_location != join.right_location for join in s.assembly)
+        i for i, s in enumerate(resp['sources']) if all(join.left_location != join.right_location for join in s.input)
     ]
     if len(multi_site_sources) > 1:
         raise ValueError('Multiple insertions possible')
