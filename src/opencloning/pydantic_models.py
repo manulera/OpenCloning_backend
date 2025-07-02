@@ -65,6 +65,10 @@ class TextFileSequence(_TextFileSequence):
     pass
 
 
+class SourceInput(_SourceInput):
+    pass
+
+
 class PrimerModel(_Primer):
     """Called PrimerModel not to be confused with the class from pydna."""
 
@@ -105,13 +109,13 @@ def input_discriminator(v) -> str | None:
             return 'SourceInput'
         else:
             return input_type
-    elif isinstance(v, _SourceInput):
+    elif isinstance(v, SourceInput):
         return v.type
     return None
 
 
 class SourceCommonClass(BaseModel):
-    input: Optional[List[_SourceInput]] = Field(
+    input: Optional[List[SourceInput]] = Field(
         default_factory=list,
         description="""The sequences that are an input to this source. If the source represents external import of a sequence, it's empty.""",
         json_schema_extra={'linkml_meta': {'alias': 'input', 'domain_of': ['Source']}},
@@ -342,7 +346,7 @@ class AssemblySourceCommonClass(SourceCommonClass):
         List[
             Annotated[
                 Union[
-                    Annotated[_SourceInput, Tag('SourceInput')],
+                    Annotated[SourceInput, Tag('SourceInput')],
                     Annotated['AssemblyFragment', Tag('AssemblyFragment')],
                 ],
                 Discriminator(input_discriminator),

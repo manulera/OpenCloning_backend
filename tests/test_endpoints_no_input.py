@@ -60,7 +60,7 @@ class OligoHybridizationTest(unittest.TestCase):
         invalid_oligo_example = copy.deepcopy(
             request_examples.oligonucleotide_hybridization_examples['default']['value']
         )
-        invalid_oligo_example['source']['forward_oligo'] = 5
+        invalid_oligo_example['source']['input'][0]['sequence'] = 5
         response = client.post('/oligonucleotide_hybridization', json=invalid_oligo_example)
         self.assertEqual(response.status_code, 404)
 
