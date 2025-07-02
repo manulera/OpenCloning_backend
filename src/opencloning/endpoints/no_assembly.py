@@ -53,7 +53,10 @@ async def restriction(
 
     cutsites = seqr.seq.get_cutsites(*enzymes)
     cutsite_pairs = seqr.seq.get_cutsite_pairs(cutsites)
-    sources = [RestrictionEnzymeDigestionSource.from_cutsites(*p, source.input, source.id) for p in cutsite_pairs]
+    sources = [
+        RestrictionEnzymeDigestionSource.from_cutsites(*p, [{'sequence': sequences[0].id}], source.id)
+        for p in cutsite_pairs
+    ]
 
     all_enzymes = set(enzyme for s in sources for enzyme in s.get_enzymes())
     enzymes_not_cutting = set(restriction_enzymes) - set(all_enzymes)

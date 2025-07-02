@@ -35,30 +35,30 @@ class AssemblySourceTest(TestCase):
 
             if i == 0:
                 # Check first fragment
-                self.assertEqual(assembly_source.assembly[0].sequence, 4)
-                self.assertEqual(assembly_source.assembly[0].reverse_complemented, False)
-                self.assertEqual(assembly_source.assembly[0].left_location, None)
+                self.assertEqual(assembly_source.input[0].sequence, 4)
+                self.assertEqual(assembly_source.input[0].reverse_complemented, False)
+                self.assertEqual(assembly_source.input[0].left_location, None)
                 self.assertEqual(
-                    assembly_source.assembly[0].right_location,
+                    assembly_source.input[0].right_location,
                     SequenceLocationStr.from_start_and_end(start=0, end=10),
                 )
 
                 # Check second fragment
-                self.assertEqual(assembly_source.assembly[1].sequence, 5)
-                self.assertEqual(assembly_source.assembly[1].reverse_complemented, False)
+                self.assertEqual(assembly_source.input[1].sequence, 5)
+                self.assertEqual(assembly_source.input[1].reverse_complemented, False)
                 self.assertEqual(
-                    assembly_source.assembly[1].left_location,
+                    assembly_source.input[1].left_location,
                     SequenceLocationStr.from_start_and_end(start=10, end=20),
                 )
                 self.assertEqual(
-                    assembly_source.assembly[1].right_location,
+                    assembly_source.input[1].right_location,
                     SequenceLocationStr.from_start_and_end(start=0, end=10),
                 )
 
                 # Check other fields
                 self.assertEqual(assembly_source.input, [4, 5, 6])
 
-            for obj, tup in zip(assembly_source.assembly, fragment_assembly):
+            for obj, tup in zip(assembly_source.input, fragment_assembly):
                 self.assertEqual(obj.to_fragment_tuple(fragments), tup)
 
     def test_get_assembly_plan(self):

@@ -51,7 +51,7 @@ def fix_backend_v0_3(input_data: dict) -> CloningStrategy | None:
             # Sort input_seqs as in input
             input_seqs.sort(key=lambda x: assembly_source.input.index(x.id))
             if source['type'] == 'PCRSource':
-                primer_ids = [assembly_source.assembly[0].sequence, assembly_source.assembly[2].sequence]
+                primer_ids = [assembly_source.input[0].sequence, assembly_source.input[2].sequence]
                 primers = [PrimerModel.model_validate(p) for p in data['primers'] if p['id'] in primer_ids]
                 input_seqs = [primers[0], input_seqs[0], primers[1]]
 

@@ -149,7 +149,7 @@ async def crispr(
     ]
 
     # If a specific assembly is requested
-    if len(source.assembly):
+    if source.is_assembly_complete():
         return format_known_assembly_response(source, out_sources, [template, insert])
 
     out_sequences = [
@@ -204,7 +204,7 @@ def generate_assemblies(
         raise HTTPException(400, *e.args)
 
     # If a specific assembly is requested
-    if len(source.assembly):
+    if source.is_assembly_complete():
         return format_known_assembly_response(source, out_sources, fragments, product_callback)
 
     out_sequences = [
@@ -239,7 +239,7 @@ async def ligation(
 
     # If the assembly is known, the blunt parameter is ignored, and we set the algorithm type from the assembly
     # (blunt ligations have features without length)
-    if len(source.assembly):
+    if source.is_assembly_complete():
         asm = source.get_assembly_plan(fragments)
         blunt = len(asm[0][2]) == 0
 
@@ -277,7 +277,7 @@ async def pcr(
     # What happens if annealing is zero? That would mean
     # mismatch in the 3' of the primer, which maybe should
     # not be allowed.
-    if len(source.assembly):
+    if source.is_assembly_complete():
         minimal_annealing = source.minimal_overlap()
         # Only the ones that match are included in the output assembly
         # location, so the submitted assembly should be returned without
@@ -315,7 +315,7 @@ async def pcr(
     ]
 
     # If a specific assembly is requested
-    if len(source.assembly):
+    if source.is_assembly_complete():
 
         def callback(x):
             if source.add_primer_features:
@@ -360,7 +360,7 @@ async def homologous_recombination(
     template, insert = [read_dsrecord_from_json(seq) for seq in sequences]
 
     # If an assembly is provided, we ignore minimal_homology
-    if len(source.assembly):
+    if source.is_assembly_complete():
         minimal_homology = source.minimal_overlap()
 
     asm = Assembly((template, insert), limit=minimal_homology, use_all_fragments=True)
@@ -386,7 +386,7 @@ async def homologous_recombination(
     ]
 
     # If a specific assembly is requested
-    if len(source.assembly):
+    if source.is_assembly_complete():
         return format_known_assembly_response(source, out_sources, [template, insert])
 
     out_sequences = [
