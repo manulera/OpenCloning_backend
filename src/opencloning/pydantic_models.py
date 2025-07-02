@@ -349,7 +349,7 @@ class AssemblySourceCommonClass(SourceCommonClass):
             ]
         ]
     ] = Field(
-        default=None,
+        default_factory=list,
         description="""The inputs to this source. If the source represents external import of a sequence, it's empty.""",
         json_schema_extra={'linkml_meta': {'alias': 'input', 'domain_of': ['Source'], 'slot_uri': 'schema:object'}},
     )

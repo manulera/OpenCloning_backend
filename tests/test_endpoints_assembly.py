@@ -378,7 +378,7 @@ class PCRTest(unittest.TestCase):
         json_seq = format_sequence_genbank(template)
         json_seq.id = 1
 
-        submitted_source = PCRSource(id=0, input=[1])
+        submitted_source = PCRSource(id=0)
 
         primer_fwd = PrimerModel(sequence='CCCCCCCC', id=2, name='forward')
 
