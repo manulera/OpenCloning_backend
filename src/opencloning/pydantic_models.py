@@ -312,7 +312,7 @@ class SequenceLocationStr(str):
         return cls.field_validator(value)
 
 
-class AssemblyFragment(_AssemblyFragment):
+class AssemblyFragment(_AssemblyFragment, SourceInput):
     left_location: Optional[SequenceLocationStr] = None
     right_location: Optional[SequenceLocationStr] = None
 
