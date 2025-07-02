@@ -3,7 +3,8 @@ from typing import Union, Literal, Callable
 from pydna.dseqrecord import Dseqrecord
 from pydna.primer import Primer as PydnaPrimer
 from pydna.crispr import cas9
-from pydantic import conlist, create_model
+from pydantic import create_model, Field
+from typing import Annotated
 from Bio.Restriction.Restriction import RestrictionBatch
 from opencloning.cre_lox import cre_loxP_overlap, annotate_loxP_sites
 from ..dna_functions import (
@@ -81,7 +82,7 @@ def format_known_assembly_response(
 async def crispr(
     source: CRISPRSource,
     guides: list[PrimerModel],
-    sequences: conlist(TextFileSequence, min_length=2, max_length=2),
+    sequences: Annotated[list[TextFileSequence], Field(min_length=2, max_length=2)],
     minimal_homology: int = Query(40, description='The minimum homology between the template and the insert.'),
 ):
     """Return the sequence after performing CRISPR editing by Homology directed repair
@@ -225,7 +226,7 @@ def generate_assemblies(
 )
 async def ligation(
     source: LigationSource,
-    sequences: conlist(TextFileSequence, min_length=1),
+    sequences: Annotated[list[TextFileSequence], Field(min_length=1)],
     blunt: bool = Query(False, description='Use blunt ligation as well as sticky ends.'),
     allow_partial_overlap: bool = Query(False, description='Allow for partially overlapping sticky ends.'),
     circular_only: bool = Query(False, description='Only return circular assemblies.'),
@@ -261,8 +262,8 @@ async def ligation(
 )
 async def pcr(
     source: PCRSource,
-    sequences: conlist(TextFileSequence, min_length=1, max_length=1),
-    primers: conlist(PrimerModel, min_length=1, max_length=2),
+    sequences: Annotated[list[TextFileSequence], Field(min_length=1, max_length=1)],
+    primers: Annotated[list[PrimerModel], Field(min_length=1, max_length=2)],
     minimal_annealing: int = Query(20, description='The minimal annealing length for each primer.'),
     allowed_mismatches: int = Query(0, description='The number of mismatches allowed'),
 ):
@@ -353,7 +354,7 @@ async def pcr(
 )
 async def homologous_recombination(
     source: HomologousRecombinationSource,
-    sequences: conlist(TextFileSequence, min_length=2, max_length=2),
+    sequences: Annotated[list[TextFileSequence], Field(min_length=2, max_length=2)],
     minimal_homology: int = Query(40, description='The minimum homology between the template and the insert.'),
 ):
 
@@ -411,7 +412,7 @@ async def homologous_recombination(
     ),
 )
 async def gibson_assembly(
-    sequences: conlist(TextFileSequence, min_length=1),
+    sequences: Annotated[list[TextFileSequence], Field(min_length=1)],
     source: Union[GibsonAssemblySource, OverlapExtensionPCRLigationSource, InFusionSource, InVivoAssemblySource],
     minimal_homology: int = Query(
         40, description='The minimum homology between consecutive fragments in the assembly.'
@@ -450,7 +451,7 @@ async def gibson_assembly(
 )
 async def restriction_and_ligation(
     source: RestrictionAndLigationSource,
-    sequences: conlist(TextFileSequence, min_length=1),
+    sequences: Annotated[list[TextFileSequence], Field(min_length=1)],
     allow_partial_overlap: bool = Query(False, description='Allow for partially overlapping sticky ends.'),
     circular_only: bool = Query(False, description='Only return circular assemblies.'),
 ):
@@ -492,7 +493,7 @@ async def restriction_and_ligation(
 )
 async def gateway(
     source: GatewaySource,
-    sequences: conlist(TextFileSequence, min_length=1),
+    sequences: Annotated[list[TextFileSequence], Field(min_length=1)],
     circular_only: bool = Query(False, description='Only return circular assemblies.'),
     only_multi_site: bool = Query(
         False, description='Only return assemblies where more than one site per sequence recombined.'
@@ -554,7 +555,9 @@ async def gateway(
         sequences=(list[TextFileSequence], ...),
     ),
 )
-async def cre_lox_recombination(source: CreLoxRecombinationSource, sequences: conlist(TextFileSequence, min_length=1)):
+async def cre_lox_recombination(
+    source: CreLoxRecombinationSource, sequences: Annotated[list[TextFileSequence], Field(min_length=1)]
+):
     fragments = [read_dsrecord_from_json(seq) for seq in sequences]
 
     # Lambda function for code clarity
