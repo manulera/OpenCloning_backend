@@ -121,7 +121,7 @@ If you want to fix several bugs from the command line, you can use the `backend_
 Before running this script, you need to migrate the data to the latest version of the schema. See [full documentation](https://github.com/OpenCloning/OpenCloning_LinkML?tab=readme-ov-file#migration-from-previous-versions-of-the-schema), but basically:
 
 ```bash
-python -m opencloning_linkl.migrations.migrate file1.json file2.json ...
+python -m opencloning_linkl.migrations.migrate --target-version='0.3.0' file1.json file2.json ...
 ```
 
 Then, you can run the script:
@@ -131,7 +131,10 @@ python -m opencloning.bug_fixing.backend_v0_3 file1.json file2.json ...
 ```
 
 For each file:
-* If the file does not need fixing, it will be skipped.
+* If the file does not need fixing, it will be skipped. Migrate it to the latest version of the schema by removing the `--target-version` flag.
+  ```bash
+  python -m opencloning_linkl.migrations.migrate file1.json file2.json ...
+  ```
 * If the file needs fixing, it will create a new file `file_1_needs_fixing.json` at the same location where the original file is, with the problematic sources replaced by templates.
 * You can then load these files into the web application and run the correct steps manually.
 

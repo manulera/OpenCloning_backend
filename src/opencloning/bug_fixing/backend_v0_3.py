@@ -27,29 +27,24 @@ def fix_backend_v0_3(input_data: dict) -> CloningStrategy | None:
     for source in data['sources']:
         if source['type'] == 'GatewaySource':
             # Take the first assembly value and check that the length of features is 7
-            assembly = source['assembly']
-            if len(assembly):
+            input = source['input']
+            if len(input):
                 feat2check = (
-                    assembly[0]['left_location']
-                    if assembly[0]['left_location'] is not None
-                    else assembly[0]['right_location']
+                    input[0]['left_location'] if input[0]['left_location'] is not None else input[0]['right_location']
                 )
                 if len(SequenceLocationStr(feat2check).to_biopython_location()) != 7:
                     problematic_source_ids.add(source['id'])
 
-        elif 'assembly' in source:
+        elif any(('type' in i and i['type'] == 'AssemblyFragment') for i in source['input']):
             assembly_source = AssemblySource(
                 id=source['id'],
                 input=source['input'],
-                output=source['output'],
                 circular=source['circular'],
-                assembly=source['assembly'],
             )
-            input_seqs = [
-                TextFileSequence.model_validate(s) for s in data['sequences'] if s['id'] in assembly_source.input
-            ]
+            input_ids = [i.sequence for i in assembly_source.input]
+            input_seqs = [TextFileSequence.model_validate(s) for s in data['sequences'] if s['id'] in input_ids]
             # Sort input_seqs as in input
-            input_seqs.sort(key=lambda x: assembly_source.input.index(x.id))
+            input_seqs.sort(key=lambda x: input_ids.index(x.id))
             if source['type'] == 'PCRSource':
                 primer_ids = [assembly_source.input[0].sequence, assembly_source.input[2].sequence]
                 primers = [PrimerModel.model_validate(p) for p in data['primers'] if p['id'] in primer_ids]
@@ -68,9 +63,11 @@ def fix_backend_v0_3(input_data: dict) -> CloningStrategy | None:
     problematic_source_ids.update(sum([cs.all_children_source_ids(s) for s in problematic_source_ids], []))
     for source_id in problematic_source_ids:
         source = next(s for s in data['sources'] if s['id'] == source_id)
-        output_seq = next(s for s in data['sequences'] if s['id'] == source['output'])
-        remove_keys = ['assembly', 'circular']
+        output_seq = next(s for s in data['sequences'] if s['id'] == source_id)
+        # Remove assembly info
+        remove_keys = ['circular']
         source_keep = {key: value for key, value in source.items() if key not in remove_keys}
+        source_keep['input'] = [{'sequence': f['sequence']} for f in source_keep['input']]
         source.clear()
         source.update(source_keep)
 

@@ -77,21 +77,17 @@ async def ziqiang_et_al2024_post(
     primers = design_primers(protospacers)
 
     with open(os.path.join(os.path.dirname(__file__), 'ziqiang_et_al2024.json'), 'r') as f:
-        template = BaseCloningStrategy.model_validate(json.load(f))
-
-    max_primer_id = max([primer.id for primer in template.primers], default=0)
+        cloning_strategy = BaseCloningStrategy.model_validate(json.load(f))
 
     for i, primer in enumerate(primers):
-        max_primer_id += 1
         orientation = 'rvs' if i % 2 == 0 else 'fwd'
-        template.primers.append(
-            PrimerModel(id=max_primer_id, name=f"protospacer_{i // 2 + 1}_{orientation}", sequence=primer)
-        )
+        cloning_strategy.add_primer(PrimerModel(id=0, name=f"protospacer_{i // 2 + 1}_{orientation}", sequence=primer))
 
-    primer_ids_for_pcrs = [3, *[p.id for p in template.primers[-len(primers) :]], 12]
-    next_node_id = max([s.id for s in template.sequences] + [s.id for s in template.sources]) + 1
+    fwd_primer3 = next(p for p in cloning_strategy.primers if p.name == 'Fw-Primer3')
+    rvs_primer12 = next(p for p in cloning_strategy.primers if p.name == 'Rev-Primer12')
+    primer_ids_for_pcrs = [fwd_primer3.id, *[p.id for p in cloning_strategy.primers[-len(primers) :]], rvs_primer12.id]
 
-    template_sequence = next(s for s in template.sequences if s.id == 18)
+    template_sequence = next(s for s in cloning_strategy.sequences if s.id == 9)
     for i, (fwd_primer_id, rvs_primer_id) in enumerate(zip(primer_ids_for_pcrs[::2], primer_ids_for_pcrs[1::2])):
         if i == 0:
             name = 'start_ps1'
@@ -100,80 +96,56 @@ async def ziqiang_et_al2024_post(
         else:
             name = f'end_ps{i}_start_ps{i + 1}'
 
-        pcr_source = PCRSource(id=next_node_id, output_name=name)
-        fwd_primer = next(p for p in template.primers if p.id == fwd_primer_id)
-        rvs_primer = next(p for p in template.primers if p.id == rvs_primer_id)
+        pcr_source = PCRSource(id=0, output_name=name)
+        fwd_primer = next(p for p in cloning_strategy.primers if p.id == fwd_primer_id)
+        rvs_primer = next(p for p in cloning_strategy.primers if p.id == rvs_primer_id)
 
-        next_node_id += 1
-        resp = await pcr(pcr_source, [template_sequence], [fwd_primer, rvs_primer], 14, 0)
+        resp = await pcr(pcr_source, [template_sequence], [fwd_primer, rvs_primer], 7, 0)
         pcr_product: TextFileSequence = TextFileSequence.model_validate(resp['sequences'][0])
-        pcr_product.id = next_node_id
         pcr_source: PCRSource = PCRSource.model_validate(resp['sources'][0])
-        pcr_source.output = next_node_id
-
-        template.sequences.append(pcr_product)
-        template.sources.append(pcr_source)
-
-        next_node_id += 1
+        cloning_strategy.add_source_and_sequence(pcr_source, pcr_product)
 
     # Find all PCR products
     # (we use type instead of isinstance because the BaseCloningStrategy does not
     #  have the newer source models with extra methods)
-    pcr_product_ids = [s.output for s in template.sources if s.type == 'PCRSource']
+    pcr_product_ids = [s.id for s in cloning_strategy.sources if s.type == 'PCRSource']
 
     # Make all input of a Golden gate assembly
     golden_gate_source = RestrictionAndLigationSource(
-        id=next_node_id, output_name='golden_gate_assembly', restriction_enzymes=['BsaI'], input=pcr_product_ids
+        id=0, output_name='golden_gate_assembly', restriction_enzymes=['BsaI']
     )
 
-    next_node_id += 1
     # Make them
-    input_sequences = [next(s for s in template.sequences if s.id == p) for p in pcr_product_ids]
+    input_sequences = [next(s for s in cloning_strategy.sequences if s.id == p) for p in pcr_product_ids]
     resp = await restriction_and_ligation(golden_gate_source, input_sequences, False, False)
     golden_gate_product: TextFileSequence = TextFileSequence.model_validate(resp['sequences'][0])
-    golden_gate_product.id = next_node_id
     golden_gate_source: RestrictionAndLigationSource = RestrictionAndLigationSource.model_validate(resp['sources'][0])
-    golden_gate_source.output = next_node_id
-    next_node_id += 1
+    cloning_strategy.add_source_and_sequence(golden_gate_source, golden_gate_product)
 
-    template.sequences.append(golden_gate_product)
-    template.sources.append(golden_gate_source)
-
-    bp_target = next(s for s in template.sequences if s.id == 12)
-    gateway_source = GatewaySource(id=next_node_id, output_name='entry_clone', reaction_type='BP', greedy=False)
-    next_node_id += 1
+    bp_target = next(s for s in cloning_strategy.sequences if s.id == 6)
+    gateway_source = GatewaySource(id=0, output_name='entry_clone', reaction_type='BP', greedy=False)
     resp = await gateway(gateway_source, [golden_gate_product, bp_target], circular_only=True, only_multi_site=True)
     gateway_product: TextFileSequence = TextFileSequence.model_validate(resp['sequences'][0])
-    gateway_product.id = next_node_id
     gateway_source: GatewaySource = GatewaySource.model_validate(resp['sources'][0])
-    gateway_source.output = next_node_id
-    next_node_id += 1
-
-    template.sequences.append(gateway_product)
-    template.sources.append(gateway_source)
+    cloning_strategy.add_source_and_sequence(gateway_source, gateway_product)
 
     if until_bp:
         # Delete sources and sequences left
-        ids2delete = list(range(5, 11))
-        template.sources = [s for s in template.sources if s.id not in ids2delete]
-        template.sequences = [s for s in template.sequences if s.id not in ids2delete]
-        return template
+        ids2delete = list(range(3, 6))
+        cloning_strategy.sources = [s for s in cloning_strategy.sources if s.id not in ids2delete]
+        cloning_strategy.sequences = [s for s in cloning_strategy.sequences if s.id not in ids2delete]
+        return cloning_strategy
 
     # Now we want to do a Gateway with everything, so we need to find all sequences that are not input of anything
-    all_input_ids = sum([s.input for s in template.sources], [])
-    sequences_to_clone = [s for s in template.sequences if s.id not in all_input_ids]
+    all_inputs = sum([s.input for s in cloning_strategy.sources], [])
+    all_input_ids = [s.sequence for s in all_inputs]
+    sequences_to_clone = [s for s in cloning_strategy.sequences if s.id not in all_input_ids]
 
-    gateway_source = GatewaySource(id=next_node_id, output_name='expression_clone', reaction_type='LR', greedy=False)
-    next_node_id += 1
+    gateway_source = GatewaySource(id=0, output_name='expression_clone', reaction_type='LR', greedy=False)
     resp = await gateway(gateway_source, sequences_to_clone, circular_only=True, only_multi_site=True)
     index_of_product = next(i for i, s in enumerate(resp['sequences']) if '/label="Cas9"' in s.file_content)
     expression_clone: TextFileSequence = TextFileSequence.model_validate(resp['sequences'][index_of_product])
-    expression_clone.id = next_node_id
     gateway_source: GatewaySource = GatewaySource.model_validate(resp['sources'][index_of_product])
-    gateway_source.output = next_node_id
-    next_node_id += 1
+    cloning_strategy.add_source_and_sequence(gateway_source, expression_clone)
 
-    template.sequences.append(expression_clone)
-    template.sources.append(gateway_source)
-
-    return template
+    return cloning_strategy

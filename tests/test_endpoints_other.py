@@ -70,7 +70,7 @@ class ValidateEndPointTest(unittest.TestCase):
         self.assertEqual(cs.schema_version, schema_version)
 
         # File with errors
-        with open(f'{test_files}/bug_fixing/digestion_spanning_origin.json') as ins:
+        with open(f'{test_files}/bug_fixing/old_format/digestion_spanning_origin.json') as ins:
             # Read it to json
             data = json.load(ins)
         response = client.post('/validate', json=data)
@@ -81,7 +81,7 @@ class ValidateEndPointTest(unittest.TestCase):
 
         # The right source has been turned into a template
         data = response.json()
-        seq = next(s for s in data['sequences'] if s['id'] == 6)
+        seq = next(s for s in data['sequences'] if s['id'] == 3)
         self.assertEqual(seq['type'], 'TemplateSequence')
 
 

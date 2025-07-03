@@ -370,7 +370,7 @@ class AssemblySourceCommonClass(SourceCommonClass):
 
     def get_assembly_plan(self, fragments: list[_SeqRecord]) -> tuple:
         """Returns the assembly plan"""
-        subf = [f.to_fragment_tuple(fragments) for f in self.input]
+        subf = [f.to_fragment_tuple(fragments) for f in self.input if f.type == 'AssemblyFragment']
         return subfragment_representation2edge_representation(subf, self.circular)
 
     def is_assembly_complete(self) -> bool:
@@ -462,7 +462,9 @@ class CRISPRSource(AssemblySourceCommonClass, _CRISPRSource):
         fragments: list[_SeqRecord],
         guides: list[int],
     ):
-        return super().from_assembly(assembly, id, False, fragments, guides=guides)
+        source = super().from_assembly(assembly, id, False, fragments)
+        source.input += [SourceInput(sequence=guide) for guide in guides]
+        return source
 
 
 class RestrictionAndLigationSource(AssemblySourceCommonClass, _RestrictionAndLigationSource):
@@ -520,17 +522,14 @@ class BaseCloningStrategy(_CloningStrategy):
         json_schema_extra={'linkml_meta': {'alias': 'backend_version', 'domain_of': ['CloningStrategy']}},
     )
 
-    def next_primer_id(self):
-        return max([p.id for p in self.primers], default=0) + 1
-
     def add_primer(self, primer: PrimerModel):
         if primer in self.primers:
             return
-        primer.id = self.next_primer_id()
+        primer.id = self.next_id()
         self.primers.append(primer)
 
-    def next_node_id(self):
-        return max([s.id for s in self.sources + self.sequences], default=0) + 1
+    def next_id(self):
+        return max([s.id for s in self.sources + self.sequences + self.primers], default=0) + 1
 
     def add_source_and_sequence(self, source: SourceCommonClass, sequence: TextFileSequence):
         if source in self.sources:
@@ -539,7 +538,7 @@ class BaseCloningStrategy(_CloningStrategy):
                     f"Source {source.id} already exists in the cloning strategy, but sequence {sequence.id} it's not its output."
                 )
             return
-        new_id = self.next_node_id()
+        new_id = self.next_id()
         source.id = new_id
         self.sources.append(source)
         sequence.id = new_id

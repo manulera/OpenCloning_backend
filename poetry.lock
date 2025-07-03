@@ -1135,26 +1135,22 @@ files = [
 
 [[package]]
 name = "opencloning-linkml"
-version = "0.3.0a0.post1.dev0+4bb12ab"
+version = "0.4.0"
 description = "A LinkML data model for OpenCloning"
 optional = false
-python-versions = "^3.10"
+python-versions = "<4.0,>=3.10"
 groups = ["main"]
 markers = "python_version == \"3.11\" or python_version >= \"3.12\""
-files = []
-develop = false
+files = [
+    {file = "opencloning_linkml-0.4.0-py3-none-any.whl", hash = "sha256:25ba328a4550ca73394f98358d2deb434bb3c69c6269f901d3a1630c0735f9a9"},
+    {file = "opencloning_linkml-0.4.0.tar.gz", hash = "sha256:76fa5c3da65ef9d8ad6dd967aac2cf7150ce125b70b310953cf613e712045dfa"},
+]
 
 [package.dependencies]
-pydantic = "^2.7.1"
+pydantic = ">=2.7.1,<3.0.0"
 
 [package.extras]
 docs = ["linkml (>=1.9.2,<2.0.0)"]
-
-[package.source]
-type = "git"
-url = "https://github.com/OpenCloning/OpenCloning_LinkML"
-reference = "HEAD"
-resolved_reference = "4bb12ab2b9cf70c94c929c211ea3e343dc5edd57"
 
 [[package]]
 name = "openpyxl"
@@ -2717,4 +2713,4 @@ test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "e5061e716304717843abed7cbfcdc069415b1d60553acb74ec30bd0edf9ae142"
+content-hash = "3b7851bde203cf9aace2fb8b8b6bc0f52b9bee0b56a735753b5275c795d4f303"
