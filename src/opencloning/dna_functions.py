@@ -29,7 +29,7 @@ def format_sequence_genbank(seq: Dseqrecord, seq_name: str = None) -> TextFileSe
         correct_name(seq)
 
     return TextFileSequence(
-        id=0,
+        id=int(seq.id) if seq.id is not None and str(seq.id).isdigit() else 0,
         file_content=seq.format('genbank'),
         sequence_file_format=SequenceFileFormat('genbank'),
         overhang_crick_3prime=seq.seq.ovhg,
