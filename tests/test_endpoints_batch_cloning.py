@@ -31,7 +31,7 @@ class ZiqiangEtAl2024Test(unittest.TestCase):
         lr_source = next(s for s in payload['sources'] if s['type'] == 'GatewaySource' and s['reaction_type'] == 'LR')
         self.assertIsNotNone(lr_source)
         # Get the output sequence
-        seq_id = lr_source['output']
+        seq_id = lr_source['id']
         seq = next(s for s in payload['sequences'] if s['id'] == seq_id)
         self.assertIsNotNone(seq)
         dseq = read_dsrecord_from_json(TextFileSequence.model_validate(seq))
@@ -52,7 +52,7 @@ class ZiqiangEtAl2024Test(unittest.TestCase):
             (s for s in payload['sources'] if s['type'] == 'GatewaySource' and s['reaction_type'] == 'BP'), None
         )
         self.assertIsNotNone(bp_source)
-        seq = next(s for s in payload['sequences'] if s['id'] == bp_source['output'])
+        seq = next(s for s in payload['sequences'] if s['id'] == bp_source['id'])
         self.assertIsNotNone(seq)
         dseq = read_dsrecord_from_json(TextFileSequence.model_validate(seq))
         self.assertEqual(dseq.name, 'entry_clone')

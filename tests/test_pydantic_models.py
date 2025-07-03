@@ -55,9 +55,6 @@ class AssemblySourceTest(TestCase):
                     SequenceLocationStr.from_start_and_end(start=0, end=10),
                 )
 
-                # Check other fields
-                self.assertEqual(assembly_source.input, [4, 5, 6])
-
             for obj, tup in zip(assembly_source.input, fragment_assembly):
                 self.assertEqual(obj.to_fragment_tuple(fragments), tup)
 

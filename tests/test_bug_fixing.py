@@ -13,15 +13,10 @@ test_files_dir = os.path.join(os.path.dirname(__file__), 'test_files', 'bug_fixi
 class TestBugFixing(unittest.TestCase):
 
     def which_sources_are_templates(self, file_path: str) -> set[int]:
-        template_sources = set()
         with open(file_path, 'r') as f:
             data = json.load(f)
 
-        template_sequence_ids = set(s['id'] for s in data['sequences'] if s['type'] == 'TemplateSequence')
-        for source in data['sources']:
-            if source['output'] in template_sequence_ids:
-                template_sources.add(source['id'])
-        return template_sources
+        return set(s['id'] for s in data['sequences'] if s['type'] == 'TemplateSequence')
 
     def test_backend_v0_3_script(self):
         # Copy JSON files from test_files/bug_fixing directory, excluding 'fixed.json' files
@@ -53,12 +48,12 @@ class TestBugFixing(unittest.TestCase):
 
                 # Tests which source ids are expected to be transformed into templates
                 if 'pcr_spanning_origin' in file_path:
-                    self.assertEqual(self.which_sources_are_templates(fixed_path), {3})
+                    self.assertEqual(self.which_sources_are_templates(fixed_path), {2})
                 elif 'gateway_13bp_overlap' in file_path:
-                    self.assertEqual(self.which_sources_are_templates(fixed_path), {9, 11})
+                    self.assertEqual(self.which_sources_are_templates(fixed_path), {5, 6})
                 elif 'gateway_13bp_followed_by_digestion' in file_path:
-                    self.assertEqual(self.which_sources_are_templates(fixed_path), {9, 11})
+                    self.assertEqual(self.which_sources_are_templates(fixed_path), {5, 6})
                 elif 'digestion_spanning_origin' in file_path:
-                    self.assertEqual(self.which_sources_are_templates(fixed_path), {5})
+                    self.assertEqual(self.which_sources_are_templates(fixed_path), {3})
                 elif 'example_error_assembly_origin_spanning_feature.json' in file_path:
-                    self.assertEqual(self.which_sources_are_templates(fixed_path), {9})
+                    self.assertEqual(self.which_sources_are_templates(fixed_path), {5})

@@ -1,7 +1,7 @@
 {
   "sequences": [
     {
-      "id": 1,
+      "id": 2,
       "type": "TextFileSequence",
       "sequence_file_format": "genbank",
       "overhang_crick_3prime": 0,
@@ -9,7 +9,7 @@
       "file_content": "LOCUS       name                      10 bp    DNA     circular UNK 01-JAN-1980\nDEFINITION  description.\nACCESSION   id\nVERSION     id\nKEYWORDS    .\nSOURCE      .\n  ORGANISM  .\n            .\nFEATURES             Location/Qualifiers\nORIGIN\n        1 ttcaaaagaa\n//"
     },
     {
-      "id": 2,
+      "id": 4,
       "type": "TextFileSequence",
       "sequence_file_format": "genbank",
       "overhang_crick_3prime": 0,
@@ -17,7 +17,7 @@
       "file_content": "LOCUS       name                      12 bp    DNA     circular UNK 01-JAN-1980\nDEFINITION  description.\nACCESSION   id\nVERSION     id\nKEYWORDS    .\nSOURCE      .\n  ORGANISM  .\n            .\nFEATURES             Location/Qualifiers\nORIGIN\n        1 ttcccccccg aa\n//"
     },
     {
-      "id": 3,
+      "id": 6,
       "type": "TextFileSequence",
       "sequence_file_format": "genbank",
       "overhang_crick_3prime": 0,
@@ -28,48 +28,53 @@
   "sources": [
     {
       "id": 1,
+      "input": [],
+      "output": 2,
       "type": "ManuallyTypedSource",
       "output_name": null,
       "database_id": null,
-      "input": [],
       "overhang_crick_3prime": 0,
       "overhang_watson_3prime": 0,
       "user_input": "TTCaaaaGAA",
       "circular": true
     },
     {
-      "id": 2,
+      "id": 3,
+      "input": [],
+      "output": 4,
       "type": "ManuallyTypedSource",
       "output_name": null,
       "database_id": null,
-      "input": [],
       "overhang_crick_3prime": 0,
       "overhang_watson_3prime": 0,
       "user_input": "ttcccccccgaa",
       "circular": true
     },
     {
-      "id": 3,
+      "id": 5,
+      "input": [
+        2,
+        4
+      ],
+      "output": 6,
       "type": "RestrictionAndLigationSource",
       "output_name": null,
       "database_id": null,
-      "input": [
+      "circular": true,
+      "assembly": [
         {
-          "type": "AssemblyFragment",
-          "sequence": 1,
+          "sequence": 2,
           "left_location": "1..10",
           "right_location": "1..10",
           "reverse_complemented": false
         },
         {
-          "type": "AssemblyFragment",
-          "sequence": 2,
+          "sequence": 4,
           "left_location": "1..12",
           "right_location": "1..12",
           "reverse_complemented": false
         }
       ],
-      "circular": true,
       "restriction_enzymes": [
         "EcoRI"
       ]
@@ -78,7 +83,7 @@
   "primers": [],
   "description": "",
   "files": null,
-  "schema_version": "0.4.0",
+  "schema_version": "0.2.9",
   "backend_version": null,
   "frontend_version": null
 }

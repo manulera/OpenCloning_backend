@@ -81,7 +81,7 @@ def format_known_assembly_response(
 )
 async def crispr(
     source: CRISPRSource,
-    guides: list[PrimerModel],
+    guides: Annotated[list[PrimerModel], Field(min_length=1)],
     sequences: Annotated[list[TextFileSequence], Field(min_length=2, max_length=2)],
     minimal_homology: int = Query(40, description='The minimum homology between the template and the insert.'),
 ):
@@ -107,6 +107,7 @@ async def crispr(
                 400, f'Could not find Cas9 cutsite in the target sequence using the guide: {guide.name}'
             )
         guide_cuts.append(possible_cuts)
+    sorted_guide_ids = list(sorted([guide.id for guide in guides]))
 
     # Check if homologous recombination is possible
     fragments = [template, insert]
@@ -145,7 +146,7 @@ async def crispr(
     # meant for linear DNA
 
     out_sources = [
-        CRISPRSource.from_assembly(id=source.id, assembly=a, guides=source.guides, fragments=fragments)
+        CRISPRSource.from_assembly(id=source.id, assembly=a, guides=sorted_guide_ids, fragments=fragments)
         for a in valid_assemblies
     ]
 
