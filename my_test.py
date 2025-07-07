@@ -31,7 +31,7 @@ trace3 = long_seq[-30:] + long_seq[:30]
 
 sanger_traces = [trace1, trace2, trace3]
 
-# aligned_circ = align_sanger_traces(circ_record, sanger_traces)
+aligned_circ = align_sanger_traces(circ_record, sanger_traces)
 
-# for i, trace in enumerate(aligned_circ):
-#     print(f"Sequence {i}: {trace}")
+for i, trace in enumerate(aligned_circ):
+    print(f"Sequence {i}: {trace}")

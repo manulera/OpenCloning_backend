@@ -124,40 +124,6 @@ def permutate_trace(reference: str, sanger_trace: str) -> str:
         return str(parse(output_path, 'fasta')[1].seq)
 
 
-def get_gapped_strings(alignment):
-    target = alignment.target
-    query = alignment.query
-    target_gapped = []
-    query_gapped = []
-    t_i = q_i = 0
-    for (t_start, t_end), (q_start, q_end) in zip(*alignment.aligned):
-        # Add gaps if needed
-        while t_i < t_start:
-            target_gapped.append(target[t_i])
-            query_gapped.append('-')
-            t_i += 1
-        while q_i < q_start:
-            target_gapped.append('-')
-            query_gapped.append(query[q_i])
-            q_i += 1
-        # Add matching region
-        while t_i < t_end and q_i < q_end:
-            target_gapped.append(target[t_i])
-            query_gapped.append(query[q_i])
-            t_i += 1
-            q_i += 1
-    # Append any trailing sequence
-    while t_i < len(target):
-        target_gapped.append(target[t_i])
-        query_gapped.append('-')
-        t_i += 1
-    while q_i < len(query):
-        target_gapped.append('-')
-        query_gapped.append(query[q_i])
-        q_i += 1
-    return ''.join(target_gapped), ''.join(query_gapped)
-
-
 def align_sanger_traces(dseqr: Dseqrecord, sanger_traces: list[str]) -> list[str]:
     """Align a sanger track to a dseqr sequence"""
     query_str = str(dseqr.seq)
@@ -189,9 +155,8 @@ def align_sanger_traces(dseqr: Dseqrecord, sanger_traces: list[str]) -> list[str
     aligned_pairs = []
     for trace in sanger_traces:
         alignment = next(aligner.align(query_str, trace))
-        gapped_target, gapped_query = get_gapped_strings(alignment)
-        aligned_pairs.append([gapped_target, gapped_query])
-        print(f"Target: {gapped_target}, Query: {gapped_query}")
+        formatted_alignment = alignment.format('fasta').split()[1::2]
+        aligned_pairs.append(tuple(formatted_alignment))
     return aligned_tuples_to_MSA(aligned_pairs)
 
 
