@@ -126,7 +126,13 @@ def permutate_trace(reference: str, sanger_trace: str) -> str:
 
 def align_sanger_traces(dseqr: Dseqrecord, sanger_traces: list[str]) -> list[str]:
     """Align a sanger track to a dseqr sequence"""
-    query_str = str(dseqr.seq)
+    aligner.match_score = 1
+    aligner.mismatch_score = -1
+    aligner.open_gap_score = -10
+    aligner.extend_gap_score = -1
+
+    query_str = str(dseqr.seq).upper()
+    sanger_traces = [trace.upper() for trace in sanger_traces]
     # Check that required executables exist in PATH
     if not shutil.which('mars'):
         raise RuntimeError("'mars' executable not found in PATH")
@@ -150,6 +156,11 @@ def align_sanger_traces(dseqr: Dseqrecord, sanger_traces: list[str]) -> list[str
                 traces_oriented.append(fwd.replace('N', ''))
             else:
                 traces_oriented.append(rvs.replace('N', ''))
+            # if fwd_alignment.score > rvs_alignment.score:
+            #     traces_oriented.append(fwd)
+            # else:
+            #     traces_oriented.append(rvs)
+
         sanger_traces = traces_oriented
 
     aligned_pairs = []
