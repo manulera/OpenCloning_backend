@@ -137,7 +137,7 @@ def align_sanger_traces(dseqr: Dseqrecord, sanger_traces: list[str]) -> list[str
     if not shutil.which('mafft'):
         raise RuntimeError("'mafft' executable not found in PATH")
 
-    traces_oriented = []
+    aligned_pairs = []
     for trace in sanger_traces:
         # If the sequence is circular, permutate both fwd and reverse complement
         if dseqr.circular:
@@ -147,18 +147,13 @@ def align_sanger_traces(dseqr: Dseqrecord, sanger_traces: list[str]) -> list[str
             fwd = trace
             rvs = reverse_complement(trace)
 
-        # Pairwise-align and keep the best alignment, to decide which orientation to keep
+        # Pairwise-align and keep the best alignment
         fwd_alignment = next(aligner.align(query_str, fwd))
         rvs_alignment = next(aligner.align(query_str, rvs))
 
-        best_trace = fwd if fwd_alignment.score > rvs_alignment.score else rvs
-        # traces_oriented.append(best_trace.replace('N', ''))
-        traces_oriented.append(best_trace)
+        best_alignment = fwd_alignment if fwd_alignment.score > rvs_alignment.score else rvs_alignment
 
-    aligned_pairs = []
-    for trace in traces_oriented:
-        alignment = next(aligner.align(query_str, trace))
-        formatted_alignment = alignment.format('fasta').split()[1::2]
+        formatted_alignment = best_alignment.format('fasta').split()[1::2]
         aligned_pairs.append(tuple(formatted_alignment))
 
     return aligned_tuples_to_MSA(aligned_pairs)

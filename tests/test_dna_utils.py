@@ -88,7 +88,7 @@ class AlignSangerTrackTest(unittest.TestCase):
 
     def test_align_sanger_traces(self):
         seq = parse(os.path.join(test_files, 'GIN11M86.gb'))[0]
-        trace = 'ttgcagcattttgtctttctataaaaatgtgtcgttcctttttttcattttttggcgcgtcgcctcggggtcgtatagaatatg'
+        trace = 'ttgcagcattttgtctttctataaaaatgtgtcgttcctttttttcattttttggcgcgtcgcctcggggtcgtatagaatat'
         alignment = align_sanger_traces(seq, [trace])
         self.assertTrue(alignment[1].startswith('-' * 152 + trace.upper()))
 
@@ -100,19 +100,12 @@ class AlignSangerTrackTest(unittest.TestCase):
         # Works with degenerate sequences
         trace_degenerate = trace.replace('g', 'n')
         alignment_degenerate = align_sanger_traces(seq, [trace_degenerate])
-        alignment_degenerate_cleaned = alignment_degenerate[1].replace('-', '')
-
-        print(alignment_degenerate_cleaned)
-        print('\n')
-        print(trace_degenerate.upper())
-
-        self.assertIn(trace_degenerate.upper(), alignment_degenerate_cleaned)
-        # self.assertTrue(alignment_degenerate[1].startswith('-' * 152 + trace_degenerate.upper()))
+        self.assertTrue(alignment_degenerate[1].startswith('-' * 152 + trace_degenerate.upper()))
 
         # If the trace aligns to the reverse complement, it returns the trace in the opposite orientation
         trace_rc = reverse_complement(trace)
         alignment_rc = align_sanger_traces(seq, [trace_rc])
-        self.assertEqual(len(alignment_rc[1]), len(seq))
+        self.assertEqual(alignment_rc[1], alignment[1])
 
         # Works with circular sequences
         seq = seq.looped()
