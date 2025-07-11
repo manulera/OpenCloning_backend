@@ -126,48 +126,41 @@ def permutate_trace(reference: str, sanger_trace: str) -> str:
 
 def align_sanger_traces(dseqr: Dseqrecord, sanger_traces: list[str]) -> list[str]:
     """Align a sanger track to a dseqr sequence"""
-    aligner.match_score = 1
-    aligner.mismatch_score = -1
-    aligner.open_gap_score = -10
-    aligner.extend_gap_score = -1
 
+    # Ensure sequences are in upper case
     query_str = str(dseqr.seq).upper()
     sanger_traces = [trace.upper() for trace in sanger_traces]
+
     # Check that required executables exist in PATH
     if not shutil.which('mars'):
         raise RuntimeError("'mars' executable not found in PATH")
     if not shutil.which('mafft'):
         raise RuntimeError("'mafft' executable not found in PATH")
 
-    # If the sequence is circular, use MARS to permutate the traces
-    if dseqr.circular:
-        permutated_traces = []
-        for trace in sanger_traces:
-            permutated_traces.append(permutate_trace(query_str, trace))
-            permutated_traces.append(permutate_trace(query_str, reverse_complement(trace)))
+    traces_oriented = []
+    for trace in sanger_traces:
+        # If the sequence is circular, permutate both fwd and reverse complement
+        if dseqr.circular:
+            fwd = permutate_trace(query_str, trace)
+            rvs = permutate_trace(query_str, reverse_complement(trace))
+        else:
+            fwd = trace
+            rvs = reverse_complement(trace)
 
-        traces_oriented = []
         # Pairwise-align and keep the best alignment, to decide which orientation to keep
-        for fwd, rvs in zip(permutated_traces[::2], permutated_traces[1::2]):
-            fwd_alignment = next(aligner.align(query_str, fwd))
-            rvs_alignment = next(aligner.align(query_str, rvs))
+        fwd_alignment = next(aligner.align(query_str, fwd))
+        rvs_alignment = next(aligner.align(query_str, rvs))
 
-            if fwd_alignment.score > rvs_alignment.score:
-                traces_oriented.append(fwd.replace('N', ''))
-            else:
-                traces_oriented.append(rvs.replace('N', ''))
-            # if fwd_alignment.score > rvs_alignment.score:
-            #     traces_oriented.append(fwd)
-            # else:
-            #     traces_oriented.append(rvs)
-
-        sanger_traces = traces_oriented
+        best_trace = fwd if fwd_alignment.score > rvs_alignment.score else rvs
+        # traces_oriented.append(best_trace.replace('N', ''))
+        traces_oriented.append(best_trace)
 
     aligned_pairs = []
-    for trace in sanger_traces:
+    for trace in traces_oriented:
         alignment = next(aligner.align(query_str, trace))
         formatted_alignment = alignment.format('fasta').split()[1::2]
         aligned_pairs.append(tuple(formatted_alignment))
+
     return aligned_tuples_to_MSA(aligned_pairs)
 
 
