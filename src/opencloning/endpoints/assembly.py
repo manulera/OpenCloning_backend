@@ -27,7 +27,7 @@ from ..pydantic_models import (
     CreLoxRecombinationSource,
     InVivoAssemblySource,
 )
-from ..assembly2 import (
+from pydna.assembly2 import (
     Assembly,
     assemble,
     sticky_end_sub_strings,
@@ -319,7 +319,7 @@ async def pcr(
 
         def callback(x):
             if source.add_primer_features:
-                return annotate_primer_binding_sites(x, fragments, source.get_assembly_plan(fragments))
+                return annotate_primer_binding_sites(x, fragments)
             else:
                 return x
 
@@ -331,7 +331,7 @@ async def pcr(
     def callback(fragments, a):
         out_seq = assemble(fragments, a)
         if source.add_primer_features:
-            return annotate_primer_binding_sites(out_seq, fragments, possible_assemblies)
+            return annotate_primer_binding_sites(out_seq, fragments)
         else:
             return out_seq
 

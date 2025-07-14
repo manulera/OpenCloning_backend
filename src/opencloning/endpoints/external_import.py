@@ -216,6 +216,11 @@ def repository_id_http_error_handler(exception: HTTPError, source: RepositoryIdS
             404,
             f'{source.repository_name} returned: {exception} - Likely you inserted a wrong {source.repository_name} id',
         )
+    elif exception.code == 403:
+        raise HTTPException(
+            403,
+            f'Request to {source.repository_name} is not allowed. Please check that the URL is whitelisted.',
+        )
 
 
 # Redirect to the right repository

@@ -2,9 +2,9 @@
 # https://github.com/manulera/OpenCloning_backend
 
 # BUILDER IMAGE
-FROM python:3.12-slim-bookworm AS builder
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get upgrade -y && apt-get install -y gcc git g++ wget build-essential cmake unzip
+FROM python:3.12-alpine AS builder
+
+RUN apk update --no-cache && apk add --no-cache build-base bash cmake
 
 # Build mafft from source
 # mafft creates an entire directory, that's what we copy later and that's why it needs
@@ -17,15 +17,17 @@ RUN cd mafft-7.525-without-extensions/core && \
     make install
 
 # Build MARS from source
-RUN wget https://github.com/manulera/MARS/archive/refs/tags/v0.2.tar.gz && \
-tar -xzf v0.2.tar.gz && \
-cd MARS-0.2 && \
+RUN wget https://github.com/manulera/MARS/archive/refs/tags/v0.2.3.tar.gz && \
+tar -xzf v0.2.3.tar.gz && \
+cd MARS-0.2.3 && \
 ./pre-install.sh && \
+# Fix https://github.com/lorrainea/MARS/issues/20
+sed -i '/template <size_t PAGESIZE>/i\ #ifdef PAGESIZE\n#undef PAGESIZE\n#endif' ./seqan/file/file_page.h && \
 make -f Makefile && \
 mv mars /usr/local/bin/mars
 
 
-RUN useradd -ms /bin/bash backend
+RUN adduser -s /bin/bash -D backend
 USER backend
 WORKDIR /home/backend
 
@@ -58,18 +60,16 @@ RUN sed -i "s/^version = .*/version = \"${PACKAGE_VERSION}\"/" pyproject.toml
 RUN poetry install --only main
 
 # FINAL IMAGE
-FROM python:3.12-slim-bookworm
+FROM python:3.12-alpine
 
-RUN apt-get update && apt-get upgrade -y && apt-get install --no-install-recommends -y mafft libgomp1 && rm -rf /var/lib/apt/lists/*
-
-# Remove perl, it's not needed and introduced vulnerabilities
-RUN apt-get purge --allow-remove-essential -y perl perl-base perl-modules-5.36 && apt-get autoremove -y
+# You need bash to run mafft and runtime libraries for MARS
+RUN apk update --no-cache && apk add --no-cache bash libstdc++ libgomp libgcc
 
 # directly output things to stdout/stderr, without buffering
 ENV PYTHONUNBUFFERED=1
 
 # create a user to run the app
-RUN useradd -ms /bin/bash backend
+RUN adduser -s /bin/bash -D backend
 USER backend
 WORKDIR /home/backend
 
