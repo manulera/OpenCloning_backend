@@ -1,4 +1,0 @@
-* backend_v0_3
-* batch_cloning > pombe
-    insertion_start = locus_source.start + hrec_source.input[0].right_location.end
-    insertion_end = locus_source.start + hrec_source.input[-1].left_location.start
