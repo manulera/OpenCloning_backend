@@ -30,6 +30,7 @@ opencloning-linkml = "0.3.0a0"
 primer3-py = "2.2.0"
 biopython = "^1.85"
 packaging = "^25.0"
+pairwise-alignments-to-msa = "^0.1.1"
 
 [tool.poetry.group.dev.dependencies]
 autopep8 = "^2.0.4"
