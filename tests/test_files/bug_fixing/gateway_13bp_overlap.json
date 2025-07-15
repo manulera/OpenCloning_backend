@@ -196,7 +196,7 @@
   ],
   "description": "Cloning the lacZ gene from E. coli into an entry clone, then expression clone",
   "files": null,
-  "schema_version": "0.4.0",
+  "schema_version": "0.4.3",
   "backend_version": null,
   "frontend_version": null
 }
