@@ -39,7 +39,6 @@ black = "^24.2.0"
 pre-commit = "^3.6.2"
 watchfiles = "^0.21.0"
 nbstripout = "^0.8.1"
-uvicorn = "^0.34.3"
 
 [tool.poetry.group.test.dependencies]
 pytest = "8.3.4"
