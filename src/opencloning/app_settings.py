@@ -43,6 +43,7 @@ default_allowed_urls = [
     'https://assets.opencloning.org/annotated-igem-distribution',
     'http://www.euroscarf.de/',
     'https://wekwikgene.wllsb.edu.cn',
+    'http://bahlerweb.cs.ucl.ac.uk',
 ]
 
 if os.environ.get('ALLOWED_EXTERNAL_URLS') is not None:
