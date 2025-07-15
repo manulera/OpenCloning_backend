@@ -1,4 +1,4 @@
-from ...pydantic_models import BaseCloningStrategy, PrimerModel, PCRSource
+from ...pydantic_models import BaseCloningStrategy, PrimerModel, PCRSource, HomologousRecombinationSource
 from pydna.parsers import parse as pydna_parse
 import os
 import json
@@ -30,8 +30,12 @@ def process_folder(working_dir: str):
         strategy = BaseCloningStrategy.model_validate(json.load(f))
 
     pcr_sources = [s for s in strategy.sources if s.type == 'PCRSource']
+    # We do this to have action to .end and .start
+    pcr_sources = [PCRSource.model_validate(s.model_dump()) for s in pcr_sources]
     locus_source = next(s for s in strategy.sources if s.type == 'GenomeCoordinatesSource')
     hrec_source = next(s for s in strategy.sources if s.type == 'HomologousRecombinationSource')
+    # We do this to have action to .end and .start
+    hrec_source: HomologousRecombinationSource = HomologousRecombinationSource.model_validate(hrec_source.model_dump())
 
     chromosome = chromosomes[locus_source.sequence_accession]
     insertion_start = locus_source.start + hrec_source.input[0].right_location.end

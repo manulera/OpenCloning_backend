@@ -69,6 +69,8 @@ async def main(
         primers=[],
         description=f'Cloning strategy for deleting the gene {gene} using PCR and homologous recombination',
     )
+    for primer in primers:
+        cloning_strategy.add_primer(primer)
     locus_seq: TextFileSequence = TextFileSequence.model_validate(locus['sequences'][0])
     locus_source: GenomeCoordinatesSource = GenomeCoordinatesSource.model_validate(locus['sources'][0])
     cloning_strategy.add_source_and_sequence(locus_source, locus_seq)
@@ -127,27 +129,15 @@ async def main(
     check_pcr_source_right: PCRSource = PCRSource.model_validate(resp['sources'][0])
     cloning_strategy.add_source_and_sequence(check_pcr_source_right, check_pcr_product_right)
 
-    sources = [locus_source, plasmid_source, pcr_source, hrec_source, check_pcr_source_left, check_pcr_source_right]
-    sequences = [locus_seq, plasmid_seq, pcr_product, hrec_product, check_pcr_product_left, check_pcr_product_right]
-
-    # Add primers
-    for primer in primers:
-        cloning_strategy.add_primer(primer)
-
-    cloning_strategy = {
-        'sources': [s.model_dump() for s in sources],
-        'sequences': [s.model_dump() for s in sequences],
-        'primers': [p.model_dump() for p in primers],
-        'description': f'Cloning strategy for deleting the gene {gene} using PCR and homologous recombination',
-    }
-
-    BaseCloningStrategy.model_validate(cloning_strategy)
+    cloning_strategy.description = (
+        f'Cloning strategy for deleting the gene {gene} using PCR and homologous recombination'
+    )
 
     if not os.path.exists(os.path.join(output_dir, gene)):
         os.makedirs(os.path.join(output_dir, gene))
 
     with open(os.path.join(output_dir, gene, 'cloning_strategy.json'), 'w') as f:
-        json.dump(cloning_strategy, f, indent=2)
+        json.dump(cloning_strategy.model_dump(), f, indent=2)
 
 
 if __name__ == '__main__':
