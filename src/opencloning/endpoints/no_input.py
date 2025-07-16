@@ -1,7 +1,8 @@
 from fastapi import Query, HTTPException
 from pydna.dseqrecord import Dseqrecord
 from pydna.dseq import Dseq
-from pydantic import conlist, create_model
+from pydantic import create_model, Field
+from typing import Annotated
 
 from ..dna_functions import (
     format_sequence_genbank,
@@ -12,6 +13,7 @@ from ..pydantic_models import (
     TextFileSequence,
     ManuallyTypedSource,
     OligoHybridizationSource,
+    SourceInput,
 )
 
 from .. import request_examples
@@ -54,11 +56,16 @@ async def manually_typed(source: ManuallyTypedSource):
 )
 async def oligonucleotide_hybridization(
     source: OligoHybridizationSource,
-    primers: conlist(PrimerModel, min_length=1, max_length=2),
+    primers: Annotated[list[PrimerModel], Field(min_length=1, max_length=2)],
     minimal_annealing: int = Query(20, description='The minimal annealing length for each primer.'),
 ):
-    watson_seq = next((p.sequence for p in primers if p.id == source.forward_oligo), None)
-    crick_seq = next((p.sequence for p in primers if p.id == source.reverse_oligo), None)
+    if len(source.input):
+        watson_seq = next((p.sequence for p in primers if p.id == source.input[0].sequence), None)
+        crick_seq = next((p.sequence for p in primers if p.id == source.input[1].sequence), None)
+    else:
+        watson_seq = primers[0].sequence
+        crick_seq = primers[1].sequence if len(primers) > 1 else watson_seq
+        source.input = [SourceInput(sequence=primers[0].id), SourceInput(sequence=primers[1].id)]
 
     if watson_seq is None or crick_seq is None:
         raise HTTPException(404, 'Invalid oligo id.')

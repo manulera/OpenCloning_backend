@@ -66,10 +66,10 @@ oligonucleotide_hybridization_examples = {
         'value': {
             'source': {
                 'id': 1,
-                'input': [],
-                'output': 0,
-                'forward_oligo': 2,
-                'reverse_oligo': 3,
+                'input': [
+                    {'sequence': 2},
+                    {'sequence': 3},
+                ],
             },
             'primers': [
                 {'id': 2, 'name': 'primer1', 'sequence': 'aaGCGGCCGCgtagaactttatgtgcttccttacattggt'},

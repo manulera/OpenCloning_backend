@@ -1,6 +1,6 @@
 from fastapi import Query, HTTPException
 from pydna.dseqrecord import Dseqrecord
-from pydantic import conlist, create_model
+from pydantic import create_model, Field
 from typing import Annotated
 from Bio.Restriction import RestrictionBatch
 
@@ -30,7 +30,7 @@ router = get_router()
 )
 async def restriction(
     source: RestrictionEnzymeDigestionSource,
-    sequences: conlist(TextFileSequence, min_length=1, max_length=1),
+    sequences: Annotated[list[TextFileSequence], Field(min_length=1, max_length=1)],
     restriction_enzymes: Annotated[list[str], Query(default_factory=list)],
 ):
     # There should be 1 or 2 enzymes in the request if the source does not have cuts
@@ -53,7 +53,10 @@ async def restriction(
 
     cutsites = seqr.seq.get_cutsites(*enzymes)
     cutsite_pairs = seqr.seq.get_cutsite_pairs(cutsites)
-    sources = [RestrictionEnzymeDigestionSource.from_cutsites(*p, source.input, source.id) for p in cutsite_pairs]
+    sources = [
+        RestrictionEnzymeDigestionSource.from_cutsites(*p, [{'sequence': sequences[0].id}], source.id)
+        for p in cutsite_pairs
+    ]
 
     all_enzymes = set(enzyme for s in sources for enzyme in s.get_enzymes())
     enzymes_not_cutting = set(restriction_enzymes) - set(all_enzymes)
@@ -90,7 +93,7 @@ async def restriction(
 )
 async def polymerase_extension(
     source: PolymeraseExtensionSource,
-    sequences: conlist(TextFileSequence, min_length=1, max_length=1),
+    sequences: Annotated[list[TextFileSequence], Field(min_length=1, max_length=1)],
 ):
     """Return the sequence from a polymerase extension reaction"""
 
@@ -117,7 +120,7 @@ async def polymerase_extension(
 )
 async def reverse_complement(
     source: ReverseComplementSource,
-    sequences: conlist(TextFileSequence, min_length=1, max_length=1),
+    sequences: Annotated[list[TextFileSequence], Field(min_length=1, max_length=1)],
 ):
     dseq = read_dsrecord_from_json(sequences[0])
     out_sequence = dseq.reverse_complement()

@@ -1,4 +1,4 @@
-from ...pydantic_models import BaseCloningStrategy, PrimerModel, PCRSource
+from ...pydantic_models import BaseCloningStrategy, PrimerModel, PCRSource, HomologousRecombinationSource
 from pydna.parsers import parse as pydna_parse
 import os
 import json
@@ -16,11 +16,11 @@ chromosomes = {
 
 def find_primer_aligned_sequence(pcr_sources: list[PCRSource], primer: PrimerModel) -> str:
     for source in pcr_sources:
-        if source.assembly[0].sequence == primer.id:
-            loc = source.assembly[0].right_location
+        if source.input[0].sequence == primer.id:
+            loc = source.input[0].right_location
             return str(primer.sequence[loc.start : loc.end])
-        if source.assembly[-1].sequence == primer.id:
-            loc = source.assembly[-1].left_location
+        if source.input[-1].sequence == primer.id:
+            loc = source.input[-1].left_location
             return str(reverse_complement(primer.sequence)[loc.start : loc.end])
     raise ValueError(f"Primer {primer.id} not found in any PCR source")
 
@@ -30,12 +30,16 @@ def process_folder(working_dir: str):
         strategy = BaseCloningStrategy.model_validate(json.load(f))
 
     pcr_sources = [s for s in strategy.sources if s.type == 'PCRSource']
+    # We do this to have action to .end and .start
+    pcr_sources = [PCRSource.model_validate(s.model_dump()) for s in pcr_sources]
     locus_source = next(s for s in strategy.sources if s.type == 'GenomeCoordinatesSource')
     hrec_source = next(s for s in strategy.sources if s.type == 'HomologousRecombinationSource')
+    # We do this to have action to .end and .start
+    hrec_source: HomologousRecombinationSource = HomologousRecombinationSource.model_validate(hrec_source.model_dump())
 
     chromosome = chromosomes[locus_source.sequence_accession]
-    insertion_start = locus_source.start + hrec_source.assembly[0].right_location.end
-    insertion_end = locus_source.start + hrec_source.assembly[-1].left_location.start
+    insertion_start = locus_source.start + hrec_source.input[0].right_location.end
+    insertion_end = locus_source.start + hrec_source.input[-1].left_location.start
 
     # Write out the sequences in genbank format and extract some relevant info
     sequences = [pydna_parse(sequence.file_content)[0] for sequence in strategy.sequences]

@@ -3,7 +3,8 @@ from typing import Union, Literal, Callable
 from pydna.dseqrecord import Dseqrecord
 from pydna.primer import Primer as PydnaPrimer
 from pydna.crispr import cas9
-from pydantic import conlist, create_model
+from pydantic import create_model, Field
+from typing import Annotated
 from Bio.Restriction.Restriction import RestrictionBatch
 from opencloning.cre_lox import cre_loxP_overlap, annotate_loxP_sites
 from ..dna_functions import (
@@ -80,8 +81,8 @@ def format_known_assembly_response(
 )
 async def crispr(
     source: CRISPRSource,
-    guides: list[PrimerModel],
-    sequences: conlist(TextFileSequence, min_length=2, max_length=2),
+    guides: Annotated[list[PrimerModel], Field(min_length=1)],
+    sequences: Annotated[list[TextFileSequence], Field(min_length=2, max_length=2)],
     minimal_homology: int = Query(40, description='The minimum homology between the template and the insert.'),
 ):
     """Return the sequence after performing CRISPR editing by Homology directed repair
@@ -106,6 +107,7 @@ async def crispr(
                 400, f'Could not find Cas9 cutsite in the target sequence using the guide: {guide.name}'
             )
         guide_cuts.append(possible_cuts)
+    sorted_guide_ids = list(sorted([guide.id for guide in guides]))
 
     # Check if homologous recombination is possible
     fragments = [template, insert]
@@ -144,12 +146,12 @@ async def crispr(
     # meant for linear DNA
 
     out_sources = [
-        CRISPRSource.from_assembly(id=source.id, assembly=a, guides=source.guides, fragments=fragments)
+        CRISPRSource.from_assembly(id=source.id, assembly=a, guides=sorted_guide_ids, fragments=fragments)
         for a in valid_assemblies
     ]
 
     # If a specific assembly is requested
-    if len(source.assembly):
+    if source.is_assembly_complete():
         return format_known_assembly_response(source, out_sources, [template, insert])
 
     out_sequences = [
@@ -204,7 +206,7 @@ def generate_assemblies(
         raise HTTPException(400, *e.args)
 
     # If a specific assembly is requested
-    if len(source.assembly):
+    if source.is_assembly_complete():
         return format_known_assembly_response(source, out_sources, fragments, product_callback)
 
     out_sequences = [
@@ -225,7 +227,7 @@ def generate_assemblies(
 )
 async def ligation(
     source: LigationSource,
-    sequences: conlist(TextFileSequence, min_length=1),
+    sequences: Annotated[list[TextFileSequence], Field(min_length=1)],
     blunt: bool = Query(False, description='Use blunt ligation as well as sticky ends.'),
     allow_partial_overlap: bool = Query(False, description='Allow for partially overlapping sticky ends.'),
     circular_only: bool = Query(False, description='Only return circular assemblies.'),
@@ -239,7 +241,7 @@ async def ligation(
 
     # If the assembly is known, the blunt parameter is ignored, and we set the algorithm type from the assembly
     # (blunt ligations have features without length)
-    if len(source.assembly):
+    if source.is_assembly_complete():
         asm = source.get_assembly_plan(fragments)
         blunt = len(asm[0][2]) == 0
 
@@ -261,8 +263,8 @@ async def ligation(
 )
 async def pcr(
     source: PCRSource,
-    sequences: conlist(TextFileSequence, min_length=1, max_length=1),
-    primers: conlist(PrimerModel, min_length=1, max_length=2),
+    sequences: Annotated[list[TextFileSequence], Field(min_length=1, max_length=1)],
+    primers: Annotated[list[PrimerModel], Field(min_length=1, max_length=2)],
     minimal_annealing: int = Query(20, description='The minimal annealing length for each primer.'),
     allowed_mismatches: int = Query(0, description='The number of mismatches allowed'),
 ):
@@ -277,7 +279,7 @@ async def pcr(
     # What happens if annealing is zero? That would mean
     # mismatch in the 3' of the primer, which maybe should
     # not be allowed.
-    if len(source.assembly):
+    if source.is_assembly_complete():
         minimal_annealing = source.minimal_overlap()
         # Only the ones that match are included in the output assembly
         # location, so the submitted assembly should be returned without
@@ -315,7 +317,7 @@ async def pcr(
     ]
 
     # If a specific assembly is requested
-    if len(source.assembly):
+    if source.is_assembly_complete():
 
         def callback(x):
             if source.add_primer_features:
@@ -353,14 +355,14 @@ async def pcr(
 )
 async def homologous_recombination(
     source: HomologousRecombinationSource,
-    sequences: conlist(TextFileSequence, min_length=2, max_length=2),
+    sequences: Annotated[list[TextFileSequence], Field(min_length=2, max_length=2)],
     minimal_homology: int = Query(40, description='The minimum homology between the template and the insert.'),
 ):
 
     template, insert = [read_dsrecord_from_json(seq) for seq in sequences]
 
     # If an assembly is provided, we ignore minimal_homology
-    if len(source.assembly):
+    if source.is_assembly_complete():
         minimal_homology = source.minimal_overlap()
 
     asm = Assembly((template, insert), limit=minimal_homology, use_all_fragments=True)
@@ -386,7 +388,7 @@ async def homologous_recombination(
     ]
 
     # If a specific assembly is requested
-    if len(source.assembly):
+    if source.is_assembly_complete():
         return format_known_assembly_response(source, out_sources, [template, insert])
 
     out_sequences = [
@@ -411,7 +413,7 @@ async def homologous_recombination(
     ),
 )
 async def gibson_assembly(
-    sequences: conlist(TextFileSequence, min_length=1),
+    sequences: Annotated[list[TextFileSequence], Field(min_length=1)],
     source: Union[GibsonAssemblySource, OverlapExtensionPCRLigationSource, InFusionSource, InVivoAssemblySource],
     minimal_homology: int = Query(
         40, description='The minimum homology between consecutive fragments in the assembly.'
@@ -450,7 +452,7 @@ async def gibson_assembly(
 )
 async def restriction_and_ligation(
     source: RestrictionAndLigationSource,
-    sequences: conlist(TextFileSequence, min_length=1),
+    sequences: Annotated[list[TextFileSequence], Field(min_length=1)],
     allow_partial_overlap: bool = Query(False, description='Allow for partially overlapping sticky ends.'),
     circular_only: bool = Query(False, description='Only return circular assemblies.'),
 ):
@@ -492,7 +494,7 @@ async def restriction_and_ligation(
 )
 async def gateway(
     source: GatewaySource,
-    sequences: conlist(TextFileSequence, min_length=1),
+    sequences: Annotated[list[TextFileSequence], Field(min_length=1)],
     circular_only: bool = Query(False, description='Only return circular assemblies.'),
     only_multi_site: bool = Query(
         False, description='Only return assemblies where more than one site per sequence recombined.'
@@ -537,7 +539,7 @@ async def gateway(
         multi_site_sources = [
             i
             for i, s in enumerate(resp['sources'])
-            if all(join.left_location != join.right_location for join in s.assembly)
+            if all(join.left_location != join.right_location for join in s.input)
         ]
         sources = [resp['sources'][i] for i in multi_site_sources]
         sequences = [resp['sequences'][i] for i in multi_site_sources]
@@ -554,7 +556,9 @@ async def gateway(
         sequences=(list[TextFileSequence], ...),
     ),
 )
-async def cre_lox_recombination(source: CreLoxRecombinationSource, sequences: conlist(TextFileSequence, min_length=1)):
+async def cre_lox_recombination(
+    source: CreLoxRecombinationSource, sequences: Annotated[list[TextFileSequence], Field(min_length=1)]
+):
     fragments = [read_dsrecord_from_json(seq) for seq in sequences]
 
     # Lambda function for code clarity

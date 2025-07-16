@@ -378,7 +378,7 @@ class PCRTest(unittest.TestCase):
         json_seq = format_sequence_genbank(template)
         json_seq.id = 1
 
-        submitted_source = PCRSource(id=0, input=[1])
+        submitted_source = PCRSource(id=0)
 
         primer_fwd = PrimerModel(sequence='CCCCCCCC', id=2, name='forward')
 
@@ -887,10 +887,7 @@ class CrisprTest(unittest.TestCase):
         json_insert.id = 2
 
         guide = PrimerModel(sequence='ttcaatgcaaacagtaatga', id=3, name='guide_1')
-        source = CRISPRSource(
-            id=0,
-            guides=[3],
-        )
+        source = CRISPRSource(id=0)
         data = {
             'source': source.model_dump(),
             'sequences': [json_template.model_dump(), json_insert.model_dump()],
@@ -922,10 +919,7 @@ class CrisprTest(unittest.TestCase):
         json_insert.id = 2
 
         guide = PrimerModel(sequence='ttcaatgcaaacagtaatga', id=3, name='guide_1')
-        source = CRISPRSource(
-            id=0,
-            guides=[3],
-        )
+        source = CRISPRSource(id=0)
         data = {
             'source': source.model_dump(),
             'sequences': [json_template.model_dump(), json_insert.model_dump()],
@@ -982,7 +976,7 @@ class CrisprTest(unittest.TestCase):
 
         guide = PrimerModel(sequence='AAAAAAAA', id=3, name='guide_1')
 
-        source = CRISPRSource(id=0, guides=[3])
+        source = CRISPRSource(id=0)
 
         data = {
             'source': source.model_dump(),
@@ -1046,10 +1040,7 @@ class CrisprTest(unittest.TestCase):
         json_insert.id = 2
 
         guide = PrimerModel(sequence='ttcaatgcaaacagtaatga', id=3, name='guide_1')
-        source = CRISPRSource(
-            id=0,
-            guides=[3],
-        )
+        source = CRISPRSource(id=0)
         data = {
             'source': source.model_dump(),
             'sequences': [json_template.model_dump(), json_insert.model_dump()],
