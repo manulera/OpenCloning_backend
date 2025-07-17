@@ -4,7 +4,7 @@
 # BUILDER IMAGE
 FROM python:3.12-alpine AS builder
 
-RUN apk update --no-cache && apk add --no-cache build-base bash cmake
+RUN apk update --no-cache && apk add --no-cache build-base bash cmake git
 
 # Build mafft from source
 # mafft creates an entire directory, that's what we copy later and that's why it needs
