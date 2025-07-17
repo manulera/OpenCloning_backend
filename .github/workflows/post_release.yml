@@ -34,7 +34,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: manulera/opencloningbackend:latest
+          image-ref: manulera/opencloningbackend:prod
           format: 'table'
           exit-code: '0'
           ignore-unfixed: true
