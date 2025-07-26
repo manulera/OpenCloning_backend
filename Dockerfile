@@ -2,7 +2,7 @@
 # https://github.com/manulera/OpenCloning_backend
 
 # BUILDER IMAGE
-FROM python:3.12-alpine AS builder
+FROM python:3.14.0rc1-alpine AS builder
 
 RUN apk update --no-cache && apk add --no-cache build-base bash cmake git
 
@@ -60,7 +60,7 @@ RUN sed -i "s/^version = .*/version = \"${PACKAGE_VERSION}\"/" pyproject.toml
 RUN poetry install --only main
 
 # FINAL IMAGE
-FROM python:3.12-alpine
+FROM python:3.14.0rc1-alpine
 
 # You need bash to run mafft and runtime libraries for MARS
 RUN apk update --no-cache && apk add --no-cache bash libstdc++ libgomp libgcc
