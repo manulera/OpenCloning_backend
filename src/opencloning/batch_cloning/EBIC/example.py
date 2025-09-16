@@ -4,7 +4,7 @@ from primer3 import bindings
 import json
 from fastapi import UploadFile, Response
 
-from ...pydantic_models import (
+from opencloning.pydantic_models import (
     GenomeCoordinatesSource,
     TextFileSequence,
     PrimerModel,
@@ -13,10 +13,10 @@ from ...pydantic_models import (
     BaseCloningStrategy,
     HomologousRecombinationSource,
 )
-from .primer_design_settings import amanda_settings
-from ...endpoints.external_import import genome_coordinates, read_from_file
-from ...endpoints.assembly import pcr, restriction_and_ligation, homologous_recombination
-from ...dna_functions import read_dsrecord_from_json
+from opencloning.batch_cloning.EBIC.primer_design_settings import amanda_settings
+from opencloning.endpoints.external_import import genome_coordinates, read_from_file
+from opencloning.endpoints.assembly import pcr, restriction_and_ligation, homologous_recombination
+from opencloning.dna_functions import read_dsrecord_from_json
 
 # Settings for design
 padding = 1000
@@ -123,7 +123,9 @@ async def main():
 
     with open(os.path.join(os.path.dirname(__file__), 'barcode.gb'), 'rb') as f:
         dummy_resp = Response()
-        resp = await read_from_file(dummy_resp, UploadFile(file=f, filename='barcode.gb'), None, None, True, 'barcode')
+        resp = await read_from_file(
+            dummy_resp, UploadFile(file=f, filename='barcode.gb'), None, None, True, 'barcode', None, None
+        )
 
     barcode_source = resp['sources'][0]
     barcode_seq: TextFileSequence = resp['sequences'][0]
@@ -132,7 +134,14 @@ async def main():
     with open(os.path.join(os.path.dirname(__file__), 'common_plasmid.gb'), 'rb') as f:
         dummy_resp = Response()
         resp = await read_from_file(
-            dummy_resp, UploadFile(file=f, filename='common_plasmid.gb'), None, None, True, 'common_plasmid'
+            dummy_resp,
+            UploadFile(file=f, filename='common_plasmid.gb'),
+            None,
+            None,
+            True,
+            'common_plasmid',
+            None,
+            None,
         )
 
     common_plasmid_source = resp['sources'][0]

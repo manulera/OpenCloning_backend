@@ -1,7 +1,7 @@
 import os
-from ...endpoints.external_import import genome_coordinates, get_from_repository_id_addgene, read_from_file
-from ...endpoints.assembly import pcr, homologous_recombination
-from ...pydantic_models import (
+from opencloning.endpoints.external_import import genome_coordinates, get_from_repository_id_addgene, read_from_file
+from opencloning.endpoints.assembly import pcr, homologous_recombination
+from opencloning.pydantic_models import (
     GenomeCoordinatesSource,
     TextFileSequence,
     AddgeneIdSource,
@@ -12,7 +12,7 @@ from ...pydantic_models import (
     UploadedFileSource,
 )
 
-from ...ncbi_requests import get_annotations_from_query
+from opencloning.ncbi_requests import get_annotations_from_query
 import asyncio
 import json
 from Bio import SeqIO
@@ -78,9 +78,9 @@ async def main(
     # Get plasmid sequence =================s================================================================
     if not isinstance(plasmid, str):
         if plasmid.filename.endswith('.fa') or plasmid.filename.endswith('.fasta'):
-            resp = await read_from_file(plasmid, None, None, True, None)
+            resp = await read_from_file(plasmid, None, None, True, None, None, None)
         else:
-            resp = await read_from_file(plasmid, None, None, None, None)
+            resp = await read_from_file(plasmid, None, None, None, None, None, None)
         # Verify that plasmid is circular
         if not pydna_parse(resp['sequences'][0].file_content)[0].circular:
             raise ValueError('Plasmid is not circular')
