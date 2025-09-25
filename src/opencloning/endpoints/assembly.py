@@ -265,12 +265,16 @@ async def pcr(
     source: PCRSource,
     sequences: Annotated[list[TextFileSequence], Field(min_length=1, max_length=1)],
     primers: Annotated[list[PrimerModel], Field(min_length=1, max_length=2)],
-    minimal_annealing: int = Query(20, description='The minimal annealing length for each primer.'),
+    minimal_annealing: int = Query(
+        14,
+        description='The minimal amount of bases that must match between the primer and the sequence, excluding mismatches.',
+    ),
     allowed_mismatches: int = Query(0, description='The number of mismatches allowed'),
 ):
     if len(primers) != len(sequences) * 2:
         raise HTTPException(400, 'The number of primers should be twice the number of sequences.')
 
+    minimal_annealing = minimal_annealing + allowed_mismatches
     pydna_sequences = [read_dsrecord_from_json(s) for s in sequences]
     pydna_primers = [PydnaPrimer(p.sequence, id=str(p.id), name=p.name) for p in primers]
 
