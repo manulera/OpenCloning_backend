@@ -3,6 +3,7 @@ from Bio.Restriction.Restriction_Dictionary import rest_dict
 from pydantic import ValidationError
 from opencloning_linkml.migrations import migrate
 from opencloning_linkml._version import __version__ as schema_version
+import os
 
 from ..bug_fixing.backend_v0_3 import fix_backend_v0_3
 
@@ -22,9 +23,27 @@ from .._version import __version__ as backend_version
 router = get_router()
 
 
+def version_to_int(version: str | None) -> int | None:
+    if version is None:
+        return None
+    try:
+        version = version.replace('v', '')
+        # Pad to 2 digits
+        int_vals = [val.zfill(2) for val in version.split('.')]
+        return int(''.join(int_vals))
+    except ValueError:
+        return None
+
+
 @router.get('/version')
 async def get_version():
-    return {'backend_version': backend_version, 'schema_version': schema_version}
+    opencloning_version = os.getenv('OPENCLONING_VERSION')
+    return {
+        'backend_version': backend_version,
+        'schema_version': schema_version,
+        'opencloning_version': opencloning_version,
+        'opencloning_version_int': version_to_int(opencloning_version),
+    }
 
 
 @router.get('/restriction_enzyme_list', response_model=dict[str, list[str]])
