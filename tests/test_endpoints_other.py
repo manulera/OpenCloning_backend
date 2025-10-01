@@ -9,19 +9,52 @@ from opencloning.dna_functions import format_sequence_genbank, read_dsrecord_fro
 from opencloning.pydantic_models import TextFileSequence, BaseCloningStrategy
 from opencloning_linkml._version import __version__ as schema_version
 from opencloning._version import __version__ as backend_version
+import pytest
+from importlib import reload
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
+
 
 client = TestClient(_main.app)
 
 
 class VersionTest(unittest.TestCase):
+
+    def tearDown(self):
+        monkeypatch = pytest.MonkeyPatch()
+        monkeypatch.delenv('OPENCLONING_VERSION', raising=False)
+        reload(_main)
+
     def test_version_empty(self):
         response = client.get('/version')
         self.assertEqual(response.status_code, 200)
         resp = response.json()
         self.assertEqual(resp['backend_version'], backend_version)
         self.assertEqual(resp['schema_version'], schema_version)
+        self.assertEqual(resp['opencloning_version'], None)
+        self.assertEqual(resp['opencloning_version_int'], None)
+
+        monkeypatch = pytest.MonkeyPatch()
+        monkeypatch.setenv('OPENCLONING_VERSION', '1.0.0')
+        response = client.get('/version')
+        self.assertEqual(response.status_code, 200)
+        resp = response.json()
+        self.assertEqual(resp['opencloning_version'], '1.0.0')
+        self.assertEqual(resp['opencloning_version_int'], 10000)
+
+        monkeypatch.setenv('OPENCLONING_VERSION', '0.2.3')
+        response = client.get('/version')
+        self.assertEqual(response.status_code, 200)
+        resp = response.json()
+        self.assertEqual(resp['opencloning_version'], '0.2.3')
+        self.assertEqual(resp['opencloning_version_int'], 203)
+
+        monkeypatch.setenv('OPENCLONING_VERSION', 'blah')
+        response = client.get('/version')
+        self.assertEqual(response.status_code, 200)
+        resp = response.json()
+        self.assertEqual(resp['opencloning_version'], 'blah')
+        self.assertEqual(resp['opencloning_version_int'], None)
 
 
 class ValidatorTest(unittest.TestCase):
