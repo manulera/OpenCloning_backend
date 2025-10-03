@@ -24,6 +24,7 @@ from ..pydantic_models import (
     SequenceFileFormat,
     SEVASource,
     SequenceLocationStr,
+    OpenDNACollectionsSource,
 )
 from ..dna_functions import (
     format_sequence_genbank,
@@ -234,7 +235,8 @@ def repository_id_http_error_handler(exception: HTTPError, source: RepositoryIdS
             | list[BenchlingUrlSource]
             | list[EuroscarfSource]
             | list[WekWikGeneIdSource]
-            | list[SEVASource],
+            | list[SEVASource]
+            | list[OpenDNACollectionsSource],
             ...,
         ),
         sequences=(list[TextFileSequence], ...),
@@ -249,6 +251,7 @@ async def get_from_repository_id(
         | EuroscarfSource
         | WekWikGeneIdSource
         | SEVASource
+        | OpenDNACollectionsSource
     ),
 ):
     return RedirectResponse(f'/repository_id/{source.repository_name}', status_code=307)
@@ -377,6 +380,22 @@ async def get_from_repository_id_euroscarf(source: EuroscarfSource):
     ),
 )
 async def get_from_repository_id_igem(source: IGEMSource):
+    try:
+        dseq = (await get_sequences_from_file_url(source.sequence_file_url))[0]
+        return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [source]}
+    except HTTPError as exception:
+        repository_id_http_error_handler(exception, source)
+
+
+@router.post(
+    '/repository_id/open_dna_collections',
+    response_model=create_model(
+        'OpenDNACollectionsResponse',
+        sources=(list[OpenDNACollectionsSource], ...),
+        sequences=(list[TextFileSequence], ...),
+    ),
+)
+async def get_from_repository_id_open_dna_collections(source: OpenDNACollectionsSource):
     try:
         dseq = (await get_sequences_from_file_url(source.sequence_file_url))[0]
         return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [source]}

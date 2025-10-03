@@ -44,6 +44,7 @@ default_allowed_urls = [
     'http://www.euroscarf.de/',
     'https://wekwikgene.wllsb.edu.cn',
     'http://bahlerweb.cs.ucl.ac.uk',
+    'https://assets.opencloning.org/open-dna-collections',
 ]
 
 if os.environ.get('ALLOWED_EXTERNAL_URLS') is not None:

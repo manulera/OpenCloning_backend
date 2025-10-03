@@ -23,6 +23,7 @@ from opencloning.pydantic_models import (
     IGEMSource,
     WekWikGeneIdSource,
     SEVASource,
+    OpenDNACollectionsSource,
 )
 from opencloning import app_settings, http_client
 
@@ -1042,6 +1043,36 @@ class SEVASourceTest(unittest.TestCase):
             payload = response.json()
             seq = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
             self.assertEqual(seq.circular, True)
+
+
+class OpenDNACollectionsSourceTest(unittest.TestCase):
+    def test_valid_url(self):
+        source = OpenDNACollectionsSource(
+            id=0,
+            repository_id='Ecoli Nanobody Toolkit/BC_RJ_SD8',
+            repository_name='open_dna_collections',
+            sequence_file_url='https://assets.opencloning.org/open-dna-collections/Ecoli%20Nanobody%20Toolkit/genbank_seq/BC_RJ_SD8.gb',
+        )
+        response = client.post('/repository_id/open_dna_collections', json=source.model_dump())
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(len(payload['sequences']), 1)
+        self.assertEqual(len(payload['sources']), 1)
+        out_source = payload['sources'][0]
+        self.assertEqual(out_source, source.model_dump())
+        seq = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
+        self.assertEqual(seq.name, 'BC_RJ_SD8')
+
+    def test_errors(self):
+
+        source = OpenDNACollectionsSource(
+            id=0,
+            repository_id='Ecoli Nanobody Toolkit/BC_RJ_SD8',
+            repository_name='open_dna_collections',
+            sequence_file_url='https://assets.opencloning.org/open-dna-collections/Ecoli%20Nanobody%20Toolkit/genbank_seq/hello.txt',
+        )
+        response = client.post('/repository_id/open_dna_collections', json=source.model_dump())
+        self.assertEqual(response.status_code, 404)
 
 
 class NotAllowedExternalUrlTest(unittest.TestCase):
