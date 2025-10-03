@@ -50,6 +50,7 @@ from opencloning_linkml.datamodel import (
     CreLoxRecombinationSource as _CreLoxRecombinationSource,
     InVivoAssemblySource as _InVivoAssemblySource,
     SourceInput as _SourceInput,
+    OpenDNACollectionsSource as _OpenDNACollectionsSource,
 )
 from pydna.assembly2 import (
     edge_representation2subfragment_representation,
@@ -181,6 +182,10 @@ class IGEMSource(SourceCommonClass, _IGEMSource):
         file_name = self.sequence_file_url.split('/')[-1]
         assert file_name.endswith('.gb'), 'The sequence file must be a GenBank file'
         return self
+
+
+class OpenDNACollectionsSource(SourceCommonClass, _OpenDNACollectionsSource):
+    pass
 
 
 class SEVASource(SourceCommonClass, _SEVASource):
