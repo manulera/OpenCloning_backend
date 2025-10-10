@@ -110,7 +110,12 @@ async def get_genbank_sequence(sequence_accession, start=None, end=None, strand=
 
     resp = await async_get(url, headers=headers, params=params)
     if resp.status_code == 200:
-        return pydna_parse(resp.text)[0]
+        try:
+            return pydna_parse(resp.text)[0]
+        except Exception:
+            # Now the ncbi returns something like this:
+            # 'Error: F a i l e d  t o  u n d e r s t a n d  i d :  b l a h '
+            raise HTTPException(404, 'wrong sequence accession')
     elif resp.status_code == 400:
         raise HTTPException(404, 'wrong sequence accession')
     elif resp.status_code == 503:
