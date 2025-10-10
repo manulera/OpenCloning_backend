@@ -198,11 +198,17 @@ async def primer_design_ebic(
     template: PrimerDesignQuery,
     max_inside: int = Query(..., description='The maximum length of the inside edge of the EBIC primer.'),
     max_outside: int = Query(..., description='The maximum length of the outside edge of the EBIC primer.'),
+    target_tm: float = Query(
+        ..., description='The desired melting temperature for the hybridization part of the primer.'
+    ),
+    target_tm_tolerance: float = Query(
+        3, description='The tolerance for the desired melting temperature for the hybridization part of the primer.'
+    ),
 ):
     """Design primers for EBIC"""
     dseqr = read_dsrecord_from_json(template.sequence)
     location = template.location.to_biopython_location()
-    return {'primers': ebic_primers(dseqr, location, max_inside, max_outside)}
+    return {'primers': ebic_primers(dseqr, location, max_inside, max_outside, target_tm, target_tm_tolerance)}
 
 
 # @router.post('/primer_design/gateway_attB', response_model=PrimerDesignResponse)

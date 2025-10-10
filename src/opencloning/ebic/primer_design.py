@@ -13,14 +13,18 @@ adapter_right_fwd = 'ataGGTCTCtGCTT'
 adapter_right_rvs = 'ataGGTCTCtAGCG'
 
 
-def call_primer3(seq: str, seq_args: dict):
+def call_primer3(seq: str, seq_args: dict, target_tm: float, target_tm_tolerance: float):
+    settings2use = amanda_settings.copy()
+    settings2use['PRIMER_OPT_TM'] = target_tm
+    settings2use['PRIMER_MIN_TM'] = target_tm - target_tm_tolerance
+    settings2use['PRIMER_MAX_TM'] = target_tm + target_tm_tolerance
     report = bindings.design_primers(
         seq_args={
             'SEQUENCE_ID': 'MH1000',
             'SEQUENCE_TEMPLATE': seq,
             **seq_args,
         },
-        global_args=amanda_settings,
+        global_args=settings2use,
     )
     return report
 
@@ -30,6 +34,8 @@ def ebic_primers(
     location: SimpleLocation,
     max_inside: int,
     max_outside: int,
+    target_tm: float,
+    target_tm_tolerance: float,
 ) -> tuple[PrimerModel, PrimerModel, PrimerModel, PrimerModel]:
     """Design primers for EBIC"""
 
@@ -53,9 +59,8 @@ def ebic_primers(
         'SEQUENCE_PRIMER_PAIR_OK_REGION_LIST': f'0,{max_outside + max_inside},{len(right_template) - int(padding/2)},{int(padding/2)}',
     }
 
-    report_left = call_primer3(left_template, seq_args_left)
-    report_right = call_primer3(right_template, seq_args_right)
-
+    report_left = call_primer3(left_template, seq_args_left, target_tm, target_tm_tolerance)
+    report_right = call_primer3(right_template, seq_args_right, target_tm, target_tm_tolerance)
     primer_names = ['left_fwd', 'left_rvs', 'right_fwd', 'right_rvs']
     primer_seqs = [
         adapter_left_fwd + report_left['PRIMER_LEFT'][0]['SEQUENCE'],
