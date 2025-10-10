@@ -7,6 +7,7 @@ import os
 import respx
 import httpx
 from importlib import reload
+import time
 
 import opencloning.request_examples as request_examples
 from opencloning.dna_functions import read_dsrecord_from_json
@@ -800,64 +801,73 @@ class GenomeRegionTest(unittest.TestCase):
 
     @pytest.mark.flaky(reruns=3, reruns_delay=2)
     def test_exceptions(self):
+        wait_time = 0.5
         # Load first example
         correct_source = GenomeCoordinatesSource.model_validate(
             request_examples.genome_region_examples['full']['value']
         )
 
         # Ommit assembly accession
-        s = correct_source.model_copy()
+        s = correct_source.model_copy(deep=True)
         s.assembly_accession = None
         response = client.post('/genome_coordinates', json=s.model_dump())
         self.assertStatusCode(response.status_code, 422)
+        time.sleep(wait_time)
 
         # Ommit locus_tag keeping gene id is now supported
         # Before it was not, but see https://github.com/ncbi/datasets/issues/397
-        s = correct_source.model_copy()
+        s = correct_source.model_copy(deep=True)
         s.locus_tag = None
         response = client.post('/genome_coordinates', json=s.model_dump())
         self.assertStatusCode(response.status_code, 200)
+        time.sleep(wait_time)
 
         # Wrong gene_id (not matching that of the locus_tag)
-        s = correct_source.model_copy()
+        s = correct_source.model_copy(deep=True)
         s.gene_id = 123
         response = client.post('/genome_coordinates', json=s.model_dump())
         self.assertStatusCode(response.status_code, 400)
+        time.sleep(wait_time)
 
         # Wrong assembly accession
-        s = correct_source.model_copy()
+        s = correct_source.model_copy(deep=True)
         s.assembly_accession = 'blah'
         response = client.post('/genome_coordinates', json=s.model_dump())
         self.assertStatusCode(response.status_code, 404)
+        time.sleep(wait_time)
 
         # Wrong locus_tag
-        s = correct_source.model_copy()
+        s = correct_source.model_copy(deep=True)
         s.locus_tag = 'blah'
         response = client.post('/genome_coordinates', json=s.model_dump())
         self.assertStatusCode(response.status_code, 404)
+        time.sleep(wait_time)
 
         # Wrong coordinates
-        s = correct_source.model_copy()
+        s = correct_source.model_copy(deep=True)
         s.start = 1
         s.end = 10
         response = client.post('/genome_coordinates', json=s.model_dump())
         self.assertStatusCode(response.status_code, 400)
+        time.sleep(wait_time)
 
         # Wrong assembly accession
-        s = correct_source.model_copy()
+        s = correct_source.model_copy(deep=True)
         s.locus_tag = None
         s.gene_id = None
         s.assembly_accession = 'blah'
         response = client.post('/genome_coordinates', json=s.model_dump())
         self.assertStatusCode(response.status_code, 404)
         self.assertIn('Wrong assembly accession', response.json()['detail'])
+        time.sleep(wait_time)
 
         # Assembly accession not linked to any sequence record
-        s = correct_source.model_copy()
+        s = correct_source.model_copy(deep=True)
         s.locus_tag = None
         s.gene_id = None
         # It used to be the case, but it changed so now we just mock the response
         s.assembly_accession = 'GCF_000146045.1'
+        time.sleep(wait_time)
 
         with respx.mock:
             respx.get(
@@ -869,22 +879,24 @@ class GenomeRegionTest(unittest.TestCase):
             self.assertIn('No sequence accessions linked', response.json()['detail'])
 
         # Assembly accession not linked to that sequence accession
-        s = correct_source.model_copy()
+        s = correct_source.model_copy(deep=True)
         s.locus_tag = None
         s.gene_id = None
         s.assembly_accession = 'GCF_000146045.2'
         response = client.post('/genome_coordinates', json=s.model_dump())
         self.assertStatusCode(response.status_code, 400)
         self.assertIn('not contained in assembly accession', response.json()['detail'])
+        time.sleep(wait_time)
 
         # Wrong sequence accession
-        s = correct_source.model_copy()
+        s = correct_source.model_copy(deep=True)
         s.locus_tag = None
         s.gene_id = None
         s.assembly_accession = None
         s.sequence_accession = 'blah'
         response = client.post('/genome_coordinates', json=s.model_dump())
         self.assertStatusCode(response.status_code, 404)
+        time.sleep(wait_time)
 
         # Coordinates malformatted
         viral_source = GenomeCoordinatesSource.model_validate(
@@ -894,17 +906,20 @@ class GenomeRegionTest(unittest.TestCase):
         viral_source.end = 1
         response = client.post('/genome_coordinates', json=viral_source.model_dump())
         self.assertStatusCode(response.status_code, 422)
+        time.sleep(wait_time)
 
         viral_source.start = 0
         viral_source.end = 20
         response = client.post('/genome_coordinates', json=viral_source.model_dump())
         self.assertStatusCode(response.status_code, 422)
+        time.sleep(wait_time)
 
         viral_source.start = 1
         viral_source.end = 20
         viral_source.strand = 0
         response = client.post('/genome_coordinates', json=viral_source.model_dump())
         self.assertStatusCode(response.status_code, 422)
+        time.sleep(wait_time)
 
         # Coordinates outside of the sequence
         viral_source.start = 1
@@ -913,6 +928,7 @@ class GenomeRegionTest(unittest.TestCase):
         viral_source.strand = 1
         response = client.post('/genome_coordinates', json=viral_source.model_dump())
         self.assertStatusCode(response.status_code, 400)
+        time.sleep(wait_time)
 
         # Coordinates too long
         viral_source.start = 1
