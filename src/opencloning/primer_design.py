@@ -9,10 +9,30 @@ from Bio.Restriction.Restriction import RestrictionType
 from Bio.Data.IUPACData import ambiguous_dna_values as _ambiguous_dna_values
 from primer3.bindings import calc_tm as _calc_tm
 from typing import Callable
+from pydantic import BaseModel, Field
 
 
-def primer3_calc_tm(seq: str) -> float:
-    return _calc_tm(seq.upper(), dna_conc=500)
+class PrimerDesignSettings(BaseModel):
+    primer_dna_conc: float = Field(50, description='The DNA concentration in the primer solution (nM).')
+    primer_salt_monovalent: float = Field(
+        50, description='The monovalent salt concentration in the primer solution (mM).'
+    )
+    primer_salt_divalent: float = Field(
+        1.5, description='The divalent salt concentration in the primer solution (mM).'
+    )
+
+    def to_primer3_args(self) -> dict:
+        """Convert the settings to primer3 arguments."""
+        return {
+            'dna_conc': self.primer_dna_conc,
+            'mv_conc': self.primer_salt_monovalent,
+            'dv_conc': self.primer_salt_divalent,
+        }
+
+
+def primer3_calc_tm(seq: str, settings: PrimerDesignSettings) -> float:
+    print(seq, _calc_tm(seq.upper(), **settings.to_primer3_args()))
+    return _calc_tm(seq.upper(), **settings.to_primer3_args())
 
 
 ambiguous_dna_values = _ambiguous_dna_values.copy()

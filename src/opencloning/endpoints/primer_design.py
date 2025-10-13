@@ -14,6 +14,7 @@ from ..primer_design import (
     gibson_assembly_primers,
     simple_pair_primers,
     primer3_calc_tm,
+    PrimerDesignSettings,
 )
 from ..get_router import get_router
 from ..ebic.primer_design import ebic_primers
@@ -46,6 +47,9 @@ def validate_spacers(spacers: list[str] | None, nb_templates: int, circular: boo
 async def primer_design_homologous_recombination(
     pcr_template: PrimerDesignQuery,
     homologous_recombination_target: PrimerDesignQuery,
+    settings: PrimerDesignSettings = Body(
+        ..., description='Primer design settings.', default_factory=PrimerDesignSettings
+    ),
     spacers: list[str] | None = Body(
         None,
         description='Spacers to add at the left and right side of the insertion.',
@@ -81,6 +85,7 @@ async def primer_design_homologous_recombination(
             insert_forward,
             target_tm,
             spacers,
+            tm_func=lambda x: primer3_calc_tm(x, settings),
         )
     except ValueError as e:
         raise HTTPException(400, *e.args)
@@ -94,6 +99,9 @@ async def primer_design_homologous_recombination(
 @router.post('/primer_design/gibson_assembly', response_model=PrimerDesignResponse)
 async def primer_design_gibson_assembly(
     pcr_templates: list[PrimerDesignQuery],
+    settings: PrimerDesignSettings = Body(
+        ..., description='Primer design settings.', default_factory=PrimerDesignSettings
+    ),
     spacers: list[str] | None = Body(
         None,
         description='Spacers to add between the restriction site and the 5\' end of the primer footprint (the part that binds the DNA).',
@@ -123,7 +131,13 @@ async def primer_design_gibson_assembly(
         templates.append(template)
     try:
         primers = gibson_assembly_primers(
-            templates, homology_length, minimal_hybridization_length, target_tm, circular, spacers
+            templates,
+            homology_length,
+            minimal_hybridization_length,
+            target_tm,
+            circular,
+            spacers,
+            tm_func=lambda x: primer3_calc_tm(x, settings),
         )
     except ValueError as e:
         raise HTTPException(400, *e.args)
@@ -137,6 +151,9 @@ async def primer_design_simple_pair(
     spacers: list[str] | None = Body(
         None,
         description='Spacers to add between the restriction site and the 5\' end of the primer footprint (the part that binds the DNA).',
+    ),
+    settings: PrimerDesignSettings = Body(
+        ..., description='Primer design settings.', default_factory=PrimerDesignSettings
     ),
     minimal_hybridization_length: int = Query(
         ..., description='The minimal length of the hybridization region in bps.'
@@ -187,6 +204,7 @@ async def primer_design_simple_pair(
             spacers,
             left_enzyme_inverted,
             right_enzyme_inverted,
+            tm_func=lambda x: primer3_calc_tm(x, settings),
         )
     except ValueError as e:
         raise HTTPException(400, *e.args)
@@ -280,13 +298,16 @@ class PrimerDetailsResponse(BaseModel):
     hairpin: ThermodynamicResult | None
 
 
-@router.get('/primer_details', response_model=PrimerDetailsResponse)
+@router.post('/primer_details', response_model=PrimerDetailsResponse)
 async def primer_details(
-    sequence: str = Query(..., description='Primer sequence', pattern=r'^[ACGTacgt]+$'),
+    sequence: str = Body(..., description='Primer sequence', pattern=r'^[ACGTacgt]+$'),
+    settings: PrimerDesignSettings = Body(
+        ..., description='Primer design settings.', default_factory=PrimerDesignSettings
+    ),
 ):
     """Get information about a primer"""
     sequence = sequence.upper()
-    tm = primer3_calc_tm(sequence)
+    tm = primer3_calc_tm(sequence, settings)
     gc_content = gc_fraction(sequence)
 
     thermodynamic_sequences = [sequence]
@@ -303,10 +324,13 @@ async def primer_details(
     }
 
 
-@router.get('/primer_heterodimer', response_model=ThermodynamicResult | None)
+@router.post('/primer_heterodimer', response_model=ThermodynamicResult | None)
 async def primer_heterodimer(
-    sequence1: str = Query(..., description='First primer sequence', pattern=r'^[ACGTacgt]+$'),
-    sequence2: str = Query(..., description='Second primer sequence', pattern=r'^[ACGTacgt]+$'),
+    sequence1: str = Body(..., description='First primer sequence', pattern=r'^[ACGTacgt]+$'),
+    sequence2: str = Body(..., description='Second primer sequence', pattern=r'^[ACGTacgt]+$'),
+    settings: PrimerDesignSettings = Body(
+        ..., description='Primer design settings.', default_factory=PrimerDesignSettings
+    ),
 ):
     """Get information about a primer pair"""
 
@@ -315,7 +339,10 @@ async def primer_heterodimer(
     else:
         sequence_pairs = list(product((sequence1[:60], sequence1[-60:]), (sequence2[:60], sequence2[-60:])))
 
-    results = [bindings.calc_heterodimer(s1, s2, output_structure=True) for s1, s2 in sequence_pairs]
+    results = [
+        bindings.calc_heterodimer(s1, s2, output_structure=True, **settings.to_primer3_args())
+        for s1, s2 in sequence_pairs
+    ]
     results = [r for r in results if r.structure_found]
     if len(results) == 0:
         return None
