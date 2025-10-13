@@ -13,6 +13,7 @@ from ..primer_design import (
     homologous_recombination_primers,
     gibson_assembly_primers,
     simple_pair_primers,
+    primer3_calc_tm,
 )
 from ..get_router import get_router
 from ..ebic.primer_design import ebic_primers
@@ -285,7 +286,7 @@ async def primer_details(
 ):
     """Get information about a primer"""
     sequence = sequence.upper()
-    tm = bindings.calc_tm(sequence)
+    tm = primer3_calc_tm(sequence)
     gc_content = gc_fraction(sequence)
 
     thermodynamic_sequences = [sequence]

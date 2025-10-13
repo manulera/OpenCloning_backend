@@ -12,7 +12,7 @@ from typing import Callable
 
 
 def primer3_calc_tm(seq: str) -> float:
-    return _calc_tm(seq.upper())
+    return _calc_tm(seq.upper(), dna_conc=500)
 
 
 ambiguous_dna_values = _ambiguous_dna_values.copy()
