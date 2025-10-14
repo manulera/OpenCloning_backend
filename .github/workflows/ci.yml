@@ -105,6 +105,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry
 
+      - name: Get package version
+        id: get-package-version
+        run: |
+          echo "package-version=$(poetry version -s)" >> $GITHUB_OUTPUT
+
       - name: Log in to Docker Hub
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
@@ -124,7 +129,7 @@ jobs:
           push: true
           tags: manulera/opencloningbackend:latest
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: PACKAGE_VERSION=$(poetry version -s)
+          build-args: PACKAGE_VERSION=${{ steps.get-package-version.outputs.package-version }}
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
