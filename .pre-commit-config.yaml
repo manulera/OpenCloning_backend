@@ -33,3 +33,13 @@ repos:
         language: system
         files: \.py$
         exclude: tests/
+  # Hook to ensure that primer3 is only imported in the primer3_functions.py file
+  # This is to centralize how the settings etc. are handled.
+  - repo: local
+    hooks:
+      - id: primer3-import-check
+        name: primer3-import-check
+        entry: python scripts/check_primer3_imports.py
+        language: system
+        files: \.py$
+        exclude: tests/

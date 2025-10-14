@@ -3,8 +3,6 @@ from pydantic import create_model
 import re
 from Bio.Restriction import RestrictionBatch
 from Bio.SeqUtils import gc_fraction
-from primer3 import bindings
-from itertools import product
 
 from ..dna_functions import get_invalid_enzyme_names
 from ..pydantic_models import PrimerModel, PrimerDesignQuery
@@ -13,6 +11,14 @@ from ..primer_design import (
     homologous_recombination_primers,
     gibson_assembly_primers,
     simple_pair_primers,
+)
+from ..primer3_functions import (
+    primer3_calc_tm,
+    PrimerDesignSettings,
+    primer3_calc_homodimer,
+    primer3_calc_hairpin,
+    primer3_calc_heterodimer,
+    ThermodynamicResult,
 )
 from ..get_router import get_router
 from ..ebic.primer_design import ebic_primers
@@ -45,6 +51,9 @@ def validate_spacers(spacers: list[str] | None, nb_templates: int, circular: boo
 async def primer_design_homologous_recombination(
     pcr_template: PrimerDesignQuery,
     homologous_recombination_target: PrimerDesignQuery,
+    settings: PrimerDesignSettings = Body(
+        ..., description='Primer design settings.', default_factory=PrimerDesignSettings
+    ),
     spacers: list[str] | None = Body(
         None,
         description='Spacers to add at the left and right side of the insertion.',
@@ -80,6 +89,7 @@ async def primer_design_homologous_recombination(
             insert_forward,
             target_tm,
             spacers,
+            tm_func=lambda x: primer3_calc_tm(x, settings),
         )
     except ValueError as e:
         raise HTTPException(400, *e.args)
@@ -93,6 +103,9 @@ async def primer_design_homologous_recombination(
 @router.post('/primer_design/gibson_assembly', response_model=PrimerDesignResponse)
 async def primer_design_gibson_assembly(
     pcr_templates: list[PrimerDesignQuery],
+    settings: PrimerDesignSettings = Body(
+        ..., description='Primer design settings.', default_factory=PrimerDesignSettings
+    ),
     spacers: list[str] | None = Body(
         None,
         description='Spacers to add between the restriction site and the 5\' end of the primer footprint (the part that binds the DNA).',
@@ -122,7 +135,13 @@ async def primer_design_gibson_assembly(
         templates.append(template)
     try:
         primers = gibson_assembly_primers(
-            templates, homology_length, minimal_hybridization_length, target_tm, circular, spacers
+            templates,
+            homology_length,
+            minimal_hybridization_length,
+            target_tm,
+            circular,
+            spacers,
+            tm_func=lambda x: primer3_calc_tm(x, settings),
         )
     except ValueError as e:
         raise HTTPException(400, *e.args)
@@ -136,6 +155,9 @@ async def primer_design_simple_pair(
     spacers: list[str] | None = Body(
         None,
         description='Spacers to add between the restriction site and the 5\' end of the primer footprint (the part that binds the DNA).',
+    ),
+    settings: PrimerDesignSettings = Body(
+        ..., description='Primer design settings.', default_factory=PrimerDesignSettings
     ),
     minimal_hybridization_length: int = Query(
         ..., description='The minimal length of the hybridization region in bps.'
@@ -186,6 +208,7 @@ async def primer_design_simple_pair(
             spacers,
             left_enzyme_inverted,
             right_enzyme_inverted,
+            tm_func=lambda x: primer3_calc_tm(x, settings),
         )
     except ValueError as e:
         raise HTTPException(400, *e.args)
@@ -198,11 +221,17 @@ async def primer_design_ebic(
     template: PrimerDesignQuery,
     max_inside: int = Query(..., description='The maximum length of the inside edge of the EBIC primer.'),
     max_outside: int = Query(..., description='The maximum length of the outside edge of the EBIC primer.'),
+    target_tm: float = Query(
+        ..., description='The desired melting temperature for the hybridization part of the primer.'
+    ),
+    target_tm_tolerance: float = Query(
+        3, description='The tolerance for the desired melting temperature for the hybridization part of the primer.'
+    ),
 ):
     """Design primers for EBIC"""
     dseqr = read_dsrecord_from_json(template.sequence)
     location = template.location.to_biopython_location()
-    return {'primers': ebic_primers(dseqr, location, max_inside, max_outside)}
+    return {'primers': ebic_primers(dseqr, location, max_inside, max_outside, target_tm, target_tm_tolerance)}
 
 
 # @router.post('/primer_design/gateway_attB', response_model=PrimerDesignResponse)
@@ -240,32 +269,6 @@ async def primer_design_ebic(
 #     return {'primers': primers}
 
 
-class ThermodynamicResult(BaseModel):
-    melting_temperature: float
-    deltaG: float
-    figure: str | None
-
-    @classmethod
-    def from_binding(cls, result):
-        return cls(
-            melting_temperature=result.tm,
-            deltaG=result.dg,
-            figure='\n'.join(result.ascii_structure_lines),
-        )
-
-
-def get_sequence_thermodynamic_result(sequences: list[str], method: callable) -> ThermodynamicResult | None:
-    """Get the thermodynamic result for a sequence, if the sequence is longer than primer3 60bp limit, it will be split into two
-    and the result with the lowest deltaG will be returned."""
-    results = [method(seq, output_structure=True) for seq in sequences]
-    results = [r for r in results if r.structure_found]
-    if len(results) == 0:
-        return None
-
-    result = min(results, key=lambda r: r.dg)
-    return ThermodynamicResult.from_binding(result)
-
-
 class PrimerDetailsResponse(BaseModel):
     melting_temperature: float
     gc_content: float
@@ -273,20 +276,20 @@ class PrimerDetailsResponse(BaseModel):
     hairpin: ThermodynamicResult | None
 
 
-@router.get('/primer_details', response_model=PrimerDetailsResponse)
+@router.post('/primer_details', response_model=PrimerDetailsResponse)
 async def primer_details(
-    sequence: str = Query(..., description='Primer sequence', pattern=r'^[ACGTacgt]+$'),
+    sequence: str = Body(..., description='Primer sequence', pattern=r'^[ACGTacgt]+$'),
+    settings: PrimerDesignSettings = Body(
+        ..., description='Primer design settings.', default_factory=PrimerDesignSettings
+    ),
 ):
     """Get information about a primer"""
     sequence = sequence.upper()
-    tm = bindings.calc_tm(sequence)
+    tm = primer3_calc_tm(sequence, settings)
     gc_content = gc_fraction(sequence)
 
-    thermodynamic_sequences = [sequence]
-    if len(sequence) > 60:
-        thermodynamic_sequences = [sequence[:60], sequence[-60:]]
-    homodimer = get_sequence_thermodynamic_result(thermodynamic_sequences, bindings.calc_homodimer)
-    hairpin = get_sequence_thermodynamic_result(thermodynamic_sequences, bindings.calc_hairpin)
+    homodimer = primer3_calc_homodimer(sequence, settings)
+    hairpin = primer3_calc_hairpin(sequence, settings)
 
     return {
         'melting_temperature': tm,
@@ -296,22 +299,14 @@ async def primer_details(
     }
 
 
-@router.get('/primer_heterodimer', response_model=ThermodynamicResult | None)
+@router.post('/primer_heterodimer', response_model=ThermodynamicResult | None)
 async def primer_heterodimer(
-    sequence1: str = Query(..., description='First primer sequence', pattern=r'^[ACGTacgt]+$'),
-    sequence2: str = Query(..., description='Second primer sequence', pattern=r'^[ACGTacgt]+$'),
+    sequence1: str = Body(..., description='First primer sequence', pattern=r'^[ACGTacgt]+$'),
+    sequence2: str = Body(..., description='Second primer sequence', pattern=r'^[ACGTacgt]+$'),
+    settings: PrimerDesignSettings = Body(
+        ..., description='Primer design settings.', default_factory=PrimerDesignSettings
+    ),
 ):
     """Get information about a primer pair"""
 
-    if len(sequence1) <= 60 or len(sequence2) <= 60:
-        sequence_pairs = [(sequence1, sequence2)]
-    else:
-        sequence_pairs = list(product((sequence1[:60], sequence1[-60:]), (sequence2[:60], sequence2[-60:])))
-
-    results = [bindings.calc_heterodimer(s1, s2, output_structure=True) for s1, s2 in sequence_pairs]
-    results = [r for r in results if r.structure_found]
-    if len(results) == 0:
-        return None
-
-    result = min(results, key=lambda r: r.dg)
-    return ThermodynamicResult.from_binding(result)
+    return primer3_calc_heterodimer(sequence1, sequence2, settings)

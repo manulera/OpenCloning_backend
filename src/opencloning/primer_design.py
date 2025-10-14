@@ -7,18 +7,17 @@ from .pydantic_models import PrimerModel
 from Bio.Seq import reverse_complement
 from Bio.Restriction.Restriction import RestrictionType
 from Bio.Data.IUPACData import ambiguous_dna_values as _ambiguous_dna_values
-from primer3.bindings import calc_tm as _calc_tm
 from typing import Callable
-
-
-def primer3_calc_tm(seq: str) -> float:
-    return _calc_tm(seq.upper())
-
+from .primer3_functions import primer3_calc_tm, PrimerDesignSettings
 
 ambiguous_dna_values = _ambiguous_dna_values.copy()
 # Remove acgt
 for base in 'ACGT':
     del ambiguous_dna_values[base]
+
+
+def default_tm_func(sequence: str) -> float:
+    return primer3_calc_tm(sequence, PrimerDesignSettings())
 
 
 def homologous_recombination_primers(
@@ -31,7 +30,7 @@ def homologous_recombination_primers(
     insert_forward: bool,
     target_tm: float,
     spacers: list[str] | None = None,
-    tm_func: Callable[[str], float] = primer3_calc_tm,
+    tm_func: Callable[[str], float] = default_tm_func,
     estimate_function: Callable[[str], float] | None = None,
 ) -> tuple[str, str]:
 
@@ -91,7 +90,7 @@ def gibson_assembly_primers(
     target_tm: float,
     circular: bool,
     spacers: list[str] | None = None,
-    tm_func: Callable[[str], float] = primer3_calc_tm,
+    tm_func: Callable[[str], float] = default_tm_func,
     estimate_function: Callable[[str], float] | None = None,
 ) -> list[PrimerModel]:
 
@@ -157,7 +156,7 @@ def simple_pair_primers(
     spacers: list[str] | None = None,
     left_enzyme_inverted: bool = False,
     right_enzyme_inverted: bool = False,
-    tm_func: Callable[[str], float] = primer3_calc_tm,
+    tm_func: Callable[[str], float] = default_tm_func,
     estimate_function: Callable[[str], float] | None = None,
 ) -> tuple[PrimerModel, PrimerModel]:
     """

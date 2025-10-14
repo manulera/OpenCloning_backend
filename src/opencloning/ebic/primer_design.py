@@ -1,6 +1,6 @@
 from pydna.dseqrecord import Dseqrecord
 from Bio.SeqFeature import SimpleLocation
-from primer3 import bindings
+from ..primer3_functions import primer3_design_primers
 
 from ..pydantic_models import PrimerModel
 from .primer_design_settings import amanda_settings
@@ -13,23 +13,13 @@ adapter_right_fwd = 'ataGGTCTCtGCTT'
 adapter_right_rvs = 'ataGGTCTCtAGCG'
 
 
-def call_primer3(seq: str, seq_args: dict):
-    report = bindings.design_primers(
-        seq_args={
-            'SEQUENCE_ID': 'MH1000',
-            'SEQUENCE_TEMPLATE': seq,
-            **seq_args,
-        },
-        global_args=amanda_settings,
-    )
-    return report
-
-
 def ebic_primers(
     input_seq: Dseqrecord,
     location: SimpleLocation,
     max_inside: int,
     max_outside: int,
+    target_tm: float,
+    target_tm_tolerance: float,
 ) -> tuple[PrimerModel, PrimerModel, PrimerModel, PrimerModel]:
     """Design primers for EBIC"""
 
@@ -53,9 +43,13 @@ def ebic_primers(
         'SEQUENCE_PRIMER_PAIR_OK_REGION_LIST': f'0,{max_outside + max_inside},{len(right_template) - int(padding/2)},{int(padding/2)}',
     }
 
-    report_left = call_primer3(left_template, seq_args_left)
-    report_right = call_primer3(right_template, seq_args_right)
+    global_args = amanda_settings.copy()
+    global_args['PRIMER_OPT_TM'] = target_tm
+    global_args['PRIMER_MIN_TM'] = target_tm - target_tm_tolerance
+    global_args['PRIMER_MAX_TM'] = target_tm + target_tm_tolerance
 
+    report_left = primer3_design_primers(left_template, seq_args_left, global_args)
+    report_right = primer3_design_primers(right_template, seq_args_right, global_args)
     primer_names = ['left_fwd', 'left_rvs', 'right_fwd', 'right_rvs']
     primer_seqs = [
         adapter_left_fwd + report_left['PRIMER_LEFT'][0]['SEQUENCE'],
