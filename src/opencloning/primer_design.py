@@ -7,38 +7,17 @@ from .pydantic_models import PrimerModel
 from Bio.Seq import reverse_complement
 from Bio.Restriction.Restriction import RestrictionType
 from Bio.Data.IUPACData import ambiguous_dna_values as _ambiguous_dna_values
-from primer3.bindings import calc_tm as _calc_tm
 from typing import Callable
-from pydantic import BaseModel, Field
-
-
-class PrimerDesignSettings(BaseModel):
-    primer_dna_conc: float = Field(50, description='The DNA concentration in the primer solution (nM).')
-    primer_salt_monovalent: float = Field(
-        50, description='The monovalent salt concentration in the primer solution (mM).'
-    )
-    primer_salt_divalent: float = Field(
-        1.5, description='The divalent salt concentration in the primer solution (mM).'
-    )
-
-    def to_primer3_args(self) -> dict:
-        """Convert the settings to primer3 arguments."""
-        return {
-            'dna_conc': self.primer_dna_conc,
-            'mv_conc': self.primer_salt_monovalent,
-            'dv_conc': self.primer_salt_divalent,
-        }
-
-
-def primer3_calc_tm(seq: str, settings: PrimerDesignSettings) -> float:
-    print(seq, _calc_tm(seq.upper(), **settings.to_primer3_args()))
-    return _calc_tm(seq.upper(), **settings.to_primer3_args())
-
+from .primer3_functions import primer3_calc_tm, PrimerDesignSettings
 
 ambiguous_dna_values = _ambiguous_dna_values.copy()
 # Remove acgt
 for base in 'ACGT':
     del ambiguous_dna_values[base]
+
+
+def default_tm_func(sequence: str) -> float:
+    return primer3_calc_tm(sequence, PrimerDesignSettings())
 
 
 def homologous_recombination_primers(
@@ -51,7 +30,7 @@ def homologous_recombination_primers(
     insert_forward: bool,
     target_tm: float,
     spacers: list[str] | None = None,
-    tm_func: Callable[[str], float] = primer3_calc_tm,
+    tm_func: Callable[[str], float] = default_tm_func,
     estimate_function: Callable[[str], float] | None = None,
 ) -> tuple[str, str]:
 
@@ -111,7 +90,7 @@ def gibson_assembly_primers(
     target_tm: float,
     circular: bool,
     spacers: list[str] | None = None,
-    tm_func: Callable[[str], float] = primer3_calc_tm,
+    tm_func: Callable[[str], float] = default_tm_func,
     estimate_function: Callable[[str], float] | None = None,
 ) -> list[PrimerModel]:
 
@@ -177,7 +156,7 @@ def simple_pair_primers(
     spacers: list[str] | None = None,
     left_enzyme_inverted: bool = False,
     right_enzyme_inverted: bool = False,
-    tm_func: Callable[[str], float] = primer3_calc_tm,
+    tm_func: Callable[[str], float] = default_tm_func,
     estimate_function: Callable[[str], float] | None = None,
 ) -> tuple[PrimerModel, PrimerModel]:
     """

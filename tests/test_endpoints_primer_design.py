@@ -15,6 +15,12 @@ from opencloning.endpoints.primer_design import (
     PrimerDetailsResponse,
     ThermodynamicResult,
 )
+from opencloning.primer3_functions import (
+    primer3_calc_tm,
+    PrimerDesignSettings,
+    primer3_calc_homodimer,
+    primer3_calc_heterodimer,
+)
 
 from pydna.parsers import parse
 from pydna.assembly2 import Assembly, gibson_overlap
@@ -22,6 +28,9 @@ from pydna.assembly2 import Assembly, gibson_overlap
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
 client = TestClient(_main.app)
+
+
+alt_primer_settings = PrimerDesignSettings(primer_dna_conc=500)
 
 
 class PrimerDesignTest(unittest.TestCase):
@@ -62,6 +71,15 @@ class PrimerDesignTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(payload['primers'][0]['sequence'], 'aaaATGGATGACATT')
         self.assertEqual(payload['primers'][1]['sequence'], 'aaaCTTTTTCAGCAA')
+
+        # Test with alt settings
+        copy_data = copy.deepcopy(data)
+        copy_data['settings'] = alt_primer_settings.model_dump()
+        response = client.post('/primer_design/homologous_recombination', json=copy_data, params=params)
+        payload = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(payload['primers'][0]['sequence'], 'aaaATGGATGACA')
+        self.assertEqual(payload['primers'][1]['sequence'], 'aaaCTTTTTCAGC')
 
         # Raise valuerror
         params['homology_length'] = 10
@@ -142,6 +160,20 @@ class PrimerDesignTest(unittest.TestCase):
         result = asm.assemble_circular()[0]
         expected = sum(templates, Dseqrecord('')).looped()
         self.assertEqual(result.seguid(), expected.seguid())
+
+        # Test with alt settings (produces different primers)
+        response = client.post(
+            '/primer_design/gibson_assembly',
+            json={'pcr_templates': queries, 'spacers': None, 'settings': alt_primer_settings.model_dump()},
+            params=params,
+        )
+        payload = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(payload['primers']), 6)
+        payload_primers = [PrimerModel.model_validate(p).to_pydna_primer() for p in payload['primers']]
+        self.assertLess(len(payload_primers[0]), len(primers[0]))
+        self.assertLess(len(payload_primers[1]), len(primers[1]))
+
         # Also works with forward_orientation = False
         queries[1]['forward_orientation'] = False
         response = client.post(
@@ -255,7 +287,7 @@ class PrimerDesignTest(unittest.TestCase):
         }
 
         params = {
-            'minimal_hybridization_length': 10,
+            'minimal_hybridization_length': 7,
             'target_tm': 30,
             'left_enzyme': 'EcoRI',
             'right_enzyme': 'BamHI',
@@ -276,6 +308,17 @@ class PrimerDesignTest(unittest.TestCase):
 
         self.assertTrue(fwd_primer.sequence.startswith('GC' + str(EcoRI.site)))
         self.assertTrue(rvs_primer.sequence.startswith('GC' + str(BamHI.site)))
+
+        # Test with alt settings
+        response = client.post(
+            '/primer_design/simple_pair',
+            json={'pcr_template': query, 'settings': alt_primer_settings.model_dump()},
+            params=params,
+        )
+        payload = response.json()
+        payload_primers = [PrimerModel.model_validate(p) for p in payload['primers']]
+        self.assertLess(len(payload_primers[0].sequence), len(fwd_primer.sequence))
+        self.assertLess(len(payload_primers[1].sequence), len(rvs_primer.sequence))
 
         # Same without enzymes
         params_no_enzymes = copy.deepcopy(params)
@@ -371,12 +414,12 @@ class PrimerDesignTest(unittest.TestCase):
     def test_primer_details(self):
         # Works with short sequences
         SEQUENCE = 'ATGCATGCATGCATGC'
-        response = client.get('/primer_details', params={'sequence': SEQUENCE})
+        response = client.post('/primer_details', json={'sequence': SEQUENCE})
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         resp = PrimerDetailsResponse.model_validate(payload)
         self.assertEqual(resp.gc_content, 0.5)
-        self.assertEqual(resp.melting_temperature, bindings.calc_tm(SEQUENCE))
+        self.assertEqual(resp.melting_temperature, primer3_calc_tm(SEQUENCE, PrimerDesignSettings()))
         homodimerResult = bindings.calc_homodimer(SEQUENCE, output_structure=True)
         self.assertEqual(resp.homodimer.melting_temperature, homodimerResult.tm)
         self.assertEqual(resp.homodimer.deltaG, homodimerResult.dg)
@@ -388,7 +431,7 @@ class PrimerDesignTest(unittest.TestCase):
 
         # Splits long sequence
         LONG_SEQUENCE = 'GGAAAAGCATTTTTCTAAAATTGAAAGGCTTCACCAAGTCCTTGGAACAGATGGAGACAATTCATCATTA'
-        response = client.get('/primer_details', params={'sequence': LONG_SEQUENCE})
+        response = client.post('/primer_details', json={'sequence': LONG_SEQUENCE})
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         resp = PrimerDetailsResponse.model_validate(payload)
@@ -405,26 +448,39 @@ class PrimerDesignTest(unittest.TestCase):
         self.assertEqual(resp.hairpin.deltaG, min_deltaG_hairpin)
 
         # Response is the same for upper and lower case
-        response_lower = client.get('/primer_details', params={'sequence': LONG_SEQUENCE.lower()})
+        response_lower = client.post('/primer_details', json={'sequence': LONG_SEQUENCE.lower()})
         self.assertEqual(response_lower.json()['melting_temperature'], response.json()['melting_temperature'])
 
         # Error 422 if sequence is not DNA
-        response = client.get('/primer_details', params={'sequence': 'ATGCATGCATGCATGCX'})
+        response = client.post('/primer_details', json={'sequence': 'ATGCATGCATGCATGCX'})
         self.assertEqual(response.status_code, 422)
 
         # Handles the case where there is no hairpin / homodimer
-        response = client.get('/primer_details', params={'sequence': 'AAAA'})
+        response = client.post('/primer_details', json={'sequence': 'AAAA'})
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         resp = PrimerDetailsResponse.model_validate(payload)
         self.assertIsNone(resp.homodimer)
         self.assertIsNone(resp.hairpin)
 
+        # Uses primer settings
+        response = client.post(
+            '/primer_details', json={'sequence': SEQUENCE, 'settings': alt_primer_settings.model_dump()}
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        resp = PrimerDetailsResponse.model_validate(payload)
+        self.assertEqual(resp.melting_temperature, primer3_calc_tm(SEQUENCE, alt_primer_settings))
+        self.assertEqual(
+            resp.homodimer.melting_temperature,
+            primer3_calc_homodimer(SEQUENCE, alt_primer_settings).melting_temperature,
+        )
+
     def test_primer_heterodimer(self):
         # Works with short sequences
         SEQUENCE1 = 'ATGCATGCATGCATGC'
         SEQUENCE2 = 'CTAAAATTGAAAGGCTTCACCAAGT'
-        response = client.get('/primer_heterodimer', params={'sequence1': SEQUENCE1, 'sequence2': SEQUENCE2})
+        response = client.post('/primer_heterodimer', json={'sequence1': SEQUENCE1, 'sequence2': SEQUENCE2})
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         resp = ThermodynamicResult.model_validate(payload)
@@ -434,19 +490,19 @@ class PrimerDesignTest(unittest.TestCase):
         self.assertEqual(resp.figure, '\n'.join(heterodimer.ascii_structure_lines))
 
         # Same with lower case
-        response_lower = client.get(
-            '/primer_heterodimer', params={'sequence1': SEQUENCE1.lower(), 'sequence2': SEQUENCE2.lower()}
+        response_lower = client.post(
+            '/primer_heterodimer', json={'sequence1': SEQUENCE1.lower(), 'sequence2': SEQUENCE2.lower()}
         )
         self.assertEqual(response_lower.json()['melting_temperature'], response.json()['melting_temperature'])
 
         # Error 422 if sequence is not DNA
-        response = client.get('/primer_heterodimer', params={'sequence1': 'ATGCATGCATGCATGCX', 'sequence2': SEQUENCE2})
+        response = client.post('/primer_heterodimer', json={'sequence1': 'ATGCATGCATGCATGCX', 'sequence2': SEQUENCE2})
         self.assertEqual(response.status_code, 422)
 
         # Handles long sequences
         LONG_SEQUENCE1 = 'GGAAAAGCATTTTTCTAAAATTGAAAGGCTTCACCAAGTCCTTGGAACAGATGGAGACAATTCATCATTA'
         LONG_SEQUENCE2 = 'GGAAAAGCATTTTTCTAAAATTGAAAGGCTTCGACTATTCCTTGGAACAGATGGAGACAATTCATCATTA'
-        response = client.get('/primer_heterodimer', params={'sequence1': LONG_SEQUENCE1, 'sequence2': LONG_SEQUENCE2})
+        response = client.post('/primer_heterodimer', json={'sequence1': LONG_SEQUENCE1, 'sequence2': LONG_SEQUENCE2})
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         resp = ThermodynamicResult.model_validate(payload)
@@ -455,10 +511,23 @@ class PrimerDesignTest(unittest.TestCase):
         self.assertEqual(resp.deltaG, min_deltaG)
 
         # Handles case where there is no heterodimer
-        response = client.get('/primer_heterodimer', params={'sequence1': 'AAA', 'sequence2': 'AAA'})
+        response = client.post('/primer_heterodimer', json={'sequence1': 'AAA', 'sequence2': 'AAA'})
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertIsNone(payload)
+
+        # Works with alt settings
+        response = client.post(
+            '/primer_heterodimer',
+            json={'sequence1': SEQUENCE1, 'sequence2': SEQUENCE2, 'settings': alt_primer_settings.model_dump()},
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        resp = ThermodynamicResult.model_validate(payload)
+        heterodimer = primer3_calc_heterodimer(SEQUENCE1, SEQUENCE2, alt_primer_settings)
+        self.assertEqual(resp.melting_temperature, heterodimer.melting_temperature)
+        self.assertEqual(resp.deltaG, heterodimer.deltaG)
+        self.assertEqual(resp.figure, heterodimer.figure)
 
 
 class TestEbicPrimers(unittest.TestCase):
@@ -478,7 +547,7 @@ class TestEbicPrimers(unittest.TestCase):
             }
         )
 
-        params = {'max_inside': 50, 'max_outside': 20}
+        params = {'max_inside': 50, 'max_outside': 20, 'target_tm': 61, 'target_tm_tolerance': 3}
         response = client.post('/primer_design/ebic', json=query.model_dump(), params=params)
         self.assertEqual(response.status_code, 200)
 

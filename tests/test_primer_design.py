@@ -545,7 +545,7 @@ class TestEbicPrimers(TestCase):
 
         template = parse(os.path.join(test_files, 'lacZ_EBIC_example.gb'))[0]
 
-        result = ebic_primers(template, SimpleLocation(1000, 4075), 50, 20)
+        result = ebic_primers(template, SimpleLocation(1000, 4075), 50, 20, 61, 3)
         expected = (
             (
                 'left_fwd',
@@ -575,7 +575,7 @@ class TestEbicPrimers(TestCase):
         """
         template = parse(os.path.join(test_files, 'lacZ_EBIC_example.gb'))[0]
         with self.assertRaises(ValueError) as e:
-            ebic_primers(template, SimpleLocation(0, 4075), 50, 20)
+            ebic_primers(template, SimpleLocation(0, 4075), 50, 20, 61, 3)
         self.assertIn('The template is too short for the padding.', str(e.exception))
 
 
