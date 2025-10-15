@@ -219,6 +219,9 @@ async def primer_design_simple_pair(
 @router.post('/primer_design/ebic', response_model=PrimerDesignResponse)
 async def primer_design_ebic(
     template: PrimerDesignQuery,
+    settings: PrimerDesignSettings = Body(
+        ..., description='Primer design settings.', default_factory=PrimerDesignSettings
+    ),
     max_inside: int = Query(..., description='The maximum length of the inside edge of the EBIC primer.'),
     max_outside: int = Query(..., description='The maximum length of the outside edge of the EBIC primer.'),
     target_tm: float = Query(
@@ -227,11 +230,25 @@ async def primer_design_ebic(
     target_tm_tolerance: float = Query(
         3, description='The tolerance for the desired melting temperature for the hybridization part of the primer.'
     ),
+    padding_left: int = Query(..., description='The padding length on the left side of the template.'),
+    padding_right: int = Query(..., description='The padding length on the right side of the template.'),
 ):
     """Design primers for EBIC"""
     dseqr = read_dsrecord_from_json(template.sequence)
     location = template.location.to_biopython_location()
-    return {'primers': ebic_primers(dseqr, location, max_inside, max_outside, target_tm, target_tm_tolerance)}
+    return {
+        'primers': ebic_primers(
+            dseqr,
+            location,
+            max_inside,
+            max_outside,
+            target_tm,
+            target_tm_tolerance,
+            padding_left,
+            padding_right,
+            settings,
+        )
+    }
 
 
 # @router.post('/primer_design/gateway_attB', response_model=PrimerDesignResponse)
