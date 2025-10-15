@@ -547,8 +547,21 @@ class TestEbicPrimers(unittest.TestCase):
             }
         )
 
-        params = {'max_inside': 50, 'max_outside': 20, 'target_tm': 61, 'target_tm_tolerance': 3}
-        response = client.post('/primer_design/ebic', json=query.model_dump(), params=params)
+        params = {
+            'max_inside': 50,
+            'max_outside': 20,
+            'target_tm': 61,
+            'target_tm_tolerance': 3,
+            'padding_left': 1000,
+            'padding_right': 1000,
+        }
+        settings = PrimerDesignSettings()
+        settings.primer_dna_conc = 500
+        response = client.post(
+            '/primer_design/ebic',
+            json={'template': query.model_dump(), 'settings': settings.model_dump()},
+            params=params,
+        )
         self.assertEqual(response.status_code, 200)
 
         expected = (

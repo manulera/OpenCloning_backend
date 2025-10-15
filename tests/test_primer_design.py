@@ -15,6 +15,7 @@ import pytest
 from Bio.Data.IUPACData import ambiguous_dna_values
 from Bio.Seq import reverse_complement
 import os
+from opencloning.primer3_functions import PrimerDesignSettings
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
@@ -545,7 +546,9 @@ class TestEbicPrimers(TestCase):
 
         template = parse(os.path.join(test_files, 'lacZ_EBIC_example.gb'))[0]
 
-        result = ebic_primers(template, SimpleLocation(1000, 4075), 50, 20, 61, 3)
+        alt_settings = PrimerDesignSettings()
+        alt_settings.primer_dna_conc = 500
+        result = ebic_primers(template, SimpleLocation(1000, 4075), 50, 20, 61, 3, settings=alt_settings)
         expected = (
             (
                 'left_fwd',

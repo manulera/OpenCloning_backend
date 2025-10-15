@@ -9,6 +9,7 @@ adapter_left_fwd = 'ataGGTCTCtGGAG'
 adapter_left_rvs = 'ataGGTCTCtCATT'
 adapter_right_fwd = 'ataGGTCTCtGCTT'
 adapter_right_rvs = 'ataGGTCTCtAGCG'
+default_settings = PrimerDesignSettings()
 
 
 def ebic_primers(
@@ -18,9 +19,9 @@ def ebic_primers(
     max_outside: int,
     target_tm: float,
     target_tm_tolerance: float,
-    padding_left: int,
-    padding_right: int,
-    settings: PrimerDesignSettings,
+    padding_left: int = 1000,
+    padding_right: int = 1000,
+    settings: PrimerDesignSettings = default_settings,
 ) -> tuple[PrimerModel, PrimerModel, PrimerModel, PrimerModel]:
     """Design primers for EBIC"""
 
