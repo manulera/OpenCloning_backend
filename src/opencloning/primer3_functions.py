@@ -62,7 +62,7 @@ class ThermodynamicResult(BaseModel):
         )
 
 
-def get_sequence_thermodynamic_result(sequence: str, method: callable) -> ThermodynamicResult | None:
+def get_sequence_thermodynamic_result(sequence: str, method: callable):
     """Get the thermodynamic result for a sequence, if the sequence is longer than primer3 60bp limit, it will be split into two
     and the result with the lowest deltaG will be returned."""
     sequence = sequence.upper()
@@ -80,13 +80,13 @@ def get_sequence_thermodynamic_result(sequence: str, method: callable) -> Thermo
     return ThermodynamicResult.from_binding(result)
 
 
-def primer3_calc_homodimer(seq: str, settings: PrimerDesignSettings) -> ThermodynamicResult:
+def primer3_calc_homodimer(seq: str, settings: PrimerDesignSettings):
     return get_sequence_thermodynamic_result(
         seq, lambda x: _calc_homodimer(x, output_structure=True, **settings.to_primer3_args())
     )
 
 
-def primer3_calc_hairpin(seq: str, settings: PrimerDesignSettings) -> ThermodynamicResult:
+def primer3_calc_hairpin(seq: str, settings: PrimerDesignSettings):
     return get_sequence_thermodynamic_result(
         seq, lambda x: _calc_hairpin(x, output_structure=True, **settings.to_primer3_args())
     )

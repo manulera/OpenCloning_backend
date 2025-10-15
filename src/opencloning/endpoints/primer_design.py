@@ -51,9 +51,7 @@ def validate_spacers(spacers: list[str] | None, nb_templates: int, circular: boo
 async def primer_design_homologous_recombination(
     pcr_template: PrimerDesignQuery,
     homologous_recombination_target: PrimerDesignQuery,
-    settings: PrimerDesignSettings = Body(
-        ..., description='Primer design settings.', default_factory=PrimerDesignSettings
-    ),
+    settings: PrimerDesignSettings = Body(description='Primer design settings.', default_factory=PrimerDesignSettings),
     spacers: list[str] | None = Body(
         None,
         description='Spacers to add at the left and right side of the insertion.',
@@ -103,9 +101,7 @@ async def primer_design_homologous_recombination(
 @router.post('/primer_design/gibson_assembly', response_model=PrimerDesignResponse)
 async def primer_design_gibson_assembly(
     pcr_templates: list[PrimerDesignQuery],
-    settings: PrimerDesignSettings = Body(
-        ..., description='Primer design settings.', default_factory=PrimerDesignSettings
-    ),
+    settings: PrimerDesignSettings = Body(description='Primer design settings.', default_factory=PrimerDesignSettings),
     spacers: list[str] | None = Body(
         None,
         description='Spacers to add between the restriction site and the 5\' end of the primer footprint (the part that binds the DNA).',
@@ -156,9 +152,7 @@ async def primer_design_simple_pair(
         None,
         description='Spacers to add between the restriction site and the 5\' end of the primer footprint (the part that binds the DNA).',
     ),
-    settings: PrimerDesignSettings = Body(
-        ..., description='Primer design settings.', default_factory=PrimerDesignSettings
-    ),
+    settings: PrimerDesignSettings = Body(description='Primer design settings.', default_factory=PrimerDesignSettings),
     minimal_hybridization_length: int = Query(
         ..., description='The minimal length of the hybridization region in bps.'
     ),
@@ -219,6 +213,7 @@ async def primer_design_simple_pair(
 @router.post('/primer_design/ebic', response_model=PrimerDesignResponse)
 async def primer_design_ebic(
     template: PrimerDesignQuery,
+    settings: PrimerDesignSettings = Body(description='Primer design settings.', default_factory=PrimerDesignSettings),
     max_inside: int = Query(..., description='The maximum length of the inside edge of the EBIC primer.'),
     max_outside: int = Query(..., description='The maximum length of the outside edge of the EBIC primer.'),
     target_tm: float = Query(
@@ -227,11 +222,25 @@ async def primer_design_ebic(
     target_tm_tolerance: float = Query(
         3, description='The tolerance for the desired melting temperature for the hybridization part of the primer.'
     ),
+    padding_left: int = Query(..., description='The padding length on the left side of the template.'),
+    padding_right: int = Query(..., description='The padding length on the right side of the template.'),
 ):
     """Design primers for EBIC"""
     dseqr = read_dsrecord_from_json(template.sequence)
     location = template.location.to_biopython_location()
-    return {'primers': ebic_primers(dseqr, location, max_inside, max_outside, target_tm, target_tm_tolerance)}
+    return {
+        'primers': ebic_primers(
+            dseqr,
+            location,
+            max_inside,
+            max_outside,
+            target_tm,
+            target_tm_tolerance,
+            padding_left,
+            padding_right,
+            settings,
+        )
+    }
 
 
 # @router.post('/primer_design/gateway_attB', response_model=PrimerDesignResponse)
@@ -279,9 +288,7 @@ class PrimerDetailsResponse(BaseModel):
 @router.post('/primer_details', response_model=PrimerDetailsResponse)
 async def primer_details(
     sequence: str = Body(..., description='Primer sequence', pattern=r'^[ACGTacgt]+$'),
-    settings: PrimerDesignSettings = Body(
-        ..., description='Primer design settings.', default_factory=PrimerDesignSettings
-    ),
+    settings: PrimerDesignSettings = Body(description='Primer design settings.', default_factory=PrimerDesignSettings),
 ):
     """Get information about a primer"""
     sequence = sequence.upper()
@@ -303,9 +310,7 @@ async def primer_details(
 async def primer_heterodimer(
     sequence1: str = Body(..., description='First primer sequence', pattern=r'^[ACGTacgt]+$'),
     sequence2: str = Body(..., description='Second primer sequence', pattern=r'^[ACGTacgt]+$'),
-    settings: PrimerDesignSettings = Body(
-        ..., description='Primer design settings.', default_factory=PrimerDesignSettings
-    ),
+    settings: PrimerDesignSettings = Body(description='Primer design settings.', default_factory=PrimerDesignSettings),
 ):
     """Get information about a primer pair"""
 
