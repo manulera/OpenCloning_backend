@@ -7,13 +7,13 @@ from pydantic import create_model, Field
 from typing import Annotated
 from Bio.Restriction.Restriction import RestrictionBatch
 from opencloning.cre_lox import cre_loxP_overlap, annotate_loxP_sites
+from opencloning.temp_functions import is_assembly_complete, minimal_assembly_overlap
 from ..dna_functions import (
     get_invalid_enzyme_names,
     format_sequence_genbank,
     read_dsrecord_from_json,
 )
 from ..pydantic_models import (
-    PCRSource,
     PrimerModel,
     TextFileSequence,
     LigationSource,
@@ -28,19 +28,20 @@ from ..pydantic_models import (
     CreLoxRecombinationSource,
     InVivoAssemblySource,
 )
+from opencloning_linkml.datamodel import PCRSource
+from pydna.opencloning_models import id_mode
 from pydna.assembly2 import (
     Assembly,
     assemble,
     sticky_end_sub_strings,
-    PCRAssembly,
     gibson_overlap,
     filter_linear_subassemblies,
     restriction_ligation_overlap,
     SingleFragmentAssembly,
     blunt_overlap,
     combine_algorithms,
-    annotate_primer_binding_sites,
     common_sub_strings,
+    pcr_assembly,
 )
 
 from ..gateway import gateway_overlap, find_gateway_sites, annotate_gateway_sites
@@ -283,68 +284,41 @@ async def pcr(
     # What happens if annealing is zero? That would mean
     # mismatch in the 3' of the primer, which maybe should
     # not be allowed.
-    if source.is_assembly_complete():
-        minimal_annealing = source.minimal_overlap()
+    if is_assembly_complete(source):
+        minimal_annealing = minimal_assembly_overlap(source)
         # Only the ones that match are included in the output assembly
         # location, so the submitted assembly should be returned without
         # allowed mistmatches
         # TODO: tests for this
         allowed_mismatches = 0
 
-    # Arrange the fragments in the order primer, sequence, primer
-    fragments = list()
-    while len(pydna_primers):
-        fragments.append(pydna_primers.pop(0))
-        fragments.append(pydna_sequences.pop(0))
-        fragments.append(pydna_primers.pop(0))
-
-    asm = PCRAssembly(fragments, limit=minimal_annealing, mismatches=allowed_mismatches)
     try:
-        possible_assemblies = asm.get_linear_assemblies()
-    except ValueError as e:
-        raise HTTPException(400, *e.args)
-
-    # Edge case: where both primers are identical, remove
-    # duplicate assemblies that represent just reverse complement
-    if len(sequences) == 1 and primers[0].id == primers[1].id:
-        possible_assemblies = [a for a in possible_assemblies if (a[0][0] == 1 and a[0][1] == 2)]
-
-    out_sources = [
-        PCRSource.from_assembly(
-            id=source.id,
-            assembly=a,
-            circular=False,
-            fragments=fragments,
+        products: list[Dseqrecord] = pcr_assembly(
+            pydna_sequences[0],
+            pydna_primers[0],
+            pydna_primers[1],
+            limit=minimal_annealing,
+            mismatches=allowed_mismatches,
             add_primer_features=source.add_primer_features,
         )
-        for a in possible_assemblies
-    ]
+    except ValueError as e:
+        # This catches the too many assemblies error
+        raise HTTPException(400, *e.args)
 
+    out_sequences = [format_sequence_genbank(product, source.output_name) for product in products]
+    with id_mode(use_object_id=False):
+        out_sources = [p.source.to_pydantic_model(0).model_dump() for p in products]
     # If a specific assembly is requested
-    if source.is_assembly_complete():
+    if is_assembly_complete(source):
+        this_source_dict = source.model_dump()
+        for i, out_source in enumerate(out_sources):
+            if out_source == this_source_dict:
+                return {'sources': [out_sources[i]], 'sequences': [out_sequences[i]]}
 
-        def callback(x):
-            if source.add_primer_features:
-                return annotate_primer_binding_sites(x, fragments)
-            else:
-                return x
+        raise HTTPException(400, 'The provided assembly is not valid.')
 
-        return format_known_assembly_response(source, out_sources, fragments, callback)
-
-    if len(possible_assemblies) == 0:
+    if len(products) == 0:
         raise HTTPException(400, 'No pair of annealing primers was found. Try changing the annealing settings.')
-
-    def callback(fragments, a):
-        out_seq = assemble(fragments, a)
-        if source.add_primer_features:
-            return annotate_primer_binding_sites(out_seq, fragments)
-        else:
-            return out_seq
-
-    out_sequences = [
-        format_sequence_genbank(callback(fragments, a), source.output_name)
-        for s, a in zip(out_sources, possible_assemblies)
-    ]
 
     return {'sources': out_sources, 'sequences': out_sequences}
 
