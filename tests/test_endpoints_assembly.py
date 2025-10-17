@@ -456,7 +456,7 @@ class PCRTest(unittest.TestCase):
             'primers': [primer_fwd.model_dump()],
         }
         response = client.post('/pcr', json=data, params={'minimal_annealing': 8})
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 422)
 
     def test_too_many_assemblies(self):
         # Too many assemblies
