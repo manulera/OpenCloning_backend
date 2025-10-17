@@ -823,6 +823,10 @@ class RestrictionAndLigationTest(unittest.TestCase):
         self.assertEqual(len(payload['sequences']), 1)
         self.assertEqual(len(payload['sources']), 1)
         self.assertEqual(payload['sources'][0], sources[0].model_dump())
+        seq1 = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
+        seq2 = sequences[0]
+        print(seq1.source)
+        print(seq2.source)
         self.assertEqual(
             read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0])), sequences[0]
         )

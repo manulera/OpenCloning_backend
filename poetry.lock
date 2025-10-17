@@ -1716,16 +1716,14 @@ wheel = "*"
 
 [[package]]
 name = "pydna"
-version = "5.5.2"
+version = "5.5.3-post.47+53fe8554"
 description = "Representing double stranded DNA and functions for simulating cloning and homologous recombination between DNA molecules."
 optional = false
-python-versions = "<4.0,>=3.9"
+python-versions = ">=3.10,<4.0"
 groups = ["main"]
 markers = "python_version == \"3.11\" or python_version >= \"3.12\""
-files = [
-    {file = "pydna-5.5.2-py3-none-any.whl", hash = "sha256:bec71bd71a15d16ac6644343d51d285ed0d7fb04c44d25dd2fc590355285ed47"},
-    {file = "pydna-5.5.2.tar.gz", hash = "sha256:9824afb2893a53bf593b1bfdb74164030c7b14c958e70c8f53968e9661cded33"},
-]
+files = []
+develop = false
 
 [package.dependencies]
 appdirs = ">=1.4.4"
@@ -1735,10 +1733,11 @@ numpy = [
     {version = ">1.26", markers = "python_version < \"3.12\""},
     {version = ">=2.3.0", markers = "python_version >= \"3.12\""},
 ]
+opencloning-linkml = "^0.4.3"
 prettytable = ">=3.5.0"
 pydivsufsort = ">=0.0.14"
 pyfiglet = "0.8.post1"
-regex = ">=2024.11.6,<2025.0.0"
+regex = "^2024.11.6"
 seguid = ">=0.0.5"
 
 [package.extras]
@@ -1746,6 +1745,12 @@ clipboard = ["pyperclip (>=1.8.2)"]
 download = ["pyparsing (>=2.4.7)", "requests (>=2.26.0)"]
 express = ["cai2 (>=1.0.5)"]
 gel = ["matplotlib (>=3.4.3)", "pillow (>=8.4.0)", "scipy (>=1.11.3)", "scipy (>=1.9.3)"]
+
+[package.source]
+type = "git"
+url = "https://github.com/pydna-group/pydna"
+reference = "53fe85542d8f28aada627e1a08c7e52fc4372ea9"
+resolved_reference = "53fe85542d8f28aada627e1a08c7e52fc4372ea9"
 
 [[package]]
 name = "pyfiglet"
@@ -2709,4 +2714,4 @@ test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "5d68d1792f2062e1b1eee1768792b2ae05bf6f1bab0d45c3db31e7b96e625826"
+content-hash = "2e028a582b33c5a5cfbd851f564ef00bbb2aa7cba1d02965e160cc542b3eef36"
