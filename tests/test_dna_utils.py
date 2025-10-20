@@ -1,7 +1,7 @@
 import os
 import unittest
 from unittest.mock import patch
-from opencloning.dna_utils import sum_is_sticky, get_alignment_shift, align_sanger_traces, permutate_trace
+from opencloning.dna_utils import sum_is_sticky, align_sanger_traces, permutate_trace
 from pydna.dseq import Dseq
 from pydna.parsers import parse
 from pydna.dseqrecord import Dseqrecord
@@ -72,16 +72,6 @@ class PartialStickyTest(unittest.TestCase):
 
         self.expectTrue(seq1, seq2, True)
         self.expectFalse(seq1, seq2, False)
-
-
-class AlignmentShiftedTest(unittest.TestCase):
-    def test_alignment_shifted(self):
-        alignment = Dseq('AA---ACCGGT---', circular=True)
-        seq = Dseq(str(alignment).replace('-', ''), circular=True)
-        for shift in range(len(seq)):
-            normal_shifted = seq.shifted(shift)
-            alignment_shifted = alignment.shifted(get_alignment_shift(alignment, shift))
-            self.assertEqual(str(normal_shifted), str(alignment_shifted).replace('-', ''))
 
 
 class AlignSangerTrackTest(unittest.TestCase):

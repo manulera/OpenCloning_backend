@@ -9,7 +9,7 @@ from ..dna_functions import (
     annotate_with_plannotate as _annotate_with_plannotate,
     format_sequence_genbank,
 )
-from ..gateway import find_gateway_sites
+from pydna.gateway import find_gateway_sites
 from ..app_settings import settings
 
 router = get_router()

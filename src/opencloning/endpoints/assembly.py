@@ -43,7 +43,7 @@ from pydna.assembly2 import (
 )
 from pydna.cre_lox import annotate_loxP_sites
 
-from ..gateway import annotate_gateway_sites
+from pydna.gateway import annotate_gateway_sites
 from ..get_router import get_router
 
 router = get_router()
@@ -281,8 +281,8 @@ async def restriction_and_ligation(
     fragments = [read_dsrecord_from_json(seq) for seq in sequences]
     enzymes = parse_restriction_enzymes(source.restriction_enzymes)
     chosen_source = source if is_assembly_complete(source) else None
-    if chosen_source:
-        allow_partial_overlap = True
+    # if chosen_source:
+    #     allow_partial_overlap = True
 
     try:
         products = _restriction_ligation_assembly(fragments, enzymes, circular_only=circular_only)

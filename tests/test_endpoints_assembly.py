@@ -5,7 +5,7 @@ from Bio.SeqFeature import SimpleLocation
 from pydna.dseqrecord import Dseqrecord
 import unittest
 from pydna.dseq import Dseq
-from opencloning.cre_lox import LOXP_SEQUENCE
+from pydna.cre_lox import LOXP_SEQUENCE
 import os
 
 from opencloning.dna_functions import format_sequence_genbank, read_dsrecord_from_json

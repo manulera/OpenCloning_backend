@@ -7,7 +7,6 @@ from pydna.dseq import Dseq
 from Bio.Seq import reverse_complement
 
 from opencloning.dna_functions import (
-    find_sequence_regex,
     custom_file_parser,
     correct_name,
     MyGenBankScanner,
@@ -16,83 +15,6 @@ from opencloning.dna_functions import (
 )
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
-
-
-class SequenceRegexTest(unittest.TestCase):
-    def test_regex(self):
-
-        # Features spanning the whole sequence
-        regex_pattern = 'AA.*AA'
-        template_seq = 'AATTAA'
-        template_seq2 = 'TTAATT'
-        for circular in [False, True]:
-            features = find_sequence_regex(regex_pattern, template_seq, circular)
-            self.assertEqual(len(features), 1)
-            self.assertEqual(features[0].start, 0)
-            self.assertEqual(features[0].end, 6)
-            self.assertEqual(features[0].strand, 1)
-
-            # Find in the reverse strand
-            features = find_sequence_regex(regex_pattern, template_seq2, circular)
-
-            self.assertEqual(len(features), 1)
-            self.assertEqual(features[0].start, 0)
-            self.assertEqual(features[0].end, 6)
-            self.assertEqual(features[0].strand, -1)
-
-        # Nested features are found and returned in the correct order
-        regex_pattern = 'AA.*AA'
-        template_seq = 'AATTAATTAA'
-        for circular in [False, True]:
-            features = find_sequence_regex(regex_pattern, template_seq, circular)
-            self.assertEqual(len(features), 4)
-
-            # First AATTAA
-            self.assertEqual([features[0].start, features[0].end], [0, 6])
-            self.assertEqual(features[0].extract(template_seq), 'AATTAA')
-            # Entire sequence
-            self.assertEqual([features[1].start, features[1].end], [0, 10])
-            self.assertEqual(features[1].extract(template_seq), 'AATTAATTAA')
-            # reverse match
-            self.assertEqual([features[2].start, features[2].end], [2, 8])
-            self.assertEqual(features[2].extract(template_seq), 'AATTAA')
-            # Second AATTAA
-            self.assertEqual([features[3].start, features[3].end], [4, 10])
-            self.assertEqual(features[3].extract(template_seq), 'AATTAA')
-
-        # Features that span the origin, the order in which they are returned is
-        # a bit arbitrary, see the documentation of location_sorter
-        regex_pattern = 'AA.*CC'
-        template_seq = 'TTCCTTAAGG'
-        features = find_sequence_regex(regex_pattern, template_seq, False)
-        self.assertEqual(len(features), 0)
-        features = find_sequence_regex(regex_pattern, template_seq, True)
-        self.assertEqual(len(features), 3)
-
-        # match: AAGGAACC
-        # TTCCTTAAGG
-        # <<<<<<--<<
-        f1, f2 = features[0].parts
-        self.assertEqual([f2.start, f2.end], [8, 10])
-        self.assertEqual([f1.start, f1.end], [0, 6])
-        features[0].strand = -1
-        self.assertEqual(features[0].extract(template_seq), 'AAGGAACC')
-
-        # match: AACC
-        # TTCCTTAAGG
-        # <<------<<
-        f1, f2 = features[1].parts
-        self.assertEqual([f1.start, f1.end], [0, 2])
-        self.assertEqual([f2.start, f2.end], [8, 10])
-        self.assertEqual(features[1].extract(template_seq), 'AACC')
-
-        # match: AAGGTTCC
-        # TTCCTTAAGG
-        # >>>>-->>>>
-        f1, f2 = features[2].parts
-        self.assertEqual([f1.start, f1.end], [6, 10])
-        self.assertEqual([f2.start, f2.end], [0, 4])
-        self.assertEqual(features[2].extract(template_seq), 'AAGGTTCC')
 
 
 class PermisiveParserWithApeTest(unittest.TestCase):
