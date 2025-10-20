@@ -1,14 +1,11 @@
 from pydantic import BaseModel, Field, model_validator, field_validator, Discriminator, Tag
 from typing import Optional, List, Union, Annotated
-from pydantic_core import core_schema
+
 from ._version import __version__
 
 from Bio.SeqFeature import (
     SeqFeature,
     Location,
-    SimpleLocation,
-    FeatureLocation as BioFeatureLocation,
-    LocationParserError,
 )
 from Bio.SeqIO.InsdcIO import _insdc_location_string as format_feature_location
 from Bio.Restriction.Restriction import RestrictionType, RestrictionBatch
@@ -56,7 +53,7 @@ from pydna.assembly2 import (
     edge_representation2subfragment_representation,
     subfragment_representation2edge_representation,
 )
-from pydna.utils import location_boundaries, shift_location
+from pydna.opencloning_models import SequenceLocationStr
 
 
 SequenceFileFormat = _SequenceFileFormat
@@ -258,65 +255,6 @@ class RestrictionEnzymeDigestionSource(SourceCommonClass, _RestrictionEnzymeDige
         return sorted(list(set(out)), key=out.index)
 
 
-class SequenceLocationStr(str):
-    """A string representation of a sequence location, genbank-like."""
-
-    # TODO: this should handle origin-spanning simple locations (splitted)
-    @classmethod
-    def from_biopython_location(cls, location: Location):
-        return cls(format_feature_location(location, None))
-
-    @classmethod
-    def from_start_and_end(cls, start: int, end: int, seq_len: int | None = None, strand: int | None = 1):
-        if end >= start:
-            return cls.from_biopython_location(SimpleLocation(start, end, strand=strand))
-        else:
-            if seq_len is None:
-                raise ValueError('Sequence length is required to handle origin-spanning simple locations')
-            unwrapped_location = SimpleLocation(start, end + seq_len, strand=strand)
-            wrapped_location = shift_location(unwrapped_location, 0, seq_len)
-            return cls.from_biopython_location(wrapped_location)
-
-    def to_biopython_location(self) -> BioFeatureLocation:
-        return Location.fromstring(self)
-
-    @classmethod
-    def field_validator(cls, v):
-        if isinstance(v, str):
-            value = cls(v)
-            try:
-                value.to_biopython_location()
-            except LocationParserError:
-                raise ValueError(f'Location "{v}" is not a valid location')
-            return value
-        raise ValueError(f'Location must be a string or a {cls.__name__}')
-
-    @property
-    def start(self) -> int:
-        return location_boundaries(self.to_biopython_location())[0]
-
-    @property
-    def end(self) -> int:
-        return location_boundaries(self.to_biopython_location())[1]
-
-    @classmethod
-    def __get_pydantic_core_schema__(
-        cls,
-        source_type,
-        handler,
-    ) -> core_schema.CoreSchema:
-        """Generate Pydantic core schema for SequenceLocationStr."""
-        return core_schema.with_info_after_validator_function(
-            cls._validate,
-            core_schema.str_schema(),
-        )
-
-    @classmethod
-    def _validate(cls, value: str, info):
-        """Validate and create SequenceLocationStr instance."""
-        return cls.field_validator(value)
-
-
 class AssemblyFragment(_AssemblyFragment, SourceInput):
     left_location: Optional[SequenceLocationStr] = None
     right_location: Optional[SequenceLocationStr] = None
@@ -363,24 +301,10 @@ class AssemblySourceCommonClass(SourceCommonClass):
         json_schema_extra={'linkml_meta': {'alias': 'input', 'domain_of': ['Source'], 'slot_uri': 'schema:object'}},
     )
 
-    def minimal_overlap(self):
-        """Returns the minimal overlap between the fragments in the assembly"""
-        all_overlaps = list()
-        for f in self.input:
-            if f.left_location is not None:
-                all_overlaps.append(f.left_location.end - f.left_location.start)
-            if f.right_location is not None:
-                all_overlaps.append(f.right_location.end - f.right_location.start)
-        return min(all_overlaps)
-
     def get_assembly_plan(self, fragments: list[_SeqRecord]) -> tuple:
         """Returns the assembly plan"""
         subf = [f.to_fragment_tuple(fragments) for f in self.input if f.type == 'AssemblyFragment']
         return subfragment_representation2edge_representation(subf, self.circular)
-
-    def is_assembly_complete(self) -> bool:
-        """Returns True if the assembly is complete"""
-        return any(f.type == 'AssemblyFragment' for f in self.input)
 
     @classmethod
     def from_assembly(

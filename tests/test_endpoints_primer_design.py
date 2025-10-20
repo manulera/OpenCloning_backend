@@ -91,7 +91,7 @@ class PrimerDesignTest(unittest.TestCase):
         # Test an insertion with spacers and reversed insert
         params['homology_length'] = 3
         data['pcr_template']['forward_orientation'] = False
-        data['homologous_recombination_target']['location'] = SequenceLocationStr.from_start_and_end(start=3, end=3)
+        data['homologous_recombination_target']['location'] = SequenceLocationStr.from_start_and_end(3, 3, 1000, None)
         data['spacers'] = ['attt', 'cggg']
         response = client.post('/primer_design/homologous_recombination', json=data, params=params)
         self.assertEqual(response.status_code, 200)
