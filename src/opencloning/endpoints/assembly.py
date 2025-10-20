@@ -17,33 +17,34 @@ from ..dna_functions import (
 from ..pydantic_models import (
     PrimerModel,
     TextFileSequence,
-    LigationSource,
     HomologousRecombinationSource,
     CRISPRSource,
-    GibsonAssemblySource,
-    InFusionSource,
-    RestrictionAndLigationSource,
     AssemblySource,
-    OverlapExtensionPCRLigationSource,
     GatewaySource,
     CreLoxRecombinationSource,
-    InVivoAssemblySource,
+    RestrictionAndLigationSource,
 )
-from opencloning_linkml.datamodel import PCRSource
-from pydna.opencloning_models import id_mode
+
+from opencloning_linkml.datamodel import (
+    PCRSource,
+    LigationSource,
+    GibsonAssemblySource,
+    InFusionSource,
+    InVivoAssemblySource,
+    OverlapExtensionPCRLigationSource,
+)
 from pydna.assembly2 import (
     Assembly,
     assemble,
-    sticky_end_sub_strings,
-    gibson_overlap,
     filter_linear_subassemblies,
     restriction_ligation_overlap,
     SingleFragmentAssembly,
-    blunt_overlap,
-    combine_algorithms,
-    common_sub_strings,
-    pcr_assembly,
-    ligation_assembly,
+    pcr_assembly as _pcr_assembly,
+    ligation_assembly as _ligation_assembly,
+    gibson_assembly as _gibson_assembly,
+    in_fusion_assembly as _in_fusion_assembly,
+    in_vivo_assembly as _in_vivo_assembly,
+    fusion_pcr_assembly as _fusion_pcr_assembly,
 )
 
 from ..gateway import gateway_overlap, find_gateway_sites, annotate_gateway_sites
@@ -246,7 +247,7 @@ async def ligation(
         blunt = minimal_assembly_overlap(source) == 0
         allow_partial_overlap = True
     try:
-        products = ligation_assembly(
+        products = _ligation_assembly(
             fragments, allow_blunt=blunt, allow_partial_overlap=allow_partial_overlap, circular_only=circular_only
         )
     except ValueError as e:
@@ -292,7 +293,7 @@ async def pcr(
         allowed_mismatches = 0
 
     try:
-        products: list[Dseqrecord] = pcr_assembly(
+        products: list[Dseqrecord] = _pcr_assembly(
             pydna_sequences[0],
             pydna_primers[0],
             pydna_primers[1],
@@ -389,23 +390,31 @@ async def gibson_assembly(
 ):
 
     fragments = [read_dsrecord_from_json(seq) for seq in sequences]
+    chosen_source = source if is_assembly_complete(source) else None
+    if chosen_source:
+        minimal_homology = minimal_assembly_overlap(chosen_source)
 
-    # Lambda function for code clarity
-    def create_source(a, is_circular):
-        return source.__class__.from_assembly(assembly=a, circular=is_circular, id=source.id, fragments=fragments)
+    function2use = None
+    if isinstance(source, GibsonAssemblySource):
+        function2use = _gibson_assembly
+    elif isinstance(source, OverlapExtensionPCRLigationSource):
+        function2use = _fusion_pcr_assembly
+    elif isinstance(source, InFusionSource):
+        function2use = _in_fusion_assembly
+    else:
+        function2use = _in_vivo_assembly
 
-    algo = gibson_overlap if not isinstance(source, InVivoAssemblySource) else common_sub_strings
-    resp = generate_assemblies(
-        source, create_source, fragments, circular_only, algo, False, {'limit': minimal_homology}
+    try:
+        products = function2use(fragments, minimal_homology, circular_only)
+    except ValueError as e:
+        raise HTTPException(400, *e.args)
+
+    return format_products(
+        products,
+        chosen_source,
+        source.output_name,
+        no_products_error_message=f'No {"circular " if circular_only else ""}assembly with at least {minimal_homology} bps of homology was found.',
     )
-
-    if len(resp['sources']) == 0:
-        raise HTTPException(
-            400,
-            f'No {"circular " if circular_only else ""}assembly with at least {minimal_homology} bps of homology was found.',
-        )
-
-    return resp
 
 
 @router.post(
