@@ -4,10 +4,8 @@ from typing import Optional, List, Union, Annotated
 from ._version import __version__
 
 from Bio.SeqFeature import (
-    SeqFeature,
     Location,
 )
-from Bio.SeqIO.InsdcIO import _insdc_location_string as format_feature_location
 from Bio.SeqRecord import SeqRecord as _SeqRecord
 from opencloning_linkml.datamodel import (
     OligoHybridizationSource as _OligoHybridizationSource,
@@ -56,26 +54,8 @@ from pydna.opencloning_models import SequenceLocationStr
 SequenceFileFormat = _SequenceFileFormat
 
 
-class TextFileSequence(_TextFileSequence):
-    pass
-
-
 class SourceInput(_SourceInput):
     pass
-
-
-class SeqFeatureModel(BaseModel):
-    type: str
-    qualifiers: dict[str, list[str]] = {}
-    location: str
-
-    def convert_to_seq_feature(self) -> SeqFeature:
-        return SeqFeature(location=Location.fromstring(self.location), type=self.type, qualifiers=self.qualifiers)
-
-    def read_from_seq_feature(sf: SeqFeature) -> 'SeqFeatureModel':
-        return SeqFeatureModel(
-            type=sf.type, qualifiers=sf.qualifiers, location=format_feature_location(sf.location, None)
-        )
 
 
 # Sources =========================================
@@ -389,7 +369,7 @@ class BaseCloningStrategy(_CloningStrategy):
     def next_id(self):
         return max([s.id for s in self.sources + self.sequences + self.primers], default=0) + 1
 
-    def add_source_and_sequence(self, source: SourceCommonClass, sequence: TextFileSequence):
+    def add_source_and_sequence(self, source: SourceCommonClass, sequence: _TextFileSequence):
         if source in self.sources:
             if sequence not in self.sequences:
                 raise ValueError(
@@ -419,7 +399,7 @@ class BaseCloningStrategy(_CloningStrategy):
 
 class PrimerDesignQuery(BaseModel):
     model_config = {'arbitrary_types_allowed': True}
-    sequence: TextFileSequence
+    sequence: _TextFileSequence
     location: SequenceLocationStr
     forward_orientation: bool = True
 
