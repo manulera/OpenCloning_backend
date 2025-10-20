@@ -1089,14 +1089,14 @@ files = [
 
 [[package]]
 name = "opencloning-linkml"
-version = "0.4.4"
+version = "0.4.5"
 description = "A LinkML data model for OpenCloning"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "opencloning_linkml-0.4.4-py3-none-any.whl", hash = "sha256:4d9139ee6c8b4054fe51bbfc8999ecec1bfbdb64fbdbf0aa9d5edbdd876a54cc"},
-    {file = "opencloning_linkml-0.4.4.tar.gz", hash = "sha256:366573e8f55bf1926527127df7c9da1acccd6a3196d1b039f0e4cc069839171d"},
+    {file = "opencloning_linkml-0.4.5-py3-none-any.whl", hash = "sha256:74cc57cef349a544c48fd05eb4942c9f8de5f96b011afbd4f15ab3a3e7226df3"},
+    {file = "opencloning_linkml-0.4.5.tar.gz", hash = "sha256:58bf4eeafafae2e6e1eb7af413674c070d1915fc7c36590ace412bb9660e2d4d"},
 ]
 
 [package.dependencies]
@@ -1651,7 +1651,7 @@ wheel = "*"
 
 [[package]]
 name = "pydna"
-version = "5.5.3-post.52+f224b4f2"
+version = "5.5.3-post.53+dc4efd89"
 description = "Representing double stranded DNA and functions for simulating cloning and homologous recombination between DNA molecules."
 optional = false
 python-versions = ">=3.10,<4.0"
@@ -1667,7 +1667,7 @@ numpy = [
     {version = ">1.26", markers = "python_version < \"3.12\""},
     {version = ">=2.3.0", markers = "python_version >= \"3.12\""},
 ]
-opencloning-linkml = "^0.4.3"
+opencloning-linkml = "0.4.5"
 prettytable = ">=3.5.0"
 pydivsufsort = ">=0.0.14"
 pyfiglet = "0.8.post1"
@@ -1683,8 +1683,8 @@ gel = ["matplotlib (>=3.4.3)", "pillow (>=8.4.0)", "scipy (>=1.11.3) ; python_ve
 [package.source]
 type = "git"
 url = "https://github.com/pydna-group/pydna"
-reference = "f224b4f2bf95dd4ee9238e8753b3039c54fdc00e"
-resolved_reference = "f224b4f2bf95dd4ee9238e8753b3039c54fdc00e"
+reference = "dc4efd8965a4e5d2d6d4fc52eb7892a5b0a63d6f"
+resolved_reference = "dc4efd8965a4e5d2d6d4fc52eb7892a5b0a63d6f"
 
 [[package]]
 name = "pyfiglet"
@@ -2618,4 +2618,4 @@ test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "748b9ffdc06c4b0894c6653f4edb4efcd28e3f1fa23833438eb5475e02d6b0f2"
+content-hash = "1daa0bcc6fa27ae84204364047f13a74196fe367f38a2878f1e14da8c280af5b"

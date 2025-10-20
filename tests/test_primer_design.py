@@ -7,7 +7,6 @@ from opencloning.ebic.primer_design import ebic_primers
 from Bio.SeqFeature import SimpleLocation, SeqFeature
 from unittest import TestCase
 from pydna.dseqrecord import Dseqrecord
-from opencloning.pydantic_models import PrimerModel
 from pydna.amplify import pcr
 from pydna.parsers import parse
 from pydna.assembly2 import Assembly, gibson_overlap
@@ -15,6 +14,9 @@ import pytest
 from Bio.Data.IUPACData import ambiguous_dna_values
 from Bio.Seq import reverse_complement
 import os
+
+from opencloning.temp_functions import primer_model_to_pydna_primer
+from opencloning_linkml.datamodel import Primer as PrimerModel
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
@@ -307,7 +309,13 @@ class TestGibsonAssemblyPrimers(TestCase):
         # Test that it yields the right sequence
         amplicons = list()
         for i in range(len(templates)):
-            amplicons.append(pcr(primers[i * 2].to_pydna_primer(), primers[i * 2 + 1].to_pydna_primer(), templates[i]))
+            amplicons.append(
+                pcr(
+                    primer_model_to_pydna_primer(primers[i * 2]),
+                    primer_model_to_pydna_primer(primers[i * 2 + 1]),
+                    templates[i],
+                )
+            )
 
         asm = Assembly(
             amplicons,
@@ -333,7 +341,13 @@ class TestGibsonAssemblyPrimers(TestCase):
         # Test that it yields the right sequence
         amplicons = list()
         for i in range(len(templates)):
-            amplicons.append(pcr(primers[i * 2].to_pydna_primer(), primers[i * 2 + 1].to_pydna_primer(), templates[i]))
+            amplicons.append(
+                pcr(
+                    primer_model_to_pydna_primer(primers[i * 2]),
+                    primer_model_to_pydna_primer(primers[i * 2 + 1]),
+                    templates[i],
+                )
+            )
 
         asm = Assembly(
             amplicons,

@@ -6,7 +6,7 @@ from pydna.dseqrecord import Dseqrecord
 from pydna.parsers import parse
 import opencloning.main as _main
 from opencloning.dna_functions import format_sequence_genbank, read_dsrecord_from_json
-from opencloning.pydantic_models import TextFileSequence, BaseCloningStrategy
+from opencloning_linkml.datamodel import TextFileSequence, CloningStrategy as BaseCloningStrategy
 from opencloning_linkml._version import __version__ as schema_version
 from opencloning._version import __version__ as backend_version
 import pytest

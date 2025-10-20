@@ -13,6 +13,7 @@ def format_products(
     completed_source: Source | None,
     output_name: str,
     no_products_error_message: str = 'No products were found.',
+    wrong_completed_source_error_message: str = 'The provided assembly is not valid.',
 ) -> dict[Literal['sources', 'sequences'], list[Source] | list[TextFileSequence]]:
 
     if completed_source is not None:
@@ -24,7 +25,7 @@ def format_products(
                         'sources': [this_source_dict],
                         'sequences': [format_sequence_genbank(prod, completed_source.output_name)],
                     }
-        raise HTTPException(400, 'The provided assembly is not valid.')
+        raise HTTPException(400, wrong_completed_source_error_message)
 
     if len(products) == 0:
         raise HTTPException(400, no_products_error_message)

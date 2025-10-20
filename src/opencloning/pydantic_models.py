@@ -8,9 +8,7 @@ from Bio.SeqFeature import (
     Location,
 )
 from Bio.SeqIO.InsdcIO import _insdc_location_string as format_feature_location
-from Bio.Restriction.Restriction import RestrictionType, RestrictionBatch
 from Bio.SeqRecord import SeqRecord as _SeqRecord
-from pydna.primer import Primer as _PydnaPrimer
 from opencloning_linkml.datamodel import (
     OligoHybridizationSource as _OligoHybridizationSource,
     PolymeraseExtensionSource as _PolymeraseExtensionSource,
@@ -20,7 +18,6 @@ from opencloning_linkml.datamodel import (
     UploadedFileSource as _UploadedFileSource,
     SequenceFileFormat as _SequenceFileFormat,
     RestrictionEnzymeDigestionSource as _RestrictionEnzymeDigestionSource,
-    RestrictionSequenceCut as _RestrictionSequenceCut,
     TextFileSequence as _TextFileSequence,
     AssemblySource as _AssemblySource,
     PCRSource as _PCRSource,
@@ -29,7 +26,6 @@ from opencloning_linkml.datamodel import (
     RestrictionAndLigationSource as _RestrictionAndLigationSource,
     LigationSource as _LigationSource,
     CRISPRSource as _CRISPRSource,
-    Primer as _Primer,
     AssemblyFragment as _AssemblyFragment,
     AddgeneIdSource as _AddgeneIdSource,
     WekWikGeneIdSource as _WekWikGeneIdSource,
@@ -48,6 +44,7 @@ from opencloning_linkml.datamodel import (
     InVivoAssemblySource as _InVivoAssemblySource,
     SourceInput as _SourceInput,
     OpenDNACollectionsSource as _OpenDNACollectionsSource,
+    Primer as PrimerModel,
 )
 from pydna.assembly2 import (
     edge_representation2subfragment_representation,
@@ -65,19 +62,6 @@ class TextFileSequence(_TextFileSequence):
 
 class SourceInput(_SourceInput):
     pass
-
-
-class PrimerModel(_Primer):
-    """Called PrimerModel not to be confused with the class from pydna."""
-
-    def to_pydna_primer(self) -> _PydnaPrimer:
-        """
-        Convert the PrimerModel to a pydna Primer object.
-
-        Returns:
-            _PydnaPrimer: A pydna Primer object with the same sequence and name as the PrimerModel.
-        """
-        return _PydnaPrimer(self.sequence, name=self.name, id=str(self.id))
 
 
 class SeqFeatureModel(BaseModel):
@@ -173,12 +157,7 @@ class EuroscarfSource(SourceCommonClass, _EuroscarfSource):
 
 
 class IGEMSource(SourceCommonClass, _IGEMSource):
-
-    @model_validator(mode='after')
-    def validate_repository_id(self):
-        file_name = self.sequence_file_url.split('/')[-1]
-        assert file_name.endswith('.gb'), 'The sequence file must be a GenBank file'
-        return self
+    pass
 
 
 class OpenDNACollectionsSource(SourceCommonClass, _OpenDNACollectionsSource):
@@ -201,58 +180,8 @@ class ReverseComplementSource(SourceCommonClass, _ReverseComplementSource):
     pass
 
 
-class RestrictionSequenceCut(_RestrictionSequenceCut):
-
-    @classmethod
-    def from_cutsite_tuple(cls, cutsite_tuple: tuple[tuple[int, int], RestrictionType]):
-        cut_watson, ovhg = cutsite_tuple[0]
-        enzyme = str(cutsite_tuple[1])
-
-        return cls(
-            cut_watson=cut_watson,
-            overhang=ovhg,
-            restriction_enzyme=enzyme,
-        )
-
-    def to_cutsite_tuple(self) -> tuple[tuple[int, int], RestrictionType]:
-        restriction_enzyme = RestrictionBatch(first=[self.restriction_enzyme]).pop()
-        return ((self.cut_watson, self.overhang), restriction_enzyme)
-
-
 class RestrictionEnzymeDigestionSource(SourceCommonClass, _RestrictionEnzymeDigestionSource):
-    """Documents a restriction enzyme digestion, and the selection of one of the fragments."""
-
-    # TODO: maybe a better way? They have to be redefined here because
-    # we have overriden the original class
-
-    left_edge: Optional[RestrictionSequenceCut] = Field(None)
-    right_edge: Optional[RestrictionSequenceCut] = Field(None)
-
-    @classmethod
-    def from_cutsites(
-        cls,
-        left: tuple[tuple[int, int], RestrictionType],
-        right: tuple[tuple[int, int], RestrictionType],
-        input: list[int],
-        id: int,
-    ):
-        return cls(
-            id=id,
-            left_edge=None if left is None else RestrictionSequenceCut.from_cutsite_tuple(left),
-            right_edge=None if right is None else RestrictionSequenceCut.from_cutsite_tuple(right),
-            input=input,
-        )
-
-    # TODO could be made into a computed field?
-    def get_enzymes(self) -> list[str]:
-        """Returns the enzymes used in the digestion"""
-        out = list()
-        if self.left_edge is not None:
-            out.append(self.left_edge.restriction_enzyme)
-        if self.right_edge is not None:
-            out.append(self.right_edge.restriction_enzyme)
-        # Unique values, sorted the same way
-        return sorted(list(set(out)), key=out.index)
+    pass
 
 
 class AssemblyFragment(_AssemblyFragment, SourceInput):

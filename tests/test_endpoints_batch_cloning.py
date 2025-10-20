@@ -4,7 +4,7 @@ import os
 
 from opencloning.dna_functions import read_dsrecord_from_json
 import opencloning.main as _main
-from opencloning.pydantic_models import (
+from opencloning_linkml.datamodel import (
     TextFileSequence,
 )
 

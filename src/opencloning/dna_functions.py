@@ -3,8 +3,14 @@ from Bio.Restriction.Restriction import RestrictionBatch
 from Bio.Seq import reverse_complement
 from pydna.dseqrecord import Dseqrecord
 from pydna.dseq import Dseq
-from .pydantic_models import TextFileSequence, AddgeneIdSource, SequenceFileFormat, WekWikGeneIdSource, SEVASource
-from opencloning_linkml.datamodel import PlannotateAnnotationReport
+from opencloning_linkml.datamodel import (
+    PlannotateAnnotationReport,
+    TextFileSequence,
+    AddgeneIdSource,
+    SequenceFileFormat,
+    WekWikGeneIdSource,
+    SEVASource,
+)
 from pydna.parsers import parse as pydna_parse
 from bs4 import BeautifulSoup
 from pydna.common_sub_strings import common_sub_strings
