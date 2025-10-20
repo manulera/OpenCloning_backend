@@ -7,6 +7,7 @@ from pydantic import create_model, Field
 from typing import Annotated
 from Bio.Restriction.Restriction import RestrictionBatch
 from opencloning.cre_lox import cre_loxP_overlap, annotate_loxP_sites
+from opencloning.endpoints.endpoint_utils import format_products
 from opencloning.temp_functions import is_assembly_complete, minimal_assembly_overlap
 from ..dna_functions import (
     get_invalid_enzyme_names,
@@ -42,6 +43,7 @@ from pydna.assembly2 import (
     combine_algorithms,
     common_sub_strings,
     pcr_assembly,
+    ligation_assembly,
 )
 
 from ..gateway import gateway_overlap, find_gateway_sites, annotate_gateway_sites
@@ -236,24 +238,24 @@ async def ligation(
 
     fragments = [read_dsrecord_from_json(seq) for seq in sequences]
 
-    # Lambda function for code clarity
-    def create_source(a, is_circular):
-        return LigationSource.from_assembly(assembly=a, circular=is_circular, id=source.id, fragments=fragments)
-
     # If the assembly is known, the blunt parameter is ignored, and we set the algorithm type from the assembly
-    # (blunt ligations have features without length)
-    if source.is_assembly_complete():
-        asm = source.get_assembly_plan(fragments)
-        blunt = len(asm[0][2]) == 0
-
-    algo = combine_algorithms(blunt_overlap, sticky_end_sub_strings) if blunt else sticky_end_sub_strings
-    resp = generate_assemblies(
-        source, create_source, fragments, circular_only, algo, False, {'limit': allow_partial_overlap}
+    # (blunt ligations have locations of length zero)
+    # Also, we allow partial overlap to be more permissive
+    if is_assembly_complete(source):
+        blunt = minimal_assembly_overlap(source) == 0
+        allow_partial_overlap = True
+    products = ligation_assembly(
+        fragments, allow_blunt=blunt, allow_partial_overlap=allow_partial_overlap, circular_only=circular_only
     )
-    if len(resp['sources']) == 0:
+    if len(products) == 0:
         raise HTTPException(400, 'No ligations were found.')
 
-    return resp
+    return {
+        'sources': [
+            source.from_assembly(assembly=a, circular=False, id=source.id, fragments=fragments) for a in products
+        ],
+        'sequences': [format_sequence_genbank(a, source.output_name) for a in products],
+    }
 
 
 @router.post(
@@ -281,7 +283,8 @@ async def pcr(
     # What happens if annealing is zero? That would mean
     # mismatch in the 3' of the primer, which maybe should
     # not be allowed.
-    if is_assembly_complete(source):
+    chosen_source = source if is_assembly_complete(source) else None
+    if chosen_source is not None:
         minimal_annealing = minimal_assembly_overlap(source)
         # Only the ones that match are included in the output assembly
         # location, so the submitted assembly should be returned without
@@ -302,22 +305,12 @@ async def pcr(
         # This catches the too many assemblies error
         raise HTTPException(400, *e.args)
 
-    out_sequences = [format_sequence_genbank(product, source.output_name) for product in products]
-    with id_mode(use_object_id=False):
-        out_sources = [p.source.to_pydantic_model(0).model_dump() for p in products]
-    # If a specific assembly is requested
-    if is_assembly_complete(source):
-        this_source_dict = source.model_dump()
-        for i, out_source in enumerate(out_sources):
-            if out_source == this_source_dict:
-                return {'sources': [out_sources[i]], 'sequences': [out_sequences[i]]}
-
-        raise HTTPException(400, 'The provided assembly is not valid.')
-
-    if len(products) == 0:
-        raise HTTPException(400, 'No pair of annealing primers was found. Try changing the annealing settings.')
-
-    return {'sources': out_sources, 'sequences': out_sequences}
+    return format_products(
+        products,
+        chosen_source,
+        source.output_name,
+        no_products_error_message='No pair of annealing primers was found. Try changing the annealing settings.',
+    )
 
 
 @router.post(

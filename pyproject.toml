@@ -20,7 +20,7 @@ httpx = "^0.28.1"
 python = "^3.11"
 python-multipart = "*"
 uvicorn = "*"
-pydna = {git = "https://github.com/pydna-group/pydna", rev = "919ea9a45e721266254c53f494f012e3afe0270d"}
+pydna = {git = "https://github.com/pydna-group/pydna", rev = "f224b4f2bf95dd4ee9238e8753b3039c54fdc00e"}
 regex = "^2024.11.6"
 pydantic = "^2.7.1"
 pandas = "^2.2.3"
