@@ -15,4 +15,6 @@ def minimal_assembly_overlap(source: AssemblySource) -> int:
             all_overlaps.append(len(Location.fromstring(f.left_location)))
         if f.right_location is not None:
             all_overlaps.append(len(Location.fromstring(f.right_location)))
+    if len(all_overlaps) == 0:
+        raise ValueError('Assembly is not complete')
     return min(all_overlaps)
