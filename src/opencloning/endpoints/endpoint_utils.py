@@ -10,19 +10,19 @@ from Bio.Restriction.Restriction import RestrictionBatch
 
 def format_products(
     products: list[Dseqrecord],
-    chosen_source: Source | None,
+    completed_source: Source | None,
     output_name: str,
     no_products_error_message: str = 'No products were found.',
 ) -> dict[Literal['sources', 'sequences'], list[Source] | list[TextFileSequence]]:
 
-    if chosen_source is not None:
-        this_source_dict = chosen_source.model_dump()
+    if completed_source is not None:
+        this_source_dict = completed_source.model_dump()
         for prod in products:
             with id_mode(use_python_internal_id=False):
                 if prod.source.to_pydantic_model(0).model_dump() == this_source_dict:
                     return {
                         'sources': [this_source_dict],
-                        'sequences': [format_sequence_genbank(prod, chosen_source.output_name)],
+                        'sequences': [format_sequence_genbank(prod, completed_source.output_name)],
                     }
         raise HTTPException(400, 'The provided assembly is not valid.')
 

@@ -70,8 +70,8 @@ async def crispr(
     template, insert = [read_dsrecord_from_json(seq) for seq in sequences]
     guides = [PydnaPrimer(guide.sequence, id=str(guide.id), name=guide.name) for guide in guides]
 
-    chosen_source = source if is_assembly_complete(source) else None
-    if chosen_source is not None:
+    completed_source = source if is_assembly_complete(source) else None
+    if completed_source is not None:
         minimal_homology = minimal_assembly_overlap(source)
 
     try:
@@ -81,7 +81,7 @@ async def crispr(
 
     return format_products(
         products,
-        chosen_source,
+        completed_source,
         source.output_name,
         no_products_error_message=f'No suitable products produced with provided primers and {minimal_homology} bps of homology',
     )
@@ -106,8 +106,8 @@ async def ligation(
     # If the assembly is known, the blunt parameter is ignored, and we set the algorithm type from the assembly
     # (blunt ligations have locations of length zero)
     # Also, we allow partial overlap to be more permissive
-    chosen_source = source if is_assembly_complete(source) else None
-    if chosen_source:
+    completed_source = source if is_assembly_complete(source) else None
+    if completed_source:
         blunt = minimal_assembly_overlap(source) == 0
         allow_partial_overlap = True
     try:
@@ -118,7 +118,7 @@ async def ligation(
         raise HTTPException(400, *e.args)
 
     return format_products(
-        products, chosen_source, source.output_name, no_products_error_message='No ligations were found.'
+        products, completed_source, source.output_name, no_products_error_message='No ligations were found.'
     )
 
 
@@ -147,8 +147,8 @@ async def pcr(
     # What happens if annealing is zero? That would mean
     # mismatch in the 3' of the primer, which maybe should
     # not be allowed.
-    chosen_source = source if is_assembly_complete(source) else None
-    if chosen_source is not None:
+    completed_source = source if is_assembly_complete(source) else None
+    if completed_source is not None:
         minimal_annealing = minimal_assembly_overlap(source)
         # Only the ones that match are included in the output assembly
         # location, so the submitted assembly should be returned without
@@ -171,7 +171,7 @@ async def pcr(
 
     return format_products(
         products,
-        chosen_source,
+        completed_source,
         source.output_name,
         no_products_error_message='No pair of annealing primers was found. Try changing the annealing settings.',
     )
@@ -194,8 +194,8 @@ async def homologous_recombination(
     template, insert = [read_dsrecord_from_json(seq) for seq in sequences]
 
     # If an assembly is provided, we ignore minimal_homology
-    chosen_source = source if is_assembly_complete(source) else None
-    if chosen_source is not None:
+    completed_source = source if is_assembly_complete(source) else None
+    if completed_source is not None:
         minimal_homology = minimal_assembly_overlap(source)
 
     try:
@@ -208,7 +208,7 @@ async def homologous_recombination(
 
     return format_products(
         products,
-        chosen_source,
+        completed_source,
         source.output_name,
         no_products_error_message=f'No homologous recombination with at least {minimal_homology} bps of homology was found.',
     )
@@ -235,9 +235,9 @@ async def gibson_assembly(
 ):
 
     fragments = [read_dsrecord_from_json(seq) for seq in sequences]
-    chosen_source = source if is_assembly_complete(source) else None
-    if chosen_source:
-        minimal_homology = minimal_assembly_overlap(chosen_source)
+    completed_source = source if is_assembly_complete(source) else None
+    if completed_source:
+        minimal_homology = minimal_assembly_overlap(completed_source)
 
     function2use = None
     if isinstance(source, GibsonAssemblySource):
@@ -256,7 +256,7 @@ async def gibson_assembly(
 
     return format_products(
         products,
-        chosen_source,
+        completed_source,
         source.output_name,
         no_products_error_message=f'No {"circular " if circular_only else ""}assembly with at least {minimal_homology} bps of homology was found.',
     )
@@ -280,8 +280,8 @@ async def restriction_and_ligation(
 
     fragments = [read_dsrecord_from_json(seq) for seq in sequences]
     enzymes = parse_restriction_enzymes(source.restriction_enzymes)
-    chosen_source = source if is_assembly_complete(source) else None
-    # if chosen_source:
+    completed_source = source if is_assembly_complete(source) else None
+    # if completed_source:
     #     allow_partial_overlap = True
 
     try:
@@ -291,7 +291,7 @@ async def restriction_and_ligation(
 
     return format_products(
         products,
-        chosen_source,
+        completed_source,
         source.output_name,
         no_products_error_message='No compatible restriction-ligation was found.',
     )
@@ -313,7 +313,7 @@ async def gateway(
 ):
 
     fragments = [read_dsrecord_from_json(seq) for seq in sequences]
-    chosen_source = source if is_assembly_complete(source) else None
+    completed_source = source if is_assembly_complete(source) else None
 
     try:
         products = _gateway_assembly(fragments, source.reaction_type, source.greedy, circular_only, only_multi_site)
@@ -324,7 +324,7 @@ async def gateway(
 
     return format_products(
         products,
-        chosen_source,
+        completed_source,
         source.output_name,
         no_products_error_message=None,  # Already handled by the _gateway_assembly function
     )
@@ -342,7 +342,7 @@ async def cre_lox_recombination(
     source: CreLoxRecombinationSource, sequences: Annotated[list[TextFileSequence], Field(min_length=1)]
 ):
     fragments = [read_dsrecord_from_json(seq) for seq in sequences]
-    chosen_source = source if is_assembly_complete(source) else None
+    completed_source = source if is_assembly_complete(source) else None
 
     if len(fragments) == 1:
         products = _cre_lox_excision(fragments[0])
@@ -357,7 +357,7 @@ async def cre_lox_recombination(
 
     return format_products(
         products,
-        chosen_source,
+        completed_source,
         source.output_name,
         no_products_error_message='No compatible Cre/Lox recombination was found.',
     )
