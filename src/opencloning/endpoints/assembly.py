@@ -1,26 +1,19 @@
 from fastapi import Query, HTTPException
-from typing import Union, Literal, Callable
+from typing import Union
 from pydna.dseqrecord import Dseqrecord
 from pydna.primer import Primer as PydnaPrimer
-from pydna.crispr import cas9
 from pydantic import create_model, Field
 from typing import Annotated
-from opencloning.cre_lox import cre_loxP_overlap, annotate_loxP_sites
 from opencloning.endpoints.endpoint_utils import format_products, parse_restriction_enzymes
 from opencloning.temp_functions import is_assembly_complete, minimal_assembly_overlap
 from ..dna_functions import (
-    format_sequence_genbank,
     read_dsrecord_from_json,
 )
-from ..pydantic_models import (
-    PrimerModel,
-    TextFileSequence,
-    CRISPRSource,
-    AssemblySource,
-    CreLoxRecombinationSource,
-)
+
 
 from opencloning_linkml.datamodel import (
+    CRISPRSource,
+    CreLoxRecombinationSource,
     PCRSource,
     LigationSource,
     GibsonAssemblySource,
@@ -30,12 +23,11 @@ from opencloning_linkml.datamodel import (
     HomologousRecombinationSource,
     RestrictionAndLigationSource,
     GatewaySource,
+    Primer as PrimerModel,
+    TextFileSequence,
 )
+
 from pydna.assembly2 import (
-    Assembly,
-    assemble,
-    filter_linear_subassemblies,
-    SingleFragmentAssembly,
     pcr_assembly as _pcr_assembly,
     ligation_assembly as _ligation_assembly,
     gibson_assembly as _gibson_assembly,
@@ -45,34 +37,16 @@ from pydna.assembly2 import (
     restriction_ligation_assembly as _restriction_ligation_assembly,
     homologous_recombination_integration as _homologous_recombination_integration,
     gateway_assembly as _gateway_assembly,
+    crispr_integration as _crispr_integration,
+    cre_lox_integration as _cre_lox_integration,
+    cre_lox_excision as _cre_lox_excision,
 )
+from pydna.cre_lox import annotate_loxP_sites
 
 from ..gateway import annotate_gateway_sites
 from ..get_router import get_router
 
 router = get_router()
-
-
-def format_known_assembly_response(
-    source: AssemblySource,
-    out_sources: list[AssemblySource],
-    fragments: list[Dseqrecord],
-    product_callback: Callable[[Dseqrecord], Dseqrecord] = lambda x: x,
-):
-    """Common function for assembly sources, when assembly is known"""
-    # If a specific assembly is requested
-    assembly_plan = source.get_assembly_plan(fragments)
-    for s in out_sources:
-        # TODO: it seems that assemble() is not getting is_insertion ever
-        other_assembly_plan = s.get_assembly_plan(fragments)
-        if assembly_plan == other_assembly_plan:
-            return {
-                'sequences': [
-                    format_sequence_genbank(product_callback(assemble(fragments, assembly_plan)), s.output_name)
-                ],
-                'sources': [s],
-            }
-    raise HTTPException(400, 'The provided assembly is not valid.')
 
 
 @router.post(
@@ -94,133 +68,23 @@ async def crispr(
     TODO: Check support for circular DNA targets
     """
     template, insert = [read_dsrecord_from_json(seq) for seq in sequences]
+    guides = [PydnaPrimer(guide.sequence, id=str(guide.id), name=guide.name) for guide in guides]
 
-    if template.circular:
-        raise HTTPException(400, 'Circular DNA targets are not supported for CRISPR editing.')
+    chosen_source = source if is_assembly_complete(source) else None
+    if chosen_source is not None:
+        minimal_homology = minimal_assembly_overlap(source)
 
-    # TODO: check input method for guide (currently as a primer)
-    # TODO: support user input PAM
-
-    # Check cutsites from guide provided by user
-    guide_cuts = []
-    for guide in guides:
-        enzyme = cas9(guide.sequence)
-        possible_cuts = template.seq.get_cutsites(enzyme)
-        if len(possible_cuts) == 0:
-            raise HTTPException(
-                400, f'Could not find Cas9 cutsite in the target sequence using the guide: {guide.name}'
-            )
-        guide_cuts.append(possible_cuts)
-    sorted_guide_ids = list(sorted([guide.id for guide in guides]))
-
-    # Check if homologous recombination is possible
-    fragments = [template, insert]
-    asm = Assembly(fragments, minimal_homology, use_all_fragments=True)
     try:
-        possible_assemblies = [a for a in asm.get_insertion_assemblies() if a[0][0] == 1]
+        products = _crispr_integration(template, [insert], guides, minimal_homology)
     except ValueError as e:
         raise HTTPException(400, *e.args)
 
-    if not possible_assemblies:
-        raise HTTPException(400, 'Repair fragment cannot be inserted in the target sequence through homology')
-
-    valid_assemblies = []
-    # Check if Cas9 cut is within the homologous recombination region
-    for a in possible_assemblies:
-        hr_start = int(a[0][2].start)
-        hr_end = int(a[1][3].end)
-
-        for cuts in guide_cuts:
-            reparable_cuts = [c for c in cuts if c[0][0] > hr_start and c[0][0] <= hr_end]
-            if len(reparable_cuts):
-                valid_assemblies.append(a)
-            if len(reparable_cuts) != len(cuts):
-                # TODO: warning a cutsite falls outside
-                pass
-
-    if len(valid_assemblies) == 0:
-        raise HTTPException(
-            400, 'A Cas9 cutsite was found, and a homologous recombination region, but they do not overlap.'
-        )
-    # elif len(valid_assemblies) != len(possible_assemblies):
-    #     # TODO: warning that some assemblies were discarded
-    #     pass
-
-    # TODO: double check that this works for circular DNA -> for now get_insertion_assemblies() is only
-    # meant for linear DNA
-
-    out_sources = [
-        CRISPRSource.from_assembly(id=source.id, assembly=a, guides=sorted_guide_ids, fragments=fragments)
-        for a in valid_assemblies
-    ]
-
-    # If a specific assembly is requested
-    if source.is_assembly_complete():
-        return format_known_assembly_response(source, out_sources, [template, insert])
-
-    out_sequences = [
-        format_sequence_genbank(assemble([template, insert], a, is_insertion=True), source.output_name)
-        for a in valid_assemblies
-    ]
-    return {'sources': out_sources, 'sequences': out_sequences}
-
-
-def generate_assemblies(
-    source: AssemblySource,
-    create_source: Callable[[list, bool], AssemblySource],
-    fragments: list[TextFileSequence],
-    circular_only: bool,
-    algo: Callable,
-    allow_insertion_assemblies: bool,
-    assembly_kwargs: dict | None = None,
-    product_callback: Callable[[Dseqrecord], Dseqrecord] = lambda x: x,
-    recombination_mode: bool = False,
-) -> dict[Literal['sources', 'sequences'], list[AssemblySource] | list[TextFileSequence]]:
-    if assembly_kwargs is None:
-        assembly_kwargs = {}
-    try:
-        out_sources = []
-        if len(fragments) > 1:
-            asm = Assembly(
-                fragments,
-                algorithm=algo,
-                use_all_fragments=True,
-                use_fragment_order=False,
-                **assembly_kwargs,
-            )
-            circular_assemblies = asm.get_circular_assemblies()
-            out_sources += [create_source(a, True) for a in circular_assemblies]
-            if not circular_only:
-                if not recombination_mode:
-                    out_sources += [
-                        create_source(a, False)
-                        for a in filter_linear_subassemblies(
-                            asm.get_linear_assemblies(), circular_assemblies, fragments
-                        )
-                    ]
-                else:
-                    out_sources += [create_source(a, False) for a in asm.get_insertion_assemblies()]
-        else:
-            asm = SingleFragmentAssembly(fragments, algorithm=algo, **assembly_kwargs)
-            out_sources.extend(create_source(a, True) for a in asm.get_circular_assemblies())
-            if not circular_only and allow_insertion_assemblies:
-                out_sources.extend(create_source(a, False) for a in asm.get_insertion_assemblies())
-
-    except ValueError as e:
-        raise HTTPException(400, *e.args)
-
-    # If a specific assembly is requested
-    if source.is_assembly_complete():
-        return format_known_assembly_response(source, out_sources, fragments, product_callback)
-
-    out_sequences = [
-        format_sequence_genbank(
-            product_callback(assemble(fragments, s.get_assembly_plan(fragments))), source.output_name
-        )
-        for s in out_sources
-    ]
-
-    return {'sources': out_sources, 'sequences': out_sequences}
+    return format_products(
+        products,
+        chosen_source,
+        source.output_name,
+        no_products_error_message=f'No suitable products produced with provided primers and {minimal_homology} bps of homology',
+    )
 
 
 @router.post(
@@ -478,25 +342,22 @@ async def cre_lox_recombination(
     source: CreLoxRecombinationSource, sequences: Annotated[list[TextFileSequence], Field(min_length=1)]
 ):
     fragments = [read_dsrecord_from_json(seq) for seq in sequences]
+    chosen_source = source if is_assembly_complete(source) else None
 
-    # Lambda function for code clarity
-    def create_source(a, is_circular):
-        return CreLoxRecombinationSource.from_assembly(
-            assembly=a, circular=is_circular, id=source.id, fragments=fragments
-        )
+    if len(fragments) == 1:
+        products = _cre_lox_excision(fragments[0])
+    else:
+        products = []
+        if not fragments[0].circular:
+            products.extend(_cre_lox_integration(fragments[0], fragments[1:]))
+        if not fragments[1].circular:
+            products.extend(_cre_lox_integration(fragments[1], fragments[:1]))
 
-    resp = generate_assemblies(
-        source,
-        create_source,
-        fragments,
-        False,
-        cre_loxP_overlap,
-        True,
-        recombination_mode=True,
-        product_callback=annotate_loxP_sites,
+    products = [annotate_loxP_sites(p) for p in products]
+
+    return format_products(
+        products,
+        chosen_source,
+        source.output_name,
+        no_products_error_message='No compatible Cre/Lox recombination was found.',
     )
-
-    if len(resp['sources']) == 0:
-        raise HTTPException(400, 'No compatible Cre/Lox recombination was found.')
-
-    return resp

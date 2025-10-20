@@ -1029,7 +1029,7 @@ class CrisprTest(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
             payload['detail'],
-            'A Cas9 cutsite was found, and a homologous recombination region, but they do not overlap.',
+            'No suitable products produced with provided primers and 8 bps of homology',
         )
 
     def test_too_many_assemblies(self):
@@ -1260,7 +1260,7 @@ class GatewaySourceTest(unittest.TestCase):
         )
         product2 = Dseq(
             'AAAACAACTTTGTACAAAAAAGCTGAACGAGAAGCGTAAAATGATATAAATATCAATATATTAAATTAGATTTTGCATAAAAAACAGACTACATAATACTGTAAAACACAACATATCCAGTCACTATGAATCAACTACTTAGATGGTATTAGTGACCTGTA'.upper(),
-            circular=True,
+            circular=False,
         )
         seqs = [read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']]
         self.assertEqual(seqs[0].seq, product)
