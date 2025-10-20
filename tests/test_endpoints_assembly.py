@@ -825,10 +825,6 @@ class RestrictionAndLigationTest(unittest.TestCase):
         self.assertEqual(len(payload['sequences']), 1)
         self.assertEqual(len(payload['sources']), 1)
         self.assertEqual(payload['sources'][0], sources[0].model_dump())
-        seq1 = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
-        seq2 = sequences[0]
-        print(seq1.source)
-        print(seq2.source)
         self.assertEqual(
             read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0])), sequences[0]
         )
@@ -1253,16 +1249,22 @@ class GatewaySourceTest(unittest.TestCase):
             'source': source.model_dump(),
             'sequences': [f.model_dump() for f in fragments],
         }
-        response = client.post('/gateway', json=data, params={'only_multi_site': True})
+        response = client.post('/gateway', json=data)
         self.assertEqual(response.status_code, 200)
         payload = response.json()
-        self.assertEqual(len(payload['sources']), 1)
+        self.assertEqual(len(payload['sources']), 2)
 
-        product = (
-            'GTACAAAAAAGCAGAAGcccAAAATAATGATTTTATTTGACTGATAGTGACCTGTTCGTTGCAACAAATTGATGAGCAATGCTTTTTTATAATGCCAACTTT'
-        ).upper()
+        product = Dseq(
+            'GTACAAAAAAGCAGAAGcccAAAATAATGATTTTATTTGACTGATAGTGACCTGTTCGTTGCAACAAATTGATGAGCAATGCTTTTTTATAATGCCAACTTT'.upper(),
+            circular=True,
+        )
+        product2 = Dseq(
+            'AAAACAACTTTGTACAAAAAAGCTGAACGAGAAGCGTAAAATGATATAAATATCAATATATTAAATTAGATTTTGCATAAAAAACAGACTACATAATACTGTAAAACACAACATATCCAGTCACTATGAATCAACTACTTAGATGGTATTAGTGACCTGTA'.upper(),
+            circular=True,
+        )
         seqs = [read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']]
-        self.assertEqual(str(seqs[0].seq), product)
+        self.assertEqual(seqs[0].seq, product)
+        self.assertEqual(seqs[1].seq, product2)
 
 
 class CreLoxRecombinationTest(unittest.TestCase):

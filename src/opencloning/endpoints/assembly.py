@@ -15,12 +15,9 @@ from ..dna_functions import (
 from ..pydantic_models import (
     PrimerModel,
     TextFileSequence,
-    HomologousRecombinationSource,
     CRISPRSource,
     AssemblySource,
-    GatewaySource,
     CreLoxRecombinationSource,
-    RestrictionAndLigationSource,
 )
 
 from opencloning_linkml.datamodel import (
@@ -30,6 +27,9 @@ from opencloning_linkml.datamodel import (
     InFusionSource,
     InVivoAssemblySource,
     OverlapExtensionPCRLigationSource,
+    HomologousRecombinationSource,
+    RestrictionAndLigationSource,
+    GatewaySource,
 )
 from pydna.assembly2 import (
     Assembly,
@@ -44,9 +44,10 @@ from pydna.assembly2 import (
     fusion_pcr_assembly as _fusion_pcr_assembly,
     restriction_ligation_assembly as _restriction_ligation_assembly,
     homologous_recombination_integration as _homologous_recombination_integration,
+    gateway_assembly as _gateway_assembly,
 )
 
-from ..gateway import gateway_overlap, find_gateway_sites, annotate_gateway_sites
+from ..gateway import annotate_gateway_sites
 from ..get_router import get_router
 
 router = get_router()
@@ -329,7 +330,7 @@ async def homologous_recombination(
     template, insert = [read_dsrecord_from_json(seq) for seq in sequences]
 
     # If an assembly is provided, we ignore minimal_homology
-    chosen_source = source if source.is_assembly_complete() else None
+    chosen_source = source if is_assembly_complete(source) else None
     if chosen_source is not None:
         minimal_homology = minimal_assembly_overlap(source)
 
@@ -448,50 +449,21 @@ async def gateway(
 ):
 
     fragments = [read_dsrecord_from_json(seq) for seq in sequences]
-    greedy = source.greedy
+    chosen_source = source if is_assembly_complete(source) else None
 
-    # Lambda function for code clarity
-    def create_source(a, is_circular):
-        return GatewaySource.from_assembly(
-            assembly=a,
-            circular=is_circular,
-            id=source.id,
-            reaction_type=source.reaction_type,
-            fragments=fragments,
-        )
+    try:
+        products = _gateway_assembly(fragments, source.reaction_type, source.greedy, circular_only, only_multi_site)
+    except ValueError as e:
+        raise HTTPException(400, *e.args)
 
-    # Algorithm used by assembly class
-    def algo(x, y, _l):
-        # By default, we allow blunt ends
-        return gateway_overlap(x, y, source.reaction_type, greedy)
+    products = [annotate_gateway_sites(p, source.greedy) for p in products]
 
-    def annotate(x):
-        return annotate_gateway_sites(x, greedy)
-
-    resp = generate_assemblies(source, create_source, fragments, circular_only, algo, False, product_callback=annotate)
-
-    if len(resp['sources']) == 0:
-        # Build a list of all the sites in the fragments
-        sites_in_fragments = list()
-        for frag in fragments:
-            sites_in_fragments.append(list(find_gateway_sites(frag, greedy).keys()))
-        formatted_strings = [f'fragment {i + 1}: {", ".join(sites)}' for i, sites in enumerate(sites_in_fragments)]
-        raise HTTPException(
-            400,
-            f'Inputs are not compatible for {source.reaction_type} reaction.\n\n' + '\n'.join(formatted_strings),
-        )
-
-    if only_multi_site:
-        multi_site_sources = [
-            i
-            for i, s in enumerate(resp['sources'])
-            if all(join.left_location != join.right_location for join in s.input)
-        ]
-        sources = [resp['sources'][i] for i in multi_site_sources]
-        sequences = [resp['sequences'][i] for i in multi_site_sources]
-        return {'sources': sources, 'sequences': sequences}
-
-    return resp
+    return format_products(
+        products,
+        chosen_source,
+        source.output_name,
+        no_products_error_message=None,  # Already handled by the _gateway_assembly function
+    )
 
 
 @router.post(
