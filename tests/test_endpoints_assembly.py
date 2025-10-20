@@ -601,7 +601,9 @@ class HomologousRecombinationTest(unittest.TestCase):
         data = {'source': source.model_dump(), 'sequences': [json_template.model_dump(), json_insert.model_dump()]}
         response = client.post('/homologous_recombination', json=data)
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['detail'], 'No homologous recombination was found.')
+        self.assertEqual(
+            response.json()['detail'], 'No homologous recombination with at least 40 bps of homology was found.'
+        )
 
 
 class GibsonAssemblyTest(unittest.TestCase):

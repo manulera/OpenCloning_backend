@@ -43,6 +43,7 @@ from pydna.assembly2 import (
     in_vivo_assembly as _in_vivo_assembly,
     fusion_pcr_assembly as _fusion_pcr_assembly,
     restriction_ligation_assembly as _restriction_ligation_assembly,
+    homologous_recombination_integration as _homologous_recombination_integration,
 )
 
 from ..gateway import gateway_overlap, find_gateway_sites, annotate_gateway_sites
@@ -315,7 +316,7 @@ async def pcr(
     '/homologous_recombination',
     response_model=create_model(
         'HomologousRecombinationResponse',
-        sources=(list[HomologousRecombinationSource], ...),
+        sources=(list[Union[HomologousRecombinationSource, InVivoAssemblySource]], ...),
         sequences=(list[TextFileSequence], ...),
     ),
 )
@@ -328,43 +329,24 @@ async def homologous_recombination(
     template, insert = [read_dsrecord_from_json(seq) for seq in sequences]
 
     # If an assembly is provided, we ignore minimal_homology
-    if source.is_assembly_complete():
-        minimal_homology = source.minimal_overlap()
+    chosen_source = source if source.is_assembly_complete() else None
+    if chosen_source is not None:
+        minimal_homology = minimal_assembly_overlap(source)
 
-    asm = Assembly((template, insert), limit=minimal_homology, use_all_fragments=True)
-
-    # The condition is that the first and last fragments are the template
     try:
-        if not template.circular:
-            possible_assemblies = [a for a in asm.get_insertion_assemblies() if a[0][0] == 1]
+        if template.circular:
+            products = _in_vivo_assembly([template, insert], minimal_homology, circular_only=True)
         else:
-            possible_assemblies = [a for a in asm.get_circular_assemblies()]
-
+            products = _homologous_recombination_integration(template, [insert], minimal_homology)
     except ValueError as e:
         raise HTTPException(400, *e.args)
 
-    if len(possible_assemblies) == 0:
-        raise HTTPException(400, 'No homologous recombination was found.')
-
-    out_sources = [
-        HomologousRecombinationSource.from_assembly(
-            id=source.id, assembly=a, circular=False, fragments=[template, insert]
-        )
-        for a in possible_assemblies
-    ]
-
-    # If a specific assembly is requested
-    if source.is_assembly_complete():
-        return format_known_assembly_response(source, out_sources, [template, insert])
-
-    out_sequences = [
-        format_sequence_genbank(
-            assemble([template, insert], a, is_insertion=not template.circular), source.output_name
-        )
-        for a in possible_assemblies
-    ]
-
-    return {'sources': out_sources, 'sequences': out_sequences}
+    return format_products(
+        products,
+        chosen_source,
+        source.output_name,
+        no_products_error_message=f'No homologous recombination with at least {minimal_homology} bps of homology was found.',
+    )
 
 
 @router.post(
