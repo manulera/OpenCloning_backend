@@ -5,12 +5,10 @@ from pydna.primer import Primer as PydnaPrimer
 from pydna.crispr import cas9
 from pydantic import create_model, Field
 from typing import Annotated
-from Bio.Restriction.Restriction import RestrictionBatch
 from opencloning.cre_lox import cre_loxP_overlap, annotate_loxP_sites
-from opencloning.endpoints.endpoint_utils import format_products
+from opencloning.endpoints.endpoint_utils import format_products, parse_restriction_enzymes
 from opencloning.temp_functions import is_assembly_complete, minimal_assembly_overlap
 from ..dna_functions import (
-    get_invalid_enzyme_names,
     format_sequence_genbank,
     read_dsrecord_from_json,
 )
@@ -37,7 +35,6 @@ from pydna.assembly2 import (
     Assembly,
     assemble,
     filter_linear_subassemblies,
-    restriction_ligation_overlap,
     SingleFragmentAssembly,
     pcr_assembly as _pcr_assembly,
     ligation_assembly as _ligation_assembly,
@@ -45,6 +42,7 @@ from pydna.assembly2 import (
     in_fusion_assembly as _in_fusion_assembly,
     in_vivo_assembly as _in_vivo_assembly,
     fusion_pcr_assembly as _fusion_pcr_assembly,
+    restriction_ligation_assembly as _restriction_ligation_assembly,
 )
 
 from ..gateway import gateway_overlap, find_gateway_sites, annotate_gateway_sites
@@ -434,32 +432,22 @@ async def restriction_and_ligation(
 ):
 
     fragments = [read_dsrecord_from_json(seq) for seq in sequences]
-    invalid_enzymes = get_invalid_enzyme_names(source.restriction_enzymes)
-    if len(invalid_enzymes):
-        raise HTTPException(404, 'These enzymes do not exist: ' + ', '.join(invalid_enzymes))
-    enzymes = RestrictionBatch(first=[e for e in source.restriction_enzymes if e is not None])
+    enzymes = parse_restriction_enzymes(source.restriction_enzymes)
+    chosen_source = source if is_assembly_complete(source) else None
+    if chosen_source:
+        allow_partial_overlap = True
 
-    # Lambda function for code clarity
-    def create_source(a, is_circular):
-        return RestrictionAndLigationSource.from_assembly(
-            assembly=a,
-            circular=is_circular,
-            id=source.id,
-            restriction_enzymes=source.restriction_enzymes,
-            fragments=fragments,
-        )
+    try:
+        products = _restriction_ligation_assembly(fragments, enzymes, circular_only=circular_only)
+    except ValueError as e:
+        raise HTTPException(400, *e.args)
 
-    # Algorithm used by assembly class
-    def algo(x, y, _l):
-        # By default, we allow blunt ends
-        return restriction_ligation_overlap(x, y, enzymes, allow_partial_overlap, True)
-
-    resp = generate_assemblies(source, create_source, fragments, circular_only, algo, True)
-
-    if len(resp['sources']) == 0:
-        raise HTTPException(400, 'No compatible restriction-ligation was found.')
-
-    return resp
+    return format_products(
+        products,
+        chosen_source,
+        source.output_name,
+        no_products_error_message='No compatible restriction-ligation was found.',
+    )
 
 
 @router.post(
