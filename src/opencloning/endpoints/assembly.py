@@ -241,21 +241,20 @@ async def ligation(
     # If the assembly is known, the blunt parameter is ignored, and we set the algorithm type from the assembly
     # (blunt ligations have locations of length zero)
     # Also, we allow partial overlap to be more permissive
-    if is_assembly_complete(source):
+    chosen_source = source if is_assembly_complete(source) else None
+    if chosen_source:
         blunt = minimal_assembly_overlap(source) == 0
         allow_partial_overlap = True
-    products = ligation_assembly(
-        fragments, allow_blunt=blunt, allow_partial_overlap=allow_partial_overlap, circular_only=circular_only
-    )
-    if len(products) == 0:
-        raise HTTPException(400, 'No ligations were found.')
+    try:
+        products = ligation_assembly(
+            fragments, allow_blunt=blunt, allow_partial_overlap=allow_partial_overlap, circular_only=circular_only
+        )
+    except ValueError as e:
+        raise HTTPException(400, *e.args)
 
-    return {
-        'sources': [
-            source.from_assembly(assembly=a, circular=False, id=source.id, fragments=fragments) for a in products
-        ],
-        'sequences': [format_sequence_genbank(a, source.output_name) for a in products],
-    }
+    return format_products(
+        products, chosen_source, source.output_name, no_products_error_message='No ligations were found.'
+    )
 
 
 @router.post(
