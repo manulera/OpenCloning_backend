@@ -1,15 +1,16 @@
 import os
 from opencloning.endpoints.external_import import genome_coordinates, get_from_repository_id_addgene, read_from_file
 from opencloning.endpoints.assembly import pcr, homologous_recombination
-from opencloning.pydantic_models import (
+from opencloning.pydantic_models import BaseCloningStrategy
+
+from opencloning_linkml.datamodel import (
     GenomeCoordinatesSource,
-    TextFileSequence,
     AddgeneIdSource,
     PCRSource,
-    PrimerModel,
+    Primer as PrimerModel,
     HomologousRecombinationSource,
-    BaseCloningStrategy,
     UploadedFileSource,
+    TextFileSequence,
 )
 
 from opencloning.ncbi_requests import get_annotations_from_query
