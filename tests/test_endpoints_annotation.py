@@ -14,7 +14,7 @@ import opencloning.app_settings as app_settings
 import opencloning.http_client as http_client
 import opencloning.endpoints.annotation as annotation_endpoints
 import opencloning.main as _main
-from opencloning.pydantic_models import (
+from opencloning_linkml.datamodel import (
     TextFileSequence,
     AnnotationSource,
 )

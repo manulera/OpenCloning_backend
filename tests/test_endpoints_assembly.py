@@ -1,18 +1,18 @@
 from fastapi.testclient import TestClient
+from opencloning_linkml.datamodel import AssemblyFragment
 from pydna.parsers import parse as pydna_parse
 from Bio.Restriction.Restriction import CommOnly
-from Bio.SeqFeature import SimpleLocation
 from pydna.dseqrecord import Dseqrecord
 import unittest
 from pydna.dseq import Dseq
-from opencloning.cre_lox import LOXP_SEQUENCE
+from pydna.cre_lox import LOXP_SEQUENCE
 import os
 
 from opencloning.dna_functions import format_sequence_genbank, read_dsrecord_from_json
 import opencloning.main as _main
-from opencloning.pydantic_models import (
+from opencloning_linkml.datamodel import (
     PCRSource,
-    PrimerModel,
+    Primer as PrimerModel,
     TextFileSequence,
     LigationSource,
     HomologousRecombinationSource,
@@ -51,12 +51,15 @@ class LigationTest(unittest.TestCase):
         json_seqs = [seq.model_dump() for seq in model_seqs]
 
         # Assign ids to define deterministic assembly
-        source = LigationSource.from_assembly(
+        source = LigationSource(
             id=0,
-            assembly=[(1, 2, SimpleLocation(7, 11), SimpleLocation(0, 4))],
+            input=[
+                AssemblyFragment(sequence=1, left_location=None, right_location='8..11', reverse_complemented=False),
+                AssemblyFragment(sequence=2, left_location='1..4', right_location=None, reverse_complemented=False),
+            ],
             circular=False,
-            fragments=model_seqs,
         )
+
         data = {'source': source.model_dump(), 'sequences': json_seqs}
         response = client.post('/ligation', json=data)
         payload = response.json()
@@ -74,11 +77,13 @@ class LigationTest(unittest.TestCase):
         self.assertEqual(sources[0], source)
 
         # Check that the inverse assembly will not pass
-        source = LigationSource.from_assembly(
+        source = LigationSource(
             id=0,
-            assembly=[(1, 2, SimpleLocation(8, 11), SimpleLocation(1, 4))],
+            input=[
+                AssemblyFragment(sequence=1, left_location=None, right_location='9..11', reverse_complemented=False),
+                AssemblyFragment(sequence=2, left_location='2..4', right_location=None, reverse_complemented=False),
+            ],
             circular=False,
-            fragments=model_seqs,
         )
         data = {'source': source.model_dump(), 'sequences': json_seqs}
         response = client.post('/ligation', json=data)
@@ -87,11 +92,13 @@ class LigationTest(unittest.TestCase):
         self.assertEqual(data['detail'], 'The provided assembly is not valid.')
 
         # Check that the circular assembly does not pass either
-        source = LigationSource.from_assembly(
+        source = LigationSource(
             id=0,
-            assembly=[(1, 2, SimpleLocation(7, 11), SimpleLocation(0, 4))],
+            input=[
+                AssemblyFragment(sequence=1, left_location=None, right_location='8..11', reverse_complemented=False),
+                AssemblyFragment(sequence=2, left_location='1..4', right_location=None, reverse_complemented=False),
+            ],
             circular=True,
-            fragments=model_seqs,
         )
         data = {'source': source.model_dump(), 'sequences': json_seqs}
         response = client.post('/ligation', json=data)
@@ -401,14 +408,16 @@ class PCRTest(unittest.TestCase):
 
         primer_fwd = PrimerModel(sequence='ACGTACGT', id=2, name='forward')
 
-        submitted_source = PCRSource.from_assembly(
+        submitted_source = PCRSource(
             id=0,
-            assembly=[
-                (1, 2, SimpleLocation(0, 8), SimpleLocation(4, 12)),
-                (2, -3, SimpleLocation(18, 26), SimpleLocation(0, 8)),
+            input=[
+                AssemblyFragment(sequence=1, left_location=None, right_location='1..8', reverse_complemented=False),
+                AssemblyFragment(
+                    sequence=2, left_location='5..12', right_location='19..26', reverse_complemented=False
+                ),
+                AssemblyFragment(sequence=3, left_location='1..8', right_location=None, reverse_complemented=True),
             ],
-            circular=True,  # The wrong thing
-            fragments=[primer_fwd, json_seq, primer_rvs],
+            circular=False,
         )
 
         data = {
@@ -421,14 +430,16 @@ class PCRTest(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
 
         # This is the wrong annealing info
-        submitted_source = PCRSource.from_assembly(
+        submitted_source = PCRSource(
             id=0,
-            assembly=[
-                (2, -3, SimpleLocation(18, 26), SimpleLocation(0, 8)),
-                (1, 2, SimpleLocation(0, 8), SimpleLocation(4, 12)),  # Reverted order
+            input=[
+                AssemblyFragment(sequence=3, left_location='1..8', right_location=None, reverse_complemented=True),
+                AssemblyFragment(
+                    sequence=2, left_location='5..12', right_location='19..26', reverse_complemented=False
+                ),
+                AssemblyFragment(sequence=1, left_location=None, right_location='1..8', reverse_complemented=False),
             ],
             circular=False,
-            fragments=[primer_fwd, json_seq, primer_rvs],
         )
 
         data = {
@@ -456,7 +467,7 @@ class PCRTest(unittest.TestCase):
             'primers': [primer_fwd.model_dump()],
         }
         response = client.post('/pcr', json=data, params={'minimal_annealing': 8})
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 422)
 
     def test_too_many_assemblies(self):
         # Too many assemblies
@@ -601,7 +612,9 @@ class HomologousRecombinationTest(unittest.TestCase):
         data = {'source': source.model_dump(), 'sequences': [json_template.model_dump(), json_insert.model_dump()]}
         response = client.post('/homologous_recombination', json=data)
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['detail'], 'No homologous recombination was found.')
+        self.assertEqual(
+            response.json()['detail'], 'No homologous recombination with at least 40 bps of homology was found.'
+        )
 
 
 class GibsonAssemblyTest(unittest.TestCase):
@@ -1027,7 +1040,7 @@ class CrisprTest(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
             payload['detail'],
-            'A Cas9 cutsite was found, and a homologous recombination region, but they do not overlap.',
+            'No suitable products produced with provided primers and 8 bps of homology',
         )
 
     def test_too_many_assemblies(self):
@@ -1247,16 +1260,22 @@ class GatewaySourceTest(unittest.TestCase):
             'source': source.model_dump(),
             'sequences': [f.model_dump() for f in fragments],
         }
-        response = client.post('/gateway', json=data, params={'only_multi_site': True})
+        response = client.post('/gateway', json=data)
         self.assertEqual(response.status_code, 200)
         payload = response.json()
-        self.assertEqual(len(payload['sources']), 1)
+        self.assertEqual(len(payload['sources']), 2)
 
-        product = (
-            'GTACAAAAAAGCAGAAGcccAAAATAATGATTTTATTTGACTGATAGTGACCTGTTCGTTGCAACAAATTGATGAGCAATGCTTTTTTATAATGCCAACTTT'
-        ).upper()
+        product = Dseq(
+            'GTACAAAAAAGCAGAAGcccAAAATAATGATTTTATTTGACTGATAGTGACCTGTTCGTTGCAACAAATTGATGAGCAATGCTTTTTTATAATGCCAACTTT'.upper(),
+            circular=True,
+        )
+        product2 = Dseq(
+            'AAAACAACTTTGTACAAAAAAGCTGAACGAGAAGCGTAAAATGATATAAATATCAATATATTAAATTAGATTTTGCATAAAAAACAGACTACATAATACTGTAAAACACAACATATCCAGTCACTATGAATCAACTACTTAGATGGTATTAGTGACCTGTA'.upper(),
+            circular=False,
+        )
         seqs = [read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']]
-        self.assertEqual(str(seqs[0].seq), product)
+        self.assertEqual(seqs[0].seq, product)
+        self.assertEqual(seqs[1].seq, product2)
 
 
 class CreLoxRecombinationTest(unittest.TestCase):

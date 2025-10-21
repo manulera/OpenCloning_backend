@@ -8,8 +8,8 @@ from ..dna_functions import (
     format_sequence_genbank,
     oligonucleotide_hybridization_overhangs,
 )
-from ..pydantic_models import (
-    PrimerModel,
+from opencloning_linkml.datamodel import (
+    Primer as PrimerModel,
     TextFileSequence,
     ManuallyTypedSource,
     OligoHybridizationSource,
@@ -31,6 +31,9 @@ router = get_router()
 async def manually_typed(source: ManuallyTypedSource):
     """Return the sequence from a manually typed sequence"""
     if source.circular:
+        # TODO: This should be done in the model validator
+        if source.overhang_crick_3prime != 0 or source.overhang_watson_3prime != 0:
+            raise HTTPException(422, 'Circular sequences cannot have overhangs.')
         seq = Dseqrecord(source.user_input, circular=source.circular)
     else:
         seq = Dseqrecord(

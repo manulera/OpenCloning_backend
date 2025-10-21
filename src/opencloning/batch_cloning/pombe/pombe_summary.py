@@ -1,4 +1,9 @@
-from ...pydantic_models import BaseCloningStrategy, PrimerModel, PCRSource, HomologousRecombinationSource
+from ...pydantic_models import BaseCloningStrategy
+from opencloning_linkml.datamodel import (
+    Primer as PrimerModel,
+    PCRSource,
+    HomologousRecombinationSource,
+)
 from pydna.parsers import parse as pydna_parse
 import os
 import json

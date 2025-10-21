@@ -4,10 +4,12 @@ See info in README.md
 
 from ..pydantic_models import (
     BaseCloningStrategy as CloningStrategy,
+)
+from pydna.opencloning_models import SequenceLocationStr
+from opencloning_linkml.datamodel import (
     AssemblySource,
     TextFileSequence,
-    PrimerModel,
-    SequenceLocationStr,
+    Primer as PrimerModel,
 )
 from .._version import __version__
 import json
@@ -50,9 +52,15 @@ def fix_backend_v0_3(input_data: dict) -> CloningStrategy | None:
                 primers = [PrimerModel.model_validate(p) for p in data['primers'] if p['id'] in primer_ids]
                 input_seqs = [primers[0], input_seqs[0], primers[1]]
 
-            assembly_plan = assembly_source.get_assembly_plan(input_seqs)
-            for join in assembly_plan:
-                if len(join[2]) != len(join[3]):
+            assembly_fragments = [a for a in assembly_source.input if a.type == 'AssemblyFragment']
+
+            for prev_f, next_f in zip(assembly_fragments, assembly_fragments[1:] + assembly_fragments[:1]):
+                left = prev_f.right_location
+                right = next_f.left_location
+                if (left is not None and right is not None) and (
+                    len(SequenceLocationStr(left).to_biopython_location())
+                    != len(SequenceLocationStr(right).to_biopython_location())
+                ):
                     problematic_source_ids.add(source['id'])
                     break
 

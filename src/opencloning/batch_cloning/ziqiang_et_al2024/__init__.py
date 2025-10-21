@@ -6,10 +6,10 @@ from typing import Annotated
 from fastapi import Body, Query, HTTPException
 
 from ...get_router import get_router
-from ...pydantic_models import (
-    BaseCloningStrategy,
-    PrimerModel,
+from ...pydantic_models import BaseCloningStrategy
+from opencloning_linkml.datamodel import (
     TextFileSequence,
+    Primer as PrimerModel,
     PCRSource,
     RestrictionAndLigationSource,
     GatewaySource,
@@ -96,7 +96,7 @@ async def ziqiang_et_al2024_post(
         else:
             name = f'end_ps{i}_start_ps{i + 1}'
 
-        pcr_source = PCRSource(id=0, output_name=name)
+        pcr_source = PCRSource(id=0, input=[], output_name=name)
         fwd_primer = next(p for p in cloning_strategy.primers if p.id == fwd_primer_id)
         rvs_primer = next(p for p in cloning_strategy.primers if p.id == rvs_primer_id)
 
@@ -112,7 +112,7 @@ async def ziqiang_et_al2024_post(
 
     # Make all input of a Golden gate assembly
     golden_gate_source = RestrictionAndLigationSource(
-        id=0, output_name='golden_gate_assembly', restriction_enzymes=['BsaI']
+        id=0, input=[], output_name='golden_gate_assembly', restriction_enzymes=['BsaI']
     )
 
     # Make them
@@ -123,7 +123,7 @@ async def ziqiang_et_al2024_post(
     cloning_strategy.add_source_and_sequence(golden_gate_source, golden_gate_product)
 
     bp_target = next(s for s in cloning_strategy.sequences if s.id == 6)
-    gateway_source = GatewaySource(id=0, output_name='entry_clone', reaction_type='BP', greedy=False)
+    gateway_source = GatewaySource(id=0, input=[], output_name='entry_clone', reaction_type='BP', greedy=False)
     resp = await gateway(gateway_source, [golden_gate_product, bp_target], circular_only=True, only_multi_site=True)
     gateway_product: TextFileSequence = TextFileSequence.model_validate(resp['sequences'][0])
     gateway_source: GatewaySource = GatewaySource.model_validate(resp['sources'][0])
@@ -141,7 +141,7 @@ async def ziqiang_et_al2024_post(
     all_input_ids = [s.sequence for s in all_inputs]
     sequences_to_clone = [s for s in cloning_strategy.sequences if s.id not in all_input_ids]
 
-    gateway_source = GatewaySource(id=0, output_name='expression_clone', reaction_type='LR', greedy=False)
+    gateway_source = GatewaySource(id=0, input=[], output_name='expression_clone', reaction_type='LR', greedy=False)
     resp = await gateway(gateway_source, sequences_to_clone, circular_only=True, only_multi_site=True)
     index_of_product = next(i for i, s in enumerate(resp['sequences']) if '/label="Cas9"' in s.file_content)
     expression_clone: TextFileSequence = TextFileSequence.model_validate(resp['sequences'][index_of_product])

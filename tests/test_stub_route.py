@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 import unittest
 import shutil
 import os
-from opencloning.pydantic_models import ManuallyTypedSource, RestrictionEnzymeDigestionSource
+from opencloning_linkml.datamodel import ManuallyTypedSource, RestrictionEnzymeDigestionSource
 from pytest import MonkeyPatch
 from importlib import reload
 from pydna.dseqrecord import Dseqrecord

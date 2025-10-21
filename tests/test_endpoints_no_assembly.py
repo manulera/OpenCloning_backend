@@ -6,13 +6,15 @@ from pydna.dseq import Dseq
 
 from opencloning.dna_functions import format_sequence_genbank, read_dsrecord_from_json
 import opencloning.main as _main
-from opencloning.pydantic_models import (
+
+from opencloning_linkml.datamodel import (
     RestrictionEnzymeDigestionSource,
-    TextFileSequence,
     RestrictionSequenceCut,
+    TextFileSequence,
     PolymeraseExtensionSource,
     ReverseComplementSource,
 )
+from opencloning.temp_functions import get_enzymes_from_source, restriction_sequence_cut_to_cutsite_tuple
 
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
@@ -91,21 +93,20 @@ class RestrictionTest(unittest.TestCase):
 
         # The edges of the fragments are correct:
         self.assertEqual(sources[0].left_edge, None)
-        self.assertEqual(sources[0].right_edge.to_cutsite_tuple()[0], (7, -4))
-
-        self.assertEqual(sources[1].left_edge.to_cutsite_tuple()[0], (7, -4))
+        self.assertEqual(restriction_sequence_cut_to_cutsite_tuple(sources[0].right_edge)[0], (7, -4))
+        self.assertEqual(restriction_sequence_cut_to_cutsite_tuple(sources[1].left_edge)[0], (7, -4))
         self.assertEqual(sources[1].right_edge, None)
 
         # The enzyme names are correctly returned:
-        self.assertEqual(sources[0].get_enzymes(), ['EcoRI'])
-        self.assertEqual(sources[1].get_enzymes(), ['EcoRI'])
+        self.assertEqual(get_enzymes_from_source(sources[0]), ['EcoRI'])
+        self.assertEqual(get_enzymes_from_source(sources[1]), ['EcoRI'])
 
         # Now we specify the output
         source = RestrictionEnzymeDigestionSource(
             id=0,
             input=[{'sequence': 1}],
             left_edge=None,
-            right_edge=RestrictionSequenceCut.from_cutsite_tuple(((7, -4), 'EcoRI')),
+            right_edge=RestrictionSequenceCut(cut_watson=7, overhang=-4, restriction_enzyme='EcoRI'),
         )
         data = {'source': source.model_dump(), 'sequences': [json_seq.model_dump()]}
         response = client.post('/restriction', json=data)
@@ -119,9 +120,9 @@ class RestrictionTest(unittest.TestCase):
         self.assertEqual(len(resulting_sequences), 1)
         self.assertEqual(len(sources), 1)
         self.assertEqual(sources[0].left_edge, None)
-        self.assertEqual(sources[0].right_edge.to_cutsite_tuple()[0], (7, -4))
-        self.assertEqual(str(sources[0].right_edge.to_cutsite_tuple()[1]), 'EcoRI')
-        self.assertEqual(sources[0].get_enzymes(), ['EcoRI'])
+        self.assertEqual(restriction_sequence_cut_to_cutsite_tuple(sources[0].right_edge)[0], (7, -4))
+        self.assertEqual(str(restriction_sequence_cut_to_cutsite_tuple(sources[0].right_edge)[1]), 'EcoRI')
+        self.assertEqual(get_enzymes_from_source(sources[0]), ['EcoRI'])
 
     def test_circular_single_restriction(self):
 
@@ -147,11 +148,11 @@ class RestrictionTest(unittest.TestCase):
         self.assertEqual(resulting_sequences[0].seq.watson.upper(), 'AATTCTTTTTTAAAAAAG')
 
         # The edges of the fragments are correct:
-        self.assertEqual(sources[0].left_edge.to_cutsite_tuple()[0], (7, -4))
-        self.assertEqual(sources[0].right_edge.to_cutsite_tuple()[0], (7, -4))
+        self.assertEqual(restriction_sequence_cut_to_cutsite_tuple(sources[0].left_edge)[0], (7, -4))
+        self.assertEqual(restriction_sequence_cut_to_cutsite_tuple(sources[0].right_edge)[0], (7, -4))
 
         # The enzyme names are correctly returned:
-        self.assertEqual(sources[0].get_enzymes(), ['EcoRI'])
+        self.assertEqual(get_enzymes_from_source(sources[0]), ['EcoRI'])
 
         # When the cutting site spans the origin
         sequences = ['AATTCTTTTTTG', 'ATTCTTTTTTGA']
@@ -182,11 +183,11 @@ class RestrictionTest(unittest.TestCase):
             self.assertEqual(resulting_sequences[0].seq.watson.upper(), 'AATTCTTTTTTG')
 
             # The edges of the fragments are correct:
-            self.assertEqual(sources[0].left_edge.to_cutsite_tuple()[0], pos)
-            self.assertEqual(sources[0].right_edge.to_cutsite_tuple()[0], pos)
+            self.assertEqual(restriction_sequence_cut_to_cutsite_tuple(sources[0].left_edge)[0], pos)
+            self.assertEqual(restriction_sequence_cut_to_cutsite_tuple(sources[0].right_edge)[0], pos)
 
             # The enzyme names are correctly returned:
-            self.assertEqual(sources[0].get_enzymes(), ['EcoRI'])
+            self.assertEqual(get_enzymes_from_source(sources[0]), ['EcoRI'])
 
     def test_linear_multiple_restriction(self):
 
@@ -230,7 +231,7 @@ class RestrictionTest(unittest.TestCase):
         # The enzyme names are correct
         restriction_enzymes = [['BamHI'], ['BamHI', 'EcoRV'], ['EcoRV']]
         for i, e in enumerate(restriction_enzymes):
-            self.assertEqual(sources[i].get_enzymes(), e)
+            self.assertEqual(get_enzymes_from_source(sources[i]), e)
 
         # Submitting the known fragments
 
@@ -312,7 +313,7 @@ class RestrictionTest(unittest.TestCase):
         # The enzyme names are correct
         restriction_enzymes = [['BamHI', 'EcoRV'], ['EcoRV', 'BamHI']]
         for i, e in enumerate(restriction_enzymes):
-            self.assertEqual(sources[i].get_enzymes(), e)
+            self.assertEqual(get_enzymes_from_source(sources[i]), e)
 
         # Submitting the known fragments
         for i in range(len(edges)):

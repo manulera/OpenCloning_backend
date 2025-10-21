@@ -1,16 +1,18 @@
-from functools import cmp_to_key
 from urllib.error import HTTPError
 from Bio.Restriction.Restriction import RestrictionBatch
 from Bio.Seq import reverse_complement
 from pydna.dseqrecord import Dseqrecord
 from pydna.dseq import Dseq
-from .pydantic_models import TextFileSequence, AddgeneIdSource, SequenceFileFormat, WekWikGeneIdSource, SEVASource
-from opencloning_linkml.datamodel import PlannotateAnnotationReport
+from opencloning_linkml.datamodel import (
+    PlannotateAnnotationReport,
+    TextFileSequence,
+    AddgeneIdSource,
+    SequenceFileFormat,
+    WekWikGeneIdSource,
+    SEVASource,
+)
 from pydna.parsers import parse as pydna_parse
 from bs4 import BeautifulSoup
-import regex
-from Bio.SeqFeature import SimpleLocation, Location
-from pydna.utils import shift_location
 from pydna.common_sub_strings import common_sub_strings
 from Bio.SeqIO import parse as seqio_parse
 import io
@@ -185,57 +187,6 @@ def correct_name(dseq: Dseqrecord):
     # Can set the name from keyword if locus is set to Exported
     if dseq.name.lower() == 'exported' and dseq.locus.lower() == 'exported' and 'keywords' in dseq.annotations:
         dseq.name = dseq.annotations['keywords'][0].replace(' ', '_')
-
-
-def location_sorter(x, y) -> int:
-    """
-    Sort by start, then length, then strand.
-    """
-    if x.parts[0].start != y.parts[0].start:
-        return x.parts[0].start - y.parts[0].start
-    elif x.parts[-1].end != y.parts[-1].end:
-        return x.parts[-1].end - y.parts[-1].end
-    return x.strand - y.strand
-
-
-def get_all_regex_feature_edges(pattern: str, seq: str, is_circular: bool) -> list[tuple[int, int]]:
-
-    subject = 2 * seq if is_circular else seq
-
-    compiled_pattern = regex.compile(pattern, regex.IGNORECASE)
-    compiled_pattern_rev = regex.compile('(?r)' + pattern, regex.IGNORECASE)
-
-    matches = list(regex.finditer(compiled_pattern, subject, overlapped=True))
-    matches += list(regex.finditer(compiled_pattern_rev, subject, overlapped=True))
-
-    # In circular objects we remove the matches that span the sequence more than once: m.end() - m.start() <= len(seq)
-    return list(set([(m.start(), m.end()) for m in matches if (m.end() - m.start() <= len(seq))]))
-
-
-def find_sequence_regex(pattern: str, seq: str, is_circular: bool) -> list[Location]:
-
-    feature_locations = list()
-
-    # Strand 1
-    feature_edges = get_all_regex_feature_edges(pattern, seq, is_circular)
-    # We use shift_location to format origin-spanning features in circular DNA
-    feature_locations += [shift_location(SimpleLocation(start, end, 1), 0, len(seq)) for start, end in feature_edges]
-
-    # Strand -1
-    feature_edges = get_all_regex_feature_edges(pattern, reverse_complement(seq), is_circular)
-    feature_locations += [
-        shift_location(SimpleLocation(start, end, 1)._flip(len(seq)), 0, len(seq)) for start, end in feature_edges
-    ]
-
-    # We return a unique list, cannot use a set because Location is not hashable
-    return sorted(
-        [x for i, x in enumerate(feature_locations) if x not in feature_locations[:i]], key=cmp_to_key(location_sorter)
-    )
-
-
-# Could be useful at some point
-# def seq_overlap_length(dseq: Dseq) -> int:
-#     return len(dseq) - abs(dseq.ovhg) - abs(dseq.watson_ovhg())
 
 
 def oligonucleotide_hybridization_overhangs(

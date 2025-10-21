@@ -10,7 +10,7 @@ from urllib.error import HTTPError
 from pydna.utils import location_boundaries
 
 from ..get_router import get_router
-from ..pydantic_models import (
+from opencloning_linkml.datamodel import (
     TextFileSequence,
     UploadedFileSource,
     RepositoryIdSource,
@@ -23,9 +23,9 @@ from ..pydantic_models import (
     GenomeCoordinatesSource,
     SequenceFileFormat,
     SEVASource,
-    SequenceLocationStr,
     OpenDNACollectionsSource,
 )
+from pydna.opencloning_models import SequenceLocationStr
 from ..dna_functions import (
     format_sequence_genbank,
     request_from_addgene,
@@ -380,6 +380,9 @@ async def get_from_repository_id_euroscarf(source: EuroscarfSource):
     ),
 )
 async def get_from_repository_id_igem(source: IGEMSource):
+    # TODO: move this to the data model?
+    if not source.sequence_file_url.endswith('.gb'):
+        raise HTTPException(422, 'The sequence file must be a GenBank file')
     try:
         dseq = (await get_sequences_from_file_url(source.sequence_file_url))[0]
         return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [source]}

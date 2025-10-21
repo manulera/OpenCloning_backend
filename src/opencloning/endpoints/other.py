@@ -13,9 +13,9 @@ from ..dna_functions import (
 )
 from ..dna_utils import align_sanger_traces
 from ..pydantic_models import (
-    TextFileSequence,
     BaseCloningStrategy,
 )
+from opencloning_linkml.datamodel import TextFileSequence
 from ..get_router import get_router
 from .._version import __version__ as backend_version
 

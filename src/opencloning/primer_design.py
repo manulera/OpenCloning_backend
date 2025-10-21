@@ -3,12 +3,12 @@ from pydna.design import primer_design, assembly_fragments
 from Bio.SeqFeature import SimpleLocation
 from pydna.utils import locations_overlap, shift_location, location_boundaries
 from pydna.amplicon import Amplicon
-from .pydantic_models import PrimerModel
 from Bio.Seq import reverse_complement
 from Bio.Restriction.Restriction import RestrictionType
 from Bio.Data.IUPACData import ambiguous_dna_values as _ambiguous_dna_values
 from typing import Callable
 from .primer3_functions import primer3_calc_tm, PrimerDesignSettings
+from opencloning_linkml.datamodel import Primer as PrimerModel
 
 ambiguous_dna_values = _ambiguous_dna_values.copy()
 # Remove acgt
