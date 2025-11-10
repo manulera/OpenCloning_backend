@@ -1,3 +1,4 @@
+from pydna.utils import location_boundaries
 from ...pydantic_models import BaseCloningStrategy
 from opencloning_linkml.datamodel import (
     Primer as PrimerModel,
@@ -10,6 +11,7 @@ import json
 from pydna import tm
 from Bio.Seq import reverse_complement
 import argparse
+from Bio.SeqFeature import Location
 
 chromosomes = {
     'NC_003424.3': 'I',
@@ -22,11 +24,11 @@ chromosomes = {
 def find_primer_aligned_sequence(pcr_sources: list[PCRSource], primer: PrimerModel) -> str:
     for source in pcr_sources:
         if source.input[0].sequence == primer.id:
-            loc = source.input[0].right_location
-            return str(primer.sequence[loc.start : loc.end])
+            loc = Location.fromstring(source.input[0].right_location)
+            return loc.extract(primer.sequence)
         if source.input[-1].sequence == primer.id:
-            loc = source.input[-1].left_location
-            return str(reverse_complement(primer.sequence)[loc.start : loc.end])
+            loc = Location.fromstring(source.input[-1].left_location)
+            return loc.extract(reverse_complement(primer.sequence))
     raise ValueError(f"Primer {primer.id} not found in any PCR source")
 
 
@@ -43,8 +45,12 @@ def process_folder(working_dir: str):
     hrec_source: HomologousRecombinationSource = HomologousRecombinationSource.model_validate(hrec_source.model_dump())
 
     chromosome = chromosomes[locus_source.sequence_accession]
-    insertion_start = locus_source.start + hrec_source.input[0].right_location.end
-    insertion_end = locus_source.start + hrec_source.input[-1].left_location.start
+    insertion_start = (
+        locus_source.start + location_boundaries(Location.fromstring(hrec_source.input[0].right_location))[1]
+    )
+    insertion_end = (
+        locus_source.start + location_boundaries(Location.fromstring(hrec_source.input[-1].left_location))[0]
+    )
 
     # Write out the sequences in genbank format and extract some relevant info
     sequences = [pydna_parse(sequence.file_content)[0] for sequence in strategy.sequences]
