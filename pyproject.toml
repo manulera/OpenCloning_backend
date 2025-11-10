@@ -20,7 +20,6 @@ httpx = "^0.28.1"
 python = "^3.11"
 python-multipart = "*"
 uvicorn = "*"
-pydna = {git = "https://github.com/pydna-group/pydna", rev = "dc4efd8965a4e5d2d6d4fc52eb7892a5b0a63d6f"}
 regex = "^2024.11.6"
 pydantic = "^2.7.1"
 pandas = "^2.2.3"
@@ -31,6 +30,7 @@ primer3-py = "2.2.0"
 biopython = "^1.85"
 packaging = "^25.0"
 pairwise-alignments-to-msa = "^0.1.1"
+pydna = "^5.5.4"
 
 [tool.poetry.group.dev.dependencies]
 autopep8 = "^2.0.4"
