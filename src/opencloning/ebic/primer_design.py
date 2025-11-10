@@ -2,7 +2,7 @@ from pydna.dseqrecord import Dseqrecord
 from Bio.SeqFeature import SimpleLocation
 from ..primer3_functions import PrimerDesignSettings, primer3_design_primers
 
-from ..pydantic_models import PrimerModel
+from opencloning_linkml.datamodel import Primer as PrimerModel
 from .primer_design_settings import amanda_settings
 
 adapter_left_fwd = 'ataGGTCTCtGGAG'

@@ -133,7 +133,7 @@ pytest -v -ks
 ### Ping a particular library version from github:
 
 ```
-poetry add git+https://github.com/BjornFJohansson/pydna#4fd760d075f77cceeb27969e017e04b42f6d0aa3
+poetry add git+https://github.com/pydna-group/pydna#4fd760d075f77cceeb27969e017e04b42f6d0aa3
 ```
 
 When installing the last version, sometimes poetry may not be able to access the latest version

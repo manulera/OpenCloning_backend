@@ -3,13 +3,13 @@ from pydantic import create_model
 from urllib.error import HTTPError
 
 from ..get_router import get_router
-from ..pydantic_models import TextFileSequence, AnnotationSource
+from opencloning_linkml.datamodel import TextFileSequence, AnnotationSource
 from ..dna_functions import (
     read_dsrecord_from_json,
     annotate_with_plannotate as _annotate_with_plannotate,
     format_sequence_genbank,
 )
-from ..gateway import find_gateway_sites
+from pydna.gateway import find_gateway_sites
 from ..app_settings import settings
 
 router = get_router()

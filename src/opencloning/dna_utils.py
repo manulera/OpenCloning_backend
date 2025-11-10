@@ -4,7 +4,6 @@ Utility functions moved here to avoid circular imports.
 
 from Bio.Seq import reverse_complement
 from pydna.dseqrecord import Dseqrecord
-from pydna.dseq import Dseq
 import tempfile
 import subprocess
 import os
@@ -12,9 +11,6 @@ import shutil
 from pydna.parsers import parse
 from Bio.Align import PairwiseAligner
 from Bio.Data.IUPACData import ambiguous_dna_values as _ambiguous_dna_values
-import re
-from Bio.SeqFeature import Location, SimpleLocation
-from pydna.utils import shift_location
 from pairwise_alignments_to_msa.alignment import aligned_tuples_to_MSA
 
 aligner = PairwiseAligner(scoring='blastn')
@@ -50,31 +46,6 @@ def sum_is_sticky(three_prime_end: tuple[str, str], five_prime_end: tuple[str, s
             return i
     else:
         return 0
-
-
-def get_alignment_shift(alignment: Dseq, shift: int) -> int:
-    """Shift the alignment by the given number of positions, ignoring gap characters (-).
-
-    Parameters
-    ----------
-    alignment : Dseq
-        The alignment sequence that may contain gap characters (-)
-    shift : int
-        Number of positions to shift the sequence by
-
-    """
-
-    nucleotides_shifted = 0
-    positions_shifted = 0
-    corrected_shift = shift if shift >= 0 else len(alignment) + shift
-    alignment_str = str(alignment)
-
-    while nucleotides_shifted != corrected_shift:
-        if alignment_str[positions_shifted] != '-':
-            nucleotides_shifted += 1
-        positions_shifted += 1
-
-    return positions_shifted
 
 
 def align_with_mafft(inputs: list[str], orientation_known: bool) -> list[str]:
@@ -157,31 +128,3 @@ def align_sanger_traces(dseqr: Dseqrecord, sanger_traces: list[str]) -> list[str
         aligned_pairs.append(tuple(formatted_alignment))
 
     return aligned_tuples_to_MSA(aligned_pairs)
-
-
-def compute_regex_site(site: str) -> str:
-    upper_site = site.upper()
-    for k, v in ambiguous_only_dna_values.items():
-        if len(v) > 1:
-            upper_site = upper_site.replace(k, f"[{''.join(v)}]")
-
-    # Make case insensitive
-    upper_site = f'(?i){upper_site}'
-    return upper_site
-
-
-def dseqrecord_finditer(pattern: str, seq: Dseqrecord) -> list[re.Match]:
-    query = str(seq.seq) if not seq.circular else str(seq.seq) * 2
-    matches = re.finditer(pattern, query)
-    return (m for m in matches if m.start() <= len(seq))
-
-
-def create_location(start: int, end: int, lim: int) -> Location:
-    while start < 0:
-        start += lim
-    while end < 0:
-        end += lim
-    if end > start:
-        return SimpleLocation(start, end)
-    else:
-        return shift_location(SimpleLocation(start, end + lim), 0, lim)

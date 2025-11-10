@@ -10,7 +10,9 @@ from itertools import product
 
 from opencloning.dna_functions import format_sequence_genbank
 import opencloning.main as _main
-from opencloning.pydantic_models import PrimerModel, SequenceLocationStr, PrimerDesignQuery
+from opencloning_linkml.datamodel import Primer as PrimerModel
+from opencloning.pydantic_models import PrimerDesignQuery
+from pydna.opencloning_models import SequenceLocationStr
 from opencloning.endpoints.primer_design import (
     PrimerDetailsResponse,
     ThermodynamicResult,
@@ -24,6 +26,8 @@ from opencloning.primer3_functions import (
 
 from pydna.parsers import parse
 from pydna.assembly2 import Assembly, gibson_overlap
+
+from opencloning.temp_functions import primer_model_to_pydna_primer
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
@@ -91,7 +95,7 @@ class PrimerDesignTest(unittest.TestCase):
         # Test an insertion with spacers and reversed insert
         params['homology_length'] = 3
         data['pcr_template']['forward_orientation'] = False
-        data['homologous_recombination_target']['location'] = SequenceLocationStr.from_start_and_end(start=3, end=3)
+        data['homologous_recombination_target']['location'] = SequenceLocationStr.from_start_and_end(3, 3, 1000, None)
         data['spacers'] = ['attt', 'cggg']
         response = client.post('/primer_design/homologous_recombination', json=data, params=params)
         self.assertEqual(response.status_code, 200)
@@ -150,7 +154,7 @@ class PrimerDesignTest(unittest.TestCase):
                 self.assertEqual(p.name, f'seq_{i//2}_rvs')
 
         # Validate that it gives the right result
-        primers = [PrimerModel.model_validate(p).to_pydna_primer() for p in payload['primers']]
+        primers = [primer_model_to_pydna_primer(PrimerModel.model_validate(p)) for p in payload['primers']]
         p1 = pcr(primers[0], primers[1], templates[0])
         p2 = pcr(primers[2], primers[3], templates[1])
         p3 = pcr(primers[4], primers[5], templates[2])
@@ -170,7 +174,7 @@ class PrimerDesignTest(unittest.TestCase):
         payload = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(payload['primers']), 6)
-        payload_primers = [PrimerModel.model_validate(p).to_pydna_primer() for p in payload['primers']]
+        payload_primers = [primer_model_to_pydna_primer(PrimerModel.model_validate(p)) for p in payload['primers']]
         self.assertLess(len(payload_primers[0]), len(primers[0]))
         self.assertLess(len(payload_primers[1]), len(primers[1]))
 
@@ -186,7 +190,7 @@ class PrimerDesignTest(unittest.TestCase):
         for i, t in enumerate(templates):
             t.name = f'template_{i}'
 
-        primers = [PrimerModel.model_validate(p).to_pydna_primer() for p in payload['primers']]
+        primers = [primer_model_to_pydna_primer(PrimerModel.model_validate(p)) for p in payload['primers']]
         p1 = pcr(primers[0], primers[1], templates[0])
         p2 = pcr(primers[2], primers[3], templates[1])
         p3 = pcr(primers[4], primers[5], templates[2])

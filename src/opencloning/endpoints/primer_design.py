@@ -5,7 +5,8 @@ from Bio.Restriction import RestrictionBatch
 from Bio.SeqUtils import gc_fraction
 
 from ..dna_functions import get_invalid_enzyme_names
-from ..pydantic_models import PrimerModel, PrimerDesignQuery
+from opencloning_linkml.datamodel import Primer as PrimerModel
+from opencloning.pydantic_models import PrimerDesignQuery
 from ..dna_functions import read_dsrecord_from_json
 from ..primer_design import (
     homologous_recombination_primers,

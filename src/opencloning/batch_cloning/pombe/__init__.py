@@ -70,8 +70,8 @@ async def post_batch_cloning(
         try:
             pombe_summary(temp_dir)
             pombe_gather(temp_dir)
-        except Exception:
-            raise HTTPException(status_code=400, detail='Summary failed')
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f'Summary failed: {e}')
 
         # zip the temp dir and return it
         zip_filename = f'{temp_dir}_archive'
