@@ -30,7 +30,7 @@ primer3-py = "2.2.0"
 biopython = "^1.85"
 packaging = "^25.0"
 pairwise-alignments-to-msa = "^0.1.1"
-pydna = {git = "https://github.com/pydna-group/pydna", rev = "change-opencloning-linkml-dependency"}
+pydna = {git = "https://github.com/pydna-group/pydna", rev = "1a8319165bff0b24e03eaf2cb459e8962a5f0168"}
 
 [tool.poetry.group.dev.dependencies]
 autopep8 = "^2.0.4"
