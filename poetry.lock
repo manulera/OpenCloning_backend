@@ -1827,7 +1827,7 @@ wheel = "*"
 
 [[package]]
 name = "pydna"
-version = "5.5.4-post.2+411d4049"
+version = "5.5.4-post.3+1a831916"
 description = "Representing double stranded DNA and functions for simulating cloning and homologous recombination between DNA molecules."
 optional = false
 python-versions = ">=3.10,<4.0"
@@ -1860,8 +1860,8 @@ gel = ["matplotlib (>=3.4.3)", "pillow (>=8.4.0)", "scipy (>=1.11.3)", "scipy (>
 [package.source]
 type = "git"
 url = "https://github.com/pydna-group/pydna"
-reference = "change-opencloning-linkml-dependency"
-resolved_reference = "411d40496f41766afcb833fd5b9732ffdf1b813d"
+reference = "1a8319165bff0b24e03eaf2cb459e8962a5f0168"
+resolved_reference = "1a8319165bff0b24e03eaf2cb459e8962a5f0168"
 
 [[package]]
 name = "pyfiglet"
@@ -2802,4 +2802,4 @@ test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "4f2c7da908f345b277373c9fb1eba88f960fa6f24104e62a40e44d3ce9284239"
+content-hash = "9d402e74664510f5d210e4356481cb5fdbe0760c2eacc882ac8357959ee0cc3f"
