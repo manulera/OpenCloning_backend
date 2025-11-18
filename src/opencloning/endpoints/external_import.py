@@ -284,13 +284,16 @@ async def get_from_repository_id_genbank(source: RepositoryIdSource):
 )
 async def get_from_repository_id_addgene(source: AddgeneIdSource):
     try:
-        dseq, out_source = await request_from_addgene(source)
+        dseq = await request_from_addgene(source)
     except HTTPError as exception:
         repository_id_http_error_handler(exception, source)
     except ConnectError:
         raise HTTPException(504, 'unable to connect to Addgene')
 
-    return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [out_source]}
+    return {
+        'sequences': [format_sequence_genbank(dseq, source.output_name)],
+        'sources': [dseq.source],  # TODO: switch to pydna class instead
+    }
 
 
 @router.post(
@@ -301,12 +304,15 @@ async def get_from_repository_id_addgene(source: AddgeneIdSource):
 )
 async def get_from_repository_id_wekwikgene(source: WekWikGeneIdSource):
     try:
-        dseq, out_source = await request_from_wekwikgene(source)
+        dseq = await request_from_wekwikgene(source)
     except HTTPError as exception:
         repository_id_http_error_handler(exception, source)
     except ConnectError:
         raise HTTPException(504, 'unable to connect to WekWikGene')
-    return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [out_source]}
+    return {
+        'sequences': [format_sequence_genbank(dseq, source.output_name)],
+        'sources': [dseq.source],
+    }  # TODO: switch to pydna class instead
 
 
 @router.post(

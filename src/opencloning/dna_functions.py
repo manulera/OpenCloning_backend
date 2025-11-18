@@ -95,7 +95,7 @@ async def get_sequence_from_snapgene_url(url: str) -> Dseqrecord:
     return Dseqrecord(parsed_seq, circular=circularize)
 
 
-async def request_from_addgene(source: AddgeneIdSource) -> tuple[Dseqrecord, AddgeneIdSource]:
+async def request_from_addgene(source: AddgeneIdSource) -> Dseqrecord:
 
     url = f'https://www.addgene.org/{source.repository_id}/sequences/'
     async with get_http_client() as client:
@@ -107,35 +107,21 @@ async def request_from_addgene(source: AddgeneIdSource) -> tuple[Dseqrecord, Add
     # Get a span.material-name from the soup, see https://github.com/manulera/OpenCloning_backend/issues/182
     plasmid_name = soup.find('span', class_='material-name').text.replace(' ', '_')
 
-    if source.sequence_file_url:
-        dseqr = (await get_sequences_from_file_url(source.sequence_file_url))[0]
-        dseqr.name = plasmid_name
-        return dseqr, source
+    sequence_file_url = None
 
-    sequence_file_url_dict = dict()
-    for _type in ['depositor-full', 'depositor-partial', 'addgene-full', 'addgene-partial']:
-        sequence_file_url_dict[_type] = []
-        if soup.find(id=_type) is not None:
-            sequence_file_url_dict[_type] = [
-                a.get('href') for a in soup.find(id=_type).findAll(class_='genbank-file-download')
-            ]
+    # If the sequence file url is provided, use that
+    if source.sequence_file_url is not None:
+        sequence_file_url = source.sequence_file_url
+    else:
+        # Otherwise, find the link to either the addgene-full (preferred) or depositor-full (secondary)
+        for _type in ['depositor-full', 'addgene-full']:
+            if soup.find(id=_type) is not None:
+                sequence_file_url = next(
+                    a.get('href') for a in soup.find(id=_type).findAll(class_='genbank-file-download')
+                )
+                break
 
-    # TODO provide addgene sequencing data supporting the sequence
-    # We prefer to return addgene full if both available
-    products = list()
-    sources = list()
-    for _type in ['addgene-full', 'depositor-full']:
-        if len(sequence_file_url_dict[_type]) > 0:
-            for seq_url in sequence_file_url_dict[_type]:
-                new_source = source.model_copy()
-                new_source.sequence_file_url = seq_url
-                new_source.addgene_sequence_type = _type
-                sources.append(new_source)
-                # There should be only one sequence
-                products.append((await get_sequences_from_file_url(seq_url))[0])
-
-    if len(products) == 0:
-        # They may have only partial sequences
+    if sequence_file_url is None:
         raise HTTPError(
             url,
             404,
@@ -143,14 +129,13 @@ async def request_from_addgene(source: AddgeneIdSource) -> tuple[Dseqrecord, Add
             f'The requested plasmid does not have full sequences, see https://www.addgene.org/{source.repository_id}/sequences/',
             None,
         )
+    dseqr = (await get_sequences_from_file_url(sequence_file_url))[0]
+    dseqr.name = plasmid_name
+    dseqr.source = source
+    return dseqr
 
-    # Rename the plasmid
-    for p in products:
-        p.name = plasmid_name
-    return products[0], sources[0]
 
-
-async def request_from_wekwikgene(source: WekWikGeneIdSource) -> tuple[Dseqrecord, WekWikGeneIdSource]:
+async def request_from_wekwikgene(source: WekWikGeneIdSource) -> Dseqrecord:
     url = f'https://wekwikgene.wllsb.edu.cn/plasmids/{source.repository_id}'
     async with get_http_client() as client:
         resp = await client.get(url)
@@ -163,10 +148,11 @@ async def request_from_wekwikgene(source: WekWikGeneIdSource) -> tuple[Dseqrecor
     seq = (await get_sequences_from_file_url(sequence_file_url, 'snapgene'))[0]
     seq.name = sequence_name
     source.sequence_file_url = sequence_file_url
-    return seq, source
+    seq.source = source
+    return seq
 
 
-async def get_seva_plasmid(source: SEVASource) -> tuple[Dseqrecord, SEVASource]:
+async def get_seva_plasmid(source: SEVASource) -> Dseqrecord:
     if 'ncbi.nlm.nih.gov/nuccore' in source.sequence_file_url:
         genbank_id = source.sequence_file_url.split('/')[-1]
         seq = await get_genbank_sequence(genbank_id)
@@ -180,7 +166,8 @@ async def get_seva_plasmid(source: SEVASource) -> tuple[Dseqrecord, SEVASource]:
         raise HTTPError(source.sequence_file_url, 404, 'invalid SEVA url', 'invalid SEVA url', None)
     if not seq.circular:
         seq = seq.looped()
-    return seq, source
+    seq.source = source
+    return seq
 
 
 def correct_name(dseq: Dseqrecord):
