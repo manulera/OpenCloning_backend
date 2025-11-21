@@ -13,9 +13,9 @@ Read [main project readme](https://github.com/manulera/OpenCloning) first.
 
 This API provides a series of entry points. The API documentation can be accessed [here](https://api.opencloning.org/docs). You can use the documentation page to try some request directly on the browser. Otherwise, the API is open for you to make requests from a python script or command line at: [https://api.opencloning.org/](https://api.opencloning.org/).
 
-## Scripting
+## Scripting with pydna
 
-The API functions can also be used to write python scripts to automate cloning. See the [scripting examples](examples/scripting) for more information.
+You can write python scripts to automate cloning using the python library [pydna](https://github.com/pydna-group/pydna), which is now integrated with the OpenCloning data model. See [the documentation](https://github.com/pydna-group/pydna/blob/master/docs/notebooks/history.ipynb) for how to get started.
 
 ## Migrating between model versions and fixing model bugs
 
