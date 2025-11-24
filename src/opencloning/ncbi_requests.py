@@ -123,9 +123,9 @@ async def get_genbank_sequence(sequence_accession, start=None, end=None, strand=
     elif resp.status_code == 400:
         raise HTTPException(404, 'wrong sequence accession')
     elif resp.status_code == 503:
-        raise HTTPException(503, 'NCBI returned an error')
+        raise HTTPException(503, 'NCBI returned an internal server error')
     else:
-        raise HTTPException(500, 'NCBI returned an unexpected error')
+        raise HTTPException(503, 'NCBI returned an unexpected error')
 
 
 def validate_coordinates_pre_request(start, end, strand):
