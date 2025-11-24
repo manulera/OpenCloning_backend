@@ -30,6 +30,7 @@ if PLANNOTATE_URL is not None and not PLANNOTATE_URL.endswith('/'):
 
 PROXY_URL = os.environ.get('PROXY_URL')
 PROXY_CERT_FILE = os.environ.get('PROXY_CERT_FILE')
+ADDGENE_TOKEN = os.environ.get('ADDGENE_TOKEN')
 
 # Allowed external URLs ===========================================
 default_allowed_urls = [
@@ -45,6 +46,7 @@ default_allowed_urls = [
     'https://wekwikgene.wllsb.edu.cn',
     'http://bahlerweb.cs.ucl.ac.uk',
     'https://assets.opencloning.org/open-dna-collections',
+    'https://api.developers.addgene.org/',
 ]
 
 if os.environ.get('ALLOWED_EXTERNAL_URLS') is not None:
@@ -66,6 +68,7 @@ class Settings(BaseModel):
     PROXY_CERT_FILE: str | None
     # Allowed external URLs
     ALLOWED_EXTERNAL_URLS: list[str]
+    ADDGENE_TOKEN: str | None
 
 
 settings = Settings(
@@ -79,4 +82,5 @@ settings = Settings(
     PROXY_URL=PROXY_URL,
     PROXY_CERT_FILE=PROXY_CERT_FILE,
     ALLOWED_EXTERNAL_URLS=ALLOWED_EXTERNAL_URLS,
+    ADDGENE_TOKEN=ADDGENE_TOKEN,
 )
