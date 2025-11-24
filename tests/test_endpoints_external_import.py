@@ -945,7 +945,7 @@ class GenomeRegionTest(unittest.TestCase):
                 'https://api.ncbi.nlm.nih.gov/datasets/v2alpha/genome/accession/GCF_000002945.2/annotation_report'
             ).mock(return_value=httpx.Response(500, text='NCBI is down'))
             response = client.post('/genome_coordinates', json=correct_source.model_dump())
-            self.assertEqual(response.status_code, 500)
+            self.assertEqual(response.status_code, 503)
             self.assertIn('NCBI is down', response.json()['detail'])
 
 
