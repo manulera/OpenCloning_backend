@@ -83,7 +83,7 @@ docker run -d --name backendcontainer -p 8000:8000 manulera/opencloningbackend
 
 ```
 
-If you don't want to download the repository and build the image, you can fetch the latest image from dockerhub (same image that is used in [https://api.opencloning.org/](https://api.opencloning.org/))
+If you don't want to download the repository and build the image, you can fetch the latest image from dockerhub.
 
 ```bash
 docker pull manulera/opencloningbackend
