@@ -23,6 +23,12 @@ class NcbiAsyncRequestsTest(unittest.IsolatedAsyncioTestCase):
         with pytest.raises(HTTPException) as e:
             await ncbi_requests.get_genbank_sequence('blah', 1, 10, 1)
         assert e.value.status_code == 500
+        assert e.value.detail == 'NCBI is down, try again later'
+
+        respx.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi').respond(504, text='')
+        with pytest.raises(HTTPException) as e:
+            await ncbi_requests.get_genbank_sequence('blah', 1, 10, 1)
+        assert e.value.status_code == 500
         assert e.value.detail == 'NCBI returned an unexpected error'
 
     async def test_get_annotations_from_query(self):
