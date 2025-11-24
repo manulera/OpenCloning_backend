@@ -9,7 +9,10 @@ headers = None if settings.NCBI_API_KEY is None else {'api_key': settings.NCBI_A
 
 async def async_get(url, headers, params=None) -> Response:
     async with get_http_client() as client:
-        return await client.get(url, headers=headers, params=params, timeout=20.0)
+        resp = await client.get(url, headers=headers, params=params, timeout=20.0)
+        if resp.status_code == 500:
+            raise HTTPException(503, 'NCBI is down, try again later')
+        return resp
 
 
 # TODO: this does not return old assembly accessions, see https://github.com/ncbi/datasets/issues/380#issuecomment-2231142816
@@ -120,9 +123,9 @@ async def get_genbank_sequence(sequence_accession, start=None, end=None, strand=
     elif resp.status_code == 400:
         raise HTTPException(404, 'wrong sequence accession')
     elif resp.status_code == 503:
-        raise HTTPException(503, 'NCBI returned an error')
+        raise HTTPException(503, 'NCBI returned an internal server error')
     else:
-        raise HTTPException(500, 'NCBI returned an unexpected error')
+        raise HTTPException(503, 'NCBI returned an unexpected error')
 
 
 def validate_coordinates_pre_request(start, end, strand):

@@ -936,6 +936,18 @@ class GenomeRegionTest(unittest.TestCase):
         response = client.post('/genome_coordinates', json=viral_source.model_dump())
         self.assertStatusCode(response.status_code, 400)
 
+    def test_ncbi_down(self):
+        correct_source = GenomeCoordinatesSource.model_validate(
+            request_examples.genome_region_examples['full']['value']
+        )
+        with respx.mock:
+            respx.get(
+                'https://api.ncbi.nlm.nih.gov/datasets/v2alpha/genome/accession/GCF_000002945.2/annotation_report'
+            ).mock(return_value=httpx.Response(500, text='NCBI is down'))
+            response = client.post('/genome_coordinates', json=correct_source.model_dump())
+            self.assertEqual(response.status_code, 503)
+            self.assertIn('NCBI is down', response.json()['detail'])
+
 
 class SEVASourceTest(unittest.TestCase):
     def test_seva_url(self):
