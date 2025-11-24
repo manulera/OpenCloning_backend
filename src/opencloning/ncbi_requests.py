@@ -9,7 +9,10 @@ headers = None if settings.NCBI_API_KEY is None else {'api_key': settings.NCBI_A
 
 async def async_get(url, headers, params=None) -> Response:
     async with get_http_client() as client:
-        return await client.get(url, headers=headers, params=params, timeout=20.0)
+        resp = await client.get(url, headers=headers, params=params, timeout=20.0)
+        if resp.status_code == 500:
+            raise HTTPException(500, 'NCBI is down, try again later')
+        return resp
 
 
 # TODO: this does not return old assembly accessions, see https://github.com/ncbi/datasets/issues/380#issuecomment-2231142816
