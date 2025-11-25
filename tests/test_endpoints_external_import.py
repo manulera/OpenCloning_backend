@@ -503,9 +503,7 @@ class AddgeneTest(unittest.TestCase):
             sequence_file_url='https://media.addgene.org/snapgene-media/wrongggggggg.gbk',
         )
         response = client.post('/repository_id/addgene', json=source.model_dump())
-        self.assertEqual(response.status_code, 404)
-
-        # TODO url exists but does not match id, or does not match
+        self.assertEqual(response.status_code, 400)
 
     def test_redirect(self):
         """Test repository_id endpoint should redirect based on repository_name value"""

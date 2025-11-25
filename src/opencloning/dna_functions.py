@@ -6,11 +6,11 @@ from pydna.dseq import Dseq
 from opencloning_linkml.datamodel import (
     PlannotateAnnotationReport,
     TextFileSequence,
-    AddgeneIdSource,
     SequenceFileFormat,
     WekWikGeneIdSource,
     SEVASource,
 )
+from pydna.opencloning_models import AddgeneIdSource
 from pydna.parsers import parse as pydna_parse
 from bs4 import BeautifulSoup
 from pydna.common_sub_strings import common_sub_strings
@@ -95,9 +95,9 @@ async def get_sequence_from_snapgene_url(url: str) -> Dseqrecord:
     return Dseqrecord(parsed_seq, circular=circularize)
 
 
-async def request_from_addgene(source: AddgeneIdSource) -> Dseqrecord:
+async def request_from_addgene(repository_id: str) -> Dseqrecord:
 
-    url = f'https://www.addgene.org/{source.repository_id}/sequences/'
+    url = f'https://www.addgene.org/{repository_id}/sequences/'
     async with get_http_client() as client:
         resp = await client.get(url)
     if resp.status_code == 404:
@@ -107,31 +107,28 @@ async def request_from_addgene(source: AddgeneIdSource) -> Dseqrecord:
     # Get a span.material-name from the soup, see https://github.com/manulera/OpenCloning_backend/issues/182
     plasmid_name = soup.find('span', class_='material-name').text.replace(' ', '_')
 
-    sequence_file_url = None
-
-    # If the sequence file url is provided, use that
-    if source.sequence_file_url is not None:
-        sequence_file_url = source.sequence_file_url
+    # Find the link to either the addgene-full (preferred) or depositor-full (secondary)
+    for addgene_sequence_type in ['depositor-full', 'addgene-full']:
+        if soup.find(id=addgene_sequence_type) is not None:
+            sequence_file_url = next(
+                a.get('href') for a in soup.find(id=addgene_sequence_type).findAll(class_='genbank-file-download')
+            )
+            break
     else:
-        # Otherwise, find the link to either the addgene-full (preferred) or depositor-full (secondary)
-        for _type in ['depositor-full', 'addgene-full']:
-            if soup.find(id=_type) is not None:
-                sequence_file_url = next(
-                    a.get('href') for a in soup.find(id=_type).findAll(class_='genbank-file-download')
-                )
-                break
-
-    if sequence_file_url is None:
         raise HTTPError(
             url,
             404,
-            f'The requested plasmid does not have full sequences, see https://www.addgene.org/{source.repository_id}/sequences/',
-            f'The requested plasmid does not have full sequences, see https://www.addgene.org/{source.repository_id}/sequences/',
+            f'The requested plasmid does not have full sequences, see https://www.addgene.org/{repository_id}/sequences/',
+            f'The requested plasmid does not have full sequences, see https://www.addgene.org/{repository_id}/sequences/',
             None,
         )
     dseqr = (await get_sequences_from_file_url(sequence_file_url))[0]
     dseqr.name = plasmid_name
-    dseqr.source = source
+    dseqr.source = AddgeneIdSource(
+        repository_id=repository_id,
+        sequence_file_url=sequence_file_url,
+        addgene_sequence_type=addgene_sequence_type,
+    )
     return dseqr
 
 

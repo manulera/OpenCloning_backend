@@ -9,6 +9,8 @@ from typing import Annotated
 from urllib.error import HTTPError
 from pydna.utils import location_boundaries
 
+from opencloning.endpoints.endpoint_utils import format_products
+
 from ..get_router import get_router
 from opencloning_linkml.datamodel import (
     TextFileSequence,
@@ -284,16 +286,24 @@ async def get_from_repository_id_genbank(source: RepositoryIdSource):
 )
 async def get_from_repository_id_addgene(source: AddgeneIdSource):
     try:
-        dseq = await request_from_addgene(source)
+        dseq = await request_from_addgene(source.repository_id)
     except HTTPError as exception:
         repository_id_http_error_handler(exception, source)
     except ConnectError:
         raise HTTPException(504, 'unable to connect to Addgene')
 
-    return {
-        'sequences': [format_sequence_genbank(dseq, source.output_name)],
-        'sources': [dseq.source],  # TODO: switch to pydna class instead
-    }
+    return format_products(
+        [dseq],
+        source if source.sequence_file_url is not None else None,
+        source.output_name,
+        wrong_completed_source_error_message=f'''
+        The provided source is not valid.
+        We found the following:
+          - repository_id: {dseq.source.repository_id}
+          - sequence_file_url: {dseq.source.sequence_file_url}
+          - addgene_sequence_type: {dseq.source.addgene_sequence_type}
+        ''',
+    )
 
 
 @router.post(
