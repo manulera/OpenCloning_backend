@@ -1,28 +1,27 @@
-import asyncio
 from .app_settings import settings
 from .http_client import get_http_client
+from pydna.dseqrecord import Dseqrecord
+from .dna_functions import request_from_addgene
+from opencloning_linkml.datamodel import AddgeneIdSource
 
 
-async def get_plasmid_list(name: str) -> str:
+async def get_plasmid_catalog(name: str) -> str:
     async with get_http_client() as client:
-        resp = await client.get(
+        return client.get(
             'https://api.developers.addgene.org/catalog/plasmid/',
             headers={'Authorization': f'Token {settings.ADDGENE_TOKEN}'},
             params={'name': name},
         )
-    # with open('plasmid_list.json', 'w') as f:
-    #     json.dump(resp.json(), f, indent=4)
-
-    # print(resp.json()['results'][0]['id'])
-    plasmid_id = resp.json()['results'][0]['id']
-    async with get_http_client() as client:
-        resp = await client.get(
-            f'https://api.developers.addgene.org/catalog/plasmid-with-sequences/{plasmid_id}/',
-            headers={'Authorization': f'Token {settings.ADDGENE_TOKEN}'},
-        )
-    # with open('plasmid_details.json', 'w') as f:
-    #     json.dump(resp.json(), f, indent=4)
 
 
-if __name__ == '__main__':
-    asyncio.run(get_plasmid_list('pfa6a GFP'))
+async def get_plasmid(source: AddgeneIdSource) -> tuple[Dseqrecord, AddgeneIdSource]:
+    # TODO replace with a call to the addgene api
+    # async with get_http_client() as client:
+    #     resp = await client.get(
+    #         f'https://api.developers.addgene.org/catalog/plasmid-with-sequences/{plasmid_id}/',
+    #         headers={'Authorization': f'Token {settings.ADDGENE_TOKEN}'},
+    #     )
+    return await request_from_addgene(source)
+
+
+get_plasmid_catalog('pfa6a gfp kan')
