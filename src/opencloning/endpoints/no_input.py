@@ -1,19 +1,21 @@
 from fastapi import Query, HTTPException
 from pydna.dseqrecord import Dseqrecord
 from pydna.dseq import Dseq
+from pydna.primer import Primer as PydnaPrimer
+from pydna.oligonucleotide_hybridization import oligonucleotide_hybridization as _oligonucleotide_hybridization
 from pydantic import create_model, Field
 from typing import Annotated
 
+from opencloning.endpoints.endpoint_utils import format_products
+
 from ..dna_functions import (
     format_sequence_genbank,
-    oligonucleotide_hybridization_overhangs,
 )
 from opencloning_linkml.datamodel import (
     Primer as PrimerModel,
     TextFileSequence,
     ManuallyTypedSource,
     OligoHybridizationSource,
-    SourceInput,
 )
 
 from .. import request_examples
@@ -62,57 +64,39 @@ async def oligonucleotide_hybridization(
     primers: Annotated[list[PrimerModel], Field(min_length=1, max_length=2)],
     minimal_annealing: int = Query(20, description='The minimal annealing length for each primer.'),
 ):
-    if len(source.input):
-        watson_seq = next((p.sequence for p in primers if p.id == source.input[0].sequence), None)
-        crick_seq = next((p.sequence for p in primers if p.id == source.input[1].sequence), None)
-    else:
-        watson_seq = primers[0].sequence
-        crick_seq = primers[1].sequence if len(primers) > 1 else watson_seq
-        source.input = [SourceInput(sequence=primers[0].id), SourceInput(sequence=primers[1].id)]
 
-    if watson_seq is None or crick_seq is None:
+    if len(source.input):
+        fwd_primer = next((p for p in primers if p.id == source.input[0].sequence), None)
+        rvs_primer = next((p for p in primers if p.id == source.input[1].sequence), None)
+    else:
+        fwd_primer = primers[0]
+        rvs_primer = primers[1] if len(primers) > 1 else fwd_primer
+
+    if fwd_primer is None or rvs_primer is None:
         raise HTTPException(404, 'Invalid oligo id.')
 
-    # The overhang is provided
+    fwd_primer = PydnaPrimer(fwd_primer.sequence, id=str(fwd_primer.id), name=fwd_primer.name)
+    rvs_primer = PydnaPrimer(rvs_primer.sequence, id=str(rvs_primer.id), name=rvs_primer.name)
+
+    # If the overhang is provided, the minimal annealing is set from that
     if source.overhang_crick_3prime is not None:
-        ovhg_watson = len(watson_seq) - len(crick_seq) + source.overhang_crick_3prime
-        minimal_annealing = len(watson_seq)
+        ovhg_watson = len(fwd_primer.seq) - len(rvs_primer.seq) + source.overhang_crick_3prime
+        minimal_annealing = len(fwd_primer.seq)
         if source.overhang_crick_3prime < 0:
             minimal_annealing += source.overhang_crick_3prime
         if ovhg_watson > 0:
             minimal_annealing -= ovhg_watson
 
     try:
-        possible_overhangs = oligonucleotide_hybridization_overhangs(watson_seq, crick_seq, minimal_annealing)
+        dseqs = _oligonucleotide_hybridization(fwd_primer, rvs_primer, minimal_annealing)
     except ValueError as e:
         raise HTTPException(400, *e.args)
 
-    if len(possible_overhangs) == 0:
-        raise HTTPException(400, 'No pair of annealing oligos was found. Try changing the annealing settings.')
-
-    if source.overhang_crick_3prime is not None:
-        if source.overhang_crick_3prime not in possible_overhangs:
-            raise HTTPException(400, 'The provided overhang is not compatible with the primers.')
-
-        return {
-            'sources': [source],
-            'sequences': [
-                format_sequence_genbank(
-                    Dseqrecord(Dseq(watson_seq, crick_seq, source.overhang_crick_3prime)), source.output_name
-                )
-            ],
-        }
-
-    out_sources = list()
-    out_sequences = list()
-    for overhang in possible_overhangs:
-        new_source = source.model_copy()
-        new_source.overhang_crick_3prime = overhang
-        out_sources.append(new_source)
-        out_sequences.append(
-            format_sequence_genbank(
-                Dseqrecord(Dseq(watson_seq, crick_seq, new_source.overhang_crick_3prime)), source.output_name
-            )
-        )
-
-    return {'sources': out_sources, 'sequences': out_sequences}
+    return format_products(
+        source.id,
+        dseqs,
+        source if source.overhang_crick_3prime is not None else None,
+        source.output_name,
+        no_products_error_message='No pair of annealing oligos was found. Try changing the annealing settings.',
+        wrong_completed_source_error_message='The provided source is not valid.',
+    )

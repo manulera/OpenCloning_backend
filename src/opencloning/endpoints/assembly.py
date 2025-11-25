@@ -80,6 +80,7 @@ async def crispr(
         raise HTTPException(400, *e.args)
 
     return format_products(
+        source.id,
         products,
         completed_source,
         source.output_name,
@@ -118,7 +119,7 @@ async def ligation(
         raise HTTPException(400, *e.args)
 
     return format_products(
-        products, completed_source, source.output_name, no_products_error_message='No ligations were found.'
+        source.id, products, completed_source, source.output_name, no_products_error_message='No ligations were found.'
     )
 
 
@@ -170,6 +171,7 @@ async def pcr(
         raise HTTPException(400, *e.args)
 
     return format_products(
+        source.id,
         products,
         completed_source,
         source.output_name,
@@ -207,6 +209,7 @@ async def homologous_recombination(
         raise HTTPException(400, *e.args)
 
     return format_products(
+        source.id,
         products,
         completed_source,
         source.output_name,
@@ -255,6 +258,7 @@ async def gibson_assembly(
         raise HTTPException(400, *e.args)
 
     return format_products(
+        source.id,
         products,
         completed_source,
         source.output_name,
@@ -290,6 +294,7 @@ async def restriction_and_ligation(
         raise HTTPException(400, *e.args)
 
     return format_products(
+        source.id,
         products,
         completed_source,
         source.output_name,
@@ -323,6 +328,7 @@ async def gateway(
     products = [annotate_gateway_sites(p, source.greedy) for p in products]
 
     return format_products(
+        source.id,
         products,
         completed_source,
         source.output_name,
@@ -356,6 +362,7 @@ async def cre_lox_recombination(
     products = [annotate_loxP_sites(p) for p in products]
 
     return format_products(
+        source.id,
         products,
         completed_source,
         source.output_name,

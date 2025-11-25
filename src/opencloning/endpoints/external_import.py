@@ -293,6 +293,7 @@ async def get_from_repository_id_addgene(source: AddgeneIdSource):
         raise HTTPException(504, 'unable to connect to Addgene')
 
     return format_products(
+        source.id,
         [dseq],
         source if source.sequence_file_url is not None else None,
         source.output_name,
