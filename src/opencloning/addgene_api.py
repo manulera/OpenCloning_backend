@@ -1,3 +1,4 @@
+import asyncio
 from .app_settings import settings
 from .http_client import get_http_client
 from pydna.dseqrecord import Dseqrecord
@@ -7,11 +8,12 @@ from opencloning_linkml.datamodel import AddgeneIdSource
 
 async def get_plasmid_catalog(name: str) -> str:
     async with get_http_client() as client:
-        return client.get(
+        resp = await client.get(
             'https://api.developers.addgene.org/catalog/plasmid/',
             headers={'Authorization': f'Token {settings.ADDGENE_TOKEN}'},
             params={'name': name},
         )
+    return resp.json()
 
 
 async def get_plasmid(source: AddgeneIdSource) -> tuple[Dseqrecord, AddgeneIdSource]:
@@ -24,4 +26,6 @@ async def get_plasmid(source: AddgeneIdSource) -> tuple[Dseqrecord, AddgeneIdSou
     return await request_from_addgene(source)
 
 
-get_plasmid_catalog('pfa6a gfp kan')
+with open('addgene_api.json', 'w') as f:
+    for plasmid in asyncio.run(get_plasmid_catalog('pfa6a-gfp-kan'))['results']:
+        print(plasmid['name'])
