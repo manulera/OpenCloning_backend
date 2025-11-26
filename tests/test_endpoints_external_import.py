@@ -965,6 +965,15 @@ class SEVASourceTest(unittest.TestCase):
         seq = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
         self.assertEqual(seq.name, 'pSEVA261')
 
+        # Also works with missing link in data.js - see catalog script - (e.g. pSEVA2a2d1)
+        source = SEVASource(
+            id=0,
+            repository_id='pSEVA2a2d1',
+            repository_name='seva',
+        )
+        response = client.post('/repository_id/seva', json=source.model_dump())
+        self.assertEqual(response.status_code, 200)
+
     def test_ncbi_url(self):
         source = SEVASource(
             id=0,
