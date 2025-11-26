@@ -8,14 +8,14 @@ from opencloning_linkml.datamodel import (
     TextFileSequence,
     SequenceFileFormat,
     WekWikGeneIdSource,
-    SEVASource,
 )
-from pydna.opencloning_models import AddgeneIdSource
+from pydna.opencloning_models import AddgeneIdSource, SEVASource
 from pydna.parsers import parse as pydna_parse
 from bs4 import BeautifulSoup
 from pydna.common_sub_strings import common_sub_strings
 from Bio.SeqIO import parse as seqio_parse
 import io
+import os
 import warnings
 from Bio.SeqIO.InsdcIO import GenBankScanner, GenBankIterator
 import re
@@ -149,21 +149,36 @@ async def request_from_wekwikgene(source: WekWikGeneIdSource) -> Dseqrecord:
     return seq
 
 
-async def get_seva_plasmid(source: SEVASource) -> Dseqrecord:
-    if 'ncbi.nlm.nih.gov/nuccore' in source.sequence_file_url:
-        genbank_id = source.sequence_file_url.split('/')[-1]
-        seq = await get_genbank_sequence(genbank_id)
-        seq.name = source.repository_id
-    elif source.sequence_file_url.startswith('https://seva-plasmids.com'):
-        seq_list = await get_sequences_from_file_url(source.sequence_file_url)
-        if len(seq_list) == 0:
-            raise ValueError('No sequences found in SEVA file')
-        seq = seq_list[0]
+def get_seva_catalog():
+    seva_catalog_path = os.path.join(os.path.dirname(__file__), 'catalogs', 'seva.tsv')
+    seva_catalog = dict()
+    with open(seva_catalog_path, 'r') as f:
+        for line in f:
+            name, genbank_link = line.strip().split('\t')
+            seva_catalog[name] = genbank_link
+    return seva_catalog
+
+
+seva_catalog = get_seva_catalog()
+
+
+async def get_seva_plasmid(repository_id: str) -> Dseqrecord:
+    if repository_id not in seva_catalog:
+        raise HTTPError(repository_id, 404, 'invalid SEVA id', 'invalid SEVA id', None)
+    link = seva_catalog[repository_id]
+    if 'http' not in link:
+        seq = await get_genbank_sequence(link)
     else:
-        raise HTTPError(source.sequence_file_url, 404, 'invalid SEVA url', 'invalid SEVA url', None)
+        seqs = await get_sequences_from_file_url(link)
+        if len(seqs) == 0:
+            raise ValueError('No sequences found in SEVA file')
+        seq = seqs[0]
+
     if not seq.circular:
         seq = seq.looped()
-    seq.source = source
+    seq.name = repository_id
+    sequence_file_url = link if 'http' in link else f'https://www.ncbi.nlm.nih.gov/nuccore/{link}'
+    seq.source = SEVASource(repository_id=repository_id, sequence_file_url=sequence_file_url)
     return seq
 
 

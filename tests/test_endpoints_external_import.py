@@ -987,11 +987,13 @@ class SEVASourceTest(unittest.TestCase):
             id=0,
             repository_id='pSEVA261',
             repository_name='seva',
-            sequence_file_url='https://seva-plasmids.com/dummy.gbk',
+            sequence_file_url='https://seva-plasmids.com/maps-canonical/maps-plasmids-SEVAs-canonical-versions-web-1-3-gbk/pSEVA261.gbk',
         )
 
-        response = client.post('/repository_id/seva', json=source.model_dump())
-        self.assertEqual(response.status_code, 404)
+        source_dict = source.model_dump()
+        source_dict['sequence_file_url'] = 'https://seva-plasmids.com/dummy.gbk'
+        response = client.post('/repository_id/seva', json=source_dict)
+        self.assertEqual(response.status_code, 400)
 
         source_dict = source.model_dump()
         source_dict['repository_id'] = 'hello'
@@ -1006,13 +1008,21 @@ class SEVASourceTest(unittest.TestCase):
         source_dict = source.model_dump()
         source_dict['sequence_file_url'] = 'https://hello.com'
         response = client.post('/repository_id/seva', json=source_dict)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
         payload = response.json()
-        self.assertIn('invalid SEVA url', payload['detail'])
+        self.assertIn('The provided source is not valid.', payload['detail'])
+        self.assertIn('repository_id: pSEVA261', payload['detail'])
+        self.assertIn(
+            f'sequence_file_url: {source.sequence_file_url}',
+            payload['detail'],
+        )
 
         # Mock connection error
+
+        source = SEVASource(id=0, repository_id='pSEVA261', repository_name='seva')
+
         with respx.mock:
-            respx.get('https://seva-plasmids.com/dummy.gbk').mock(side_effect=httpx.ConnectError)
+            respx.get(source.sequence_file_url).mock(side_effect=httpx.ConnectError)
             response = client.post('/repository_id/seva', json=source.model_dump())
             self.assertEqual(response.status_code, 504)
             payload = response.json()
@@ -1020,7 +1030,7 @@ class SEVASourceTest(unittest.TestCase):
 
         # Mock incorrect file
         with respx.mock:
-            respx.get('https://seva-plasmids.com/dummy.gbk').mock(return_value=httpx.Response(200, text='dummy test'))
+            respx.get(source.sequence_file_url).mock(return_value=httpx.Response(200, text='dummy test'))
             response = client.post('/repository_id/seva', json=source.model_dump())
             self.assertEqual(response.status_code, 400)
             payload = response.json()
@@ -1030,7 +1040,7 @@ class SEVASourceTest(unittest.TestCase):
         with respx.mock:
             with open(f'{test_files}/ase1_body_error.gb', 'r') as f:
                 mock_seq = f.read()
-            respx.get('https://seva-plasmids.com/dummy.gbk').mock(return_value=httpx.Response(200, text=mock_seq))
+            respx.get(source.sequence_file_url).mock(return_value=httpx.Response(200, text=mock_seq))
             response = client.post('/repository_id/seva', json=source.model_dump())
             self.assertEqual(response.status_code, 400)
             payload = response.json()
