@@ -8,6 +8,7 @@ from opencloning_linkml.datamodel import (
     TextFileSequence,
     SequenceFileFormat,
     WekWikGeneIdSource,
+    SnapGenePlasmidSource,
 )
 from pydna.opencloning_models import AddgeneIdSource, SEVASource
 from pydna.parsers import parse as pydna_parse
@@ -15,10 +16,11 @@ from bs4 import BeautifulSoup
 from pydna.common_sub_strings import common_sub_strings
 from Bio.SeqIO import parse as seqio_parse
 import io
-import os
 import warnings
 from Bio.SeqIO.InsdcIO import GenBankScanner, GenBankIterator
 import re
+
+from opencloning.catalogs import seva_catalog, snapgene_catalog
 from .http_client import get_http_client, ConnectError, TimeoutException
 from .ncbi_requests import get_genbank_sequence
 
@@ -84,15 +86,18 @@ async def get_sequences_from_file_url(
         return custom_file_parser(io.StringIO(resp.text), format)
 
 
-async def get_sequence_from_snapgene_url(url: str) -> Dseqrecord:
-    async with get_http_client() as client:
-        resp = await client.get(url)
-    # Check that resp.content is not empty
-    if len(resp.content) == 0:
-        raise HTTPError(url, 404, 'invalid snapgene id', 'invalid snapgene id', None)
-    parsed_seq = next(seqio_parse(io.BytesIO(resp.content), 'snapgene'))
-    circularize = 'topology' in parsed_seq.annotations.keys() and parsed_seq.annotations['topology'] == 'circular'
-    return Dseqrecord(parsed_seq, circular=circularize)
+async def request_from_snapgene(plasmid_set: dict, plasmid_name: str) -> Dseqrecord:
+    if plasmid_set not in snapgene_catalog:
+        raise HTTPError(plasmid_set, 404, 'invalid plasmid set', 'invalid plasmid set', None)
+    if plasmid_name not in snapgene_catalog[plasmid_set]:
+        raise HTTPError(plasmid_name, 404, 'invalid plasmid name', 'invalid plasmid name', None)
+    url = f'https://www.snapgene.com/local/fetch.php?set={plasmid_set}&plasmid={plasmid_name}'
+    seqs = await get_sequences_from_file_url(url, SequenceFileFormat('snapgene'))
+    if len(seqs) == 0:
+        raise ValueError('No sequences found in SnapGene file')
+    seq = seqs[0]
+    seq.source = SnapGenePlasmidSource(repository_id=f'{plasmid_set}/{plasmid_name}')
+    return seq
 
 
 async def request_from_addgene(repository_id: str) -> Dseqrecord:
@@ -147,19 +152,6 @@ async def request_from_wekwikgene(source: WekWikGeneIdSource) -> Dseqrecord:
     source.sequence_file_url = sequence_file_url
     seq.source = source
     return seq
-
-
-def get_seva_catalog():
-    seva_catalog_path = os.path.join(os.path.dirname(__file__), 'catalogs', 'seva.tsv')
-    seva_catalog = dict()
-    with open(seva_catalog_path, 'r') as f:
-        for line in f:
-            name, genbank_link = line.strip().split('\t')
-            seva_catalog[name] = genbank_link
-    return seva_catalog
-
-
-seva_catalog = get_seva_catalog()
 
 
 async def get_seva_plasmid(repository_id: str) -> Dseqrecord:

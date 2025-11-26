@@ -31,9 +31,9 @@ from pydna.opencloning_models import SequenceLocationStr
 from ..dna_functions import (
     format_sequence_genbank,
     request_from_addgene,
+    request_from_snapgene,
     request_from_wekwikgene,
     get_sequences_from_file_url,
-    get_sequence_from_snapgene_url,
     custom_file_parser,
     get_sequence_from_euroscarf_url,
     get_seva_plasmid,
@@ -356,15 +356,8 @@ async def get_from_repository_id_snapgene(
 ):
     try:
         plasmid_set, plasmid_name = source.repository_id.split('/')
-        url = f'https://www.snapgene.com/local/fetch.php?set={plasmid_set}&plasmid={plasmid_name}'
-        dseq = await get_sequence_from_snapgene_url(url)
-        # Unless a name is provided, we use the plasmid name from snapgene
-        if source.output_name is None:
-            source.output_name = plasmid_name
-        return {
-            'sequences': [format_sequence_genbank(dseq, source.output_name)],
-            'sources': [source],
-        }
+        seq = await request_from_snapgene(plasmid_set, plasmid_name)
+        return format_products(source.id, [seq], None, source.output_name)
     except HTTPError as exception:
         repository_id_http_error_handler(exception, source)
 

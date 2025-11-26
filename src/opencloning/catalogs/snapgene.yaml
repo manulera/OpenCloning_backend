@@ -1,0 +1,5693 @@
+basic_cloning_vectors:
+  name: Basic Cloning Vectors
+  plasmids:
+  - name: BlueScribe
+    subpath: BlueScribe
+  - name: CAG promoter
+    subpath: CAG_promoter
+  - name: chicken beta-actin promoter
+    subpath: chicken_beta-actin_promoter
+  - name: CLIP-tag
+    subpath: CLIP-tag
+  - name: CMV promoter
+    subpath: CMV_promoter
+  - name: GAL1 promoter
+    subpath: GAL1_promoter
+  - name: GST
+    subpath: GST
+  - name: HaloTag
+    subpath: HaloTag
+  - name: HSV TK promoter
+    subpath: HSV_TK_promoter
+  - name: lac operator
+    subpath: lac_operator
+  - name: lac promoter
+    subpath: lac_promoter
+  - name: lac UV5 promoter
+    subpath: lac_UV5_promoter
+  - name: lacZ
+    subpath: lacZ
+  - name: lambda
+    subpath: lambda
+  - name: LITMUS28
+    subpath: LITMUS28
+  - name: LITMUS28i
+    subpath: LITMUS28i
+  - name: LITMUS29
+    subpath: LITMUS29
+  - name: LITMUS38
+    subpath: LITMUS38
+  - name: LITMUS38i
+    subpath: LITMUS38i
+  - name: LITMUS39
+    subpath: LITMUS39
+  - name: M13mp18
+    subpath: M13mp18
+  - name: M13mp19
+    subpath: M13mp19
+  - name: MBP
+    subpath: MBP
+  - name: pACYC177
+    subpath: pACYC177
+  - name: pACYC184
+    subpath: pACYC184
+  - name: pAN7-1
+    subpath: pAN7-1
+  - name: pANT7_cGST
+    subpath: pANT7_cGST
+  - name: pANT7_nHA
+    subpath: pANT7_nHA
+  - name: pAUR316
+    subpath: pAUR316
+  - name: pBC KS(+)
+    subpath: pBC_KS(%2B)
+  - name: pBC KS(-)
+    subpath: pBC_KS(-)
+  - name: pBC SK(+)
+    subpath: pBC_SK(%2B)
+  - name: pBC SK(-)
+    subpath: pBC_SK(-)
+  - name: pBeloBAC11
+    subpath: pBeloBAC11
+  - name: pBluescript II KS(+)
+    subpath: pBluescript_II_KS(%2B)
+  - name: pBluescript II KS(-)
+    subpath: pBluescript_II_KS(-)
+  - name: pBluescript II SK(+)
+    subpath: pBluescript_II_SK(%2B)
+  - name: pBluescript II SK(-)
+    subpath: pBluescript_II_SK(-)
+  - name: pBluescript KS(+)
+    subpath: pBluescript_KS(%2B)
+  - name: pBluescript KS(-)
+    subpath: pBluescript_KS(-)
+  - name: pBluescript SK(+)
+    subpath: pBluescript_SK(%2B)
+  - name: pBluescript SK(-)
+    subpath: pBluescript_SK(-)
+  - name: pBR322
+    subpath: pBR322
+  - name: pBS KS(+)
+    subpath: pBS_KS(%2B)
+  - name: pBS KS(-)
+    subpath: pBS_KS(-)
+  - name: pBS SK(+)
+    subpath: pBS_SK(%2B)
+  - name: pBS SK(-)
+    subpath: pBS_SK(-)
+  - name: pBS(+)
+    subpath: pBS(%2B)
+  - name: pBS(-)
+    subpath: pBS(-)
+  - name: pBSK(+) Simple-Amp
+    subpath: pBSK(%2B)_Simple-Amp
+  - name: pBSK(+) Simple-Kan
+    subpath: pBSK(%2B)_Simple-Kan
+  - name: pcDNA3
+    subpath: pcDNA3
+  - name: pcDNA3.1(+)
+    subpath: pcDNA3.1(%2B)
+  - name: pcDNA3.1(-)
+    subpath: pcDNA3.1(-)
+  - name: pCold I
+    subpath: pCold_I
+  - name: pCold II
+    subpath: pCold_II
+  - name: pCold III
+    subpath: pCold_III
+  - name: pCold IV
+    subpath: pCold_IV
+  - name: pCold TF
+    subpath: pCold_TF
+  - name: pCR-XL-2-TOPO
+    subpath: pCR-XL-2-TOPO
+  - name: pCR-XL-2-TOPO (linearized)
+    subpath: pCR-XL-2-TOPO_(linearized)
+  - name: pDD
+    subpath: pDD
+  - name: pDNR-Dual
+    subpath: pDNR-Dual
+  - name: pDNR-LIB
+    subpath: pDNR-LIB
+  - name: pE-SUMOpro Amp
+    subpath: pE-SUMOpro_Amp
+  - name: pE-SUMOpro Kan
+    subpath: pE-SUMOpro_Kan
+  - name: pE-SUMOpro3 Amp
+    subpath: pE-SUMOpro3_Amp
+  - name: pE-SUMOpro3 Kan
+    subpath: pE-SUMOpro3_Kan
+  - name: pE-SUMOstar Amp
+    subpath: pE-SUMOstar_Amp
+  - name: pE-SUMOstar Kan
+    subpath: pE-SUMOstar_Kan
+  - name: pEASY-Blunt (linearized)
+    subpath: pEASY-Blunt_(linearized)
+  - name: pEASY-Blunt E1 (linearized)
+    subpath: pEASY-Blunt_E1_(linearized)
+  - name: pEASY-Blunt E2 (linearized)
+    subpath: pEASY-Blunt_E2_(linearized)
+  - name: pEASY-Blunt Simple (linearized)
+    subpath: pEASY-Blunt_Simple_(linearized)
+  - name: pEASY-Blunt Zero (linearized)
+    subpath: pEASY-Blunt_Zero_(linearized)
+  - name: pEASY-Blunt3 (linearized)
+    subpath: pEASY-Blunt3_(linearized)
+  - name: pEASY-T1 (linearized)
+    subpath: pEASY-T1_(linearized)
+  - name: pEASY-T1 Simple (linearized)
+    subpath: pEASY-T1_Simple_(linearized)
+  - name: pEASY-T3 (linearized)
+    subpath: pEASY-T3_(linearized)
+  - name: pEASY-T5 Zero (linearized)
+    subpath: pEASY-T5_Zero_(linearized)
+  - name: pEX-1
+    subpath: pEX-1
+  - name: pEX-A
+    subpath: pEX-A
+  - name: pEX-C-GST
+    subpath: pEX-C-GST
+  - name: pEX-C-His
+    subpath: pEX-C-His
+  - name: pEX-K
+    subpath: pEX-K
+  - name: pEX-N-GST
+    subpath: pEX-N-GST
+  - name: pEX-N-His
+    subpath: pEX-N-His
+  - name: pEX-N-His-GST
+    subpath: pEX-N-His-GST
+  - name: pEX1
+    subpath: pEX1
+  - name: pEX2
+    subpath: pEX2
+  - name: pEX3
+    subpath: pEX3
+  - name: pEZ BAC
+    subpath: pEZ_BAC
+  - name: pEZ BAC (BamHI linearized)
+    subpath: pEZ_BAC_(BamHI_linearized)
+  - name: pEZ BAC (HpaI linearized)
+    subpath: pEZ_BAC_(HpaI_linearized)
+  - name: pEZSeq-Amp
+    subpath: pEZSeq-Amp
+  - name: pEZSeq-Amp (linearized)
+    subpath: pEZSeq-Amp_(linearized)
+  - name: pEZSeq-Kan
+    subpath: pEZSeq-Kan
+  - name: pEZSeq-Kan (linearized)
+    subpath: pEZSeq-Kan_(linearized)
+  - name: pF1A T7
+    subpath: pF1A_T7
+  - name: pF1K T7
+    subpath: pF1K_T7
+  - name: pF25A ICE T7
+    subpath: pF25A_ICE_T7
+  - name: pF25K ICE T7
+    subpath: pF25K_ICE_T7
+  - name: pF3A WG (BYDV)
+    subpath: pF3A_WG_(BYDV)
+  - name: pF3K WG (BYDV)
+    subpath: pF3K_WG_(BYDV)
+  - name: pFC20A HaloTag T7 SP6
+    subpath: pFC20A_HaloTag_T7_SP6
+  - name: pFC20K HaloTag T7 SP6
+    subpath: pFC20K_HaloTag_T7_SP6
+  - name: pFC30A His6HaloTag T7
+    subpath: pFC30A_His6HaloTag_T7
+  - name: pFC30K His6HaloTag T7
+    subpath: pFC30K_His6HaloTag_T7
+  - name: pFC7A (HQ)
+    subpath: pFC7A_(HQ)
+  - name: pFC7K (HQ)
+    subpath: pFC7K_(HQ)
+  - name: pFN18A HaloTag T7
+    subpath: pFN18A_HaloTag_T7
+  - name: pFN18K HaloTag T7
+    subpath: pFN18K_HaloTag_T7
+  - name: pFN19A HaloTag T7 SP6
+    subpath: pFN19A_HaloTag_T7_SP6
+  - name: pFN19K HaloTag T7 SP6
+    subpath: pFN19K_HaloTag_T7_SP6
+  - name: pFN29A His6HaloTag T7
+    subpath: pFN29A_His6HaloTag_T7
+  - name: pFN29K His6HaloTag T7
+    subpath: pFN29K_His6HaloTag_T7
+  - name: pFN2A (GST)
+    subpath: pFN2A_(GST)
+  - name: pFN2K (GST)
+    subpath: pFN2K_(GST)
+  - name: pFN6A (HQ)
+    subpath: pFN6A_(HQ)
+  - name: pFN6K (HQ)
+    subpath: pFN6K_(HQ)
+  - name: pGEM-11Zf(+)
+    subpath: pGEM-11Zf(%2B)
+  - name: pGEM-11Zf(-)
+    subpath: pGEM-11Zf(-)
+  - name: pGEM-3Z
+    subpath: pGEM-3Z
+  - name: pGEM-3Zf(+)
+    subpath: pGEM-3Zf(%2B)
+  - name: pGEM-3Zf(-)
+    subpath: pGEM-3Zf(-)
+  - name: pGEM-4Z
+    subpath: pGEM-4Z
+  - name: pGEM-5Zf(+)
+    subpath: pGEM-5Zf(%2B)
+  - name: pGEM-7Zf(+)
+    subpath: pGEM-7Zf(%2B)
+  - name: pGEM-7Zf(-)
+    subpath: pGEM-7Zf(-)
+  - name: pGEM-9Zf(-)
+    subpath: pGEM-9Zf(-)
+  - name: pGEM-T
+    subpath: pGEM-T
+  - name: pGEM-T (linearized)
+    subpath: pGEM-T_(linearized)
+  - name: pGEM-T Easy
+    subpath: pGEM-T_Easy
+  - name: pGEM-T Easy (linearized)
+    subpath: pGEM-T_Easy_(linearized)
+  - name: pGGA
+    subpath: pGGA
+  - name: pGGAselect
+    subpath: pGGAselect
+  - name: PGK promoter
+    subpath: PGK_promoter
+  - name: pGS-21a
+    subpath: pGS-21a
+  - name: pH6HTC His6HaloTag T7
+    subpath: pH6HTC_His6HaloTag_T7
+  - name: pH6HTN His6HaloTag T7
+    subpath: pH6HTN_His6HaloTag_T7
+  - name: phiX174
+    subpath: phiX174
+  - name: pHP45(omega)
+    subpath: pHP45(omega)
+  - name: pHP45(omega)-Km
+    subpath: pHP45(omega)-Km
+  - name: pHP45(omega)-Tc
+    subpath: pHP45(omega)-Tc
+  - name: pHSG298
+    subpath: pHSG298
+  - name: pHSG299
+    subpath: pHSG299
+  - name: pHSG396
+    subpath: pHSG396
+  - name: pHSG398
+    subpath: pHSG398
+  - name: pHY300PLK
+    subpath: pHY300PLK
+  - name: pICOz
+    subpath: pICOz
+  - name: pInvRecA
+    subpath: pInvRecA
+  - name: pJAZZ-OC
+    subpath: pJAZZ-OC
+  - name: pJAZZ-OK
+    subpath: pJAZZ-OK
+  - name: pJET1.2
+    subpath: pJET1.2
+  - name: pJET1.2 blunt
+    subpath: pJET1.2_blunt
+  - name: pJW168
+    subpath: pJW168
+  - name: pKF 18k-2
+    subpath: pKF_18k-2
+  - name: pKF 19k-2
+    subpath: pKF_19k-2
+  - name: pKOV
+    subpath: pKOV
+  - name: pLATE11 (linearized)
+    subpath: pLATE11_(linearized)
+  - name: pLATE31 (linearized)
+    subpath: pLATE31_(linearized)
+  - name: pLATE51 (linearized)
+    subpath: pLATE51_(linearized)
+  - name: pLATE52 (linearized)
+    subpath: pLATE52_(linearized)
+  - name: pLEXX-AK
+    subpath: pLEXX-AK
+  - name: pLPS-B (linearized)
+    subpath: pLPS-B_(linearized)
+  - name: pMAL-c5E
+    subpath: pMAL-c5E
+  - name: pMAL-c5G
+    subpath: pMAL-c5G
+  - name: pMAL-c5X
+    subpath: pMAL-c5X
+  - name: pMAL-c5X-His
+    subpath: pMAL-c5X-His
+  - name: pMAL-c6T
+    subpath: pMAL-c6T
+  - name: pMAL-p5E
+    subpath: pMAL-p5E
+  - name: pMAL-p5G
+    subpath: pMAL-p5G
+  - name: pMAL-p5X
+    subpath: pMAL-p5X
+  - name: pMCS5
+    subpath: pMCS5
+  - name: pMiniT
+    subpath: pMiniT
+  - name: pMiniT (linearized)
+    subpath: pMiniT_(linearized)
+  - name: pMiniT 2.0
+    subpath: pMiniT_2.0
+  - name: pMiniT 2.0 (linearized)
+    subpath: pMiniT_2.0_(linearized)
+  - name: pMMB190
+    subpath: pMMB190
+  - name: pMMB206
+    subpath: pMMB206
+  - name: pMMB207
+    subpath: pMMB207
+  - name: pMMB208
+    subpath: pMMB208
+  - name: pMMB66EH
+    subpath: pMMB66EH
+  - name: pMMB66HE
+    subpath: pMMB66HE
+  - name: pMMB67EH
+    subpath: pMMB67EH
+  - name: pMMB67HE
+    subpath: pMMB67HE
+  - name: pNEB193
+    subpath: pNEB193
+  - name: pNEB206A (linearized)
+    subpath: pNEB206A_(linearized)
+  - name: pOSIP-CH
+    subpath: pOSIP-CH
+  - name: pOSIP-CO
+    subpath: pOSIP-CO
+  - name: pOSIP-CT
+    subpath: pOSIP-CT
+  - name: pOSIP-KC
+    subpath: pOSIP-KC
+  - name: pOSIP-KH
+    subpath: pOSIP-KH
+  - name: pOSIP-KL
+    subpath: pOSIP-KL
+  - name: pOSIP-KO
+    subpath: pOSIP-KO
+  - name: pOSIP-KP
+    subpath: pOSIP-KP
+  - name: pOSIP-KT
+    subpath: pOSIP-KT
+  - name: pOSIP-TH
+    subpath: pOSIP-TH
+  - name: pOSIP-TO
+    subpath: pOSIP-TO
+  - name: pOSIP-TT
+    subpath: pOSIP-TT
+  - name: pPCR-Script Amp SK(+)
+    subpath: pPCR-Script_Amp_SK(%2B)
+  - name: pPCR-Script Cam SK(+)
+    subpath: pPCR-Script_Cam_SK(%2B)
+  - name: pPTR I
+    subpath: pPTR_I
+  - name: pPTR II
+    subpath: pPTR_II
+  - name: pQLinkG2
+    subpath: pQLinkG2
+  - name: pQLinkGD
+    subpath: pQLinkGD
+  - name: pQLinkH
+    subpath: pQLinkH
+  - name: pQLinkHD
+    subpath: pQLinkHD
+  - name: pQLinkN
+    subpath: pQLinkN
+  - name: pRACE (linearized)
+    subpath: pRACE_(linearized)
+  - name: pRANGER-BTB-1
+    subpath: pRANGER-BTB-1
+  - name: pRANGER-BTB-2
+    subpath: pRANGER-BTB-2
+  - name: pRANGER-BTB-3
+    subpath: pRANGER-BTB-3
+  - name: pRANGER-BTB-5
+    subpath: pRANGER-BTB-5
+  - name: pRHA-109
+    subpath: pRHA-109
+  - name: pRHA-113
+    subpath: pRHA-113
+  - name: pRHA-67
+    subpath: pRHA-67
+  - name: pRSET A
+    subpath: pRSET_A
+  - name: pRSET B
+    subpath: pRSET_B
+  - name: pRSET C
+    subpath: pRSET_C
+  - name: pSB1C3
+    subpath: pSB1C3
+  - name: pSC101
+    subpath: pSC101
+  - name: pSEAP2-Basic
+    subpath: pSEAP2-Basic
+  - name: pSF-Core
+    subpath: pSF-Core
+  - name: pSMART BAC v2.0
+    subpath: pSMART_BAC_v2.0
+  - name: pSMART BAC v2.0 (BamHI linearized)
+    subpath: pSMART_BAC_v2.0_(BamHI_linearized)
+  - name: pSMART BAC v2.0 (EcoRI linearized)
+    subpath: pSMART_BAC_v2.0_(EcoRI_linearized)
+  - name: pSMART BAC v2.0 (HindIII linearized)
+    subpath: pSMART_BAC_v2.0_(HindIII_linearized)
+  - name: pSMART FOS v2.0 (linearized)
+    subpath: pSMART_FOS_v2.0_(linearized)
+  - name: pSMART HCAmp
+    subpath: pSMART_HCAmp
+  - name: pSMART HCAmp (linearized)
+    subpath: pSMART_HCAmp_(linearized)
+  - name: pSMART HCKan
+    subpath: pSMART_HCKan
+  - name: pSMART HCKan (linearized)
+    subpath: pSMART_HCKan_(linearized)
+  - name: pSMART LCAmp
+    subpath: pSMART_LCAmp
+  - name: pSMART LCAmp (linearized)
+    subpath: pSMART_LCAmp_(linearized)
+  - name: pSMART LCKan
+    subpath: pSMART_LCKan
+  - name: pSMART LCKan (linearized)
+    subpath: pSMART_LCKan_(linearized)
+  - name: pSP64 Poly(A)
+    subpath: pSP64_Poly(A)
+  - name: pSP72
+    subpath: pSP72
+  - name: pSP73
+    subpath: pSP73
+  - name: pSpark Done (linearized)
+    subpath: pSpark_Done_(linearized)
+  - name: pSpark I (linearized)
+    subpath: pSpark_I_(linearized)
+  - name: pSpark II (linearized)
+    subpath: pSpark_II_(linearized)
+  - name: pSpark III (linearized)
+    subpath: pSpark_III_(linearized)
+  - name: pSpark IV (linearized)
+    subpath: pSpark_IV_(linearized)
+  - name: pSpark V (linearized)
+    subpath: pSpark_V_(linearized)
+  - name: pSpot1
+    subpath: pSpot1
+  - name: pSpot2
+    subpath: pSpot2
+  - name: pSpot3
+    subpath: pSpot3
+  - name: pSpot4
+    subpath: pSpot4
+  - name: pSTBlue-1
+    subpath: pSTBlue-1
+  - name: pSTV28
+    subpath: pSTV28
+  - name: pSTV29
+    subpath: pSTV29
+  - name: pT7Blue
+    subpath: pT7Blue
+  - name: pT7Blue-2
+    subpath: pT7Blue-2
+  - name: pT7Blue-3
+    subpath: pT7Blue-3
+  - name: pT7CFE1-CFtag
+    subpath: pT7CFE1-CFtag
+  - name: pT7CFE1-CGFP-HA-His
+    subpath: pT7CFE1-CGFP-HA-His
+  - name: pT7CFE1-CGST-HA-His
+    subpath: pT7CFE1-CGST-HA-His
+  - name: pT7CFE1-CHA
+    subpath: pT7CFE1-CHA
+  - name: pT7CFE1-CHis
+    subpath: pT7CFE1-CHis
+  - name: pT7CFE1-CMyc
+    subpath: pT7CFE1-CMyc
+  - name: pT7CFE1-NFtag
+    subpath: pT7CFE1-NFtag
+  - name: pT7CFE1-NHA
+    subpath: pT7CFE1-NHA
+  - name: pT7CFE1-NHA-CHis
+    subpath: pT7CFE1-NHA-CHis
+  - name: pT7CFE1-NHis
+    subpath: pT7CFE1-NHis
+  - name: pT7CFE1-NHis-GST
+    subpath: pT7CFE1-NHis-GST
+  - name: pT7CFE1-NHis-GST-CHA
+    subpath: pT7CFE1-NHis-GST-CHA
+  - name: pT7CFE1-NMyc
+    subpath: pT7CFE1-NMyc
+  - name: pTOP Blunt V2 (linearized)
+    subpath: pTOP_Blunt_V2_(linearized)
+  - name: pTrcHis A
+    subpath: pTrcHis_A
+  - name: pTrcHis B
+    subpath: pTrcHis_B
+  - name: pTrcHis C
+    subpath: pTrcHis_C
+  - name: pTrcHis2 A
+    subpath: pTrcHis2_A
+  - name: pTrcHis2 B
+    subpath: pTrcHis2_B
+  - name: pTrcHis2 C
+    subpath: pTrcHis2_C
+  - name: pTV 118N
+    subpath: pTV_118N
+  - name: pTWV228
+    subpath: pTWV228
+  - name: pTXB1
+    subpath: pTXB1
+  - name: pTYB21
+    subpath: pTYB21
+  - name: pType IIs
+    subpath: pType_IIs
+  - name: pTZ19R
+    subpath: pTZ19R
+  - name: pTZ19U
+    subpath: pTZ19U
+  - name: pTZ57R
+    subpath: pTZ57R
+  - name: pUAST
+    subpath: pUAST
+  - name: pUC118
+    subpath: pUC118
+  - name: pUC119
+    subpath: pUC119
+  - name: pUC18
+    subpath: pUC18
+  - name: pUC19
+    subpath: pUC19
+  - name: pUC19L
+    subpath: pUC19L
+  - name: pUC57
+    subpath: pUC57
+  - name: pUC57-Kan
+    subpath: pUC57-Kan
+  - name: pUC57-Simple
+    subpath: pUC57-Simple
+  - name: pUCmu
+    subpath: pUCmu
+  - name: pUCSP
+    subpath: pUCSP
+  - name: pVLT31
+    subpath: pVLT31
+  - name: pVLT33
+    subpath: pVLT33
+  - name: pVLT35
+    subpath: pVLT35
+  - name: pYES1L
+    subpath: pYES1L
+  - name: pZErO-2
+    subpath: pZErO-2
+  - name: SNAP-tag
+    subpath: SNAP-tag
+  - name: SP6 promoter
+    subpath: SP6_promoter
+  - name: SV40 promoter
+    subpath: SV40_promoter
+  - name: T3 promoter
+    subpath: T3_promoter
+  - name: T5 promoter
+    subpath: T5_promoter
+  - name: T7 promoter
+    subpath: T7_promoter
+  - name: tac promoter
+    subpath: tac_promoter
+  - name: trc promoter
+    subpath: trc_promoter
+pet_and_duet_vectors_(novagen):
+  name: pET & Duet Vectors (Novagen)
+  plasmids:
+  - name: pACYCDuet-1
+    subpath: pACYCDuet-1
+  - name: pCDF-1b
+    subpath: pCDF-1b
+  - name: pCDF-2 Ek_LIC
+    subpath: pCDF-2_Ek_LIC
+  - name: pCDF-2 Ek_LIC (linearized)
+    subpath: pCDF-2_Ek_LIC_(linearized)
+  - name: pCDFDuet-1
+    subpath: pCDFDuet-1
+  - name: pCOLA-2-DEST
+    subpath: pCOLA-2-DEST
+  - name: pCOLA-3-DEST
+    subpath: pCOLA-3-DEST
+  - name: pCOLADuet-1
+    subpath: pCOLADuet-1
+  - name: pET-11a
+    subpath: pET-11a
+  - name: pET-11b
+    subpath: pET-11b
+  - name: pET-11c
+    subpath: pET-11c
+  - name: pET-11d
+    subpath: pET-11d
+  - name: pET-14b
+    subpath: pET-14b
+  - name: pET-15b
+    subpath: pET-15b
+  - name: pET-16b
+    subpath: pET-16b
+  - name: pET-17b
+    subpath: pET-17b
+  - name: pET-19b
+    subpath: pET-19b
+  - name: pET-20b(+)
+    subpath: pET-20b(%2B)
+  - name: pET-21(+)
+    subpath: pET-21(%2B)
+  - name: pET-21a(+)
+    subpath: pET-21a(%2B)
+  - name: pET-21b(+)
+    subpath: pET-21b(%2B)
+  - name: pET-21c(+)
+    subpath: pET-21c(%2B)
+  - name: pET-21d(+)
+    subpath: pET-21d(%2B)
+  - name: pET-22b(+)
+    subpath: pET-22b(%2B)
+  - name: pET-23(+)
+    subpath: pET-23(%2B)
+  - name: pET-23a(+)
+    subpath: pET-23a(%2B)
+  - name: pET-23b(+)
+    subpath: pET-23b(%2B)
+  - name: pET-23c(+)
+    subpath: pET-23c(%2B)
+  - name: pET-23d(+)
+    subpath: pET-23d(%2B)
+  - name: pET-24(+)
+    subpath: pET-24(%2B)
+  - name: pET-24a(+)
+    subpath: pET-24a(%2B)
+  - name: pET-24b(+)
+    subpath: pET-24b(%2B)
+  - name: pET-24c(+)
+    subpath: pET-24c(%2B)
+  - name: pET-24d(+)
+    subpath: pET-24d(%2B)
+  - name: pET-25b(+)
+    subpath: pET-25b(%2B)
+  - name: pET-26b(+)
+    subpath: pET-26b(%2B)
+  - name: pET-27b(+)
+    subpath: pET-27b(%2B)
+  - name: pET-28a(+)
+    subpath: pET-28a(%2B)
+  - name: pET-28b(+)
+    subpath: pET-28b(%2B)
+  - name: pET-28c(+)
+    subpath: pET-28c(%2B)
+  - name: pET-29a(+)
+    subpath: pET-29a(%2B)
+  - name: pET-29b(+)
+    subpath: pET-29b(%2B)
+  - name: pET-29c(+)
+    subpath: pET-29c(%2B)
+  - name: pET-30 Ek_LIC
+    subpath: pET-30_Ek_LIC
+  - name: pET-30 Ek_LIC (linearized)
+    subpath: pET-30_Ek_LIC_(linearized)
+  - name: pET-30 Xa_LIC
+    subpath: pET-30_Xa_LIC
+  - name: pET-30 Xa_LIC (linearized)
+    subpath: pET-30_Xa_LIC_(linearized)
+  - name: pET-30a(+)
+    subpath: pET-30a(%2B)
+  - name: pET-30b(+)
+    subpath: pET-30b(%2B)
+  - name: pET-30c(+)
+    subpath: pET-30c(%2B)
+  - name: pET-31b(+)
+    subpath: pET-31b(%2B)
+  - name: pET-32 Ek_LIC
+    subpath: pET-32_Ek_LIC
+  - name: pET-32 Ek_LIC (linearized)
+    subpath: pET-32_Ek_LIC_(linearized)
+  - name: pET-32 Xa_LIC
+    subpath: pET-32_Xa_LIC
+  - name: pET-32 Xa_LIC (linearized)
+    subpath: pET-32_Xa_LIC_(linearized)
+  - name: pET-32a(+)
+    subpath: pET-32a(%2B)
+  - name: pET-32b(+)
+    subpath: pET-32b(%2B)
+  - name: pET-32c(+)
+    subpath: pET-32c(%2B)
+  - name: pET-33b(+)
+    subpath: pET-33b(%2B)
+  - name: pET-39b(+)
+    subpath: pET-39b(%2B)
+  - name: pET-3a
+    subpath: pET-3a
+  - name: pET-3b
+    subpath: pET-3b
+  - name: pET-3c
+    subpath: pET-3c
+  - name: pET-3d
+    subpath: pET-3d
+  - name: pET-40b(+)
+    subpath: pET-40b(%2B)
+  - name: pET-41 Ek_LIC
+    subpath: pET-41_Ek_LIC
+  - name: pET-41 Ek_LIC (linearized)
+    subpath: pET-41_Ek_LIC_(linearized)
+  - name: pET-41a(+)
+    subpath: pET-41a(%2B)
+  - name: pET-41b(+)
+    subpath: pET-41b(%2B)
+  - name: pET-41c(+)
+    subpath: pET-41c(%2B)
+  - name: pET-42a(+)
+    subpath: pET-42a(%2B)
+  - name: pET-42b(+)
+    subpath: pET-42b(%2B)
+  - name: pET-42c(+)
+    subpath: pET-42c(%2B)
+  - name: pET-43.1 Ek_LIC
+    subpath: pET-43.1_Ek_LIC
+  - name: pET-43.1 Ek_LIC (linearized)
+    subpath: pET-43.1_Ek_LIC_(linearized)
+  - name: pET-43.1a(+)
+    subpath: pET-43.1a(%2B)
+  - name: pET-43.1b(+)
+    subpath: pET-43.1b(%2B)
+  - name: pET-43.1c(+)
+    subpath: pET-43.1c(%2B)
+  - name: pET-44a(+)
+    subpath: pET-44a(%2B)
+  - name: pET-44b(+)
+    subpath: pET-44b(%2B)
+  - name: pET-44c(+)
+    subpath: pET-44c(%2B)
+  - name: pET-45b(+)
+    subpath: pET-45b(%2B)
+  - name: pET-46 Ek_LIC
+    subpath: pET-46_Ek_LIC
+  - name: pET-46 Ek_LIC (linearized)
+    subpath: pET-46_Ek_LIC_(linearized)
+  - name: pET-47b(+)
+    subpath: pET-47b(%2B)
+  - name: pET-48b(+)
+    subpath: pET-48b(%2B)
+  - name: pET-49b(+)
+    subpath: pET-49b(%2B)
+  - name: pET-50b(+)
+    subpath: pET-50b(%2B)
+  - name: pET-51b(+)
+    subpath: pET-51b(%2B)
+  - name: pET-51b(+) Ek_LIC
+    subpath: pET-51b(%2B)_Ek_LIC
+  - name: pET-51b(+) Ek_LIC (linearized)
+    subpath: pET-51b(%2B)_Ek_LIC_(linearized)
+  - name: pET-52b(+)
+    subpath: pET-52b(%2B)
+  - name: pET-52b(+) 3C_LIC
+    subpath: pET-52b(%2B)_3C_LIC
+  - name: pET-52b(+) 3C_LIC (linearized)
+    subpath: pET-52b(%2B)_3C_LIC_(linearized)
+  - name: pET-53-DEST
+    subpath: pET-53-DEST
+  - name: pET-54-DEST
+    subpath: pET-54-DEST
+  - name: pET-55-DEST
+    subpath: pET-55-DEST
+  - name: pET-56-DEST
+    subpath: pET-56-DEST
+  - name: pET-57-DEST
+    subpath: pET-57-DEST
+  - name: pET-58-DEST
+    subpath: pET-58-DEST
+  - name: pET-59-DEST
+    subpath: pET-59-DEST
+  - name: pET-60-DEST
+    subpath: pET-60-DEST
+  - name: pET-61-DEST
+    subpath: pET-61-DEST
+  - name: pET-62-DEST
+    subpath: pET-62-DEST
+  - name: pET-9a
+    subpath: pET-9a
+  - name: pET-9b
+    subpath: pET-9b
+  - name: pET-9c
+    subpath: pET-9c
+  - name: pET-9d
+    subpath: pET-9d
+  - name: pETBlue-1
+    subpath: pETBlue-1
+  - name: pETBlue-2
+    subpath: pETBlue-2
+  - name: pETcoco-1
+    subpath: pETcoco-1
+  - name: pETcoco-2
+    subpath: pETcoco-2
+  - name: pETDuet-1
+    subpath: pETDuet-1
+  - name: pLacI
+    subpath: pLacI
+  - name: pLysE
+    subpath: pLysE
+  - name: pLysS
+    subpath: pLysS
+  - name: pRSF-1b
+    subpath: pRSF-1b
+  - name: pRSF-2 Ek_LIC
+    subpath: pRSF-2_Ek_LIC
+  - name: pRSF-2 Ek_LIC (linearized)
+    subpath: pRSF-2_Ek_LIC_(linearized)
+  - name: pRSFDuet-1
+    subpath: pRSFDuet-1
+coronavirus_resources:
+  name: Coronavirus Resources
+  plasmids: []
+pgex_vectors_(ge_healthcare):
+  name: pGEX Vectors (GE Healthcare)
+  plasmids:
+  - name: pGEX-1_lambda_T
+    subpath: pGEX-1_lambda_T
+  - name: pGEX-2T
+    subpath: pGEX-2T
+  - name: pGEX-2TK
+    subpath: pGEX-2TK
+  - name: pGEX-3X
+    subpath: pGEX-3X
+  - name: pGEX-4T-1
+    subpath: pGEX-4T-1
+  - name: pGEX-4T-2
+    subpath: pGEX-4T-2
+  - name: pGEX-4T-3
+    subpath: pGEX-4T-3
+  - name: pGEX-5X-1
+    subpath: pGEX-5X-1
+  - name: pGEX-5X-2
+    subpath: pGEX-5X-2
+  - name: pGEX-5X-3
+    subpath: pGEX-5X-3
+  - name: pGEX-6P-1
+    subpath: pGEX-6P-1
+  - name: pGEX-6P-2
+    subpath: pGEX-6P-2
+  - name: pGEX-6P-3
+    subpath: pGEX-6P-3
+crispr_plasmids:
+  name: CRISPR Plasmids
+  plasmids:
+  - name: 3xFLAG-dCas9 pCMV-7.1
+    subpath: 3xFLAG-dCas9_pCMV-7.1
+  - name: 3xFLAG-dCas9 pMXs-neo
+    subpath: 3xFLAG-dCas9_pMXs-neo
+  - name: 3xFLAG-dCas9 pMXs-puro
+    subpath: 3xFLAG-dCas9_pMXs-puro
+  - name: Cas9m4
+    subpath: Cas9m4
+  - name: Cas9m4-VP64
+    subpath: Cas9m4-VP64
+  - name: CRISPRi library backbone
+    subpath: CRISPRi_library_backbone
+  - name: dCAS9-VP64_GFP
+    subpath: dCAS9-VP64_GFP
+  - name: eSpCas9(1.1)
+    subpath: eSpCas9(1.1)
+  - name: GeneArt CRISPR Nuclease Vector - CD4 (linearized)
+    subpath: GeneArt_CRISPR_Nuclease_Vector_-_CD4_(linearized)
+  - name: GeneArt CRISPR Nuclease Vector - OFP (linearized)
+    subpath: GeneArt_CRISPR_Nuclease_Vector_-_OFP_(linearized)
+  - name: gRNA_AAVS1-T1
+    subpath: gRNA_AAVS1-T1
+  - name: gRNA_AAVS1-T2
+    subpath: gRNA_AAVS1-T2
+  - name: gRNA_Cloning Vector
+    subpath: gRNA_Cloning_Vector
+  - name: gRNA_GFP-T1
+    subpath: gRNA_GFP-T1
+  - name: gRNA_GFP-T2
+    subpath: gRNA_GFP-T2
+  - name: HBT-pcoCas9
+    subpath: HBT-pcoCas9
+  - name: hCas9
+    subpath: hCas9
+  - name: hCas9_D10A
+    subpath: hCas9_D10A
+  - name: JDS246
+    subpath: JDS246
+  - name: lenti dCAS-VP64_Blast
+    subpath: lenti_dCAS-VP64_Blast
+  - name: lenti MS2-P65-HSF1_Hygro
+    subpath: lenti_MS2-P65-HSF1_Hygro
+  - name: lenti sgRNA(MS2)_zeo backbone
+    subpath: lenti_sgRNA(MS2)_zeo_backbone
+  - name: lentiCas9-Blast
+    subpath: lentiCas9-Blast
+  - name: lentiCas9-EGFP
+    subpath: lentiCas9-EGFP
+  - name: lentiCas9n(D10A)-Blast
+    subpath: lentiCas9n(D10A)-Blast
+  - name: lentiCRISPR v2
+    subpath: lentiCRISPR_v2
+  - name: lentiGuide-Puro
+    subpath: lentiGuide-Puro
+  - name: LSL-Cas9-Rosa26TV
+    subpath: LSL-Cas9-Rosa26TV
+  - name: M-SPcas
+    subpath: M-SPcas
+  - name: M-ST1cas
+    subpath: M-ST1cas
+  - name: MLM3613
+    subpath: MLM3613
+  - name: MLM3636
+    subpath: MLM3636
+  - name: MLM3639
+    subpath: MLM3639
+  - name: MS2-P65-HSF1_GFP
+    subpath: MS2-P65-HSF1_GFP
+  - name: MSP1101
+    subpath: MSP1101
+  - name: MSP2133
+    subpath: MSP2133
+  - name: MSP2135
+    subpath: MSP2135
+  - name: MSP469
+    subpath: MSP469
+  - name: p3s-Cas9HC
+    subpath: p3s-Cas9HC
+  - name: p414-TEF1p-Cas9-CYC1t
+    subpath: p414-TEF1p-Cas9-CYC1t
+  - name: p415-GalL-Cas9-CYC1t
+    subpath: p415-GalL-Cas9-CYC1t
+  - name: p426-SNR52p-gRNA.CAN1.Y-SUP4t
+    subpath: p426-SNR52p-gRNA.CAN1.Y-SUP4t
+  - name: pAAV-Guide-it-1 Vector (Linear)
+    subpath: pAAV-Guide-it-1_Vector_(Linear)
+  - name: pAAV-Guide-it-Down Vector (Linear)
+    subpath: pAAV-Guide-it-Down_Vector_(Linear)
+  - name: pAAV-Guide-it-Up Vector
+    subpath: pAAV-Guide-it-Up_Vector
+  - name: pAAVS1-BSD-DNR
+    subpath: pAAVS1-BSD-DNR
+  - name: pAAVS1-Puro-DNR
+    subpath: pAAVS1-Puro-DNR
+  - name: pAc-sgRNA-Cas9
+    subpath: pAc-sgRNA-Cas9
+  - name: pAC149-pCR8-dCas9VP160
+    subpath: pAC149-pCR8-dCas9VP160
+  - name: pAC152-dual-dCas9VP64-sgExpression
+    subpath: pAC152-dual-dCas9VP64-sgExpression
+  - name: pAC153-dual-dCas9VP96-sgExpression
+    subpath: pAC153-dual-dCas9VP96-sgExpression
+  - name: pAC154-dual-dCas9VP160-sgExpression
+    subpath: pAC154-dual-dCas9VP160-sgExpression
+  - name: pAC155-pCR8-sgExpression
+    subpath: pAC155-pCR8-sgExpression
+  - name: pAC2-dual-dCas9VP48-sgExpression
+    subpath: pAC2-dual-dCas9VP48-sgExpression
+  - name: pAC84-pCR8-dCas9
+    subpath: pAC84-pCR8-dCas9
+  - name: pAC91-pmax-dCas9VP64
+    subpath: pAC91-pmax-dCas9VP64
+  - name: pAC93-pmax-dCas9VP160
+    subpath: pAC93-pmax-dCas9VP160
+  - name: pAC94-pmax-dCas9VP160-2A-puro
+    subpath: pAC94-pmax-dCas9VP160-2A-puro
+  - name: pAC95-pmax-dCas9VP160-2A-neo
+    subpath: pAC95-pmax-dCas9VP160-2A-neo
+  - name: pACT2-CAS9c
+    subpath: pACT2-CAS9c
+  - name: pBS-Hsp70-Cas9
+    subpath: pBS-Hsp70-Cas9
+  - name: pCAG-T3-hCAS-pA
+    subpath: pCAG-T3-hCAS-pA
+  - name: pCAG-T3-hCasD10A-pA
+    subpath: pCAG-T3-hCasD10A-pA
+  - name: pCas
+    subpath: pCas
+  - name: pCas-Guide
+    subpath: pCas-Guide
+  - name: pCas-Guide-AAVS1
+    subpath: pCas-Guide-AAVS1
+  - name: pCas-Guide-CRISPRa
+    subpath: pCas-Guide-CRISPRa
+  - name: pCas-Guide-CRISPRi
+    subpath: pCas-Guide-CRISPRi
+  - name: pCas-Guide-EF1a-CD4
+    subpath: pCas-Guide-EF1a-CD4
+  - name: pCas-Guide-EF1a-GFP
+    subpath: pCas-Guide-EF1a-GFP
+  - name: pCas-Guide-Nickase
+    subpath: pCas-Guide-Nickase
+  - name: pCas-Guide-ROSA26
+    subpath: pCas-Guide-ROSA26
+  - name: pCas9
+    subpath: pCas9
+  - name: pCas9_GFP
+    subpath: pCas9_GFP
+  - name: pCas9D10A_GFP
+    subpath: pCas9D10A_GFP
+  - name: pcDNA-dCas9
+    subpath: pcDNA-dCas9
+  - name: pcDNA-dCas9-p300 Core
+    subpath: pcDNA-dCas9-p300_Core
+  - name: pcDNA-dCas9-p300 Core (D1399Y)
+    subpath: pcDNA-dCas9-p300_Core_(D1399Y)
+  - name: pcDNA-dCas9-VP64
+    subpath: pcDNA-dCas9-VP64
+  - name: pcDNA3.1-CibN-dCas9-CibN
+    subpath: pcDNA3.1-CibN-dCas9-CibN
+  - name: pCFD1-dU6-1gRNA
+    subpath: pCFD1-dU6-1gRNA
+  - name: pCFD2-dU6-2gRNA
+    subpath: pCFD2-dU6-2gRNA
+  - name: pCFD3-dU6-3gRNA
+    subpath: pCFD3-dU6-3gRNA
+  - name: pCFD4-U6-1_U6-3tandemgRNAs
+    subpath: pCFD4-U6-1_U6-3tandemgRNAs
+  - name: pCLIP-All-EFS-Ametrine
+    subpath: pCLIP-All-EFS-Ametrine
+  - name: pCLIP-All-EFS-Blast
+    subpath: pCLIP-All-EFS-Blast
+  - name: pCLIP-All-EFS-Puro
+    subpath: pCLIP-All-EFS-Puro
+  - name: pCLIP-All-EFS-tRFP
+    subpath: pCLIP-All-EFS-tRFP
+  - name: pCLIP-All-EFS-ZsGreen
+    subpath: pCLIP-All-EFS-ZsGreen
+  - name: pCLIP-All-hCMV-Blast
+    subpath: pCLIP-All-hCMV-Blast
+  - name: pCLIP-All-hCMV-Puro
+    subpath: pCLIP-All-hCMV-Puro
+  - name: pCLIP-All-hCMV-tRFP
+    subpath: pCLIP-All-hCMV-tRFP
+  - name: pCLIP-All-hCMV-ZsGreen
+    subpath: pCLIP-All-hCMV-ZsGreen
+  - name: pCLIP-All-Nickase(D10A)-EFS-Blast
+    subpath: pCLIP-All-Nickase(D10A)-EFS-Blast
+  - name: pCLIP-All-Nickase(D10A)-EFS-Puro
+    subpath: pCLIP-All-Nickase(D10A)-EFS-Puro
+  - name: pCLIP-All-Nickase(D10A)-EFS-tRFP
+    subpath: pCLIP-All-Nickase(D10A)-EFS-tRFP
+  - name: pCLIP-All-Nickase(D10A)-EFS-ZsGreen
+    subpath: pCLIP-All-Nickase(D10A)-EFS-ZsGreen
+  - name: pCLIP-All-Nickase(D10A)-hCMV-Puro
+    subpath: pCLIP-All-Nickase(D10A)-hCMV-Puro
+  - name: pCLIP-All-Nickase(D10A)-hCMV-tRFP
+    subpath: pCLIP-All-Nickase(D10A)-hCMV-tRFP
+  - name: pCLIP-All-Nickase(D10A)-hCMV-ZsGreen
+    subpath: pCLIP-All-Nickase(D10A)-hCMV-ZsGreen
+  - name: pCLIP-All-Nickase(D10A)-TRE3G-Blast
+    subpath: pCLIP-All-Nickase(D10A)-TRE3G-Blast
+  - name: pCLIP-All-Nickase(D10A)-TRE3G-Puro
+    subpath: pCLIP-All-Nickase(D10A)-TRE3G-Puro
+  - name: pCLIP-All-Nickase(D10A)-TRE3G-tRFP
+    subpath: pCLIP-All-Nickase(D10A)-TRE3G-tRFP
+  - name: pCLIP-All-Nickase(D10A)-TRE3G-ZsGreen
+    subpath: pCLIP-All-Nickase(D10A)-TRE3G-ZsGreen
+  - name: pCLIP-All-TRE3G-Blast
+    subpath: pCLIP-All-TRE3G-Blast
+  - name: pCLIP-All-TRE3G-Puro
+    subpath: pCLIP-All-TRE3G-Puro
+  - name: pCLIP-All-TRE3G-tRFP
+    subpath: pCLIP-All-TRE3G-tRFP
+  - name: pCLIP-All-TRE3G-ZsGreen
+    subpath: pCLIP-All-TRE3G-ZsGreen
+  - name: pCLIP-Cas9(D10a)-Nickase-EFS-Blast
+    subpath: pCLIP-Cas9(D10a)-Nickase-EFS-Blast
+  - name: pCLIP-Cas9(D10a)-Nickase-EFS-Puro
+    subpath: pCLIP-Cas9(D10a)-Nickase-EFS-Puro
+  - name: pCLIP-Cas9(D10a)-Nickase-EFS-tRFP
+    subpath: pCLIP-Cas9(D10a)-Nickase-EFS-tRFP
+  - name: pCLIP-Cas9(D10a)-Nickase-EFS-ZsGreen
+    subpath: pCLIP-Cas9(D10a)-Nickase-EFS-ZsGreen
+  - name: pCLIP-Cas9(D10a)-Nickase-hCMV-Blast
+    subpath: pCLIP-Cas9(D10a)-Nickase-hCMV-Blast
+  - name: pCLIP-Cas9(D10a)-Nickase-hCMV-Puro
+    subpath: pCLIP-Cas9(D10a)-Nickase-hCMV-Puro
+  - name: pCLIP-Cas9(D10a)-Nickase-hCMV-tRFP
+    subpath: pCLIP-Cas9(D10a)-Nickase-hCMV-tRFP
+  - name: pCLIP-Cas9(D10a)-Nickase-hCMV-ZsGreen
+    subpath: pCLIP-Cas9(D10a)-Nickase-hCMV-ZsGreen
+  - name: pCLIP-Cas9(D10a)-Nickase-TRE3G-Blast
+    subpath: pCLIP-Cas9(D10a)-Nickase-TRE3G-Blast
+  - name: pCLIP-Cas9(D10a)-Nickase-TRE3G-Puro
+    subpath: pCLIP-Cas9(D10a)-Nickase-TRE3G-Puro
+  - name: pCLIP-Cas9(D10a)-Nickase-TRE3G-tRFP
+    subpath: pCLIP-Cas9(D10a)-Nickase-TRE3G-tRFP
+  - name: pCLIP-Cas9(D10a)-Nickase-TRE3G-ZsGreen
+    subpath: pCLIP-Cas9(D10a)-Nickase-TRE3G-ZsGreen
+  - name: pCLIP-Cas9-Nuclease-EFS-Blast
+    subpath: pCLIP-Cas9-Nuclease-EFS-Blast
+  - name: pCLIP-Cas9-Nuclease-EFS-Puro
+    subpath: pCLIP-Cas9-Nuclease-EFS-Puro
+  - name: pCLIP-Cas9-Nuclease-EFS-tRFP
+    subpath: pCLIP-Cas9-Nuclease-EFS-tRFP
+  - name: pCLIP-Cas9-Nuclease-EFS-ZsGreen
+    subpath: pCLIP-Cas9-Nuclease-EFS-ZsGreen
+  - name: pCLIP-Cas9-Nuclease-hCMV-Blast
+    subpath: pCLIP-Cas9-Nuclease-hCMV-Blast
+  - name: pCLIP-Cas9-Nuclease-hCMV-Puro
+    subpath: pCLIP-Cas9-Nuclease-hCMV-Puro
+  - name: pCLIP-Cas9-Nuclease-hCMV-tRFP
+    subpath: pCLIP-Cas9-Nuclease-hCMV-tRFP
+  - name: pCLIP-Cas9-Nuclease-hCMV-ZsGreen
+    subpath: pCLIP-Cas9-Nuclease-hCMV-ZsGreen
+  - name: pCLIP-Cas9-Nuclease-TRE3G-Blast
+    subpath: pCLIP-Cas9-Nuclease-TRE3G-Blast
+  - name: pCLIP-Cas9-Nuclease-TRE3G-Puro
+    subpath: pCLIP-Cas9-Nuclease-TRE3G-Puro
+  - name: pCLIP-Cas9-Nuclease-TRE3G-tRFP
+    subpath: pCLIP-Cas9-Nuclease-TRE3G-tRFP
+  - name: pCLIP-Cas9-Nuclease-TRE3G-ZsGreen
+    subpath: pCLIP-Cas9-Nuclease-TRE3G-ZsGreen
+  - name: pCLIP-gRNA-EFS-Blast
+    subpath: pCLIP-gRNA-EFS-Blast
+  - name: pCLIP-gRNA-EFS-Puro
+    subpath: pCLIP-gRNA-EFS-Puro
+  - name: pCLIP-gRNA-EFS-tRFP
+    subpath: pCLIP-gRNA-EFS-tRFP
+  - name: pCLIP-gRNA-EFS-ZsGreen
+    subpath: pCLIP-gRNA-EFS-ZsGreen
+  - name: pCLIP-gRNA-hCMV-Blast
+    subpath: pCLIP-gRNA-hCMV-Blast
+  - name: pCLIP-gRNA-hCMV-Puro
+    subpath: pCLIP-gRNA-hCMV-Puro
+  - name: pCLIP-gRNA-hCMV-tRFP
+    subpath: pCLIP-gRNA-hCMV-tRFP
+  - name: pCLIP-gRNA-hCMV-ZsGreen
+    subpath: pCLIP-gRNA-hCMV-ZsGreen
+  - name: pCRCT
+    subpath: pCRCT
+  - name: pCRISPomyces-1
+    subpath: pCRISPomyces-1
+  - name: pCRISPomyces-2
+    subpath: pCRISPomyces-2
+  - name: pCRISPR
+    subpath: pCRISPR
+  - name: pCRISPRa-Enhancer
+    subpath: pCRISPRa-Enhancer
+  - name: pCS2+hSpCas9
+    subpath: pCS2%2BhSpCas9
+  - name: pCS2-Cas9
+    subpath: pCS2-Cas9
+  - name: pCS2-nCas9n
+    subpath: pCS2-nCas9n
+  - name: pCW-Cas9
+    subpath: pCW-Cas9
+  - name: pdCas9
+    subpath: pdCas9
+  - name: pdCas9 BFP-humanized
+    subpath: pdCas9_BFP-humanized
+  - name: pdCas9-bacteria
+    subpath: pdCas9-bacteria
+  - name: pdCas9-humanized
+    subpath: pdCas9-humanized
+  - name: pDCC6
+    subpath: pDCC6
+  - name: pDD162 (Peft-3_Cas9 + Empty sgRNA)
+    subpath: pDD162_(Peft-3_Cas9_%2B_Empty_sgRNA)
+  - name: pDR274
+    subpath: pDR274
+  - name: Peft-3_cas9-SV40_NLS_tbb-2 3'UTR
+    subpath: Peft-3_cas9-SV40_NLS_tbb-2_3%27UTR
+  - name: pET-28b-Cas9-His
+    subpath: pET-28b-Cas9-His
+  - name: pET-Cas9-6xHis
+    subpath: pET-Cas9-6xHis
+  - name: pET-Cas9-NLS-6xHis
+    subpath: pET-Cas9-NLS-6xHis
+  - name: pET-NLS-Cas9-6xHis
+    subpath: pET-NLS-Cas9-6xHis
+  - name: pET28a Cas9-Cys
+    subpath: pET28a_Cas9-Cys
+  - name: pFGC-pcoCas9
+    subpath: pFGC-pcoCas9
+  - name: pGL3-U6-sgRNA-PGK-puromycin
+    subpath: pGL3-U6-sgRNA-PGK-puromycin
+  - name: pgRNA-bacteria
+    subpath: pgRNA-bacteria
+  - name: pgRNA-humanized
+    subpath: pgRNA-humanized
+  - name: pGuide
+    subpath: pGuide
+  - name: pGuide-it-sgRNA1 Vector (Linear)
+    subpath: pGuide-it-sgRNA1_Vector_(Linear)
+  - name: pGuide-it-tdTomato Vector (Linear)
+    subpath: pGuide-it-tdTomato_Vector_(Linear)
+  - name: pGuide-it-ZsGreen1 Vector (Linear)
+    subpath: pGuide-it-ZsGreen1_Vector_(Linear)
+  - name: pHAGE EF1-alpha dCas9-KRAB
+    subpath: pHAGE_EF1-alpha_dCas9-KRAB
+  - name: pHAGE EF1-alpha dCas9-VP64
+    subpath: pHAGE_EF1-alpha_dCas9-VP64
+  - name: pHAGE TRE dCas9
+    subpath: pHAGE_TRE_dCas9
+  - name: pHAGE TRE dCas9-KRAB
+    subpath: pHAGE_TRE_dCas9-KRAB
+  - name: pHAGE TRE dCas9-VP64
+    subpath: pHAGE_TRE_dCas9-VP64
+  - name: pHAGE-TO-dCas9-3XGFP
+    subpath: pHAGE-TO-dCas9-3XGFP
+  - name: pHAGE-TO-dCas9-3XmCherry
+    subpath: pHAGE-TO-dCas9-3XmCherry
+  - name: pHAGE-TO-nls-st1dCas9-3nls-3XTagBFP2
+    subpath: pHAGE-TO-nls-st1dCas9-3nls-3XTagBFP2
+  - name: pHAGE-TO-nmdCas9-3XGFP
+    subpath: pHAGE-TO-nmdCas9-3XGFP
+  - name: pHAGE-TO-nmdCas9-3XmCherry
+    subpath: pHAGE-TO-nmdCas9-3XmCherry
+  - name: pHR-SFFV-dCas9-BFP
+    subpath: pHR-SFFV-dCas9-BFP
+  - name: pHR-SFFV-dCas9-BFP-KRAB
+    subpath: pHR-SFFV-dCas9-BFP-KRAB
+  - name: pHR-SFFV-KRAB-dCas9-P2A-mCherry
+    subpath: pHR-SFFV-KRAB-dCas9-P2A-mCherry
+  - name: pHRdSV40-dCas9-10xGCN4_v4-P2A-BFP
+    subpath: pHRdSV40-dCas9-10xGCN4_v4-P2A-BFP
+  - name: pHRdSV40-NLS-dCas9-24xGCN4_v4-NLS-P2A-BFP-dWPRE
+    subpath: pHRdSV40-NLS-dCas9-24xGCN4_v4-NLS-P2A-BFP-dWPRE
+  - name: pHRdSV40-scFv-GCN4-sfGFP-VP64-GB1-NLS
+    subpath: pHRdSV40-scFv-GCN4-sfGFP-VP64-GB1-NLS
+  - name: pHSN401
+    subpath: pHSN401
+  - name: pHsp70-Cas9
+    subpath: pHsp70-Cas9
+  - name: pICH41308_hCas9
+    subpath: pICH41308_hCas9
+  - name: pICH47742_2x35S-5'UTR-hCas9(STOP)-NOST
+    subpath: pICH47742_2x35S-5%27UTR-hCas9(STOP)-NOST
+  - name: piCRg Entry
+    subpath: piCRg_Entry
+  - name: pICSL01009_AtU6p
+    subpath: pICSL01009_AtU6p
+  - name: pK7WGF2_hCas9
+    subpath: pK7WGF2_hCas9
+  - name: pKLV-U6gRNA(BbsI)-PGKpuro2ABFP
+    subpath: pKLV-U6gRNA(BbsI)-PGKpuro2ABFP
+  - name: pL-CRISPR.EFS.GFP
+    subpath: pL-CRISPR.EFS.GFP
+  - name: pL-CRISPR.EFS.tRFP
+    subpath: pL-CRISPR.EFS.tRFP
+  - name: pL-CRISPR.SFFV.GFP
+    subpath: pL-CRISPR.SFFV.GFP
+  - name: pL-CRISPR.SFFV.tRFP
+    subpath: pL-CRISPR.SFFV.tRFP
+  - name: pLenti-Cas-Guide
+    subpath: pLenti-Cas-Guide
+  - name: pLenti-Cas9
+    subpath: pLenti-Cas9
+  - name: pLenti-Cas9-IRES-Puro
+    subpath: pLenti-Cas9-IRES-Puro
+  - name: pLenti-Cas9-P2A-tGFP
+    subpath: pLenti-Cas9-P2A-tGFP
+  - name: pLenti-EF1a-Cas9-IRES-Puro
+    subpath: pLenti-EF1a-Cas9-IRES-Puro
+  - name: pLenti-Guide-Puro
+    subpath: pLenti-Guide-Puro
+  - name: pLKO.1-puro U6 sgRNA BfuAI stuffer
+    subpath: pLKO.1-puro_U6_sgRNA_BfuAI_stuffer
+  - name: pLSC-5
+    subpath: pLSC-5
+  - name: pLV hUbC-Cas9-T2A-GFP
+    subpath: pLV_hUbC-Cas9-T2A-GFP
+  - name: pLV hUbC-dCas9 VP64-T2A-GFP
+    subpath: pLV_hUbC-dCas9_VP64-T2A-GFP
+  - name: pLV hUbC-dCas9-T2A-GFP
+    subpath: pLV_hUbC-dCas9-T2A-GFP
+  - name: pLVX-hyg-sgRNA1 Vector (Linear)
+    subpath: pLVX-hyg-sgRNA1_Vector_(Linear)
+  - name: pLVX-puro-Cas9
+    subpath: pLVX-puro-Cas9
+  - name: pLX-sgRNA
+    subpath: pLX-sgRNA
+  - name: pMB66
+    subpath: pMB66
+  - name: pMB70
+    subpath: pMB70
+  - name: pME-Cas9
+    subpath: pME-Cas9
+  - name: pME-Cas9-T2A-GFP
+    subpath: pME-Cas9-T2A-GFP
+  - name: pMJ806
+    subpath: pMJ806
+  - name: pMJ841
+    subpath: pMJ841
+  - name: pMJ920
+    subpath: pMJ920
+  - name: pMLM3705
+    subpath: pMLM3705
+  - name: pMSCV-LTR-dCas9-p65AD-BFP
+    subpath: pMSCV-LTR-dCas9-p65AD-BFP
+  - name: pMSCV-LTR-dCas9-VP64-BFP
+    subpath: pMSCV-LTR-dCas9-VP64-BFP
+  - name: pMZ374
+    subpath: pMZ374
+  - name: pNW3
+    subpath: pNW3
+  - name: pRGE31
+    subpath: pRGE31
+  - name: pRGEB31
+    subpath: pRGEB31
+  - name: pRGEB32
+    subpath: pRGEB32
+  - name: pROSA26-Puro-DNR
+    subpath: pROSA26-Puro-DNR
+  - name: pRPR1_gRNA_handle_RPR1t
+    subpath: pRPR1_gRNA_handle_RPR1t
+  - name: pSECC
+    subpath: pSECC
+  - name: pSimpleII-U6-tracr-U6-BsmBI-NLS-NmCas9-HA-NLS(s)
+    subpath: pSimpleII-U6-tracr-U6-BsmBI-NLS-NmCas9-HA-NLS(s)
+  - name: pSLQ1658-dCas9-EGFP
+    subpath: pSLQ1658-dCas9-EGFP
+  - name: pSpCas9 (PX165)
+    subpath: pSpCas9_(PX165)
+  - name: pSpCas9(BB)-2A-GFP (PX458)
+    subpath: pSpCas9(BB)-2A-GFP_(PX458)
+  - name: pSpCas9(BB)-2A-Puro (PX459) V2.0
+    subpath: pSpCas9(BB)-2A-Puro_(PX459)_V2.0
+  - name: pSpCas9n(BB) (PX460)
+    subpath: pSpCas9n(BB)_(PX460)
+  - name: pSpCas9n(BB)-2A-GFP (PX461)
+    subpath: pSpCas9n(BB)-2A-GFP_(PX461)
+  - name: pSpCas9n(BB)-2A-Puro (PX462) V2.0
+    subpath: pSpCas9n(BB)-2A-Puro_(PX462)_V2.0
+  - name: pSPgRNA
+    subpath: pSPgRNA
+  - name: pSQT1313
+    subpath: pSQT1313
+  - name: pSQT834
+    subpath: pSQT834
+  - name: pST1374-N-NLS-flag-linker-Cas9-D10A
+    subpath: pST1374-N-NLS-flag-linker-Cas9-D10A
+  - name: pST1374-N-NLS-flag-linker-Cas9-H840A
+    subpath: pST1374-N-NLS-flag-linker-Cas9-H840A
+  - name: pST1374-NLS-flag-linker-Cas9
+    subpath: pST1374-NLS-flag-linker-Cas9
+  - name: pT3TS-nCas9n
+    subpath: pT3TS-nCas9n
+  - name: pT7-Cas9
+    subpath: pT7-Cas9
+  - name: pT7-Cas9-Nickase
+    subpath: pT7-Cas9-Nickase
+  - name: pT7-gRNA
+    subpath: pT7-gRNA
+  - name: pT7-Guide-IVT
+    subpath: pT7-Guide-IVT
+  - name: pTDH3-dCas9
+    subpath: pTDH3-dCas9
+  - name: pTDH3-dCas9-Mxi1
+    subpath: pTDH3-dCas9-Mxi1
+  - name: pTOL-hCMV-TET3G-Hygro Transactivator
+    subpath: pTOL-hCMV-TET3G-Hygro_Transactivator
+  - name: pTPGI_dCas9_VP64
+    subpath: pTPGI_dCas9_VP64
+  - name: pU6-(BbsI)_CBh-Cas9-T2A-BFP-P2A-Ad4E1B
+    subpath: pU6-(BbsI)_CBh-Cas9-T2A-BFP-P2A-Ad4E1B
+  - name: pU6-(BbsI)_CBh-Cas9-T2A-mcherry-P2A-Ad4E4orf6
+    subpath: pU6-(BbsI)_CBh-Cas9-T2A-mcherry-P2A-Ad4E4orf6
+  - name: pU6-BbsI-chiRNA
+    subpath: pU6-BbsI-chiRNA
+  - name: PU6_klp-12_sgRNA
+    subpath: PU6_klp-12_sgRNA
+  - name: pUC119-gRNA
+    subpath: pUC119-gRNA
+  - name: pUC57-sgRNA expression vector
+    subpath: pUC57-sgRNA_expression_vector
+  - name: Puro-Cas9 donor
+    subpath: Puro-Cas9_donor
+  - name: pWJ66
+    subpath: pWJ66
+  - name: pWJ68
+    subpath: pWJ68
+  - name: pwtCas9-bacteria
+    subpath: pwtCas9-bacteria
+  - name: pX260
+    subpath: pX260
+  - name: pX330
+    subpath: pX330
+  - name: pX330A-1x2
+    subpath: pX330A-1x2
+  - name: pX330S-2
+    subpath: pX330S-2
+  - name: pX334
+    subpath: pX334
+  - name: pX335
+    subpath: pX335
+  - name: PX551
+    subpath: PX551
+  - name: PX552
+    subpath: PX552
+  - name: pX600
+    subpath: pX600
+  - name: pX601
+    subpath: pX601
+  - name: pX602
+    subpath: pX602
+  - name: PX851
+    subpath: PX851
+  - name: PX852
+    subpath: PX852
+  - name: PX853
+    subpath: PX853
+  - name: PX854
+    subpath: PX854
+  - name: PX855
+    subpath: PX855
+  - name: PX856
+    subpath: PX856
+  - name: pY010 (pcDNA3.1-hAsCpf1)
+    subpath: pY010_(pcDNA3.1-hAsCpf1)
+  - name: pY016 (pcDNA3.1-hLbCpf1)
+    subpath: pY016_(pcDNA3.1-hLbCpf1)
+  - name: sgRNA(MS2) cloning backbone
+    subpath: sgRNA(MS2)_cloning_backbone
+  - name: SP-Cas9
+    subpath: SP-Cas9
+  - name: SP-dCas9-VPR
+    subpath: SP-dCas9-VPR
+  - name: VP12
+    subpath: VP12
+plant_vectors:
+  name: Plant Vectors
+  plasmids:
+  - name: pBI121
+    subpath: pBI121
+  - name: pBI221
+    subpath: pBI221
+  - name: pBin19
+    subpath: pBin19
+  - name: pBINPLUS
+    subpath: pBINPLUS
+  - name: pCAMBIA0105.1R
+    subpath: pCAMBIA0105.1R
+  - name: pCAMBIA0305.1
+    subpath: pCAMBIA0305.1
+  - name: pCAMBIA0305.2
+    subpath: pCAMBIA0305.2
+  - name: pCAMBIA0380
+    subpath: pCAMBIA0380
+  - name: pCAMBIA0390
+    subpath: pCAMBIA0390
+  - name: pCAMBIA1105.1
+    subpath: pCAMBIA1105.1
+  - name: pCAMBIA1105.1R
+    subpath: pCAMBIA1105.1R
+  - name: pCAMBIA1200
+    subpath: pCAMBIA1200
+  - name: pCAMBIA1201
+    subpath: pCAMBIA1201
+  - name: pCAMBIA1281Z
+    subpath: pCAMBIA1281Z
+  - name: pCAMBIA1291Z
+    subpath: pCAMBIA1291Z
+  - name: pCAMBIA1300
+    subpath: pCAMBIA1300
+  - name: pCAMBIA1301
+    subpath: pCAMBIA1301
+  - name: pCAMBIA1302
+    subpath: pCAMBIA1302
+  - name: pCAMBIA1303
+    subpath: pCAMBIA1303
+  - name: pCAMBIA1304
+    subpath: pCAMBIA1304
+  - name: pCAMBIA1305.1
+    subpath: pCAMBIA1305.1
+  - name: pCAMBIA1305.2
+    subpath: pCAMBIA1305.2
+  - name: pCAMBIA1380
+    subpath: pCAMBIA1380
+  - name: pCAMBIA1381
+    subpath: pCAMBIA1381
+  - name: pCAMBIA1381Xa
+    subpath: pCAMBIA1381Xa
+  - name: pCAMBIA1381Xb
+    subpath: pCAMBIA1381Xb
+  - name: pCAMBIA1381Xc
+    subpath: pCAMBIA1381Xc
+  - name: pCAMBIA1381Z
+    subpath: pCAMBIA1381Z
+  - name: pCAMBIA1390
+    subpath: pCAMBIA1390
+  - name: pCAMBIA1391
+    subpath: pCAMBIA1391
+  - name: pCAMBIA1391Xa
+    subpath: pCAMBIA1391Xa
+  - name: pCAMBIA1391Xb
+    subpath: pCAMBIA1391Xb
+  - name: pCAMBIA1391Xc
+    subpath: pCAMBIA1391Xc
+  - name: pCAMBIA1391Z
+    subpath: pCAMBIA1391Z
+  - name: pCAMBIA2200
+    subpath: pCAMBIA2200
+  - name: pCAMBIA2201
+    subpath: pCAMBIA2201
+  - name: pCAMBIA2300
+    subpath: pCAMBIA2300
+  - name: pCAMBIA2301
+    subpath: pCAMBIA2301
+  - name: pCAMBIA3200
+    subpath: pCAMBIA3200
+  - name: pCAMBIA3201
+    subpath: pCAMBIA3201
+  - name: pCAMBIA3300
+    subpath: pCAMBIA3300
+  - name: pCAMBIA3301
+    subpath: pCAMBIA3301
+  - name: pCAMBIA5105
+    subpath: pCAMBIA5105
+  - name: pEarleyGate 100
+    subpath: pEarleyGate_100
+  - name: pEarleyGate 101
+    subpath: pEarleyGate_101
+  - name: pEarleyGate 102
+    subpath: pEarleyGate_102
+  - name: pEarleyGate 103
+    subpath: pEarleyGate_103
+  - name: pEarleyGate 104
+    subpath: pEarleyGate_104
+  - name: pEarleyGate 201
+    subpath: pEarleyGate_201
+  - name: pEarleyGate 202
+    subpath: pEarleyGate_202
+  - name: pEarleyGate 203
+    subpath: pEarleyGate_203
+  - name: pEarleyGate 204
+    subpath: pEarleyGate_204
+  - name: pEarleyGate 205
+    subpath: pEarleyGate_205
+  - name: pEarleyGate 301
+    subpath: pEarleyGate_301
+  - name: pEarleyGate 302
+    subpath: pEarleyGate_302
+  - name: pEarleyGate 303
+    subpath: pEarleyGate_303
+  - name: pEarleyGate 304
+    subpath: pEarleyGate_304
+  - name: pFGC5941
+    subpath: pFGC5941
+  - name: pGA643
+    subpath: pGA643
+  - name: pGreen
+    subpath: pGreen
+  - name: pGreen 0029
+    subpath: pGreen_0029
+  - name: pGreenII
+    subpath: pGreenII
+  - name: pGreenII 0049
+    subpath: pGreenII_0049
+  - name: pGreenII 0179
+    subpath: pGreenII_0179
+  - name: pGreenII 0229
+    subpath: pGreenII_0229
+  - name: pGreenII 0579
+    subpath: pGreenII_0579
+  - name: pHANNIBAL
+    subpath: pHANNIBAL
+  - name: pHELLSGATE
+    subpath: pHELLSGATE
+  - name: pHELLSGATE 12
+    subpath: pHELLSGATE_12
+  - name: pHELLSGATE 4
+    subpath: pHELLSGATE_4
+  - name: pHELLSGATE 8
+    subpath: pHELLSGATE_8
+  - name: pKANNIBAL
+    subpath: pKANNIBAL
+  - name: pPZP100
+    subpath: pPZP100
+  - name: pPZP101
+    subpath: pPZP101
+  - name: pPZP102
+    subpath: pPZP102
+  - name: pPZP111
+    subpath: pPZP111
+  - name: pPZP112
+    subpath: pPZP112
+  - name: pPZP121
+    subpath: pPZP121
+  - name: pPZP122
+    subpath: pPZP122
+  - name: pPZP200
+    subpath: pPZP200
+  - name: pPZP201
+    subpath: pPZP201
+  - name: pPZP202
+    subpath: pPZP202
+  - name: pPZP211
+    subpath: pPZP211
+  - name: pPZP212
+    subpath: pPZP212
+  - name: pPZP221
+    subpath: pPZP221
+  - name: pPZP222
+    subpath: pPZP222
+  - name: pRI 101-AN
+    subpath: pRI_101-AN
+  - name: pRI 101-ON
+    subpath: pRI_101-ON
+  - name: pRI 201-AN
+    subpath: pRI_201-AN
+  - name: pRI 201-ON
+    subpath: pRI_201-ON
+  - name: pRI 909
+    subpath: pRI_909
+  - name: pRI 910
+    subpath: pRI_910
+  - name: pSB1
+    subpath: pSB1
+  - name: pSB11
+    subpath: pSB11
+  - name: pSoup
+    subpath: pSoup
+fluorescent_protein_genes_and_plasmids:
+  name: Fluorescent Protein Genes & Plasmids
+  plasmids:
+  - name: AcGFP1
+    subpath: AcGFP1
+  - name: Azami-Green
+    subpath: Azami-Green
+  - name: Azurite BFP
+    subpath: Azurite_BFP
+  - name: BFP
+    subpath: BFP
+  - name: CFP
+    subpath: CFP
+  - name: Citrine
+    subpath: Citrine
+  - name: Clover
+    subpath: Clover
+  - name: CopGFP
+    subpath: CopGFP
+  - name: cp173Venus
+    subpath: cp173Venus
+  - name: Cycle 3 GFP
+    subpath: Cycle_3_GFP
+  - name: CyOFP1
+    subpath: CyOFP1
+  - name: CyPet
+    subpath: CyPet
+  - name: CyPet (humanized)
+    subpath: CyPet_(humanized)
+  - name: CyRFP1
+    subpath: CyRFP1
+  - name: d1EGFP
+    subpath: d1EGFP
+  - name: d2ECFP
+    subpath: d2ECFP
+  - name: d2EGFP
+    subpath: d2EGFP
+  - name: d2EYFP
+    subpath: d2EYFP
+  - name: d4EGFP
+    subpath: d4EGFP
+  - name: daGFP
+    subpath: daGFP
+  - name: Dendra2
+    subpath: Dendra2
+  - name: dKeima-Red
+    subpath: dKeima-Red
+  - name: dKeima570
+    subpath: dKeima570
+  - name: Dronpa-Green1
+    subpath: Dronpa-Green1
+  - name: Dronpa-Green3
+    subpath: Dronpa-Green3
+  - name: DsRed-Express
+    subpath: DsRed-Express
+  - name: DsRed-Express2
+    subpath: DsRed-Express2
+  - name: DsRed-Max
+    subpath: DsRed-Max
+  - name: DsRed-Monomer
+    subpath: DsRed-Monomer
+  - name: DsRed.T3
+    subpath: DsRed.T3
+  - name: DsRed1
+    subpath: DsRed1
+  - name: DsRed2
+    subpath: DsRed2
+  - name: dTomato
+    subpath: dTomato
+  - name: E2-Crimson
+    subpath: E2-Crimson
+  - name: E2-Orange
+    subpath: E2-Orange
+  - name: E2-Red_Green
+    subpath: E2-Red_Green
+  - name: EBFP
+    subpath: EBFP
+  - name: EBFP2
+    subpath: EBFP2
+  - name: ECFP
+    subpath: ECFP
+  - name: ecliptic pHluorin
+    subpath: ecliptic_pHluorin
+  - name: EGFP
+    subpath: EGFP
+  - name: Emerald GFP
+    subpath: Emerald_GFP
+  - name: EosFP
+    subpath: EosFP
+  - name: EYFP
+    subpath: EYFP
+  - name: FAPalpha2
+    subpath: FAPalpha2
+  - name: FAPbeta1
+    subpath: FAPbeta1
+  - name: Fast-FT
+    subpath: Fast-FT
+  - name: Fluorescent Timer
+    subpath: Fluorescent_Timer
+  - name: FusionRed
+    subpath: FusionRed
+  - name: Gamillus
+    subpath: Gamillus
+  - name: GFP
+    subpath: GFP
+  - name: GFPuv
+    subpath: GFPuv
+  - name: HcRed1
+    subpath: HcRed1
+  - name: hdKeima-Red
+    subpath: hdKeima-Red
+  - name: hdKeima570
+    subpath: hdKeima570
+  - name: hKikGR1
+    subpath: hKikGR1
+  - name: hKO
+    subpath: hKO
+  - name: hmAzami-Green
+    subpath: hmAzami-Green
+  - name: hMGFP
+    subpath: hMGFP
+  - name: hmKeima-Red
+    subpath: hmKeima-Red
+  - name: hmKeima8.5
+    subpath: hmKeima8.5
+  - name: hmKikGR1
+    subpath: hmKikGR1
+  - name: hmKO
+    subpath: hmKO
+  - name: hmKO2
+    subpath: hmKO2
+  - name: hmMiCy1
+    subpath: hmMiCy1
+  - name: hmUkG1
+    subpath: hmUkG1
+  - name: hrGFP
+    subpath: hrGFP
+  - name: IFP1.1
+    subpath: IFP1.1
+  - name: IFP1.4
+    subpath: IFP1.4
+  - name: IFP2.0
+    subpath: IFP2.0
+  - name: iRFP670
+    subpath: iRFP670
+  - name: iRFP682
+    subpath: iRFP682
+  - name: iRFP702
+    subpath: iRFP702
+  - name: iRFP713
+    subpath: iRFP713
+  - name: iRFP720
+    subpath: iRFP720
+  - name: Kaede
+    subpath: Kaede
+  - name: Katushka2S
+    subpath: Katushka2S
+  - name: KikGR1
+    subpath: KikGR1
+  - name: KillerOrange
+    subpath: KillerOrange
+  - name: KillerRed
+    subpath: KillerRed
+  - name: Kohinoor
+    subpath: Kohinoor
+  - name: Kusabira-Orange
+    subpath: Kusabira-Orange
+  - name: LanYFP
+    subpath: LanYFP
+  - name: LSSmKate1
+    subpath: LSSmKate1
+  - name: LSSmKate2
+    subpath: LSSmKate2
+  - name: LSSmOrange
+    subpath: LSSmOrange
+  - name: mAmetrine
+    subpath: mAmetrine
+  - name: mAmetrine1.1
+    subpath: mAmetrine1.1
+  - name: mApple
+    subpath: mApple
+  - name: mAzami-Green
+    subpath: mAzami-Green
+  - name: mBaoJin
+    subpath: mBaoJin
+  - name: mCardinal
+    subpath: mCardinal
+  - name: mCarmine
+    subpath: mCarmine
+  - name: mCerulean
+    subpath: mCerulean
+  - name: mCherry
+    subpath: mCherry
+  - name: mCherry2
+    subpath: mCherry2
+  - name: mCherry2C
+    subpath: mCherry2C
+  - name: mClavGR2
+    subpath: mClavGR2
+  - name: mClover2
+    subpath: mClover2
+  - name: mClover3
+    subpath: mClover3
+  - name: mCyRFP1
+    subpath: mCyRFP1
+  - name: mECFP
+    subpath: mECFP
+  - name: Medium-FT
+    subpath: Medium-FT
+  - name: mEGFP
+    subpath: mEGFP
+  - name: mEmerald
+    subpath: mEmerald
+  - name: mEos2
+    subpath: mEos2
+  - name: mEos3.1
+    subpath: mEos3.1
+  - name: mEos3.2
+    subpath: mEos3.2
+  - name: mEos4a
+    subpath: mEos4a
+  - name: mEos4b
+    subpath: mEos4b
+  - name: mEYFP
+    subpath: mEYFP
+  - name: mgfp5
+    subpath: mgfp5
+  - name: mGold
+    subpath: mGold
+  - name: mGreenLantern
+    subpath: mGreenLantern
+  - name: mHoneydew
+    subpath: mHoneydew
+  - name: MiCy
+    subpath: MiCy
+  - name: mIFP
+    subpath: mIFP
+  - name: miniSOG
+    subpath: miniSOG
+  - name: miRFP670
+    subpath: miRFP670
+  - name: miRFP703
+    subpath: miRFP703
+  - name: miRFP709
+    subpath: miRFP709
+  - name: mKalama1
+    subpath: mKalama1
+  - name: mKate2
+    subpath: mKate2
+  - name: mKeima-Red
+    subpath: mKeima-Red
+  - name: mKikGR1
+    subpath: mKikGR1
+  - name: mKO
+    subpath: mKO
+  - name: mKO2
+    subpath: mKO2
+  - name: mMaple
+    subpath: mMaple
+  - name: mMaroon1
+    subpath: mMaroon1
+  - name: mMiCy1
+    subpath: mMiCy1
+  - name: mNectarine
+    subpath: mNectarine
+  - name: mNeonGreen
+    subpath: mNeonGreen
+  - name: mNeptune
+    subpath: mNeptune
+  - name: mNeptune2
+    subpath: mNeptune2
+  - name: mNeptune2.5
+    subpath: mNeptune2.5
+  - name: mOrange
+    subpath: mOrange
+  - name: mOrange2
+    subpath: mOrange2
+  - name: moxGFP
+    subpath: moxGFP
+  - name: mPapaya1
+    subpath: mPapaya1
+  - name: mPlum
+    subpath: mPlum
+  - name: mRaspberry
+    subpath: mRaspberry
+  - name: mRFP1
+    subpath: mRFP1
+  - name: mRuby
+    subpath: mRuby
+  - name: mRuby2
+    subpath: mRuby2
+  - name: mRuby3
+    subpath: mRuby3
+  - name: mScarlet
+    subpath: mScarlet
+  - name: mScarlet-2I
+    subpath: mScarlet-2I
+  - name: mScarlet-H
+    subpath: mScarlet-H
+  - name: mScarlet-I
+    subpath: mScarlet-I
+  - name: mScarlet3
+    subpath: mScarlet3
+  - name: mseCFP
+    subpath: mseCFP
+  - name: msGFP2
+    subpath: msGFP2
+  - name: mStayGold (E138D)
+    subpath: mStayGold_(E138D)
+  - name: mStayGold(J)
+    subpath: mStayGold(J)
+  - name: mTagBFP2
+    subpath: mTagBFP2
+  - name: mTangerine
+    subpath: mTangerine
+  - name: mTFP1
+    subpath: mTFP1
+  - name: mTurquoise
+    subpath: mTurquoise
+  - name: mTurquoise2
+    subpath: mTurquoise2
+  - name: mUkG1
+    subpath: mUkG1
+  - name: mVenus
+    subpath: mVenus
+  - name: mWasabi
+    subpath: mWasabi
+  - name: PA-GFP
+    subpath: PA-GFP
+  - name: PA-TagRFP
+    subpath: PA-TagRFP
+  - name: pAcGFP1
+    subpath: pAcGFP1
+  - name: pAcGFP1-1
+    subpath: pAcGFP1-1
+  - name: pAcGFP1-C In-Fusion Ready
+    subpath: pAcGFP1-C_In-Fusion_Ready
+  - name: pAcGFP1-C1
+    subpath: pAcGFP1-C1
+  - name: pAcGFP1-C2
+    subpath: pAcGFP1-C2
+  - name: pAcGFP1-C3
+    subpath: pAcGFP1-C3
+  - name: pAcGFP1-N In-Fusion Ready
+    subpath: pAcGFP1-N_In-Fusion_Ready
+  - name: pAcGFP1-N1
+    subpath: pAcGFP1-N1
+  - name: pAcGFP1-N2
+    subpath: pAcGFP1-N2
+  - name: pAcGFP1-N3
+    subpath: pAcGFP1-N3
+  - name: pAG-S1
+    subpath: pAG-S1
+  - name: PAmCherry
+    subpath: PAmCherry
+  - name: PAmCherry1
+    subpath: PAmCherry1
+  - name: pAmCyan
+    subpath: pAmCyan
+  - name: pAmCyan1-C1
+    subpath: pAmCyan1-C1
+  - name: pAmCyan1-N1
+    subpath: pAmCyan1-N1
+  - name: PAmKate
+    subpath: PAmKate
+  - name: pAsRed2
+    subpath: pAsRed2
+  - name: pAsRed2-C1
+    subpath: pAsRed2-C1
+  - name: pAsRed2-N1
+    subpath: pAsRed2-N1
+  - name: pd1EGFP-N1
+    subpath: pd1EGFP-N1
+  - name: pd2ECFP-N1
+    subpath: pd2ECFP-N1
+  - name: pd2EGFP-N1
+    subpath: pd2EGFP-N1
+  - name: pd2EYFP-N1
+    subpath: pd2EYFP-N1
+  - name: pd4EGFP-N1
+    subpath: pd4EGFP-N1
+  - name: pDendra2
+    subpath: pDendra2
+  - name: pDendra2-C
+    subpath: pDendra2-C
+  - name: pDendra2-N
+    subpath: pDendra2-N
+  - name: pDG1-S1
+    subpath: pDG1-S1
+  - name: pDG3-S1
+    subpath: pDG3-S1
+  - name: pdKeima-Red-S1
+    subpath: pdKeima-Red-S1
+  - name: pdKeima570-S1
+    subpath: pdKeima570-S1
+  - name: pDsRed-Express
+    subpath: pDsRed-Express
+  - name: pDsRed-Express-1
+    subpath: pDsRed-Express-1
+  - name: pDsRed-Express-C1
+    subpath: pDsRed-Express-C1
+  - name: pDsRed-Express-N1
+    subpath: pDsRed-Express-N1
+  - name: pDsRed-Express2
+    subpath: pDsRed-Express2
+  - name: pDsRed-Express2-1
+    subpath: pDsRed-Express2-1
+  - name: pDsRed-Express2-C1
+    subpath: pDsRed-Express2-C1
+  - name: pDsRed-Express2-N1
+    subpath: pDsRed-Express2-N1
+  - name: pDsRed-Monomer-C In-Fusion Ready
+    subpath: pDsRed-Monomer-C_In-Fusion_Ready
+  - name: pDsRed-Monomer-C1
+    subpath: pDsRed-Monomer-C1
+  - name: pDsRed-Monomer-N In-Fusion Ready
+    subpath: pDsRed-Monomer-N_In-Fusion_Ready
+  - name: pDsRed-Monomer-N1
+    subpath: pDsRed-Monomer-N1
+  - name: pDsRed2
+    subpath: pDsRed2
+  - name: pDsRed2-1
+    subpath: pDsRed2-1
+  - name: pDsRed2-C1
+    subpath: pDsRed2-C1
+  - name: pDsRed2-N1
+    subpath: pDsRed2-N1
+  - name: pE2-Crimson
+    subpath: pE2-Crimson
+  - name: pE2-Crimson-C1
+    subpath: pE2-Crimson-C1
+  - name: pE2-Crimson-N1
+    subpath: pE2-Crimson-N1
+  - name: pECFP
+    subpath: pECFP
+  - name: pECFP-1
+    subpath: pECFP-1
+  - name: pECFP-C1
+    subpath: pECFP-C1
+  - name: pECFP-N1
+    subpath: pECFP-N1
+  - name: pEGFP
+    subpath: pEGFP
+  - name: pEGFP-1
+    subpath: pEGFP-1
+  - name: pEGFP-C1
+    subpath: pEGFP-C1
+  - name: pEGFP-C2
+    subpath: pEGFP-C2
+  - name: pEGFP-C3
+    subpath: pEGFP-C3
+  - name: pEGFP-N1
+    subpath: pEGFP-N1
+  - name: pEGFP-N2
+    subpath: pEGFP-N2
+  - name: pEGFP-N3
+    subpath: pEGFP-N3
+  - name: pEYFP
+    subpath: pEYFP
+  - name: pEYFP-1
+    subpath: pEYFP-1
+  - name: pEYFP-C1
+    subpath: pEYFP-C1
+  - name: pEYFP-N1
+    subpath: pEYFP-N1
+  - name: pFusionRed-B
+    subpath: pFusionRed-B
+  - name: pFusionRed-C
+    subpath: pFusionRed-C
+  - name: pFusionRed-N
+    subpath: pFusionRed-N
+  - name: pGFP
+    subpath: pGFP
+  - name: pGFPuv
+    subpath: pGFPuv
+  - name: pGLO
+    subpath: pGLO
+  - name: pHcRed1
+    subpath: pHcRed1
+  - name: pHcRed1-1
+    subpath: pHcRed1-1
+  - name: pHcRed1-C1
+    subpath: pHcRed1-C1
+  - name: pHcRed1-N1_1
+    subpath: pHcRed1-N1_1
+  - name: phdKeima-Red-S1
+    subpath: phdKeima-Red-S1
+  - name: phdKeima570-S1
+    subpath: phdKeima570-S1
+  - name: phKikGR1-S1
+    subpath: phKikGR1-S1
+  - name: phKO1-S1
+    subpath: phKO1-S1
+  - name: phmAG1-S1
+    subpath: phmAG1-S1
+  - name: phMGFP
+    subpath: phMGFP
+  - name: phmKeima-Red-S1
+    subpath: phmKeima-Red-S1
+  - name: phmKO1-S1
+    subpath: phmKO1-S1
+  - name: phmUkG1-S1
+    subpath: phmUkG1-S1
+  - name: pHRed
+    subpath: pHRed
+  - name: pHTomato
+    subpath: pHTomato
+  - name: pHuji
+    subpath: pHuji
+  - name: pKaede-S1
+    subpath: pKaede-S1
+  - name: pKatushka2S-B
+    subpath: pKatushka2S-B
+  - name: pKatushka2S-C
+    subpath: pKatushka2S-C
+  - name: pKatushka2S-N
+    subpath: pKatushka2S-N
+  - name: pKikGR1-S1
+    subpath: pKikGR1-S1
+  - name: pKillerOrange-B
+    subpath: pKillerOrange-B
+  - name: pKillerOrange-C
+    subpath: pKillerOrange-C
+  - name: pKillerOrange-N
+    subpath: pKillerOrange-N
+  - name: pKillerRed-B
+    subpath: pKillerRed-B
+  - name: pKillerRed-C
+    subpath: pKillerRed-C
+  - name: pKillerRed-N
+    subpath: pKillerRed-N
+  - name: pKindling-Red-B
+    subpath: pKindling-Red-B
+  - name: pKindling-Red-N
+    subpath: pKindling-Red-N
+  - name: pKO1-S1
+    subpath: pKO1-S1
+  - name: pLSSmOrange-C1
+    subpath: pLSSmOrange-C1
+  - name: pLSSmOrange-N1
+    subpath: pLSSmOrange-N1
+  - name: pmAG1-S1
+    subpath: pmAG1-S1
+  - name: pmBanana
+    subpath: pmBanana
+  - name: pmCherry
+    subpath: pmCherry
+  - name: pmCherry-1
+    subpath: pmCherry-1
+  - name: pmCherry-C1
+    subpath: pmCherry-C1
+  - name: pmCherry-N1
+    subpath: pmCherry-N1
+  - name: pMFAPalpha2
+    subpath: pMFAPalpha2
+  - name: pMFAPbeta1
+    subpath: pMFAPbeta1
+  - name: pMiCy1-S1
+    subpath: pMiCy1-S1
+  - name: pmKate2-C
+    subpath: pmKate2-C
+  - name: pmKate2-N
+    subpath: pmKate2-N
+  - name: pmKeima-Red-S1
+    subpath: pmKeima-Red-S1
+  - name: pmKikGR1-S1
+    subpath: pmKikGR1-S1
+  - name: pmKO1-S1
+    subpath: pmKO1-S1
+  - name: pmKO2-S1
+    subpath: pmKO2-S1
+  - name: pmMiCy1-S1
+    subpath: pmMiCy1-S1
+  - name: pmOrange
+    subpath: pmOrange
+  - name: pmOrange2
+    subpath: pmOrange2
+  - name: pmOrange2-C1
+    subpath: pmOrange2-C1
+  - name: pmOrange2-N1
+    subpath: pmOrange2-N1
+  - name: pmPlum
+    subpath: pmPlum
+  - name: pmRaspberry
+    subpath: pmRaspberry
+  - name: pmStrawberry
+    subpath: pmStrawberry
+  - name: pmUkG1-S1
+    subpath: pmUkG1-S1
+  - name: pNirFP-C
+    subpath: pNirFP-C
+  - name: pNirFP-N
+    subpath: pNirFP-N
+  - name: pPA-TagRFP-C
+    subpath: pPA-TagRFP-C
+  - name: pPA-TagRFP-N
+    subpath: pPA-TagRFP-N
+  - name: pPAmCherry-C1
+    subpath: pPAmCherry-C1
+  - name: pPAmCherry-N1
+    subpath: pPAmCherry-N1
+  - name: pPAmCherry1-C1
+    subpath: pPAmCherry1-C1
+  - name: pPAmCherry1-N1
+    subpath: pPAmCherry1-N1
+  - name: pPhi-Yellow-B
+    subpath: pPhi-Yellow-B
+  - name: pPhi-Yellow-C
+    subpath: pPhi-Yellow-C
+  - name: pPhi-Yellow-N
+    subpath: pPhi-Yellow-N
+  - name: pPhi-Yellow-PRL
+    subpath: pPhi-Yellow-PRL
+  - name: pPS-CFP2-C
+    subpath: pPS-CFP2-C
+  - name: pPS-CFP2-N
+    subpath: pPS-CFP2-N
+  - name: pPSmOrange-C1
+    subpath: pPSmOrange-C1
+  - name: pPSmOrange-N1
+    subpath: pPSmOrange-N1
+  - name: pRSET-BFP
+    subpath: pRSET-BFP
+  - name: pRSET-CFP
+    subpath: pRSET-CFP
+  - name: pRSET-EmGFP
+    subpath: pRSET-EmGFP
+  - name: PS-CFP2
+    subpath: PS-CFP2
+  - name: PSmOrange
+    subpath: PSmOrange
+  - name: PSmOrange2
+    subpath: PSmOrange2
+  - name: pTagBFP-C
+    subpath: pTagBFP-C
+  - name: pTagBFP-N
+    subpath: pTagBFP-N
+  - name: pTagCFP-C
+    subpath: pTagCFP-C
+  - name: pTagCFP-N
+    subpath: pTagCFP-N
+  - name: pTagGFP2-C
+    subpath: pTagGFP2-C
+  - name: pTagGFP2-N
+    subpath: pTagGFP2-N
+  - name: pTagRFP-C
+    subpath: pTagRFP-C
+  - name: pTagRFP-N
+    subpath: pTagRFP-N
+  - name: pTagYFP-C
+    subpath: pTagYFP-C
+  - name: pTagYFP-N
+    subpath: pTagYFP-N
+  - name: ptd-Tomato-N1
+    subpath: ptd-Tomato-N1
+  - name: ptdTomato
+    subpath: ptdTomato
+  - name: ptdTomato-C1
+    subpath: ptdTomato-C1
+  - name: pTimer
+    subpath: pTimer
+  - name: pTimer-1
+    subpath: pTimer-1
+  - name: pTurboFP602-B
+    subpath: pTurboFP602-B
+  - name: pTurboFP602-C
+    subpath: pTurboFP602-C
+  - name: pTurboFP602-N
+    subpath: pTurboFP602-N
+  - name: pTurboFP602-PRL
+    subpath: pTurboFP602-PRL
+  - name: pTurboGFP-B
+    subpath: pTurboGFP-B
+  - name: pTurboGFP-C
+    subpath: pTurboGFP-C
+  - name: pTurboGFP-N
+    subpath: pTurboGFP-N
+  - name: pTurboGFP-PRL
+    subpath: pTurboGFP-PRL
+  - name: pTurboRFP-B
+    subpath: pTurboRFP-B
+  - name: pTurboRFP-C
+    subpath: pTurboRFP-C
+  - name: pTurboRFP-N
+    subpath: pTurboRFP-N
+  - name: pTurboRFP-PRL
+    subpath: pTurboRFP-PRL
+  - name: pTurboYFP-B
+    subpath: pTurboYFP-B
+  - name: pTurboYFP-C
+    subpath: pTurboYFP-C
+  - name: pTurboYFP-N
+    subpath: pTurboYFP-N
+  - name: pTurboYFP-PRL
+    subpath: pTurboYFP-PRL
+  - name: pZsGreen
+    subpath: pZsGreen
+  - name: pZsGreen1-1
+    subpath: pZsGreen1-1
+  - name: pZsGreen1-C1
+    subpath: pZsGreen1-C1
+  - name: pZsGreen1-N1
+    subpath: pZsGreen1-N1
+  - name: pZsYellow
+    subpath: pZsYellow
+  - name: pZsYellow1-C1
+    subpath: pZsYellow1-C1
+  - name: pZsYellow1-N1
+    subpath: pZsYellow1-N1
+  - name: ratiometric pHluorin
+    subpath: ratiometric_pHluorin
+  - name: Rhacostoma GFP
+    subpath: Rhacostoma_GFP
+  - name: rsEGFP
+    subpath: rsEGFP
+  - name: rsEGFP2
+    subpath: rsEGFP2
+  - name: rsFusionRed1
+    subpath: rsFusionRed1
+  - name: rsFusionRed2
+    subpath: rsFusionRed2
+  - name: rsFusionRed3
+    subpath: rsFusionRed3
+  - name: rsTagRFP
+    subpath: rsTagRFP
+  - name: SBFP2
+    subpath: SBFP2
+  - name: SCFP3A
+    subpath: SCFP3A
+  - name: SGFP2
+    subpath: SGFP2
+  - name: SiriusGFP
+    subpath: SiriusGFP
+  - name: Skylan-NS
+    subpath: Skylan-NS
+  - name: Slow-FT
+    subpath: Slow-FT
+  - name: smURFP
+    subpath: smURFP
+  - name: StayGold
+    subpath: StayGold
+  - name: super-ecliptic pHluorin
+    subpath: super-ecliptic_pHluorin
+  - name: superfolder GFP
+    subpath: superfolder_GFP
+  - name: SuperNova
+    subpath: SuperNova
+  - name: SuperNova2
+    subpath: SuperNova2
+  - name: SYFP2
+    subpath: SYFP2
+  - name: TagBFP
+    subpath: TagBFP
+  - name: TagCFP
+    subpath: TagCFP
+  - name: TagGFP2
+    subpath: TagGFP2
+  - name: TagRFP
+    subpath: TagRFP
+  - name: TagRFP-T
+    subpath: TagRFP-T
+  - name: TagRFP657
+    subpath: TagRFP657
+  - name: TagYFP
+    subpath: TagYFP
+  - name: TDsmURFP
+    subpath: TDsmURFP
+  - name: tdTomato
+    subpath: tdTomato
+  - name: TurboFP602
+    subpath: TurboFP602
+  - name: TurboFP635
+    subpath: TurboFP635
+  - name: TurboGFP
+    subpath: TurboGFP
+  - name: TurboRFP
+    subpath: TurboRFP
+  - name: TurboYFP
+    subpath: TurboYFP
+  - name: UnaG
+    subpath: UnaG
+  - name: Venus
+    subpath: Venus
+  - name: Y-FAST
+    subpath: Y-FAST
+  - name: yeGFP
+    subpath: yeGFP
+  - name: YFP
+    subpath: YFP
+  - name: YPet
+    subpath: YPet
+  - name: YPet (humanized)
+    subpath: YPet_(humanized)
+  - name: ZsGreen
+    subpath: ZsGreen
+  - name: ZsGreen1
+    subpath: ZsGreen1
+  - name: ZsYellow1
+    subpath: ZsYellow1
+qiagen_vectors:
+  name: Qiagen Vectors
+  plasmids:
+  - name: pDrive
+    subpath: pDrive
+  - name: pDrive (linearized)
+    subpath: pDrive_(linearized)
+  - name: pIX 3.0
+    subpath: pIX_3.0
+  - name: pIX 4.0
+    subpath: pIX_4.0
+  - name: pQE-10
+    subpath: pQE-10
+  - name: pQE-100 DoubleTag
+    subpath: pQE-100_DoubleTag
+  - name: pQE-11
+    subpath: pQE-11
+  - name: pQE-12
+    subpath: pQE-12
+  - name: pQE-13
+    subpath: pQE-13
+  - name: pQE-14
+    subpath: pQE-14
+  - name: pQE-15
+    subpath: pQE-15
+  - name: pQE-16
+    subpath: pQE-16
+  - name: pQE-17
+    subpath: pQE-17
+  - name: pQE-18
+    subpath: pQE-18
+  - name: pQE-19
+    subpath: pQE-19
+  - name: pQE-22
+    subpath: pQE-22
+  - name: pQE-3
+    subpath: pQE-3
+  - name: pQE-30
+    subpath: pQE-30
+  - name: pQE-30 UA
+    subpath: pQE-30_UA
+  - name: pQE-30 UA (linearized)
+    subpath: pQE-30_UA_(linearized)
+  - name: pQE-30 Xa
+    subpath: pQE-30_Xa
+  - name: pQE-31
+    subpath: pQE-31
+  - name: pQE-32
+    subpath: pQE-32
+  - name: pQE-4
+    subpath: pQE-4
+  - name: pQE-40
+    subpath: pQE-40
+  - name: pQE-41
+    subpath: pQE-41
+  - name: pQE-42
+    subpath: pQE-42
+  - name: pQE-5
+    subpath: pQE-5
+  - name: pQE-50
+    subpath: pQE-50
+  - name: pQE-51
+    subpath: pQE-51
+  - name: pQE-52
+    subpath: pQE-52
+  - name: pQE-6
+    subpath: pQE-6
+  - name: pQE-60
+    subpath: pQE-60
+  - name: pQE-7
+    subpath: pQE-7
+  - name: pQE-70
+    subpath: pQE-70
+  - name: pQE-8
+    subpath: pQE-8
+  - name: pQE-80L
+    subpath: pQE-80L
+  - name: pQE-80L-Kan
+    subpath: pQE-80L-Kan
+  - name: pQE-81L
+    subpath: pQE-81L
+  - name: pQE-81L-Kan
+    subpath: pQE-81L-Kan
+  - name: pQE-82L
+    subpath: pQE-82L
+  - name: pQE-82L-Kan
+    subpath: pQE-82L-Kan
+  - name: pQE-9
+    subpath: pQE-9
+  - name: pQE-T7 (cloning region)
+    subpath: pQE-T7_(cloning_region)
+  - name: pQE-T7-1
+    subpath: pQE-T7-1
+  - name: pQE-T7-2
+    subpath: pQE-T7-2
+  - name: pQE-TriSystem
+    subpath: pQE-TriSystem
+  - name: pQE-TriSystem His-Strep1
+    subpath: pQE-TriSystem_His-Strep1
+  - name: pQE-TriSystem His-Strep2
+    subpath: pQE-TriSystem_His-Strep2
+  - name: pQE-TriSystem Strep
+    subpath: pQE-TriSystem_Strep
+  - name: pQE-Trisystem-5
+    subpath: pQE-Trisystem-5
+  - name: pQE-Trisystem-6
+    subpath: pQE-Trisystem-6
+  - name: pQE-TriSystem-7
+    subpath: pQE-TriSystem-7
+  - name: pREP4
+    subpath: pREP4
+  - name: TAGZyme pQE-1
+    subpath: TAGZyme_pQE-1
+  - name: TAGZyme pQE-2
+    subpath: TAGZyme_pQE-2
+gateway_cloning_vectors:
+  name: "Gateway\xAE Cloning Vectors"
+  plasmids:
+  - name: pAd BLOCK-iT-DEST
+    subpath: pAd_BLOCK-iT-DEST
+  - name: pAd CMV V5-DEST
+    subpath: pAd_CMV_V5-DEST
+  - name: pAd PL-DEST
+    subpath: pAd_PL-DEST
+  - name: pBAD-DEST49
+    subpath: pBAD-DEST49
+  - name: pcDNA-DEST40
+    subpath: pcDNA-DEST40
+  - name: pcDNA-DEST47
+    subpath: pcDNA-DEST47
+  - name: pcDNA-DEST53
+    subpath: pcDNA-DEST53
+  - name: pcDNA3.1 nV5-DEST
+    subpath: pcDNA3.1_nV5-DEST
+  - name: pcDNA3.2 capTEV-CT V5-DEST
+    subpath: pcDNA3.2_capTEV-CT_V5-DEST
+  - name: pcDNA3.2 capTEV-NT V5-DEST
+    subpath: pcDNA3.2_capTEV-NT_V5-DEST
+  - name: pcDNA3.2 V5-DEST
+    subpath: pcDNA3.2_V5-DEST
+  - name: pcDNA6.2 C-EmGFP-DEST
+    subpath: pcDNA6.2_C-EmGFP-DEST
+  - name: pcDNA6.2 C-YFP-DEST
+    subpath: pcDNA6.2_C-YFP-DEST
+  - name: pcDNA6.2 cGeneBLAzer-DEST
+    subpath: pcDNA6.2_cGeneBLAzer-DEST
+  - name: pcDNA6.2 cLumio-DEST
+    subpath: pcDNA6.2_cLumio-DEST
+  - name: pcDNA6.2 EmGFP-Bsd V5-DEST
+    subpath: pcDNA6.2_EmGFP-Bsd_V5-DEST
+  - name: pcDNA6.2 N-EmGFP-DEST
+    subpath: pcDNA6.2_N-EmGFP-DEST
+  - name: pcDNA6.2 N-YFP-DEST
+    subpath: pcDNA6.2_N-YFP-DEST
+  - name: pcDNA6.2 nGeneBLAzer-DEST
+    subpath: pcDNA6.2_nGeneBLAzer-DEST
+  - name: pcDNA6.2 nLumio-DEST
+    subpath: pcDNA6.2_nLumio-DEST
+  - name: pcDNA6.2 V5-DEST
+    subpath: pcDNA6.2_V5-DEST
+  - name: pcDNA6.2 V5-pL-DEST
+    subpath: pcDNA6.2_V5-pL-DEST
+  - name: pCMV SPORT6
+    subpath: pCMV_SPORT6
+  - name: pCMV SPORT6.1
+    subpath: pCMV_SPORT6.1
+  - name: pCOLA-2-DEST
+    subpath: pCOLA-2-DEST
+  - name: pCOLA-3-DEST
+    subpath: pCOLA-3-DEST
+  - name: pDEST R4-R3
+    subpath: pDEST_R4-R3
+  - name: pDEST R4-R3 Vector II
+    subpath: pDEST_R4-R3_Vector_II
+  - name: pDEST10
+    subpath: pDEST10
+  - name: pDEST14
+    subpath: pDEST14
+  - name: pDEST15
+    subpath: pDEST15
+  - name: pDEST17
+    subpath: pDEST17
+  - name: pDEST20
+    subpath: pDEST20
+  - name: pDEST24
+    subpath: pDEST24
+  - name: pDEST26
+    subpath: pDEST26
+  - name: pDEST27
+    subpath: pDEST27
+  - name: pDEST8
+    subpath: pDEST8
+  - name: pDONR P2r-P3
+    subpath: pDONR_P2r-P3
+  - name: pDONR P4-P1r
+    subpath: pDONR_P4-P1r
+  - name: pDONR Zeo
+    subpath: pDONR_Zeo
+  - name: pDONR201
+    subpath: pDONR201
+  - name: pDONR207
+    subpath: pDONR207
+  - name: pDONR221
+    subpath: pDONR221
+  - name: pDONR221 P1-P4
+    subpath: pDONR221_P1-P4
+  - name: pDONR221 P1-P5r
+    subpath: pDONR221_P1-P5r
+  - name: pDONR221 P3-P2
+    subpath: pDONR221_P3-P2
+  - name: pDONR221 P4r-P3r
+    subpath: pDONR221_P4r-P3r
+  - name: pDONR221 P5-P2
+    subpath: pDONR221_P5-P2
+  - name: pDONR221 P5-P4
+    subpath: pDONR221_P5-P4
+  - name: pDONR222
+    subpath: pDONR222
+  - name: pDONR223
+    subpath: pDONR223
+  - name: pEF-DEST51
+    subpath: pEF-DEST51
+  - name: pEF5 FRT V5-DEST
+    subpath: pEF5_FRT_V5-DEST
+  - name: pENTR GeneBLAzer
+    subpath: pENTR_GeneBLAzer
+  - name: pENTR11
+    subpath: pENTR11
+  - name: pENTR1A
+    subpath: pENTR1A
+  - name: pENTR2B
+    subpath: pENTR2B
+  - name: pENTR3C
+    subpath: pENTR3C
+  - name: pENTR4
+    subpath: pENTR4
+  - name: pET-53-DEST
+    subpath: pET-53-DEST
+  - name: pET-54-DEST
+    subpath: pET-54-DEST
+  - name: pET-55-DEST
+    subpath: pET-55-DEST
+  - name: pET-56-DEST
+    subpath: pET-56-DEST
+  - name: pET-57-DEST
+    subpath: pET-57-DEST
+  - name: pET-58-DEST
+    subpath: pET-58-DEST
+  - name: pET-59-DEST
+    subpath: pET-59-DEST
+  - name: pET-60-DEST
+    subpath: pET-60-DEST
+  - name: pET-61-DEST
+    subpath: pET-61-DEST
+  - name: pET-62-DEST
+    subpath: pET-62-DEST
+  - name: pET-DEST42
+    subpath: pET-DEST42
+  - name: pET104-DEST
+    subpath: pET104-DEST
+  - name: pET104.1-DEST
+    subpath: pET104.1-DEST
+  - name: pET160-DEST
+    subpath: pET160-DEST
+  - name: pET161-DEST
+    subpath: pET161-DEST
+  - name: pEXP1-DEST
+    subpath: pEXP1-DEST
+  - name: pEXP2-DEST
+    subpath: pEXP2-DEST
+  - name: pEXP3-DEST
+    subpath: pEXP3-DEST
+  - name: pEXP4-DEST
+    subpath: pEXP4-DEST
+  - name: pHELLSGATE
+    subpath: pHELLSGATE
+  - name: pHELLSGATE 12
+    subpath: pHELLSGATE_12
+  - name: pHELLSGATE 4
+    subpath: pHELLSGATE_4
+  - name: pHELLSGATE 8
+    subpath: pHELLSGATE_8
+  - name: pIB V5-His-DEST
+    subpath: pIB_V5-His-DEST
+  - name: pLenti4 BLOCK-iT-DEST
+    subpath: pLenti4_BLOCK-iT-DEST
+  - name: pLenti4 V5-DEST
+    subpath: pLenti4_V5-DEST
+  - name: pLenti6 BLOCK-iT-DEST
+    subpath: pLenti6_BLOCK-iT-DEST
+  - name: pLenti6 capTEV-CT-DEST
+    subpath: pLenti6_capTEV-CT-DEST
+  - name: pLenti6 capTEV-NT-DEST1
+    subpath: pLenti6_capTEV-NT-DEST1
+  - name: pLenti6 UbC V5-DEST
+    subpath: pLenti6_UbC_V5-DEST
+  - name: pLenti6 V5-DEST
+    subpath: pLenti6_V5-DEST
+  - name: pLenti6.2 C-Lumio V5-DEST
+    subpath: pLenti6.2_C-Lumio_V5-DEST
+  - name: pLenti6.2 N-Lumio V5-DEST
+    subpath: pLenti6.2_N-Lumio_V5-DEST
+  - name: pLenti6.2 V5-DEST
+    subpath: pLenti6.2_V5-DEST
+  - name: pLenti6.3 TO V5-DEST
+    subpath: pLenti6.3_TO_V5-DEST
+  - name: pLenti6.3 V5-DEST
+    subpath: pLenti6.3_V5-DEST
+  - name: pLenti6.4 R4R2 V5-DEST
+    subpath: pLenti6.4_R4R2_V5-DEST
+  - name: pLenti7.3 V5-DEST
+    subpath: pLenti7.3_V5-DEST
+  - name: pMT BioEase-DEST
+    subpath: pMT_BioEase-DEST
+  - name: pMT-DEST48
+    subpath: pMT-DEST48
+  - name: pSCREEN-iT lacZ-DEST
+    subpath: pSCREEN-iT_lacZ-DEST
+  - name: pT-REx-DEST30
+    subpath: pT-REx-DEST30
+  - name: pT-REx-DEST31
+    subpath: pT-REx-DEST31
+  - name: pYES-DEST52
+    subpath: pYES-DEST52
+  - name: Reading Frame Cassette A
+    subpath: Reading_Frame_Cassette_A
+  - name: Reading Frame Cassette B
+    subpath: Reading_Frame_Cassette_B
+  - name: Reading Frame Cassette C.1
+    subpath: Reading_Frame_Cassette_C.1
+structural_genomics_vectors:
+  name: Structural Genomics Vectors
+  plasmids:
+  - name: p11
+    subpath: p11
+  - name: p15Tv-L
+    subpath: p15Tv-L
+  - name: p283
+    subpath: p283
+  - name: pBEN1-SGC
+    subpath: pBEN1-SGC
+  - name: pBEN1-SGC (linearized)
+    subpath: pBEN1-SGC_(linearized)
+  - name: pDB-HisGST
+    subpath: pDB-HisGST
+  - name: pDB.GST
+    subpath: pDB.GST
+  - name: pDB.His.MBP
+    subpath: pDB.His.MBP
+  - name: pDB.His.NusA
+    subpath: pDB.His.NusA
+  - name: pDB.His.TRX
+    subpath: pDB.His.TRX
+  - name: pDB.TRX
+    subpath: pDB.TRX
+  - name: pEU-GST-FV
+    subpath: pEU-GST-FV
+  - name: pEU-His-FV
+    subpath: pEU-His-FV
+  - name: pEU-HSBC
+    subpath: pEU-HSBC
+  - name: pFB-LIC-Bse
+    subpath: pFB-LIC-Bse
+  - name: pFB-LIC-Bse (linearized)
+    subpath: pFB-LIC-Bse_(linearized)
+  - name: pH3c-LIC
+    subpath: pH3c-LIC
+  - name: pH3c-LIC (linearized)
+    subpath: pH3c-LIC_(linearized)
+  - name: pHM3C-LIC
+    subpath: pHM3C-LIC
+  - name: pHM3C-LIC (linearized)
+    subpath: pHM3C-LIC_(linearized)
+  - name: pLIC-CH
+    subpath: pLIC-CH
+  - name: pLIC-CH (linearized)
+    subpath: pLIC-CH_(linearized)
+  - name: pLIC-EGFP
+    subpath: pLIC-EGFP
+  - name: pLIC-EGFP (linearized)
+    subpath: pLIC-EGFP_(linearized)
+  - name: pLIC-SGC1
+    subpath: pLIC-SGC1
+  - name: pLIC-SGC1 (linearized)
+    subpath: pLIC-SGC1_(linearized)
+  - name: pMCentr1
+    subpath: pMCentr1
+  - name: pMCentr1 (linearized)
+    subpath: pMCentr1_(linearized)
+  - name: pMCentr2
+    subpath: pMCentr2
+  - name: pMCentr2 (linearized)
+    subpath: pMCentr2_(linearized)
+  - name: pMCentr3
+    subpath: pMCentr3
+  - name: pMCentr3 (linearized)
+    subpath: pMCentr3_(linearized)
+  - name: pMCSG10
+    subpath: pMCSG10
+  - name: pMCSG10 (linearized)
+    subpath: pMCSG10_(linearized)
+  - name: pMCSG11
+    subpath: pMCSG11
+  - name: pMCSG11 (linearized)
+    subpath: pMCSG11_(linearized)
+  - name: pMCSG12
+    subpath: pMCSG12
+  - name: pMCSG12 (linearized)
+    subpath: pMCSG12_(linearized)
+  - name: pMCSG13
+    subpath: pMCSG13
+  - name: pMCSG13 (linearized)
+    subpath: pMCSG13_(linearized)
+  - name: pMCSG14
+    subpath: pMCSG14
+  - name: pMCSG14 (linearized)
+    subpath: pMCSG14_(linearized)
+  - name: pMCSG17
+    subpath: pMCSG17
+  - name: pMCSG17 (linearized)
+    subpath: pMCSG17_(linearized)
+  - name: pMCSG18
+    subpath: pMCSG18
+  - name: pMCSG18 (linearized)
+    subpath: pMCSG18_(linearized)
+  - name: pMCSG19
+    subpath: pMCSG19
+  - name: pMCSG19 (linearized)
+    subpath: pMCSG19_(linearized)
+  - name: pMCSG19B
+    subpath: pMCSG19B
+  - name: pMCSG19B (linearized)
+    subpath: pMCSG19B_(linearized)
+  - name: pMCSG19C
+    subpath: pMCSG19C
+  - name: pMCSG19C (linearized)
+    subpath: pMCSG19C_(linearized)
+  - name: pMCSG20
+    subpath: pMCSG20
+  - name: pMCSG20 (linearized)
+    subpath: pMCSG20_(linearized)
+  - name: pMCSG21
+    subpath: pMCSG21
+  - name: pMCSG21 (linearized)
+    subpath: pMCSG21_(linearized)
+  - name: pMCSG22
+    subpath: pMCSG22
+  - name: pMCSG22 (linearized)
+    subpath: pMCSG22_(linearized)
+  - name: pMCSG23
+    subpath: pMCSG23
+  - name: pMCSG23 (linearized)
+    subpath: pMCSG23_(linearized)
+  - name: pMCSG24
+    subpath: pMCSG24
+  - name: pMCSG24 (linearized)
+    subpath: pMCSG24_(linearized)
+  - name: pMCSG25
+    subpath: pMCSG25
+  - name: pMCSG25 (linearized)
+    subpath: pMCSG25_(linearized)
+  - name: pMCSG26
+    subpath: pMCSG26
+  - name: pMCSG26 (linearized)
+    subpath: pMCSG26_(linearized)
+  - name: pMCSG27
+    subpath: pMCSG27
+  - name: pMCSG27 (linearized)
+    subpath: pMCSG27_(linearized)
+  - name: pMCSG28
+    subpath: pMCSG28
+  - name: pMCSG28 (linearized)
+    subpath: pMCSG28_(linearized)
+  - name: pMCSG29
+    subpath: pMCSG29
+  - name: pMCSG29 (linearized)
+    subpath: pMCSG29_(linearized)
+  - name: pMCSG30
+    subpath: pMCSG30
+  - name: pMCSG30 (linearized)
+    subpath: pMCSG30_(linearized)
+  - name: pMCSG31
+    subpath: pMCSG31
+  - name: pMCSG31 (linearized)
+    subpath: pMCSG31_(linearized)
+  - name: pMCSG32
+    subpath: pMCSG32
+  - name: pMCSG32 (linearized)
+    subpath: pMCSG32_(linearized)
+  - name: pMCSG33
+    subpath: pMCSG33
+  - name: pMCSG33 (linearized)
+    subpath: pMCSG33_(linearized)
+  - name: pMCSG34
+    subpath: pMCSG34
+  - name: pMCSG34 (linearized)
+    subpath: pMCSG34_(linearized)
+  - name: pMCSG34B
+    subpath: pMCSG34B
+  - name: pMCSG34B (linearized)
+    subpath: pMCSG34B_(linearized)
+  - name: pMCSG35
+    subpath: pMCSG35
+  - name: pMCSG35 (linearized)
+    subpath: pMCSG35_(linearized)
+  - name: pMCSG35B
+    subpath: pMCSG35B
+  - name: pMCSG35B (linearized)
+    subpath: pMCSG35B_(linearized)
+  - name: pMCSG37
+    subpath: pMCSG37
+  - name: pMCSG37 (linearized)
+    subpath: pMCSG37_(linearized)
+  - name: pMCSG38
+    subpath: pMCSG38
+  - name: pMCSG38 (linearized)
+    subpath: pMCSG38_(linearized)
+  - name: pMCSG38C
+    subpath: pMCSG38C
+  - name: pMCSG38C (linearized)
+    subpath: pMCSG38C_(linearized)
+  - name: pMCSG39
+    subpath: pMCSG39
+  - name: pMCSG39 (linearized)
+    subpath: pMCSG39_(linearized)
+  - name: pMCSG40
+    subpath: pMCSG40
+  - name: pMCSG40 (linearized)
+    subpath: pMCSG40_(linearized)
+  - name: pMCSG41
+    subpath: pMCSG41
+  - name: pMCSG41 (linearized)
+    subpath: pMCSG41_(linearized)
+  - name: pMCSG42
+    subpath: pMCSG42
+  - name: pMCSG42 (linearized)
+    subpath: pMCSG42_(linearized)
+  - name: pMCSG43
+    subpath: pMCSG43
+  - name: pMCSG43 (linearized)
+    subpath: pMCSG43_(linearized)
+  - name: pMCSG46
+    subpath: pMCSG46
+  - name: pMCSG46 (linearized)
+    subpath: pMCSG46_(linearized)
+  - name: pMCSG48
+    subpath: pMCSG48
+  - name: pMCSG48 (linearized)
+    subpath: pMCSG48_(linearized)
+  - name: pMCSG49
+    subpath: pMCSG49
+  - name: pMCSG49 (linearized)
+    subpath: pMCSG49_(linearized)
+  - name: pMCSG50
+    subpath: pMCSG50
+  - name: pMCSG50 (linearized)
+    subpath: pMCSG50_(linearized)
+  - name: pMCSG51
+    subpath: pMCSG51
+  - name: pMCSG51 (linearized)
+    subpath: pMCSG51_(linearized)
+  - name: pMCSG52
+    subpath: pMCSG52
+  - name: pMCSG52 (linearized)
+    subpath: pMCSG52_(linearized)
+  - name: pMCSG53
+    subpath: pMCSG53
+  - name: pMCSG53 (linearized)
+    subpath: pMCSG53_(linearized)
+  - name: pMCSG54
+    subpath: pMCSG54
+  - name: pMCSG54 (linearized)
+    subpath: pMCSG54_(linearized)
+  - name: pMCSG55
+    subpath: pMCSG55
+  - name: pMCSG55 (linearized)
+    subpath: pMCSG55_(linearized)
+  - name: pMCSG56
+    subpath: pMCSG56
+  - name: pMCSG56 (linearized)
+    subpath: pMCSG56_(linearized)
+  - name: pMCSG57
+    subpath: pMCSG57
+  - name: pMCSG57 (linearized)
+    subpath: pMCSG57_(linearized)
+  - name: pMCSG58
+    subpath: pMCSG58
+  - name: pMCSG58 (linearized)
+    subpath: pMCSG58_(linearized)
+  - name: pMCSG59
+    subpath: pMCSG59
+  - name: pMCSG59 (linearized)
+    subpath: pMCSG59_(linearized)
+  - name: pMCSG60
+    subpath: pMCSG60
+  - name: pMCSG60 (linearized)
+    subpath: pMCSG60_(linearized)
+  - name: pMCSG61
+    subpath: pMCSG61
+  - name: pMCSG61 (linearized)
+    subpath: pMCSG61_(linearized)
+  - name: pMCSG62
+    subpath: pMCSG62
+  - name: pMCSG62 (linearized)
+    subpath: pMCSG62_(linearized)
+  - name: pMCSG63
+    subpath: pMCSG63
+  - name: pMCSG63 (linearized)
+    subpath: pMCSG63_(linearized)
+  - name: pMCSG64
+    subpath: pMCSG64
+  - name: pMCSG64 (linearized)
+    subpath: pMCSG64_(linearized)
+  - name: pMCSG65
+    subpath: pMCSG65
+  - name: pMCSG65 (linearized)
+    subpath: pMCSG65_(linearized)
+  - name: pMCSG66
+    subpath: pMCSG66
+  - name: pMCSG66 (linearized)
+    subpath: pMCSG66_(linearized)
+  - name: pMCSG67
+    subpath: pMCSG67
+  - name: pMCSG67 (linearized)
+    subpath: pMCSG67_(linearized)
+  - name: pMCSG68
+    subpath: pMCSG68
+  - name: pMCSG68 (linearized)
+    subpath: pMCSG68_(linearized)
+  - name: pMCSG69
+    subpath: pMCSG69
+  - name: pMCSG69 (linearized)
+    subpath: pMCSG69_(linearized)
+  - name: pMCSG7
+    subpath: pMCSG7
+  - name: pMCSG7 (linearized)
+    subpath: pMCSG7_(linearized)
+  - name: pMCSG70
+    subpath: pMCSG70
+  - name: pMCSG70 (linearized)
+    subpath: pMCSG70_(linearized)
+  - name: pMCSG71
+    subpath: pMCSG71
+  - name: pMCSG71 (linearized)
+    subpath: pMCSG71_(linearized)
+  - name: pMCSG73
+    subpath: pMCSG73
+  - name: pMCSG73 (linearized)
+    subpath: pMCSG73_(linearized)
+  - name: pMCSG75
+    subpath: pMCSG75
+  - name: pMCSG75 (linearized)
+    subpath: pMCSG75_(linearized)
+  - name: pMCSG76
+    subpath: pMCSG76
+  - name: pMCSG76 (linearized)
+    subpath: pMCSG76_(linearized)
+  - name: pMCSG77
+    subpath: pMCSG77
+  - name: pMCSG77 (linearized)
+    subpath: pMCSG77_(linearized)
+  - name: pMCSG79
+    subpath: pMCSG79
+  - name: pMCSG79 (linearized)
+    subpath: pMCSG79_(linearized)
+  - name: pMCSG8
+    subpath: pMCSG8
+  - name: pMCSG8 (linearized)
+    subpath: pMCSG8_(linearized)
+  - name: pMCSG81
+    subpath: pMCSG81
+  - name: pMCSG81 (linearized)
+    subpath: pMCSG81_(linearized)
+  - name: pMCSG9
+    subpath: pMCSG9
+  - name: pMCSG9 (linearized)
+    subpath: pMCSG9_(linearized)
+  - name: pNH-TrxT
+    subpath: pNH-TrxT
+  - name: pNH-TrxT (linearized)
+    subpath: pNH-TrxT_(linearized)
+  - name: pNIC-CH
+    subpath: pNIC-CH
+  - name: pNIC-CH (linearized)
+    subpath: pNIC-CH_(linearized)
+  - name: pNIC-CTHF
+    subpath: pNIC-CTHF
+  - name: pNIC-CTHF (linearized)
+    subpath: pNIC-CTHF_(linearized)
+  - name: pNIC-Zb
+    subpath: pNIC-Zb
+  - name: pNIC-Zb (linearized)
+    subpath: pNIC-Zb_(linearized)
+  - name: pNIC28-Bsa4
+    subpath: pNIC28-Bsa4
+  - name: pNIC28-Bsa4 (linearized)
+    subpath: pNIC28-Bsa4_(linearized)
+  - name: pNYCOMPS-LIC-FH10T+ (N term)
+    subpath: pNYCOMPS-LIC-FH10T%2B_(N_term)
+  - name: pNYCOMPS-LIC-FH10T+ (N term) - linearized
+    subpath: pNYCOMPS-LIC-FH10T%2B_(N_term)_-_linearized
+  - name: pSpeedET
+    subpath: pSpeedET
+  - name: pVP13
+    subpath: pVP13
+  - name: pVP16
+    subpath: pVP16
+  - name: pVP33A
+    subpath: pVP33A
+  - name: pVP33K
+    subpath: pVP33K
+  - name: pVP56A
+    subpath: pVP56A
+  - name: pVP56K
+    subpath: pVP56K
+  - name: pVP65K
+    subpath: pVP65K
+  - name: pVP68K
+    subpath: pVP68K
+  - name: pVP81K
+    subpath: pVP81K
+  - name: pVP91A
+    subpath: pVP91A
+image_consortium_plasmids:
+  name: I.M.A.G.E. Consortium Plasmids
+  plasmids:
+  - name: Lafmid BA
+    subpath: Lafmid_BA
+  - name: pAD-GAL4
+    subpath: pAD-GAL4
+  - name: pAMP1
+    subpath: pAMP1
+  - name: pAMP10
+    subpath: pAMP10
+  - name: pBK-CMV
+    subpath: pBK-CMV
+  - name: pBluescribe (modified)
+    subpath: pBluescribe_(modified)
+  - name: pBluescript II KS(+)
+    subpath: pBluescript_II_KS(%2B)
+  - name: pBluescript II SK(+)
+    subpath: pBluescript_II_SK(%2B)
+  - name: pBluescript KS(+)
+    subpath: pBluescript_KS(%2B)
+  - name: pBluescript SK(+)
+    subpath: pBluescript_SK(%2B)
+  - name: pBluescript SK(-)
+    subpath: pBluescript_SK(-)
+  - name: pBluescript-FL
+    subpath: pBluescript-FL
+  - name: pBluescriptR
+    subpath: pBluescriptR
+  - name: pcDNA3
+    subpath: pcDNA3
+  - name: pcDNA3.1 Zeo(+)
+    subpath: pcDNA3.1_Zeo(%2B)
+  - name: pcDNA3.1(+)
+    subpath: pcDNA3.1(%2B)
+  - name: pcDNA3.1(-)
+    subpath: pcDNA3.1(-)
+  - name: pcDNAI
+    subpath: pcDNAI
+  - name: pcDNAII
+    subpath: pcDNAII
+  - name: pCMV SPORT
+    subpath: pCMV_SPORT
+  - name: pCMV SPORT2
+    subpath: pCMV_SPORT2
+  - name: pCMV SPORT4
+    subpath: pCMV_SPORT4
+  - name: pCMV SPORT6
+    subpath: pCMV_SPORT6
+  - name: pCMV SPORT6.1
+    subpath: pCMV_SPORT6.1
+  - name: pCMV SPORT6ccdB
+    subpath: pCMV_SPORT6ccdB
+  - name: pCR-Blunt II-TOPO
+    subpath: pCR-Blunt_II-TOPO
+  - name: pCR-Blunt II-TOPO (linearized)
+    subpath: pCR-Blunt_II-TOPO_(linearized)
+  - name: pCR-XL-TOPO
+    subpath: pCR-XL-TOPO
+  - name: pCR-XL-TOPO (linearized)
+    subpath: pCR-XL-TOPO_(linearized)
+  - name: pCR2.1-TOPO
+    subpath: pCR2.1-TOPO
+  - name: pCR2.1-TOPO (linearized)
+    subpath: pCR2.1-TOPO_(linearized)
+  - name: pCR3.1
+    subpath: pCR3.1
+  - name: pCR3.1 (linearized)
+    subpath: pCR3.1_(linearized)
+  - name: pCR4-TOPO
+    subpath: pCR4-TOPO
+  - name: pCR4-TOPO (linearized)
+    subpath: pCR4-TOPO_(linearized)
+  - name: pCS105
+    subpath: pCS105
+  - name: pCS107
+    subpath: pCS107
+  - name: pCS108
+    subpath: pCS108
+  - name: pCS2+
+    subpath: pCS2%2B
+  - name: pCS22+
+    subpath: pCS22%2B
+  - name: pCS2G
+    subpath: pCS2G
+  - name: pDNR-Dual
+    subpath: pDNR-Dual
+  - name: pDNR-LIB
+    subpath: pDNR-LIB
+  - name: pDONR201
+    subpath: pDONR201
+  - name: pDONR223
+    subpath: pDONR223
+  - name: pExpress-1
+    subpath: pExpress-1
+  - name: pME18S-FL3
+    subpath: pME18S-FL3
+  - name: pOTB7
+    subpath: pOTB7
+  - name: pOTB7-3
+    subpath: pOTB7-3
+  - name: pOTB7a
+    subpath: pOTB7a
+  - name: pPCR-Script Amp SK(+)
+    subpath: pPCR-Script_Amp_SK(%2B)
+  - name: pRKW2
+    subpath: pRKW2
+  - name: pSPORT 1
+    subpath: pSPORT_1
+  - name: pSPORT 2
+    subpath: pSPORT_2
+  - name: pT7T3D-PacI
+    subpath: pT7T3D-PacI
+  - name: pUC19
+    subpath: pUC19
+  - name: pYX-Asc
+    subpath: pYX-Asc
+  - name: pZErO-2
+    subpath: pZErO-2
+  - name: pZL1
+    subpath: pZL1
+ta_and_gc_cloning_vectors:
+  name: TA and GC Cloning Vectors
+  plasmids:
+  - name: Allele TA Vector (linearized)
+    subpath: Allele_TA_Vector_(linearized)
+  - name: pBAD Thio-TOPO (linearized)
+    subpath: pBAD_Thio-TOPO_(linearized)
+  - name: pBAD-TOPO (linearized)
+    subpath: pBAD-TOPO_(linearized)
+  - name: pBlue-TOPO (linearized)
+    subpath: pBlue-TOPO_(linearized)
+  - name: pcDNA3.1 CT-GFP-TOPO (linearized)
+    subpath: pcDNA3.1_CT-GFP-TOPO_(linearized)
+  - name: pcDNA3.1 NT-GFP-TOPO (linearized)
+    subpath: pcDNA3.1_NT-GFP-TOPO_(linearized)
+  - name: pcDNA3.1 V5-His-TOPO (linearized)
+    subpath: pcDNA3.1_V5-His-TOPO_(linearized)
+  - name: pcDNA3.3-TOPO (linearized)
+    subpath: pcDNA3.3-TOPO_(linearized)
+  - name: pcDNA3.4-TOPO (linearized)
+    subpath: pcDNA3.4-TOPO_(linearized)
+  - name: pcDNA4 HisMax-TOPO (linearized)
+    subpath: pcDNA4_HisMax-TOPO_(linearized)
+  - name: pcDNA5 FRT TO-TOPO (linearized)
+    subpath: pcDNA5_FRT_TO-TOPO_(linearized)
+  - name: pcDNA5 FRT V5-His-TOPO (linearized)
+    subpath: pcDNA5_FRT_V5-His-TOPO_(linearized)
+  - name: pcDNA6.2 C-EmGFP-GW TOPO (linearized)
+    subpath: pcDNA6.2_C-EmGFP-GW_TOPO_(linearized)
+  - name: pcDNA6.2 C-YFP-GW TOPO (linearized)
+    subpath: pcDNA6.2_C-YFP-GW_TOPO_(linearized)
+  - name: pcDNA6.2 N-EmGFP-GW TOPO (linearized)
+    subpath: pcDNA6.2_N-EmGFP-GW_TOPO_(linearized)
+  - name: pCR-XL-TOPO (linearized)
+    subpath: pCR-XL-TOPO_(linearized)
+  - name: pCR2.1-TOPO (linearized)
+    subpath: pCR2.1-TOPO_(linearized)
+  - name: pCR4-TOPO (linearized)
+    subpath: pCR4-TOPO_(linearized)
+  - name: pCR8 GW TOPO (linearized)
+    subpath: pCR8_GW_TOPO_(linearized)
+  - name: pCRII-TOPO (linearized)
+    subpath: pCRII-TOPO_(linearized)
+  - name: pDrive (linearized)
+    subpath: pDrive_(linearized)
+  - name: pEF6 V5-His-TOPO (linearized)
+    subpath: pEF6_V5-His-TOPO_(linearized)
+  - name: pENTR5'-TOPO (linearized)
+    subpath: pENTR5%27-TOPO_(linearized)
+  - name: pET SUMO (linearized)
+    subpath: pET_SUMO_(linearized)
+  - name: pETBlue-1 AccepTor
+    subpath: pETBlue-1_AccepTor
+  - name: pEXP5-CT TOPO (linearized)
+    subpath: pEXP5-CT_TOPO_(linearized)
+  - name: pEXP5-NT TOPO (linearized)
+    subpath: pEXP5-NT_TOPO_(linearized)
+  - name: pGC Blue (linearized)
+    subpath: pGC_Blue_(linearized)
+  - name: pGEM-T (linearized)
+    subpath: pGEM-T_(linearized)
+  - name: pGEM-T Easy (linearized)
+    subpath: pGEM-T_Easy_(linearized)
+  - name: pGlow-TOPO (linearized)
+    subpath: pGlow-TOPO_(linearized)
+  - name: pIB V5-His-TOPO (linearized)
+    subpath: pIB_V5-His-TOPO_(linearized)
+  - name: pJAZZ-OK GC (left arm)
+    subpath: pJAZZ-OK_GC_(left_arm)
+  - name: pJAZZ-OK GC (right arm)
+    subpath: pJAZZ-OK_GC_(right_arm)
+  - name: pLenti6.3 V5-TOPO (linearized)
+    subpath: pLenti6.3_V5-TOPO_(linearized)
+  - name: pLenti7.3 V5-TOPO (linearized)
+    subpath: pLenti7.3_V5-TOPO_(linearized)
+  - name: pLPS-T (linearized)
+    subpath: pLPS-T_(linearized)
+  - name: pLUG (linearized)
+    subpath: pLUG_(linearized)
+  - name: pLUG-Multi (linearized)
+    subpath: pLUG-Multi_(linearized)
+  - name: pMT V5-His-TOPO (linearized)
+    subpath: pMT_V5-His-TOPO_(linearized)
+  - name: pOptiVEC-TOPO (linearized)
+    subpath: pOptiVEC-TOPO_(linearized)
+  - name: pPrime (linearized)
+    subpath: pPrime_(linearized)
+  - name: pQE-30 UA (linearized)
+    subpath: pQE-30_UA_(linearized)
+  - name: pSC-A-amp kan (linearized)
+    subpath: pSC-A-amp_kan_(linearized)
+  - name: pSecTag FRT V5-His-TOPO (linearized)
+    subpath: pSecTag_FRT_V5-His-TOPO_(linearized)
+  - name: pSMART GC HK (linearized)
+    subpath: pSMART_GC_HK_(linearized)
+  - name: pSMART GC LK (linearized)
+    subpath: pSMART_GC_LK_(linearized)
+  - name: pSpark TA
+    subpath: pSpark_TA
+  - name: pSpark TA Done
+    subpath: pSpark_TA_Done
+  - name: pSTBlue-1 AccepTor
+    subpath: pSTBlue-1_AccepTor
+  - name: pT7Blue T-Vector
+    subpath: pT7Blue_T-Vector
+  - name: pTA Plus (linearized)
+    subpath: pTA_Plus_(linearized)
+  - name: pTargeT (linearized)
+    subpath: pTargeT_(linearized)
+  - name: pTOP TA V2 (linearized)
+    subpath: pTOP_TA_V2_(linearized)
+  - name: pTrcHis-TOPO (linearized)
+    subpath: pTrcHis-TOPO_(linearized)
+  - name: pTrcHis2-TOPO (linearized)
+    subpath: pTrcHis2-TOPO_(linearized)
+  - name: pTZ57R_T
+    subpath: pTZ57R_T
+  - name: pUC57-T
+    subpath: pUC57-T
+  - name: pUCm-T (linearized)
+    subpath: pUCm-T_(linearized)
+  - name: pYES2.1 V5-His-TOPO (linearized)
+    subpath: pYES2.1_V5-His-TOPO_(linearized)
+  - name: RBC T&A Cloning Vector (linearized)
+    subpath: RBC_T%26A_Cloning_Vector_(linearized)
+  - name: T-Vector pMD19 (Simple)
+    subpath: T-Vector_pMD19_(Simple)
+  - name: T-Vector pMD20
+    subpath: T-Vector_pMD20
+insect_cell_vectors:
+  name: Insect Cell Vectors
+  plasmids:
+  - name: BaculoDirect C-Term Linear DNA
+    subpath: BaculoDirect_C-Term_Linear_DNA
+  - name: BaculoDirect N-Term Linear DNA
+    subpath: BaculoDirect_N-Term_Linear_DNA
+  - name: pAB-6xHis
+    subpath: pAB-6xHis
+  - name: pAB-6xHis-MBP
+    subpath: pAB-6xHis-MBP
+  - name: pAB-bee
+    subpath: pAB-bee
+  - name: pAB-bee-8xHis
+    subpath: pAB-bee-8xHis
+  - name: pAB-bee-FH
+    subpath: pAB-bee-FH
+  - name: pAB-GST
+    subpath: pAB-GST
+  - name: pAB-MBP
+    subpath: pAB-MBP
+  - name: pAc5.1 V5-His A
+    subpath: pAc5.1_V5-His_A
+  - name: pAc5.1 V5-His B
+    subpath: pAc5.1_V5-His_B
+  - name: pAc5.1 V5-His C
+    subpath: pAc5.1_V5-His_C
+  - name: pAcAB3
+    subpath: pAcAB3
+  - name: pAcAB4
+    subpath: pAcAB4
+  - name: pACEBac1
+    subpath: pACEBac1
+  - name: pACEBac2
+    subpath: pACEBac2
+  - name: pAcG2T
+    subpath: pAcG2T
+  - name: pAcG3X
+    subpath: pAcG3X
+  - name: pAcGHLT A
+    subpath: pAcGHLT_A
+  - name: pAcGHLT B
+    subpath: pAcGHLT_B
+  - name: pAcGHLT C
+    subpath: pAcGHLT_C
+  - name: pAcGP67-A
+    subpath: pAcGP67-A
+  - name: pAcGP67-B
+    subpath: pAcGP67-B
+  - name: pAcGP67-C
+    subpath: pAcGP67-C
+  - name: pAcHLT A
+    subpath: pAcHLT_A
+  - name: pAcHLT B
+    subpath: pAcHLT_B
+  - name: pAcHLT C
+    subpath: pAcHLT_C
+  - name: pAcMP2
+    subpath: pAcMP2
+  - name: pAcMP3
+    subpath: pAcMP3
+  - name: pAcSecG2T
+    subpath: pAcSecG2T
+  - name: pAcSG2
+    subpath: pAcSG2
+  - name: pAcUW51
+    subpath: pAcUW51
+  - name: pBAC-1
+    subpath: pBAC-1
+  - name: pBAC-2cp
+    subpath: pBAC-2cp
+  - name: pBAC-3
+    subpath: pBAC-3
+  - name: pBAC-5
+    subpath: pBAC-5
+  - name: pBAC-6
+    subpath: pBAC-6
+  - name: pBAC4x-1
+    subpath: pBAC4x-1
+  - name: pBACgus-1
+    subpath: pBACgus-1
+  - name: pBACgus-2cp
+    subpath: pBACgus-2cp
+  - name: pBACgus-3
+    subpath: pBACgus-3
+  - name: pBACgus-5
+    subpath: pBACgus-5
+  - name: pBACgus-6
+    subpath: pBACgus-6
+  - name: pBACgus4x-1
+    subpath: pBACgus4x-1
+  - name: pBacPAK8
+    subpath: pBacPAK8
+  - name: pBacPAK9
+    subpath: pBacPAK9
+  - name: pBACsurf-1
+    subpath: pBACsurf-1
+  - name: pBiEx-1
+    subpath: pBiEx-1
+  - name: pBiEx-2
+    subpath: pBiEx-2
+  - name: pBiEx-3
+    subpath: pBiEx-3
+  - name: pCoBlast
+    subpath: pCoBlast
+  - name: pCoHygro
+    subpath: pCoHygro
+  - name: pDEST10
+    subpath: pDEST10
+  - name: pDEST20
+    subpath: pDEST20
+  - name: pDEST8
+    subpath: pDEST8
+  - name: pDream2.1 MCS
+    subpath: pDream2.1_MCS
+  - name: pFastBac CT-TOPO (linearized)
+    subpath: pFastBac_CT-TOPO_(linearized)
+  - name: pFastBac Dual
+    subpath: pFastBac_Dual
+  - name: pFastBac HBM-TOPO (linearized)
+    subpath: pFastBac_HBM-TOPO_(linearized)
+  - name: pFastBac NT-TOPO (linearized)
+    subpath: pFastBac_NT-TOPO_(linearized)
+  - name: pFastBac1
+    subpath: pFastBac1
+  - name: pFastBacHT A
+    subpath: pFastBacHT_A
+  - name: pFastBacHT B
+    subpath: pFastBacHT_B
+  - name: pFastBacHT C
+    subpath: pFastBacHT_C
+  - name: pI-secSUMOstar
+    subpath: pI-secSUMOstar
+  - name: pI-SUMOstar
+    subpath: pI-SUMOstar
+  - name: pIB V5-His
+    subpath: pIB_V5-His
+  - name: pIB V5-His-DEST
+    subpath: pIB_V5-His-DEST
+  - name: pIDC
+    subpath: pIDC
+  - name: pIDK
+    subpath: pIDK
+  - name: pIDS
+    subpath: pIDS
+  - name: pIEx Bac-1
+    subpath: pIEx_Bac-1
+  - name: pIEx Bac-1 Ek_LIC (linearized)
+    subpath: pIEx_Bac-1_Ek_LIC_(linearized)
+  - name: pIEx Bac-3
+    subpath: pIEx_Bac-3
+  - name: pIEx Bac-3 3C_LIC (linearized)
+    subpath: pIEx_Bac-3_3C_LIC_(linearized)
+  - name: pIEx Bac-4
+    subpath: pIEx_Bac-4
+  - name: pIEx Bac-4 Ek_LIC (linearized)
+    subpath: pIEx_Bac-4_Ek_LIC_(linearized)
+  - name: pIEx Bac-5
+    subpath: pIEx_Bac-5
+  - name: pIEx Bac-5 3C_LIC (linearized)
+    subpath: pIEx_Bac-5_3C_LIC_(linearized)
+  - name: pIEx-1
+    subpath: pIEx-1
+  - name: pIEx-10
+    subpath: pIEx-10
+  - name: pIEx-10 Ek_LIC
+    subpath: pIEx-10_Ek_LIC
+  - name: pIEx-10 Ek_LIC (linearized)
+    subpath: pIEx-10_Ek_LIC_(linearized)
+  - name: pIEx-2
+    subpath: pIEx-2
+  - name: pIEx-3
+    subpath: pIEx-3
+  - name: pIEx-4
+    subpath: pIEx-4
+  - name: pIEx-5
+    subpath: pIEx-5
+  - name: pIEx-6
+    subpath: pIEx-6
+  - name: pIEx-7 Ek_LIC
+    subpath: pIEx-7_Ek_LIC
+  - name: pIEx-7 Ek_LIC (linearized)
+    subpath: pIEx-7_Ek_LIC_(linearized)
+  - name: pIEx-8
+    subpath: pIEx-8
+  - name: pIEx-8 Ek_LIC
+    subpath: pIEx-8_Ek_LIC
+  - name: pIEx-8 Ek_LIC (linearized)
+    subpath: pIEx-8_Ek_LIC_(linearized)
+  - name: pIEx-9
+    subpath: pIEx-9
+  - name: pIEx-9 3C_LIC
+    subpath: pIEx-9_3C_LIC
+  - name: pIEx-9 3C_LIC (linearized)
+    subpath: pIEx-9_3C_LIC_(linearized)
+  - name: pIZ V5-His
+    subpath: pIZ_V5-His
+  - name: pIZT V5-His
+    subpath: pIZT_V5-His
+  - name: pMelBac A
+    subpath: pMelBac_A
+  - name: pMelBac B
+    subpath: pMelBac_B
+  - name: pMelBac C
+    subpath: pMelBac_C
+  - name: pMIB V5-His A
+    subpath: pMIB_V5-His_A
+  - name: pMIB V5-His B
+    subpath: pMIB_V5-His_B
+  - name: pMIB V5-His C
+    subpath: pMIB_V5-His_C
+  - name: pMT BioEase-DEST
+    subpath: pMT_BioEase-DEST
+  - name: pMT BiP V5-His A
+    subpath: pMT_BiP_V5-His_A
+  - name: pMT BiP V5-His B
+    subpath: pMT_BiP_V5-His_B
+  - name: pMT BiP V5-His C
+    subpath: pMT_BiP_V5-His_C
+  - name: pMT V5-His A
+    subpath: pMT_V5-His_A
+  - name: pMT V5-His B
+    subpath: pMT_V5-His_B
+  - name: pMT V5-His C
+    subpath: pMT_V5-His_C
+  - name: pMT-DEST48
+    subpath: pMT-DEST48
+  - name: pQE-TriSystem
+    subpath: pQE-TriSystem
+  - name: pQE-TriSystem His-Strep1
+    subpath: pQE-TriSystem_His-Strep1
+  - name: pQE-TriSystem His-Strep2
+    subpath: pQE-TriSystem_His-Strep2
+  - name: pQE-TriSystem Strep
+    subpath: pQE-TriSystem_Strep
+  - name: pQE-Trisystem-5
+    subpath: pQE-Trisystem-5
+  - name: pQE-Trisystem-6
+    subpath: pQE-Trisystem-6
+  - name: pQE-TriSystem-7
+    subpath: pQE-TriSystem-7
+  - name: pTriEx-1.1
+    subpath: pTriEx-1.1
+  - name: pTriEx-1.1 Hygro
+    subpath: pTriEx-1.1_Hygro
+  - name: pTriEx-1.1 Neo
+    subpath: pTriEx-1.1_Neo
+  - name: pTriEx-2
+    subpath: pTriEx-2
+  - name: pTriEx-2 Hygro
+    subpath: pTriEx-2_Hygro
+  - name: pTriEx-2 Neo
+    subpath: pTriEx-2_Neo
+  - name: pTriEx-3
+    subpath: pTriEx-3
+  - name: pTriEx-3 Hygro
+    subpath: pTriEx-3_Hygro
+  - name: pTriEx-3 Neo
+    subpath: pTriEx-3_Neo
+  - name: pTriEx-4
+    subpath: pTriEx-4
+  - name: pTriEx-4 Ek_LIC (linearized)
+    subpath: pTriEx-4_Ek_LIC_(linearized)
+  - name: pTriEx-4 Hygro
+    subpath: pTriEx-4_Hygro
+  - name: pTriEx-4 Neo
+    subpath: pTriEx-4_Neo
+  - name: pTriEx-5
+    subpath: pTriEx-5
+  - name: pTriEx-5 Ek_LIC (linearized)
+    subpath: pTriEx-5_Ek_LIC_(linearized)
+  - name: pTriEx-6
+    subpath: pTriEx-6
+  - name: pTriEx-6 3C_LIC (linearized)
+    subpath: pTriEx-6_3C_LIC_(linearized)
+  - name: pTriEx-7
+    subpath: pTriEx-7
+  - name: pTriEx-7 Ek_LIC (linearized)
+    subpath: pTriEx-7_Ek_LIC_(linearized)
+  - name: pVL-FH
+    subpath: pVL-FH
+  - name: pVL1392
+    subpath: pVL1392
+  - name: pVL1393
+    subpath: pVL1393
+topo_cloning_vectors:
+  name: TOPO Cloning Vectors
+  plasmids:
+  - name: pBAD Thio-TOPO (linearized)
+    subpath: pBAD_Thio-TOPO_(linearized)
+  - name: pBAD-TOPO (linearized)
+    subpath: pBAD-TOPO_(linearized)
+  - name: pBAD202 D-TOPO
+    subpath: pBAD202_D-TOPO
+  - name: pBlue-TOPO (linearized)
+    subpath: pBlue-TOPO_(linearized)
+  - name: pcDNA3.1 CT-GFP-TOPO (linearized)
+    subpath: pcDNA3.1_CT-GFP-TOPO_(linearized)
+  - name: pcDNA3.1 NT-GFP-TOPO (linearized)
+    subpath: pcDNA3.1_NT-GFP-TOPO_(linearized)
+  - name: pcDNA3.1 V5-His-TOPO (linearized)
+    subpath: pcDNA3.1_V5-His-TOPO_(linearized)
+  - name: pcDNA3.1D V5-His-TOPO
+    subpath: pcDNA3.1D_V5-His-TOPO
+  - name: pcDNA3.2 V5 GW D-TOPO
+    subpath: pcDNA3.2_V5_GW_D-TOPO
+  - name: pcDNA3.3-TOPO (linearized)
+    subpath: pcDNA3.3-TOPO_(linearized)
+  - name: pcDNA3.4-TOPO (linearized)
+    subpath: pcDNA3.4-TOPO_(linearized)
+  - name: pcDNA4 HisMax-TOPO (linearized)
+    subpath: pcDNA4_HisMax-TOPO_(linearized)
+  - name: pcDNA5 FRT TO-TOPO (linearized)
+    subpath: pcDNA5_FRT_TO-TOPO_(linearized)
+  - name: pcDNA5 FRT V5-His-TOPO (linearized)
+    subpath: pcDNA5_FRT_V5-His-TOPO_(linearized)
+  - name: pcDNA6.2 C-EmGFP-GW TOPO (linearized)
+    subpath: pcDNA6.2_C-EmGFP-GW_TOPO_(linearized)
+  - name: pcDNA6.2 C-YFP-GW TOPO (linearized)
+    subpath: pcDNA6.2_C-YFP-GW_TOPO_(linearized)
+  - name: pcDNA6.2 cGeneBLAzer-GW D-TOPO
+    subpath: pcDNA6.2_cGeneBLAzer-GW_D-TOPO
+  - name: pcDNA6.2 N-EmGFP-GW TOPO (linearized)
+    subpath: pcDNA6.2_N-EmGFP-GW_TOPO_(linearized)
+  - name: pcDNA6.2 V5 GW D-TOPO
+    subpath: pcDNA6.2_V5_GW_D-TOPO
+  - name: pCR-Blunt II-TOPO (linearized)
+    subpath: pCR-Blunt_II-TOPO_(linearized)
+  - name: pCR-XL-2-TOPO (linearized)
+    subpath: pCR-XL-2-TOPO_(linearized)
+  - name: pCR-XL-TOPO (linearized)
+    subpath: pCR-XL-TOPO_(linearized)
+  - name: pCR2.1-TOPO (linearized)
+    subpath: pCR2.1-TOPO_(linearized)
+  - name: pCR4-TOPO (linearized)
+    subpath: pCR4-TOPO_(linearized)
+  - name: pCR4Blunt-TOPO (linearized)
+    subpath: pCR4Blunt-TOPO_(linearized)
+  - name: pCR8 GW TOPO (linearized)
+    subpath: pCR8_GW_TOPO_(linearized)
+  - name: pCRII-TOPO (linearized)
+    subpath: pCRII-TOPO_(linearized)
+  - name: pEF5 FRT V5-D-TOPO
+    subpath: pEF5_FRT_V5-D-TOPO
+  - name: pEF6 V5-His-TOPO (linearized)
+    subpath: pEF6_V5-His-TOPO_(linearized)
+  - name: pENTR D-TOPO
+    subpath: pENTR_D-TOPO
+  - name: pENTR SD D-TOPO
+    subpath: pENTR_SD_D-TOPO
+  - name: pENTR TEV D-TOPO
+    subpath: pENTR_TEV_D-TOPO
+  - name: pENTR5'-TOPO (linearized)
+    subpath: pENTR5%27-TOPO_(linearized)
+  - name: pET100 D-TOPO
+    subpath: pET100_D-TOPO
+  - name: pET101 D-TOPO
+    subpath: pET101_D-TOPO
+  - name: pET102 D-TOPO
+    subpath: pET102_D-TOPO
+  - name: pET151 D-TOPO
+    subpath: pET151_D-TOPO
+  - name: pET160 GW D-TOPO
+    subpath: pET160_GW_D-TOPO
+  - name: pET161 GW D-TOPO
+    subpath: pET161_GW_D-TOPO
+  - name: pET200 D-TOPO
+    subpath: pET200_D-TOPO
+  - name: pEXP5-CT TOPO (linearized)
+    subpath: pEXP5-CT_TOPO_(linearized)
+  - name: pEXP5-NT TOPO (linearized)
+    subpath: pEXP5-NT_TOPO_(linearized)
+  - name: pGlow-TOPO (linearized)
+    subpath: pGlow-TOPO_(linearized)
+  - name: pIB V5-His-TOPO (linearized)
+    subpath: pIB_V5-His-TOPO_(linearized)
+  - name: pLenti6 V5-D-TOPO
+    subpath: pLenti6_V5-D-TOPO
+  - name: pLenti6.3 V5-TOPO (linearized)
+    subpath: pLenti6.3_V5-TOPO_(linearized)
+  - name: pLenti7.3 V5-TOPO (linearized)
+    subpath: pLenti7.3_V5-TOPO_(linearized)
+  - name: pLPS-B (linearized)
+    subpath: pLPS-B_(linearized)
+  - name: pMT V5-His-TOPO (linearized)
+    subpath: pMT_V5-His-TOPO_(linearized)
+  - name: pOptiVEC-TOPO (linearized)
+    subpath: pOptiVEC-TOPO_(linearized)
+  - name: pSecTag FRT V5-His-TOPO (linearized)
+    subpath: pSecTag_FRT_V5-His-TOPO_(linearized)
+  - name: pTOP Blunt V2 (linearized)
+    subpath: pTOP_Blunt_V2_(linearized)
+  - name: pTrcHis-TOPO (linearized)
+    subpath: pTrcHis-TOPO_(linearized)
+  - name: pTrcHis2-TOPO (linearized)
+    subpath: pTrcHis2-TOPO_(linearized)
+  - name: pYES2.1 V5-His-TOPO (linearized)
+    subpath: pYES2.1_V5-His-TOPO_(linearized)
+luciferase_vectors:
+  name: Luciferase Vectors
+  plasmids:
+  - name: pBI-CMV5
+    subpath: pBI-CMV5
+  - name: pBIND-ER(alpha)
+    subpath: pBIND-ER(alpha)
+  - name: pBIND-GR
+    subpath: pBIND-GR
+  - name: pCBG68-Basic
+    subpath: pCBG68-Basic
+  - name: pCBG68-Control
+    subpath: pCBG68-Control
+  - name: pCBG99-Basic
+    subpath: pCBG99-Basic
+  - name: pCBG99-Control
+    subpath: pCBG99-Control
+  - name: pCBR-Basic
+    subpath: pCBR-Basic
+  - name: pCBR-Control
+    subpath: pCBR-Control
+  - name: pCLuc Mini-TK 2
+    subpath: pCLuc_Mini-TK_2
+  - name: pCLuc-Basic 2
+    subpath: pCLuc-Basic_2
+  - name: pCMV-CLuc 2
+    subpath: pCMV-CLuc_2
+  - name: pCMV-Cypridina Luc
+    subpath: pCMV-Cypridina_Luc
+  - name: pCMV-Gaussia Luc
+    subpath: pCMV-Gaussia_Luc
+  - name: pCMV-Gaussia-Dura Luc
+    subpath: pCMV-Gaussia-Dura_Luc
+  - name: pCMV-GLuc 2
+    subpath: pCMV-GLuc_2
+  - name: pCMV-Green Renilla Luc
+    subpath: pCMV-Green_Renilla_Luc
+  - name: pCMV-Red Firefly Luc
+    subpath: pCMV-Red_Firefly_Luc
+  - name: pCRE-MetLuc2-Reporter
+    subpath: pCRE-MetLuc2-Reporter
+  - name: pFN26A (BIND) hRluc-neo Flexi Vector
+    subpath: pFN26A_(BIND)_hRluc-neo_Flexi_Vector
+  - name: pGEM-luc
+    subpath: pGEM-luc
+  - name: pGL2-Basic
+    subpath: pGL2-Basic
+  - name: pGL2-Control
+    subpath: pGL2-Control
+  - name: pGL2-Enhancer
+    subpath: pGL2-Enhancer
+  - name: pGL2-Promoter
+    subpath: pGL2-Promoter
+  - name: pGL3-Basic
+    subpath: pGL3-Basic
+  - name: pGL3-Control
+    subpath: pGL3-Control
+  - name: pGL3-Enhancer
+    subpath: pGL3-Enhancer
+  - name: pGL3-Promoter
+    subpath: pGL3-Promoter
+  - name: pGL4.10[luc2]
+    subpath: pGL4.10_luc2
+  - name: pGL4.11[luc2P]
+    subpath: pGL4.11_luc2P
+  - name: pGL4.12[luc2CP]
+    subpath: pGL4.12_luc2CP
+  - name: pGL4.13[luc2 SV40]
+    subpath: pGL4.13_luc2_SV40
+  - name: pGL4.14[luc2 Hygro]
+    subpath: pGL4.14_luc2_Hygro
+  - name: pGL4.15[luc2P Hygro]
+    subpath: pGL4.15_luc2P_Hygro
+  - name: pGL4.16[luc2CP Hygro]
+    subpath: pGL4.16_luc2CP_Hygro
+  - name: pGL4.17[luc2 Neo]
+    subpath: pGL4.17_luc2_Neo
+  - name: pGL4.18[luc2P Neo]
+    subpath: pGL4.18_luc2P_Neo
+  - name: pGL4.19[luc2CP Neo]
+    subpath: pGL4.19_luc2CP_Neo
+  - name: pGL4.20[luc2 Puro]
+    subpath: pGL4.20_luc2_Puro
+  - name: pGL4.21[luc2P Puro]
+    subpath: pGL4.21_luc2P_Puro
+  - name: pGL4.22[luc2CP Puro]
+    subpath: pGL4.22_luc2CP_Puro
+  - name: pGL4.23[luc2 minP]
+    subpath: pGL4.23_luc2_minP
+  - name: pGL4.24[luc2P minP]
+    subpath: pGL4.24_luc2P_minP
+  - name: pGL4.25[luc2CP minP]
+    subpath: pGL4.25_luc2CP_minP
+  - name: pGL4.26[luc2 minP Hygro]
+    subpath: pGL4.26_luc2_minP_Hygro
+  - name: pGL4.27[luc2P minP Hygro]
+    subpath: pGL4.27_luc2P_minP_Hygro
+  - name: pGL4.28[luc2CP minP Hygro]
+    subpath: pGL4.28_luc2CP_minP_Hygro
+  - name: pGL4.29[luc2P CRE Hygro]
+    subpath: pGL4.29_luc2P_CRE_Hygro
+  - name: pGL4.30[luc2P NFAT-RE Hygro]
+    subpath: pGL4.30_luc2P_NFAT-RE_Hygro
+  - name: pGL4.31[luc2P GAL4UAS Hygro]
+    subpath: pGL4.31_luc2P_GAL4UAS_Hygro
+  - name: pGL4.32[luc2P NF-kB-RE Hygro]
+    subpath: pGL4.32_luc2P_NF-kB-RE_Hygro
+  - name: pGL4.33[luc2P SRE Hygro]
+    subpath: pGL4.33_luc2P_SRE_Hygro
+  - name: pGL4.34[luc2P SRF-RE Hygro]
+    subpath: pGL4.34_luc2P_SRF-RE_Hygro
+  - name: pGL4.35[luc2P 9XGAL4UAS Hygro]
+    subpath: pGL4.35_luc2P_9XGAL4UAS_Hygro
+  - name: pGL4.36[luc2P MMTV Hygro]
+    subpath: pGL4.36_luc2P_MMTV_Hygro
+  - name: pGL4.37[luc2P ARE Hygro]
+    subpath: pGL4.37_luc2P_ARE_Hygro
+  - name: pGL4.38[luc2P p53 RE Hygro]
+    subpath: pGL4.38_luc2P_p53_RE_Hygro
+  - name: pGL4.39[luc2P ATF6 RE Hygro]
+    subpath: pGL4.39_luc2P_ATF6_RE_Hygro
+  - name: pGL4.40[luc2P MRE Hygro]
+    subpath: pGL4.40_luc2P_MRE_Hygro
+  - name: pGL4.41[luc2P HSE Hygro]
+    subpath: pGL4.41_luc2P_HSE_Hygro
+  - name: pGL4.42[luc2P HRE Hygro]
+    subpath: pGL4.42_luc2P_HRE_Hygro
+  - name: pGL4.43[luc2P XRE Hygro]
+    subpath: pGL4.43_luc2P_XRE_Hygro
+  - name: pGL4.44[luc2P AP1 RE Hygro]
+    subpath: pGL4.44_luc2P_AP1_RE_Hygro
+  - name: pGL4.45[luc2P ISRE Hygro]
+    subpath: pGL4.45_luc2P_ISRE_Hygro
+  - name: pGL4.47[luc2P SIE Hygro]
+    subpath: pGL4.47_luc2P_SIE_Hygro
+  - name: pGL4.48[luc2P SBE Hygro]
+    subpath: pGL4.48_luc2P_SBE_Hygro
+  - name: pGL4.49[luc2P TCF-LEF RE Hygro]
+    subpath: pGL4.49_luc2P_TCF-LEF_RE_Hygro
+  - name: pGL4.50[luc2 CMV Hygro]
+    subpath: pGL4.50_luc2_CMV_Hygro
+  - name: pGL4.51[luc2 CMV Neo]
+    subpath: pGL4.51_luc2_CMV_Neo
+  - name: pGL4.52[luc2P STAT5 RE Hygro]
+    subpath: pGL4.52_luc2P_STAT5_RE_Hygro
+  - name: pGL4.70[hRluc]
+    subpath: pGL4.70_hRluc
+  - name: pGL4.71[hRlucP]
+    subpath: pGL4.71_hRlucP
+  - name: pGL4.72[hRlucCP]
+    subpath: pGL4.72_hRlucCP
+  - name: pGL4.73[hRluc SV40]
+    subpath: pGL4.73_hRluc_SV40
+  - name: pGL4.74[hRluc TK]
+    subpath: pGL4.74_hRluc_TK
+  - name: pGL4.75[hRluc CMV]
+    subpath: pGL4.75_hRluc_CMV
+  - name: pGL4.76[hRluc Hygro]
+    subpath: pGL4.76_hRluc_Hygro
+  - name: pGL4.77[hRlucP Hygro]
+    subpath: pGL4.77_hRlucP_Hygro
+  - name: pGL4.78[hRlucCP Hygro]
+    subpath: pGL4.78_hRlucCP_Hygro
+  - name: pGL4.79[hRluc Neo]
+    subpath: pGL4.79_hRluc_Neo
+  - name: pGL4.80[hRlucP Neo]
+    subpath: pGL4.80_hRlucP_Neo
+  - name: pGL4.81[hRlucCP Neo]
+    subpath: pGL4.81_hRlucCP_Neo
+  - name: pGL4.82[hRluc Puro]
+    subpath: pGL4.82_hRluc_Puro
+  - name: pGL4.83[hRlucP Puro]
+    subpath: pGL4.83_hRlucP_Puro
+  - name: pGL4.84[hRlucCP Puro]
+    subpath: pGL4.84_hRlucCP_Puro
+  - name: pGLuc Mini-TK 2
+    subpath: pGLuc_Mini-TK_2
+  - name: pGLuc-Basic 2
+    subpath: pGLuc-Basic_2
+  - name: phRG-B
+    subpath: phRG-B
+  - name: phRG-TK
+    subpath: phRG-TK
+  - name: phRL-CMV
+    subpath: phRL-CMV
+  - name: phRL-null
+    subpath: phRL-null
+  - name: phRL-SV40
+    subpath: phRL-SV40
+  - name: phRL-TK
+    subpath: phRL-TK
+  - name: phRL-TK(Int-)
+    subpath: phRL-TK(Int-)
+  - name: pLightSwitch_Prom
+    subpath: pLightSwitch_Prom
+  - name: pLVX-MetLuc Control
+    subpath: pLVX-MetLuc_Control
+  - name: pLVX-MetLuc Reporter
+    subpath: pLVX-MetLuc_Reporter
+  - name: pMCS-Cypridina Luc
+    subpath: pMCS-Cypridina_Luc
+  - name: pMCS-Gaussia Luc
+    subpath: pMCS-Gaussia_Luc
+  - name: pMCS-Gaussia-Dura Luc
+    subpath: pMCS-Gaussia-Dura_Luc
+  - name: pMCS-Green Renilla Luc
+    subpath: pMCS-Green_Renilla_Luc
+  - name: pMCS-Red Firefly Luc
+    subpath: pMCS-Red_Firefly_Luc
+  - name: pMetLuc-Mem Control
+    subpath: pMetLuc-Mem_Control
+  - name: pMetLuc-Mem Reporter
+    subpath: pMetLuc-Mem_Reporter
+  - name: pMetLuc2-Control
+    subpath: pMetLuc2-Control
+  - name: pMetLuc2-Reporter
+    subpath: pMetLuc2-Reporter
+  - name: pmirGLO
+    subpath: pmirGLO
+  - name: pMirTarget
+    subpath: pMirTarget
+  - name: pNFkB-MetLuc2-Reporter
+    subpath: pNFkB-MetLuc2-Reporter
+  - name: pNL1.1.CMV[Nluc CMV]
+    subpath: pNL1.1.CMV_Nluc_CMV
+  - name: pNL1.1[Nluc]
+    subpath: pNL1.1_Nluc
+  - name: pNL1.2[NlucP]
+    subpath: pNL1.2_NlucP
+  - name: pNL1.3.CMV[secNluc CMV]
+    subpath: pNL1.3.CMV_secNluc_CMV
+  - name: pNL1.3[secNluc]
+    subpath: pNL1.3_secNluc
+  - name: pNL2.1[Nluc Hygro]
+    subpath: pNL2.1_Nluc_Hygro
+  - name: pNL2.2[NlucP Hygro]
+    subpath: pNL2.2_NlucP_Hygro
+  - name: pNL2.3[secNluc Hygro]
+    subpath: pNL2.3_secNluc_Hygro
+  - name: pNL3.1[Nluc minP]
+    subpath: pNL3.1_Nluc_minP
+  - name: pNL3.2.NF-kB-RE[NlucP NF-kB-RE Hygro]
+    subpath: pNL3.2.NF-kB-RE_NlucP_NF-kB-RE_Hygro
+  - name: pNL3.2[NlucP minP]
+    subpath: pNL3.2_NlucP_minP
+  - name: pNL3.3[secNluc minP]
+    subpath: pNL3.3_secNluc_minP
+  - name: pRL-CMV
+    subpath: pRL-CMV
+  - name: pRL-null
+    subpath: pRL-null
+  - name: pRL-SV40
+    subpath: pRL-SV40
+  - name: pRL-TK
+    subpath: pRL-TK
+  - name: pSELECT-zeo-Lucia
+    subpath: pSELECT-zeo-Lucia
+  - name: pSF-CMV-EMCV-FLuc
+    subpath: pSF-CMV-EMCV-FLuc
+  - name: pSF-CMV-EMCV-RLuc
+    subpath: pSF-CMV-EMCV-RLuc
+  - name: pSF-CMV-FLuc
+    subpath: pSF-CMV-FLuc
+  - name: pSF-CMV-FMDV-FLuc
+    subpath: pSF-CMV-FMDV-FLuc
+  - name: pSF-CMV-FMDV-RLuc
+    subpath: pSF-CMV-FMDV-RLuc
+  - name: pSF-CMV-PGK-FLuc
+    subpath: pSF-CMV-PGK-FLuc
+  - name: pSF-CMV-PGK-RLuc
+    subpath: pSF-CMV-PGK-RLuc
+  - name: pSF-CMV-RLuc
+    subpath: pSF-CMV-RLuc
+  - name: pSF-CMV-RSV-FLuc AscI
+    subpath: pSF-CMV-RSV-FLuc_AscI
+  - name: pSF-CMV-RSV-RLuc AscI
+    subpath: pSF-CMV-RSV-RLuc_AscI
+  - name: pSF-CMV-Ub-FLuc AscI
+    subpath: pSF-CMV-Ub-FLuc_AscI
+  - name: pSF-CMV-Ub-RLuc AscI
+    subpath: pSF-CMV-Ub-RLuc_AscI
+  - name: pSF-CMVe-FLuc
+    subpath: pSF-CMVe-FLuc
+  - name: pSF-CMVe-RLuc
+    subpath: pSF-CMVe-RLuc
+  - name: pSF-MinProm-FLuc
+    subpath: pSF-MinProm-FLuc
+  - name: pSF-MinProm-RLuc
+    subpath: pSF-MinProm-RLuc
+  - name: pSF-pA-CMVe-FLuc
+    subpath: pSF-pA-CMVe-FLuc
+  - name: pSF-pA-CMVe-RLuc
+    subpath: pSF-pA-CMVe-RLuc
+  - name: pSF-pA-MinProm-FLuc
+    subpath: pSF-pA-MinProm-FLuc
+  - name: pSF-pA-MinProm-RLuc
+    subpath: pSF-pA-MinProm-RLuc
+  - name: pSF-pA-PromMCS-FLuc
+    subpath: pSF-pA-PromMCS-FLuc
+  - name: pSF-pA-PromMCS-RLuc
+    subpath: pSF-pA-PromMCS-RLuc
+  - name: pSF-PromMCS-FLuc
+    subpath: pSF-PromMCS-FLuc
+  - name: pSF-PromMCS-RLuc
+    subpath: pSF-PromMCS-RLuc
+  - name: pSF-RecA-FLuc
+    subpath: pSF-RecA-FLuc
+  - name: pSP-luc+NF
+    subpath: pSP-luc%2BNF
+  - name: pSV40-CLuc
+    subpath: pSV40-CLuc
+  - name: pSV40-GLuc
+    subpath: pSV40-GLuc
+  - name: pTK-CLuc
+    subpath: pTK-CLuc
+  - name: pTK-Cypridina Luc
+    subpath: pTK-Cypridina_Luc
+  - name: pTK-Gaussia Luc
+    subpath: pTK-Gaussia_Luc
+  - name: pTK-Gaussia-Dura Luc
+    subpath: pTK-Gaussia-Dura_Luc
+  - name: pTK-GLuc
+    subpath: pTK-GLuc
+  - name: pTK-Green Renilla Luc
+    subpath: pTK-Green_Renilla_Luc
+  - name: pTK-Red Firefly Luc
+    subpath: pTK-Red_Firefly_Luc
+  - name: pXPG
+    subpath: pXPG
+viral_expression_and_packaging_vectors:
+  name: Viral Expression & Packaging Vectors
+  plasmids:
+  - name: pAAV-AC-GFP
+    subpath: pAAV-AC-GFP
+  - name: pAAV-AC-Myc-DDK
+    subpath: pAAV-AC-Myc-DDK
+  - name: pAAV-AC-RFP
+    subpath: pAAV-AC-RFP
+  - name: pAAV2-EF1a-tGFP-WPRE
+    subpath: pAAV2-EF1a-tGFP-WPRE
+  - name: pAd BLOCK-iT-DEST
+    subpath: pAd_BLOCK-iT-DEST
+  - name: pAd CMV V5-DEST
+    subpath: pAd_CMV_V5-DEST
+  - name: pAd PL-DEST
+    subpath: pAd_PL-DEST
+  - name: pAdenoX-CMV Linear
+    subpath: pAdenoX-CMV_Linear
+  - name: pAdenoX-DsRed-Express Linear
+    subpath: pAdenoX-DsRed-Express_Linear
+  - name: pAdenoX-PRLS Linear
+    subpath: pAdenoX-PRLS_Linear
+  - name: pAdenoX-PRLS-DsRed-Express Linear
+    subpath: pAdenoX-PRLS-DsRed-Express_Linear
+  - name: pAdenoX-PRLS-ZsGreen1 Linear
+    subpath: pAdenoX-PRLS-ZsGreen1_Linear
+  - name: pAdenoX-Tet3G Linear
+    subpath: pAdenoX-Tet3G_Linear
+  - name: pAdenoX-ZsGreen1 Linear
+    subpath: pAdenoX-ZsGreen1_Linear
+  - name: pB-RS
+    subpath: pB-RS
+  - name: pBABE-Hygro
+    subpath: pBABE-Hygro
+  - name: pBABE-Neo
+    subpath: pBABE-Neo
+  - name: pBABE-Puro
+    subpath: pBABE-Puro
+  - name: pBABE-Zeo
+    subpath: pBABE-Zeo
+  - name: pCMV-VSV-G
+    subpath: pCMV-VSV-G
+  - name: pGFP-B-RS
+    subpath: pGFP-B-RS
+  - name: pGFP-C-shLenti
+    subpath: pGFP-C-shLenti
+  - name: pGFP-V-RS
+    subpath: pGFP-V-RS
+  - name: pGIPZ
+    subpath: pGIPZ
+  - name: pLenti-C-GFP
+    subpath: pLenti-C-GFP
+  - name: pLenti-C-mGFP
+    subpath: pLenti-C-mGFP
+  - name: pLenti-C-Myc-DDK
+    subpath: pLenti-C-Myc-DDK
+  - name: pLenti-C-Myc-DDK-IRES-BSD
+    subpath: pLenti-C-Myc-DDK-IRES-BSD
+  - name: pLenti-C-Myc-DDK-IRES-GFP
+    subpath: pLenti-C-Myc-DDK-IRES-GFP
+  - name: pLenti-C-Myc-DDK-IRES-Neo
+    subpath: pLenti-C-Myc-DDK-IRES-Neo
+  - name: pLenti-C-Myc-DDK-IRES-Puro
+    subpath: pLenti-C-Myc-DDK-IRES-Puro
+  - name: pLenti-C-Myc-DDK-IRES-tRFP
+    subpath: pLenti-C-Myc-DDK-IRES-tRFP
+  - name: pLenti-C-tRFP
+    subpath: pLenti-C-tRFP
+  - name: pLenti-C-tYFP
+    subpath: pLenti-C-tYFP
+  - name: pLenti-EF1a-C-mGFP
+    subpath: pLenti-EF1a-C-mGFP
+  - name: pLenti-EF1a-C-Myc-DDK-IRES-Puro
+    subpath: pLenti-EF1a-C-Myc-DDK-IRES-Puro
+  - name: pLenti-EF1a-C-tGFP
+    subpath: pLenti-EF1a-C-tGFP
+  - name: pLenti-N-tGFP
+    subpath: pLenti-N-tGFP
+  - name: pLenti-N-tRFP
+    subpath: pLenti-N-tRFP
+  - name: pLenti-N-tYFP
+    subpath: pLenti-N-tYFP
+  - name: pLenti3.3 TR
+    subpath: pLenti3.3_TR
+  - name: pLenti4 BLOCK-iT-DEST
+    subpath: pLenti4_BLOCK-iT-DEST
+  - name: pLenti4 V5-DEST
+    subpath: pLenti4_V5-DEST
+  - name: pLenti6 BLOCK-iT-DEST
+    subpath: pLenti6_BLOCK-iT-DEST
+  - name: pLenti6 capTEV-CT-DEST
+    subpath: pLenti6_capTEV-CT-DEST
+  - name: pLenti6 capTEV-NT-DEST1
+    subpath: pLenti6_capTEV-NT-DEST1
+  - name: pLenti6 TR
+    subpath: pLenti6_TR
+  - name: pLenti6 UbC V5-DEST
+    subpath: pLenti6_UbC_V5-DEST
+  - name: pLenti6 V5-DEST
+    subpath: pLenti6_V5-DEST
+  - name: pLenti6.2 C-Lumio V5-DEST
+    subpath: pLenti6.2_C-Lumio_V5-DEST
+  - name: pLenti6.2 N-Lumio V5-DEST
+    subpath: pLenti6.2_N-Lumio_V5-DEST
+  - name: pLenti6.2 V5-DEST
+    subpath: pLenti6.2_V5-DEST
+  - name: pLenti6.3 TO V5-DEST
+    subpath: pLenti6.3_TO_V5-DEST
+  - name: pLenti6.3 V5-DEST
+    subpath: pLenti6.3_V5-DEST
+  - name: pLenti6.4 R4R2 V5-DEST
+    subpath: pLenti6.4_R4R2_V5-DEST
+  - name: pLenti7.3 V5-DEST
+    subpath: pLenti7.3_V5-DEST
+  - name: pLEX-MCS
+    subpath: pLEX-MCS
+  - name: pLHCX
+    subpath: pLHCX
+  - name: pLKO.1
+    subpath: pLKO.1
+  - name: pLKO.1 puro
+    subpath: pLKO.1_puro
+  - name: pLMN-ZsGreen-Neomycin
+    subpath: pLMN-ZsGreen-Neomycin
+  - name: pLMPd-Ametrine
+    subpath: pLMPd-Ametrine
+  - name: pLNCX2
+    subpath: pLNCX2
+  - name: pLP VSVG
+    subpath: pLP_VSVG
+  - name: pLP1
+    subpath: pLP1
+  - name: pLP2
+    subpath: pLP2
+  - name: pLPCX
+    subpath: pLPCX
+  - name: pLVX-EF1alpha-IRES-mCherry
+    subpath: pLVX-EF1alpha-IRES-mCherry
+  - name: pLVX-EF1alpha-IRES-Puro
+    subpath: pLVX-EF1alpha-IRES-Puro
+  - name: pLVX-EF1alpha-IRES-ZsGreen1
+    subpath: pLVX-EF1alpha-IRES-ZsGreen1
+  - name: pLVX-EF1alpha-Tet3G
+    subpath: pLVX-EF1alpha-Tet3G
+  - name: pLVX-Het-1
+    subpath: pLVX-Het-1
+  - name: pLVX-Het-2
+    subpath: pLVX-Het-2
+  - name: pLVX-Het-Mem1
+    subpath: pLVX-Het-Mem1
+  - name: pLVX-Het-Nuc1
+    subpath: pLVX-Het-Nuc1
+  - name: pLVX-Hom-1
+    subpath: pLVX-Hom-1
+  - name: pLVX-Hom-Mem1
+    subpath: pLVX-Hom-Mem1
+  - name: pLVX-Hom-Nuc1
+    subpath: pLVX-Hom-Nuc1
+  - name: pLVX-IRES-Hyg
+    subpath: pLVX-IRES-Hyg
+  - name: pLVX-IRES-mCherry
+    subpath: pLVX-IRES-mCherry
+  - name: pLVX-IRES-Neo
+    subpath: pLVX-IRES-Neo
+  - name: pLVX-IRES-Puro
+    subpath: pLVX-IRES-Puro
+  - name: pLVX-IRES-tdTomato
+    subpath: pLVX-IRES-tdTomato
+  - name: pLVX-IRES-ZsGreen1
+    subpath: pLVX-IRES-ZsGreen1
+  - name: pLVX-PTuner
+    subpath: pLVX-PTuner
+  - name: pLVX-PTuner Green
+    subpath: pLVX-PTuner_Green
+  - name: pLVX-PTunerC
+    subpath: pLVX-PTunerC
+  - name: pLVX-Puro
+    subpath: pLVX-Puro
+  - name: pLVX-rHom-1
+    subpath: pLVX-rHom-1
+  - name: pLVX-rHom-Nuc1
+    subpath: pLVX-rHom-Nuc1
+  - name: pLVX-rHom-Sec1
+    subpath: pLVX-rHom-Sec1
+  - name: pLVX-Tet-Off Advanced
+    subpath: pLVX-Tet-Off_Advanced
+  - name: pLVX-Tet-On Advanced
+    subpath: pLVX-Tet-On_Advanced
+  - name: pLVX-Tet3G
+    subpath: pLVX-Tet3G
+  - name: pLVX-TetOne
+    subpath: pLVX-TetOne
+  - name: pLVX-TetOne-Puro
+    subpath: pLVX-TetOne-Puro
+  - name: pLVX-Tight-Puro
+    subpath: pLVX-Tight-Puro
+  - name: pLVX-TRE3G
+    subpath: pLVX-TRE3G
+  - name: pLVX-TRE3G-Hom1
+    subpath: pLVX-TRE3G-Hom1
+  - name: pLVX-TRE3G-IRES
+    subpath: pLVX-TRE3G-IRES
+  - name: pLVX-TRE3G-mCherry
+    subpath: pLVX-TRE3G-mCherry
+  - name: pLVX-TRE3G-ZsGreen1
+    subpath: pLVX-TRE3G-ZsGreen1
+  - name: pLX301
+    subpath: pLX301
+  - name: pLX302
+    subpath: pLX302
+  - name: pLX303
+    subpath: pLX303
+  - name: pLX304
+    subpath: pLX304
+  - name: pLX304-V5-Blast-Empty
+    subpath: pLX304-V5-Blast-Empty
+  - name: pLXIN
+    subpath: pLXIN
+  - name: pLXSN
+    subpath: pLXSN
+  - name: pMD2.G
+    subpath: pMD2.G
+  - name: pMSCV16URP-U6-sh-HTS6-UbiC-TagRFP-2A-Puro
+    subpath: pMSCV16URP-U6-sh-HTS6-UbiC-TagRFP-2A-Puro
+  - name: pMSCVhyg
+    subpath: pMSCVhyg
+  - name: pMSCVneo
+    subpath: pMSCVneo
+  - name: pMSCVpuro
+    subpath: pMSCVpuro
+  - name: pQC-tTS-IN
+    subpath: pQC-tTS-IN
+  - name: pQCXIH
+    subpath: pQCXIH
+  - name: pQCXIN
+    subpath: pQCXIN
+  - name: pQCXIP
+    subpath: pQCXIP
+  - name: pQCXIX
+    subpath: pQCXIX
+  - name: pRetro-Lib
+    subpath: pRetro-Lib
+  - name: pRetroQ-AcGFP1-C1
+    subpath: pRetroQ-AcGFP1-C1
+  - name: pRetroQ-AcGFP1-N1
+    subpath: pRetroQ-AcGFP1-N1
+  - name: pRetroQ-DsRed-Monomer-C1
+    subpath: pRetroQ-DsRed-Monomer-C1
+  - name: pRetroQ-DsRed-Monomer-N1
+    subpath: pRetroQ-DsRed-Monomer-N1
+  - name: pRetroQ-mCherry-C1
+    subpath: pRetroQ-mCherry-C1
+  - name: pRetroQ-mCherry-N1
+    subpath: pRetroQ-mCherry-N1
+  - name: pRetroX-IRES-DsRedExpress
+    subpath: pRetroX-IRES-DsRedExpress
+  - name: pRetroX-IRES-ZsGreen1
+    subpath: pRetroX-IRES-ZsGreen1
+  - name: pRetroX-PTuner
+    subpath: pRetroX-PTuner
+  - name: pRetroX-PTuner IRES
+    subpath: pRetroX-PTuner_IRES
+  - name: pRetroX-Tet-Off Advanced
+    subpath: pRetroX-Tet-Off_Advanced
+  - name: pRetroX-Tet-On Advanced
+    subpath: pRetroX-Tet-On_Advanced
+  - name: pRetroX-Tet3G
+    subpath: pRetroX-Tet3G
+  - name: pRetroX-TetOne
+    subpath: pRetroX-TetOne
+  - name: pRetroX-TetOne-Puro
+    subpath: pRetroX-TetOne-Puro
+  - name: pRetroX-Tight-Hyg
+    subpath: pRetroX-Tight-Hyg
+  - name: pRetroX-Tight-Pur
+    subpath: pRetroX-Tight-Pur
+  - name: pRetroX-TRE3G
+    subpath: pRetroX-TRE3G
+  - name: pRFP-C-RS
+    subpath: pRFP-C-RS
+  - name: pRFP-CB-shLenti
+    subpath: pRFP-CB-shLenti
+  - name: pRS
+    subpath: pRS
+  - name: pRSGC1-U6-sg-HTS6-CMV-Cas9-2A-Puro
+    subpath: pRSGC1-U6-sg-HTS6-CMV-Cas9-2A-Puro
+  - name: pRSGC2-U6-sg-HTS6-UbiC-Cas9-2A-Puro
+    subpath: pRSGC2-U6-sg-HTS6-UbiC-Cas9-2A-Puro
+  - name: pRSI12-U6-sh-HTS4-UbiC-TagRFP-2A-Puro
+    subpath: pRSI12-U6-sh-HTS4-UbiC-TagRFP-2A-Puro
+  - name: pRSI16-U6-sh-HTS6-UbiC-TagRFP-2A-Puro
+    subpath: pRSI16-U6-sh-HTS6-UbiC-TagRFP-2A-Puro
+  - name: pRSI16cb-U6-sh-13kCB18-HTS6-UbiC-TagRFP-2A-Puro
+    subpath: pRSI16cb-U6-sh-13kCB18-HTS6-UbiC-TagRFP-2A-Puro
+  - name: pRSI17-U6-sh-HTS6-UbiC-TagGFP2-2A-Puro
+    subpath: pRSI17-U6-sh-HTS6-UbiC-TagGFP2-2A-Puro
+  - name: pRSI17cb-U6-sh-13kCB18-HTS6-UbiC-TagGFP2-2A-Puro
+    subpath: pRSI17cb-U6-sh-13kCB18-HTS6-UbiC-TagGFP2-2A-Puro
+  - name: pRSIT12-U6Tet-sh-HTS4-CMV-TetRep-2A-TagRFP-2A-Puro
+    subpath: pRSIT12-U6Tet-sh-HTS4-CMV-TetRep-2A-TagRFP-2A-Puro
+  - name: pRSIT16-U6Tet-sh-HTS6-CMV-TetRep-2A-TagRFP-2A-Puro
+    subpath: pRSIT16-U6Tet-sh-HTS6-CMV-TetRep-2A-TagRFP-2A-Puro
+  - name: pRSIT17-U6Tet-sh-HTS6-CMV-TetRep-2A-TagGFP2-2A-Puro
+    subpath: pRSIT17-U6Tet-sh-HTS6-CMV-TetRep-2A-TagGFP2-2A-Puro
+  - name: pRSITEP-U6Tet-sh-noHTS-EF1-TetRep-2A-Puro
+    subpath: pRSITEP-U6Tet-sh-noHTS-EF1-TetRep-2A-Puro
+  - name: pRSITUR-U6Tet-sh-HTS3-UbiC-TetRep-2A-TagRFP
+    subpath: pRSITUR-U6Tet-sh-HTS3-UbiC-TetRep-2A-TagRFP
+  - name: pShuttle2
+    subpath: pShuttle2
+  - name: pSIREN-RetroQ
+    subpath: pSIREN-RetroQ
+  - name: pSIREN-RetroQ-DsRed-Express
+    subpath: pSIREN-RetroQ-DsRed-Express
+  - name: pSIREN-RetroQ-TetH
+    subpath: pSIREN-RetroQ-TetH
+  - name: pSIREN-RetroQ-TetP
+    subpath: pSIREN-RetroQ-TetP
+  - name: pSIREN-RetroQ-ZsGreen1
+    subpath: pSIREN-RetroQ-ZsGreen1
+  - name: pSIREN-Shuttle (linearized)
+    subpath: pSIREN-Shuttle_(linearized)
+  - name: psPAX2
+    subpath: psPAX2
+  - name: pTRE3G-Hom1
+    subpath: pTRE3G-Hom1
+  - name: pTRIPZ
+    subpath: pTRIPZ
+  - name: ptTS-Neo
+    subpath: ptTS-Neo
+  - name: pZIP-hCMV-RFP-Puro
+    subpath: pZIP-hCMV-RFP-Puro
+  - name: pZIP-hCMV-ZSGreen-Puro
+    subpath: pZIP-hCMV-ZSGreen-Puro
+  - name: pZIP-hEF1-alpha-RFP-Puro
+    subpath: pZIP-hEF1-alpha-RFP-Puro
+  - name: pZIP-hEF1-alpha-ZsGreen-Puro
+    subpath: pZIP-hEF1-alpha-ZsGreen-Puro
+  - name: pZIP-mCMV-RFP-Puro
+    subpath: pZIP-mCMV-RFP-Puro
+  - name: pZIP-mCMV-ZsGreen-Puro
+    subpath: pZIP-mCMV-ZsGreen-Puro
+  - name: pZIP-mEF1-alpha-RFP-Puro
+    subpath: pZIP-mEF1-alpha-RFP-Puro
+  - name: pZIP-mEF1-alpha-ZsGreen-Puro
+    subpath: pZIP-mEF1-alpha-ZsGreen-Puro
+  - name: pZIP-SFFV-RFP-Puro
+    subpath: pZIP-SFFV-RFP-Puro
+  - name: pZIP-SFFV-ZsGreen-Puro
+    subpath: pZIP-SFFV-ZsGreen-Puro
+  - name: pZIP-TRE3G-ZsGreen-Puro
+    subpath: pZIP-TRE3G-ZsGreen-Puro
+  - name: scramble shRNA
+    subpath: scramble_shRNA
+lucigen_vectors:
+  name: Lucigen Vectors
+  plasmids:
+  - name: pAviTag C-His Kan
+    subpath: pAviTag_C-His_Kan
+  - name: pAviTag N-His Kan
+    subpath: pAviTag_N-His_Kan
+  - name: pAviTag-C N-His SUMO Kan
+    subpath: pAviTag-C_N-His_SUMO_Kan
+  - name: pAviTag-N N-His SUMO Kan
+    subpath: pAviTag-N_N-His_SUMO_Kan
+  - name: pETite C-His Kan
+    subpath: pETite_C-His_Kan
+  - name: pETite N-His Kan
+    subpath: pETite_N-His_Kan
+  - name: pETite N-His SUMO Kan
+    subpath: pETite_N-His_SUMO_Kan
+  - name: pEZ BAC
+    subpath: pEZ_BAC
+  - name: pEZ BAC (BamHI linearized)
+    subpath: pEZ_BAC_(BamHI_linearized)
+  - name: pEZ BAC (HpaI linearized)
+    subpath: pEZ_BAC_(HpaI_linearized)
+  - name: pEZSeq-Amp
+    subpath: pEZSeq-Amp
+  - name: pEZSeq-Amp (linearized)
+    subpath: pEZSeq-Amp_(linearized)
+  - name: pEZSeq-Kan
+    subpath: pEZSeq-Kan
+  - name: pEZSeq-Kan (linearized)
+    subpath: pEZSeq-Kan_(linearized)
+  - name: pGC Blue (linearized)
+    subpath: pGC_Blue_(linearized)
+  - name: pInvRecA
+    subpath: pInvRecA
+  - name: pJAZZ-OC
+    subpath: pJAZZ-OC
+  - name: pJAZZ-OK
+    subpath: pJAZZ-OK
+  - name: pJW168
+    subpath: pJW168
+  - name: pME-HA (linearized)
+    subpath: pME-HA_(linearized)
+  - name: pNGS FOS (linearized)
+    subpath: pNGS_FOS_(linearized)
+  - name: pRANGER-BTB-1
+    subpath: pRANGER-BTB-1
+  - name: pRANGER-BTB-2
+    subpath: pRANGER-BTB-2
+  - name: pRANGER-BTB-3
+    subpath: pRANGER-BTB-3
+  - name: pRANGER-BTB-5
+    subpath: pRANGER-BTB-5
+  - name: pRham C-His Kan
+    subpath: pRham_C-His_Kan
+  - name: pRham N-His Kan
+    subpath: pRham_N-His_Kan
+  - name: pRham N-His SUMO Kan
+    subpath: pRham_N-His_SUMO_Kan
+  - name: pSMART BAC v2.0
+    subpath: pSMART_BAC_v2.0
+  - name: pSMART BAC v2.0 (BamHI linearized)
+    subpath: pSMART_BAC_v2.0_(BamHI_linearized)
+  - name: pSMART BAC v2.0 (EcoRI linearized)
+    subpath: pSMART_BAC_v2.0_(EcoRI_linearized)
+  - name: pSMART BAC v2.0 (HindIII linearized)
+    subpath: pSMART_BAC_v2.0_(HindIII_linearized)
+  - name: pSMART FOS v2.0 (linearized)
+    subpath: pSMART_FOS_v2.0_(linearized)
+  - name: pSMART GC HK (linearized)
+    subpath: pSMART_GC_HK_(linearized)
+  - name: pSMART GC LK (linearized)
+    subpath: pSMART_GC_LK_(linearized)
+  - name: pSMART HCAmp
+    subpath: pSMART_HCAmp
+  - name: pSMART HCAmp (linearized)
+    subpath: pSMART_HCAmp_(linearized)
+  - name: pSMART HCKan
+    subpath: pSMART_HCKan
+  - name: pSMART HCKan (linearized)
+    subpath: pSMART_HCKan_(linearized)
+  - name: pSMART LCAmp
+    subpath: pSMART_LCAmp
+  - name: pSMART LCAmp (linearized)
+    subpath: pSMART_LCAmp_(linearized)
+  - name: pSMART LCKan
+    subpath: pSMART_LCKan
+  - name: pSMART LCKan (linearized)
+    subpath: pSMART_LCKan_(linearized)
+yeast_plasmids:
+  name: Yeast Plasmids
+  plasmids:
+  - name: alpha-factor secretion signal
+    subpath: alpha-factor_secretion_signal
+  - name: bleMX6
+    subpath: bleMX6
+  - name: hphMX6
+    subpath: hphMX6
+  - name: kanMX
+    subpath: kanMX
+  - name: kanMX2
+    subpath: kanMX2
+  - name: kanMX4
+    subpath: kanMX4
+  - name: kanMX6
+    subpath: kanMX6
+  - name: natMX6
+    subpath: natMX6
+  - name: pAbAi
+    subpath: pAbAi
+  - name: pAD-GAL4
+    subpath: pAD-GAL4
+  - name: pAG25
+    subpath: pAG25
+  - name: pAG29
+    subpath: pAG29
+  - name: pAG32
+    subpath: pAG32
+  - name: pAO815
+    subpath: pAO815
+  - name: patMX4
+    subpath: patMX4
+  - name: pAUR101
+    subpath: pAUR101
+  - name: pAUR112
+    subpath: pAUR112
+  - name: pAUR123
+    subpath: pAUR123
+  - name: pAUR224
+    subpath: pAUR224
+  - name: pBridge
+    subpath: pBridge
+  - name: pDH25
+    subpath: pDH25
+  - name: pEG202
+    subpath: pEG202
+  - name: pESC-HIS
+    subpath: pESC-HIS
+  - name: pESC-LEU
+    subpath: pESC-LEU
+  - name: pESC-TRP
+    subpath: pESC-TRP
+  - name: pESC-URA
+    subpath: pESC-URA
+  - name: pFA6-kanMX4
+    subpath: pFA6-kanMX4
+  - name: pFA6a
+    subpath: pFA6a
+  - name: pFA6a-12Pk-kanMX6
+    subpath: pFA6a-12Pk-kanMX6
+  - name: pFA6a-13Myc-His3MX6
+    subpath: pFA6a-13Myc-His3MX6
+  - name: pFA6a-13Myc-kanMX6
+    subpath: pFA6a-13Myc-kanMX6
+  - name: pFA6a-13Myc-TRP1
+    subpath: pFA6a-13Myc-TRP1
+  - name: pFA6a-3HA-His3MX6
+    subpath: pFA6a-3HA-His3MX6
+  - name: pFA6a-3HA-kanMX6
+    subpath: pFA6a-3HA-kanMX6
+  - name: pFA6a-3HA-TRP1
+    subpath: pFA6a-3HA-TRP1
+  - name: pFA6a-5FLAG-kanMX6
+    subpath: pFA6a-5FLAG-kanMX6
+  - name: pFA6a-bleMX6
+    subpath: pFA6a-bleMX6
+  - name: pFA6a-GFP(S65T)-His3MX6
+    subpath: pFA6a-GFP(S65T)-His3MX6
+  - name: pFA6a-GFP(S65T)-kanMX6
+    subpath: pFA6a-GFP(S65T)-kanMX6
+  - name: pFA6a-GFP(S65T)-TRP1
+    subpath: pFA6a-GFP(S65T)-TRP1
+  - name: pFA6a-GST-His3MX6
+    subpath: pFA6a-GST-His3MX6
+  - name: pFA6a-GST-kanMX6
+    subpath: pFA6a-GST-kanMX6
+  - name: pFA6a-GST-TRP1
+    subpath: pFA6a-GST-TRP1
+  - name: pFA6a-His3MX6
+    subpath: pFA6a-His3MX6
+  - name: pFA6a-His3MX6-PGAL1
+    subpath: pFA6a-His3MX6-PGAL1
+  - name: pFA6a-His3MX6-PGAL1-3HA
+    subpath: pFA6a-His3MX6-PGAL1-3HA
+  - name: pFA6a-His3MX6-PGAL1-GFP
+    subpath: pFA6a-His3MX6-PGAL1-GFP
+  - name: pFA6a-His3MX6-PGAL1-GST
+    subpath: pFA6a-His3MX6-PGAL1-GST
+  - name: pFA6a-hphMX6
+    subpath: pFA6a-hphMX6
+  - name: pFA6a-kanMX6
+    subpath: pFA6a-kanMX6
+  - name: pFA6a-kanMX6-PGAL1
+    subpath: pFA6a-kanMX6-PGAL1
+  - name: pFA6a-kanMX6-PGAL1-3HA
+    subpath: pFA6a-kanMX6-PGAL1-3HA
+  - name: pFA6a-kanMX6-PGAL1-GFP
+    subpath: pFA6a-kanMX6-PGAL1-GFP
+  - name: pFA6a-kanMX6-PGAL1-GST
+    subpath: pFA6a-kanMX6-PGAL1-GST
+  - name: pFA6a-natMX6
+    subpath: pFA6a-natMX6
+  - name: pFA6a-TRP1
+    subpath: pFA6a-TRP1
+  - name: pFA6a-TRP1-PGAL1
+    subpath: pFA6a-TRP1-PGAL1
+  - name: pFA6a-TRP1-PGAL1-3HA
+    subpath: pFA6a-TRP1-PGAL1-3HA
+  - name: pFA6a-TRP1-PGAL1-GFP
+    subpath: pFA6a-TRP1-PGAL1-GFP
+  - name: pFA6a-TRP1-PGAL1-GST
+    subpath: pFA6a-TRP1-PGAL1-GST
+  - name: pFLD
+    subpath: pFLD
+  - name: pFLD(alpha)
+    subpath: pFLD(alpha)
+  - name: pGAD-C1
+    subpath: pGAD-C1
+  - name: pGAD-C2
+    subpath: pGAD-C2
+  - name: pGAD-C3
+    subpath: pGAD-C3
+  - name: pGADT7 AD
+    subpath: pGADT7_AD
+  - name: pGADT7-Rec
+    subpath: pGADT7-Rec
+  - name: pGADT7-Rec (linearized)
+    subpath: pGADT7-Rec_(linearized)
+  - name: pGAPZ A
+    subpath: pGAPZ_A
+  - name: pGAPZ B
+    subpath: pGAPZ_B
+  - name: pGAPZ C
+    subpath: pGAPZ_C
+  - name: pGAPZ(alpha) A
+    subpath: pGAPZ(alpha)_A
+  - name: pGAPZ(alpha) B
+    subpath: pGAPZ(alpha)_B
+  - name: pGAPZ(alpha) C
+    subpath: pGAPZ(alpha)_C
+  - name: pGBD-C1
+    subpath: pGBD-C1
+  - name: pGBD-C2
+    subpath: pGBD-C2
+  - name: pGBD-C3
+    subpath: pGBD-C3
+  - name: pGBDU-C1
+    subpath: pGBDU-C1
+  - name: pGBDU-C2
+    subpath: pGBDU-C2
+  - name: pGBDU-C3
+    subpath: pGBDU-C3
+  - name: pGBKT7
+    subpath: pGBKT7
+  - name: pGilda
+    subpath: pGilda
+  - name: pHIL-D2
+    subpath: pHIL-D2
+  - name: pHIL-S1
+    subpath: pHIL-S1
+  - name: pJG4-5
+    subpath: pJG4-5
+  - name: pKLAC1
+    subpath: pKLAC1
+  - name: pKLAC2
+    subpath: pKLAC2
+  - name: pOAD
+    subpath: pOAD
+  - name: pOBD2
+    subpath: pOBD2
+  - name: pP-secSUMO3
+    subpath: pP-secSUMO3
+  - name: pPIC3
+    subpath: pPIC3
+  - name: pPIC3.5
+    subpath: pPIC3.5
+  - name: pPIC3.5K
+    subpath: pPIC3.5K
+  - name: pPIC6 A
+    subpath: pPIC6_A
+  - name: pPIC6 B
+    subpath: pPIC6_B
+  - name: pPIC6 C
+    subpath: pPIC6_C
+  - name: pPIC6(alpha) A
+    subpath: pPIC6(alpha)_A
+  - name: pPIC6(alpha) B
+    subpath: pPIC6(alpha)_B
+  - name: pPIC6(alpha) C
+    subpath: pPIC6(alpha)_C
+  - name: pPIC9
+    subpath: pPIC9
+  - name: pPIC9K
+    subpath: pPIC9K
+  - name: pPICZ A
+    subpath: pPICZ_A
+  - name: pPICZ B
+    subpath: pPICZ_B
+  - name: pPICZ C
+    subpath: pPICZ_C
+  - name: pPICZ(alpha) A
+    subpath: pPICZ(alpha)_A
+  - name: pPICZ(alpha) B
+    subpath: pPICZ(alpha)_B
+  - name: pPICZ(alpha) C
+    subpath: pPICZ(alpha)_C
+  - name: pPINK(alpha)-HC
+    subpath: pPINK(alpha)-HC
+  - name: pPink-HC
+    subpath: pPink-HC
+  - name: pPink-LC
+    subpath: pPink-LC
+  - name: pRS303
+    subpath: pRS303
+  - name: pRS304
+    subpath: pRS304
+  - name: pRS305
+    subpath: pRS305
+  - name: pRS306
+    subpath: pRS306
+  - name: pRS313
+    subpath: pRS313
+  - name: pRS314
+    subpath: pRS314
+  - name: pRS315
+    subpath: pRS315
+  - name: pRS316
+    subpath: pRS316
+  - name: pRS403
+    subpath: pRS403
+  - name: pRS404
+    subpath: pRS404
+  - name: pRS405
+    subpath: pRS405
+  - name: pRS406
+    subpath: pRS406
+  - name: pRS413
+    subpath: pRS413
+  - name: pRS414
+    subpath: pRS414
+  - name: pRS415
+    subpath: pRS415
+  - name: pRS416
+    subpath: pRS416
+  - name: pRS423
+    subpath: pRS423
+  - name: pRS424
+    subpath: pRS424
+  - name: pRS425
+    subpath: pRS425
+  - name: pRS426
+    subpath: pRS426
+  - name: pSpot5
+    subpath: pSpot5
+  - name: pSpot6
+    subpath: pSpot6
+  - name: pSpot7
+    subpath: pSpot7
+  - name: pSpot8
+    subpath: pSpot8
+  - name: pTEF1 Zeo
+    subpath: pTEF1_Zeo
+  - name: pUCATPH
+    subpath: pUCATPH
+  - name: pY-secSUMOstar
+    subpath: pY-secSUMOstar
+  - name: pY-SUMOstar
+    subpath: pY-SUMOstar
+  - name: pYC2 CT
+    subpath: pYC2_CT
+  - name: pYC2 NT A
+    subpath: pYC2_NT_A
+  - name: pYC2 NT B
+    subpath: pYC2_NT_B
+  - name: pYC2 NT C
+    subpath: pYC2_NT_C
+  - name: pYC2-E
+    subpath: pYC2-E
+  - name: pYC6 CT
+    subpath: pYC6_CT
+  - name: pYES2
+    subpath: pYES2
+  - name: pYES2 CT
+    subpath: pYES2_CT
+  - name: pYES2 NT A
+    subpath: pYES2_NT_A
+  - name: pYES2 NT B
+    subpath: pYES2_NT_B
+  - name: pYES2 NT C
+    subpath: pYES2_NT_C
+  - name: pYES2.1-E
+    subpath: pYES2.1-E
+  - name: pYES3 CT
+    subpath: pYES3_CT
+  - name: pYES6 CT
+    subpath: pYES6_CT
+  - name: pYM25
+    subpath: pYM25
+  - name: pYM26
+    subpath: pYM26
+  - name: pYM44
+    subpath: pYM44
+  - name: YCp50
+    subpath: YCp50
+  - name: YCp50-poly
+    subpath: YCp50-poly
+  - name: YCplac111
+    subpath: YCplac111
+  - name: YCplac22
+    subpath: YCplac22
+  - name: YCplac33
+    subpath: YCplac33
+  - name: YEp13
+    subpath: YEp13
+  - name: YEp24
+    subpath: YEp24
+  - name: YEp351
+    subpath: YEp351
+  - name: YEp352
+    subpath: YEp352
+  - name: YEp353
+    subpath: YEp353
+  - name: YEp354
+    subpath: YEp354
+  - name: YEp355
+    subpath: YEp355
+  - name: YEp356
+    subpath: YEp356
+  - name: YEp356R
+    subpath: YEp356R
+  - name: YEp357
+    subpath: YEp357
+  - name: YEp357R
+    subpath: YEp357R
+  - name: YEp358
+    subpath: YEp358
+  - name: YEp358R
+    subpath: YEp358R
+  - name: YEp363
+    subpath: YEp363
+  - name: YEp364
+    subpath: YEp364
+  - name: YEp365
+    subpath: YEp365
+  - name: YEp366
+    subpath: YEp366
+  - name: YEp366R
+    subpath: YEp366R
+  - name: YEp367
+    subpath: YEp367
+  - name: YEp367R
+    subpath: YEp367R
+  - name: YEp368
+    subpath: YEp368
+  - name: YEp368R
+    subpath: YEp368R
+  - name: YEplac112
+    subpath: YEplac112
+  - name: YEplac181
+    subpath: YEplac181
+  - name: YEplac195
+    subpath: YEplac195
+  - name: YIp351
+    subpath: YIp351
+  - name: YIp352
+    subpath: YIp352
+  - name: YIp5
+    subpath: YIp5
+  - name: YIplac128
+    subpath: YIplac128
+  - name: YIplac204
+    subpath: YIplac204
+  - name: YIplac211
+    subpath: YIplac211
+  - name: YRp7
+    subpath: YRp7
+mammalian_expression_vectors:
+  name: Mammalian Expression Vectors
+  plasmids:
+  - name: p3xFLAG-CMV-10
+    subpath: p3xFLAG-CMV-10
+  - name: p3xFLAG-CMV-13
+    subpath: p3xFLAG-CMV-13
+  - name: p3xFLAG-CMV-14
+    subpath: p3xFLAG-CMV-14
+  - name: p3xFLAG-CMV-7
+    subpath: p3xFLAG-CMV-7
+  - name: p3xFLAG-CMV-7.1
+    subpath: p3xFLAG-CMV-7.1
+  - name: p3xFLAG-CMV-8
+    subpath: p3xFLAG-CMV-8
+  - name: p3xFLAG-CMV-9
+    subpath: p3xFLAG-CMV-9
+  - name: p3xFLAG-Myc-CMV-23
+    subpath: p3xFLAG-Myc-CMV-23
+  - name: p3xFLAG-Myc-CMV-24
+    subpath: p3xFLAG-Myc-CMV-24
+  - name: p3xFLAG-Myc-CMV-25
+    subpath: p3xFLAG-Myc-CMV-25
+  - name: p3xFLAG-Myc-CMV-26
+    subpath: p3xFLAG-Myc-CMV-26
+  - name: pALTER-MAX
+    subpath: pALTER-MAX
+  - name: pBApo-CMV
+    subpath: pBApo-CMV
+  - name: pBApo-CMV Neo
+    subpath: pBApo-CMV_Neo
+  - name: pBApo-CMV Pur
+    subpath: pBApo-CMV_Pur
+  - name: pBApo-EF1(alpha) Neo
+    subpath: pBApo-EF1(alpha)_Neo
+  - name: pBApo-EF1(alpha) Pur
+    subpath: pBApo-EF1(alpha)_Pur
+  - name: pBI-CMV1
+    subpath: pBI-CMV1
+  - name: pBI-CMV2
+    subpath: pBI-CMV2
+  - name: pBI-CMV3
+    subpath: pBI-CMV3
+  - name: pBI-CMV4
+    subpath: pBI-CMV4
+  - name: pBK-CMV
+    subpath: pBK-CMV
+  - name: pBudCE4.1
+    subpath: pBudCE4.1
+  - name: pcDNA-DEST40
+    subpath: pcDNA-DEST40
+  - name: pcDNA-DEST47
+    subpath: pcDNA-DEST47
+  - name: pcDNA-DEST53
+    subpath: pcDNA-DEST53
+  - name: pcDNA3
+    subpath: pcDNA3
+  - name: pcDNA3.1 CT-GFP
+    subpath: pcDNA3.1_CT-GFP
+  - name: pcDNA3.1 His A
+    subpath: pcDNA3.1_His_A
+  - name: pcDNA3.1 His B
+    subpath: pcDNA3.1_His_B
+  - name: pcDNA3.1 His C
+    subpath: pcDNA3.1_His_C
+  - name: pcDNA3.1 Hygro(+)
+    subpath: pcDNA3.1_Hygro(%2B)
+  - name: pcDNA3.1 Hygro(-)
+    subpath: pcDNA3.1_Hygro(-)
+  - name: pcDNA3.1 myc-His A
+    subpath: pcDNA3.1_myc-His_A
+  - name: pcDNA3.1 myc-His B
+    subpath: pcDNA3.1_myc-His_B
+  - name: pcDNA3.1 myc-His C
+    subpath: pcDNA3.1_myc-His_C
+  - name: pcDNA3.1 myc-His(-) A
+    subpath: pcDNA3.1_myc-His(-)_A
+  - name: pcDNA3.1 myc-His(-) B
+    subpath: pcDNA3.1_myc-His(-)_B
+  - name: pcDNA3.1 myc-His(-) C
+    subpath: pcDNA3.1_myc-His(-)_C
+  - name: pcDNA3.1 NT-GFP
+    subpath: pcDNA3.1_NT-GFP
+  - name: pcDNA3.1 nV5-DEST
+    subpath: pcDNA3.1_nV5-DEST
+  - name: pcDNA3.1 V5-His A
+    subpath: pcDNA3.1_V5-His_A
+  - name: pcDNA3.1 V5-His B
+    subpath: pcDNA3.1_V5-His_B
+  - name: pcDNA3.1 V5-His C
+    subpath: pcDNA3.1_V5-His_C
+  - name: pcDNA3.1 Zeo(+)
+    subpath: pcDNA3.1_Zeo(%2B)
+  - name: pcDNA3.1 Zeo(-)
+    subpath: pcDNA3.1_Zeo(-)
+  - name: pcDNA3.1(+)
+    subpath: pcDNA3.1(%2B)
+  - name: pcDNA3.1(-)
+    subpath: pcDNA3.1(-)
+  - name: pcDNA3.1+ C-DYK
+    subpath: pcDNA3.1%2B_C-DYK
+  - name: pcDNA3.1+ C-HA
+    subpath: pcDNA3.1%2B_C-HA
+  - name: pcDNA3.1+ C-His
+    subpath: pcDNA3.1%2B_C-His
+  - name: pcDNA3.1+ C-Myc
+    subpath: pcDNA3.1%2B_C-Myc
+  - name: pcDNA3.1+ N-GST(TEV)
+    subpath: pcDNA3.1%2B_N-GST(TEV)
+  - name: pcDNA3.1+ N-GST(Thrombin)
+    subpath: pcDNA3.1%2B_N-GST(Thrombin)
+  - name: pcDNA3.1+ N-HA
+    subpath: pcDNA3.1%2B_N-HA
+  - name: pcDNA3.1+ N-His
+    subpath: pcDNA3.1%2B_N-His
+  - name: pcDNA3.1+ N-Myc
+    subpath: pcDNA3.1%2B_N-Myc
+  - name: pcDNA3.2 V5-DEST
+    subpath: pcDNA3.2_V5-DEST
+  - name: pcDNA4 His A
+    subpath: pcDNA4_His_A
+  - name: pcDNA4 His B
+    subpath: pcDNA4_His_B
+  - name: pcDNA4 His C
+    subpath: pcDNA4_His_C
+  - name: pcDNA4 HisMax A
+    subpath: pcDNA4_HisMax_A
+  - name: pcDNA4 HisMax B
+    subpath: pcDNA4_HisMax_B
+  - name: pcDNA4 HisMax C
+    subpath: pcDNA4_HisMax_C
+  - name: pcDNA4 myc-His A
+    subpath: pcDNA4_myc-His_A
+  - name: pcDNA4 myc-His B
+    subpath: pcDNA4_myc-His_B
+  - name: pcDNA4 myc-His C
+    subpath: pcDNA4_myc-His_C
+  - name: pcDNA4 TO
+    subpath: pcDNA4_TO
+  - name: pcDNA4 TO myc-His A
+    subpath: pcDNA4_TO_myc-His_A
+  - name: pcDNA4 TO myc-His B
+    subpath: pcDNA4_TO_myc-His_B
+  - name: pcDNA4 TO myc-His C
+    subpath: pcDNA4_TO_myc-His_C
+  - name: pcDNA4 V5-His A
+    subpath: pcDNA4_V5-His_A
+  - name: pcDNA4 V5-His B
+    subpath: pcDNA4_V5-His_B
+  - name: pcDNA4 V5-His C
+    subpath: pcDNA4_V5-His_C
+  - name: pcDNA5 FRT
+    subpath: pcDNA5_FRT
+  - name: pcDNA5 FRT TO
+    subpath: pcDNA5_FRT_TO
+  - name: pcDNA5 TO
+    subpath: pcDNA5_TO
+  - name: pcDNA6 myc-His A
+    subpath: pcDNA6_myc-His_A
+  - name: pcDNA6 myc-His B
+    subpath: pcDNA6_myc-His_B
+  - name: pcDNA6 myc-His C
+    subpath: pcDNA6_myc-His_C
+  - name: pcDNA6 TR
+    subpath: pcDNA6_TR
+  - name: pcDNA6 V5-His A
+    subpath: pcDNA6_V5-His_A
+  - name: pcDNA6 V5-His B
+    subpath: pcDNA6_V5-His_B
+  - name: pcDNA6 V5-His C
+    subpath: pcDNA6_V5-His_C
+  - name: pcDNA6.2 C-EmGFP-DEST
+    subpath: pcDNA6.2_C-EmGFP-DEST
+  - name: pcDNA6.2 C-YFP-DEST
+    subpath: pcDNA6.2_C-YFP-DEST
+  - name: pcDNA6.2 cGeneBLAzer-DEST
+    subpath: pcDNA6.2_cGeneBLAzer-DEST
+  - name: pcDNA6.2 cLumio-DEST
+    subpath: pcDNA6.2_cLumio-DEST
+  - name: pcDNA6.2 EmGFP-Bsd V5-DEST
+    subpath: pcDNA6.2_EmGFP-Bsd_V5-DEST
+  - name: pcDNA6.2 N-EmGFP-DEST
+    subpath: pcDNA6.2_N-EmGFP-DEST
+  - name: pcDNA6.2 N-YFP-DEST
+    subpath: pcDNA6.2_N-YFP-DEST
+  - name: pcDNA6.2 nGeneBLAzer-DEST
+    subpath: pcDNA6.2_nGeneBLAzer-DEST
+  - name: pcDNA6.2 nLumio-DEST
+    subpath: pcDNA6.2_nLumio-DEST
+  - name: pcDNA6.2 V5-DEST
+    subpath: pcDNA6.2_V5-DEST
+  - name: pcDNA6.2 V5-pL-DEST
+    subpath: pcDNA6.2_V5-pL-DEST
+  - name: pCEP4
+    subpath: pCEP4
+  - name: pCI
+    subpath: pCI
+  - name: pCI-neo
+    subpath: pCI-neo
+  - name: pCMV SPORT6
+    subpath: pCMV_SPORT6
+  - name: pCMV SPORT6.1
+    subpath: pCMV_SPORT6.1
+  - name: pCMV-(DYKDDDDK)-C
+    subpath: pCMV-(DYKDDDDK)-C
+  - name: pCMV-(DYKDDDDK)-N
+    subpath: pCMV-(DYKDDDDK)-N
+  - name: pCMV-3Tag-1A
+    subpath: pCMV-3Tag-1A
+  - name: pCMV-3Tag-1B
+    subpath: pCMV-3Tag-1B
+  - name: pCMV-3Tag-1C
+    subpath: pCMV-3Tag-1C
+  - name: pCMV-3Tag-2A
+    subpath: pCMV-3Tag-2A
+  - name: pCMV-3Tag-2B
+    subpath: pCMV-3Tag-2B
+  - name: pCMV-3Tag-2C
+    subpath: pCMV-3Tag-2C
+  - name: pCMV-3Tag-3A
+    subpath: pCMV-3Tag-3A
+  - name: pCMV-3Tag-3B
+    subpath: pCMV-3Tag-3B
+  - name: pCMV-3Tag-3C
+    subpath: pCMV-3Tag-3C
+  - name: pCMV-3Tag-4A
+    subpath: pCMV-3Tag-4A
+  - name: pCMV-3Tag-4B
+    subpath: pCMV-3Tag-4B
+  - name: pCMV-3Tag-4C
+    subpath: pCMV-3Tag-4C
+  - name: pCMV-3Tag-6
+    subpath: pCMV-3Tag-6
+  - name: pCMV-3Tag-7
+    subpath: pCMV-3Tag-7
+  - name: pCMV-3Tag-8
+    subpath: pCMV-3Tag-8
+  - name: pCMV-3Tag-9
+    subpath: pCMV-3Tag-9
+  - name: pCMV-DDK-C
+    subpath: pCMV-DDK-C
+  - name: pCMV-DDK-N
+    subpath: pCMV-DDK-N
+  - name: pCMV-HA
+    subpath: pCMV-HA
+  - name: pCMV-HA-C
+    subpath: pCMV-HA-C
+  - name: pCMV-HA-N
+    subpath: pCMV-HA-N
+  - name: pCMV-LacZ
+    subpath: pCMV-LacZ
+  - name: pCMV-MIR
+    subpath: pCMV-MIR
+  - name: pCMV-Myc
+    subpath: pCMV-Myc
+  - name: pCMV-Myc-C
+    subpath: pCMV-Myc-C
+  - name: pCMV-Myc-N
+    subpath: pCMV-Myc-N
+  - name: pCMV-Script
+    subpath: pCMV-Script
+  - name: pCMV-Script EX
+    subpath: pCMV-Script_EX
+  - name: pCMV-Tag 1
+    subpath: pCMV-Tag_1
+  - name: pCMV-Tag 2A
+    subpath: pCMV-Tag_2A
+  - name: pCMV-Tag 2B
+    subpath: pCMV-Tag_2B
+  - name: pCMV-Tag 2C
+    subpath: pCMV-Tag_2C
+  - name: pCMV-Tag 3A
+    subpath: pCMV-Tag_3A
+  - name: pCMV-Tag 3B
+    subpath: pCMV-Tag_3B
+  - name: pCMV-Tag 3C
+    subpath: pCMV-Tag_3C
+  - name: pCMV-Tag 4A
+    subpath: pCMV-Tag_4A
+  - name: pCMV-Tag 4B
+    subpath: pCMV-Tag_4B
+  - name: pCMV-Tag 4C
+    subpath: pCMV-Tag_4C
+  - name: pCMV-Tag 5A
+    subpath: pCMV-Tag_5A
+  - name: pCMV-Tag 5B
+    subpath: pCMV-Tag_5B
+  - name: pCMV-Tag 5C
+    subpath: pCMV-Tag_5C
+  - name: pCMV-Tet3G
+    subpath: pCMV-Tet3G
+  - name: pCMV6-A-BSD
+    subpath: pCMV6-A-BSD
+  - name: pCMV6-A-EM7-BSD
+    subpath: pCMV6-A-EM7-BSD
+  - name: pCMV6-A-GFP
+    subpath: pCMV6-A-GFP
+  - name: pCMV6-A-Hygro
+    subpath: pCMV6-A-Hygro
+  - name: pCMV6-A-Puro
+    subpath: pCMV6-A-Puro
+  - name: pCMV6-AC
+    subpath: pCMV6-AC
+  - name: pCMV6-AC-3DDK
+    subpath: pCMV6-AC-3DDK
+  - name: pCMV6-AC-3HA
+    subpath: pCMV6-AC-3HA
+  - name: pCMV6-AC-DDK
+    subpath: pCMV6-AC-DDK
+  - name: pCMV6-AC-DDK-His
+    subpath: pCMV6-AC-DDK-His
+  - name: pCMV6-AC-FC
+    subpath: pCMV6-AC-FC
+  - name: pCMV6-AC-FC-S
+    subpath: pCMV6-AC-FC-S
+  - name: pCMV6-AC-FP602
+    subpath: pCMV6-AC-FP602
+  - name: pCMV6-AC-FP635
+    subpath: pCMV6-AC-FP635
+  - name: pCMV6-AC-GFP
+    subpath: pCMV6-AC-GFP
+  - name: pCMV6-AC-GFP-rtTA
+    subpath: pCMV6-AC-GFP-rtTA
+  - name: pCMV6-AC-HA
+    subpath: pCMV6-AC-HA
+  - name: pCMV6-AC-HA-His
+    subpath: pCMV6-AC-HA-His
+  - name: pCMV6-AC-His
+    subpath: pCMV6-AC-His
+  - name: pCMV6-AC-IRES-GFP
+    subpath: pCMV6-AC-IRES-GFP
+  - name: pCMV6-AC-IRES-GFP-Puro
+    subpath: pCMV6-AC-IRES-GFP-Puro
+  - name: pCMV6-AC-mBFP
+    subpath: pCMV6-AC-mBFP
+  - name: pCMV6-AC-mCFP
+    subpath: pCMV6-AC-mCFP
+  - name: pCMV6-AC-mGFP
+    subpath: pCMV6-AC-mGFP
+  - name: pCMV6-AC-mKate
+    subpath: pCMV6-AC-mKate
+  - name: pCMV6-AC-mRFP
+    subpath: pCMV6-AC-mRFP
+  - name: pCMV6-AC-Myc
+    subpath: pCMV6-AC-Myc
+  - name: pCMV6-AC-Myc-DDK
+    subpath: pCMV6-AC-Myc-DDK
+  - name: pCMV6-AC-Myc-His
+    subpath: pCMV6-AC-Myc-His
+  - name: pCMV6-AC-mYFP
+    subpath: pCMV6-AC-mYFP
+  - name: pCMV6-AC-RFP
+    subpath: pCMV6-AC-RFP
+  - name: pCMV6-AC-YFP
+    subpath: pCMV6-AC-YFP
+  - name: pCMV6-AN-3DDK
+    subpath: pCMV6-AN-3DDK
+  - name: pCMV6-AN-3HA
+    subpath: pCMV6-AN-3HA
+  - name: pCMV6-AN-DDK
+    subpath: pCMV6-AN-DDK
+  - name: pCMV6-AN-FC
+    subpath: pCMV6-AN-FC
+  - name: pCMV6-AN-FC-S
+    subpath: pCMV6-AN-FC-S
+  - name: pCMV6-AN-FP602
+    subpath: pCMV6-AN-FP602
+  - name: pCMV6-AN-FP635
+    subpath: pCMV6-AN-FP635
+  - name: pCMV6-AN-GFP
+    subpath: pCMV6-AN-GFP
+  - name: pCMV6-AN-GFP-AC-His
+    subpath: pCMV6-AN-GFP-AC-His
+  - name: pCMV6-AN-HA
+    subpath: pCMV6-AN-HA
+  - name: pCMV6-AN-His
+    subpath: pCMV6-AN-His
+  - name: pCMV6-AN-His-DDK
+    subpath: pCMV6-AN-His-DDK
+  - name: pCMV6-AN-His-HA
+    subpath: pCMV6-AN-His-HA
+  - name: pCMV6-AN-His-Myc
+    subpath: pCMV6-AN-His-Myc
+  - name: pCMV6-AN-mBFP
+    subpath: pCMV6-AN-mBFP
+  - name: pCMV6-AN-mCFP
+    subpath: pCMV6-AN-mCFP
+  - name: pCMV6-AN-mGFP
+    subpath: pCMV6-AN-mGFP
+  - name: pCMV6-AN-mKate
+    subpath: pCMV6-AN-mKate
+  - name: pCMV6-AN-mRFP
+    subpath: pCMV6-AN-mRFP
+  - name: pCMV6-AN-Myc
+    subpath: pCMV6-AN-Myc
+  - name: pCMV6-AN-Myc-DDK
+    subpath: pCMV6-AN-Myc-DDK
+  - name: pCMV6-AN-mYFP
+    subpath: pCMV6-AN-mYFP
+  - name: pCMV6-AN-RFP
+    subpath: pCMV6-AN-RFP
+  - name: pCMV6-AN-YFP
+    subpath: pCMV6-AN-YFP
+  - name: pCMV6-Entry
+    subpath: pCMV6-Entry
+  - name: pCMV6-Entry-Cre
+    subpath: pCMV6-Entry-Cre
+  - name: pCMV6-Entry2
+    subpath: pCMV6-Entry2
+  - name: pCMV6-XL5-DDK-His
+    subpath: pCMV6-XL5-DDK-His
+  - name: pCS6-Empty
+    subpath: pCS6-Empty
+  - name: pCTAP-A
+    subpath: pCTAP-A
+  - name: pCTAP-B
+    subpath: pCTAP-B
+  - name: pCTAP-C
+    subpath: pCTAP-C
+  - name: pDEST26
+    subpath: pDEST26
+  - name: pDEST27
+    subpath: pDEST27
+  - name: pDisplay
+    subpath: pDisplay
+  - name: pEF-DEST51
+    subpath: pEF-DEST51
+  - name: pEF1alpha-IRES
+    subpath: pEF1alpha-IRES
+  - name: pEF1alpha-IRES-AcGFP1
+    subpath: pEF1alpha-IRES-AcGFP1
+  - name: pEF1alpha-IRES-DsRed-Express2
+    subpath: pEF1alpha-IRES-DsRed-Express2
+  - name: pEF1alpha-IRES-ZsGreen1
+    subpath: pEF1alpha-IRES-ZsGreen1
+  - name: pEF1alpha-Tet3G
+    subpath: pEF1alpha-Tet3G
+  - name: pEF5 FRT V5-DEST
+    subpath: pEF5_FRT_V5-DEST
+  - name: pEF6 V5-His A
+    subpath: pEF6_V5-His_A
+  - name: pEF6 V5-His B
+    subpath: pEF6_V5-His_B
+  - name: pEF6 V5-His C
+    subpath: pEF6_V5-His_C
+  - name: pEntry-rtTA
+    subpath: pEntry-rtTA
+  - name: pF4A CMV
+    subpath: pF4A_CMV
+  - name: pF4K CMV
+    subpath: pF4K_CMV
+  - name: pF5A CMV-neo
+    subpath: pF5A_CMV-neo
+  - name: pF5K CMV-neo
+    subpath: pF5K_CMV-neo
+  - name: pFC14A HaloTag CMV
+    subpath: pFC14A_HaloTag_CMV
+  - name: pFC14K HaloTag CMV
+    subpath: pFC14K_HaloTag_CMV
+  - name: pFC15A HaloTag CMVd1
+    subpath: pFC15A_HaloTag_CMVd1
+  - name: pFC15K HaloTag CMVd1
+    subpath: pFC15K_HaloTag_CMVd1
+  - name: pFC16A HaloTag CMVd2
+    subpath: pFC16A_HaloTag_CMVd2
+  - name: pFC16K HaloTag CMVd2
+    subpath: pFC16K_HaloTag_CMVd2
+  - name: pFC17A HaloTag CMVd3
+    subpath: pFC17A_HaloTag_CMVd3
+  - name: pFC17K HaloTag CMVd3
+    subpath: pFC17K_HaloTag_CMVd3
+  - name: pFC27A HaloTag CMV-neo
+    subpath: pFC27A_HaloTag_CMV-neo
+  - name: pFC27K HaloTag CMV-neo
+    subpath: pFC27K_HaloTag_CMV-neo
+  - name: pFLAG-CMV-1
+    subpath: pFLAG-CMV-1
+  - name: pFLAG-CMV-2
+    subpath: pFLAG-CMV-2
+  - name: pFLAG-CMV-3
+    subpath: pFLAG-CMV-3
+  - name: pFLAG-CMV-4
+    subpath: pFLAG-CMV-4
+  - name: pFLAG-CMV-5.1
+    subpath: pFLAG-CMV-5.1
+  - name: pFLAG-Myc-CMV-19
+    subpath: pFLAG-Myc-CMV-19
+  - name: pFLAG-Myc-CMV-20
+    subpath: pFLAG-Myc-CMV-20
+  - name: pFLAG-Myc-CMV-21
+    subpath: pFLAG-Myc-CMV-21
+  - name: pFLAG-Myc-CMV-22
+    subpath: pFLAG-Myc-CMV-22
+  - name: pFN21A HaloTag CMV
+    subpath: pFN21A_HaloTag_CMV
+  - name: pFN21K HaloTag CMV
+    subpath: pFN21K_HaloTag_CMV
+  - name: pFN22A HaloTag CMVd1
+    subpath: pFN22A_HaloTag_CMVd1
+  - name: pFN22K HaloTag CMVd1
+    subpath: pFN22K_HaloTag_CMVd1
+  - name: pFN23A HaloTag CMVd2
+    subpath: pFN23A_HaloTag_CMVd2
+  - name: pFN23K HaloTag CMVd2
+    subpath: pFN23K_HaloTag_CMVd2
+  - name: pFN24A HaloTag CMVd3
+    subpath: pFN24A_HaloTag_CMVd3
+  - name: pFN24K HaloTag CMVd3
+    subpath: pFN24K_HaloTag_CMVd3
+  - name: pFN28A HaloTag CMV-neo
+    subpath: pFN28A_HaloTag_CMV-neo
+  - name: pFN28K HaloTag CMV-neo
+    subpath: pFN28K_HaloTag_CMV-neo
+  - name: pFRT lacZeo
+    subpath: pFRT_lacZeo
+  - name: pFRT lacZeo2
+    subpath: pFRT_lacZeo2
+  - name: pGen2.1
+    subpath: pGen2.1
+  - name: phCMV1
+    subpath: phCMV1
+  - name: phCMV2
+    subpath: phCMV2
+  - name: phCMV3
+    subpath: phCMV3
+  - name: pHet-1
+    subpath: pHet-1
+  - name: pHet-Act1-2
+    subpath: pHet-Act1-2
+  - name: pHet-Mem1
+    subpath: pHet-Mem1
+  - name: pHet-Nuc1
+    subpath: pHet-Nuc1
+  - name: pHom-1
+    subpath: pHom-1
+  - name: pHom-Mem1
+    subpath: pHom-Mem1
+  - name: pHTC HaloTag CMV-neo
+    subpath: pHTC_HaloTag_CMV-neo
+  - name: pHTN HaloTag CMV-neo
+    subpath: pHTN_HaloTag_CMV-neo
+  - name: pIRES
+    subpath: pIRES
+  - name: pIRES2 DsRed-Express2
+    subpath: pIRES2_DsRed-Express2
+  - name: pIRES2-AcGFP1
+    subpath: pIRES2-AcGFP1
+  - name: pIRES2-EGFP
+    subpath: pIRES2-EGFP
+  - name: pIRES2-ZsGreen1
+    subpath: pIRES2-ZsGreen1
+  - name: pIRESbleo3
+    subpath: pIRESbleo3
+  - name: pIREShyg3
+    subpath: pIREShyg3
+  - name: pIRESneo3
+    subpath: pIRESneo3
+  - name: pIRESpuro3
+    subpath: pIRESpuro3
+  - name: pM-secSUMOstar
+    subpath: pM-secSUMOstar
+  - name: pM-SUMOstar
+    subpath: pM-SUMOstar
+  - name: pME-HA (linearized)
+    subpath: pME-HA_(linearized)
+  - name: pmRi-mCherry
+    subpath: pmRi-mCherry
+  - name: pmRi-ZsGreen1
+    subpath: pmRi-ZsGreen1
+  - name: pNTAP-A
+    subpath: pNTAP-A
+  - name: pNTAP-B
+    subpath: pNTAP-B
+  - name: pNTAP-C
+    subpath: pNTAP-C
+  - name: pOG44
+    subpath: pOG44
+  - name: pPTuner
+    subpath: pPTuner
+  - name: pPTuner IRES2
+    subpath: pPTuner_IRES2
+  - name: pPTunerC
+    subpath: pPTunerC
+  - name: pREP4
+    subpath: pREP4
+  - name: prHom-1
+    subpath: prHom-1
+  - name: prHom-Nuc1
+    subpath: prHom-Nuc1
+  - name: prHom-Sec1
+    subpath: prHom-Sec1
+  - name: pSecTag A
+    subpath: pSecTag_A
+  - name: pSecTag B
+    subpath: pSecTag_B
+  - name: pSecTag C
+    subpath: pSecTag_C
+  - name: pSecTag2 A
+    subpath: pSecTag2_A
+  - name: pSecTag2 B
+    subpath: pSecTag2_B
+  - name: pSecTag2 C
+    subpath: pSecTag2_C
+  - name: pSI
+    subpath: pSI
+  - name: pSingle-tTs-shRNA
+    subpath: pSingle-tTs-shRNA
+  - name: pT-REx-DEST30
+    subpath: pT-REx-DEST30
+  - name: pT-REx-DEST31
+    subpath: pT-REx-DEST31
+  - name: pTandem-1
+    subpath: pTandem-1
+  - name: pTCN
+    subpath: pTCN
+  - name: pTCP
+    subpath: pTCP
+  - name: pTet-DualOFF
+    subpath: pTet-DualOFF
+  - name: pTet-DualON
+    subpath: pTet-DualON
+  - name: pTet-Off
+    subpath: pTet-Off
+  - name: pTet-Off-Advanced
+    subpath: pTet-Off-Advanced
+  - name: pTet-On
+    subpath: pTet-On
+  - name: pTet-On-Advanced
+    subpath: pTet-On-Advanced
+  - name: pTet-tTS
+    subpath: pTet-tTS
+  - name: pTetOne
+    subpath: pTetOne
+  - name: pTK-neo
+    subpath: pTK-neo
+  - name: pTracer-CMV
+    subpath: pTracer-CMV
+  - name: pTracer-CMV Bsd
+    subpath: pTracer-CMV_Bsd
+  - name: pTracer-CMV2
+    subpath: pTracer-CMV2
+  - name: pTracer-EF V5-His A
+    subpath: pTracer-EF_V5-His_A
+  - name: pTracer-EF V5-His B
+    subpath: pTracer-EF_V5-His_B
+  - name: pTracer-EF V5-His C
+    subpath: pTracer-EF_V5-His_C
+  - name: pTracer-SV40
+    subpath: pTracer-SV40
+  - name: pTRE-Cycle1
+    subpath: pTRE-Cycle1
+  - name: pTRE-Cycle2
+    subpath: pTRE-Cycle2
+  - name: pTRE-Cycle3
+    subpath: pTRE-Cycle3
+  - name: pTRE-Dual1
+    subpath: pTRE-Dual1
+  - name: pTRE-Dual2
+    subpath: pTRE-Dual2
+  - name: pTRE-Tight
+    subpath: pTRE-Tight
+  - name: pTRE-Tight-BI
+    subpath: pTRE-Tight-BI
+  - name: pTRE-Tight-BI-AcGFP1
+    subpath: pTRE-Tight-BI-AcGFP1
+  - name: pTRE-Tight-BI-DsRed-Express
+    subpath: pTRE-Tight-BI-DsRed-Express
+  - name: pTRE-Tight-BI-ZsGreen1
+    subpath: pTRE-Tight-BI-ZsGreen1
+  - name: pTRE2
+    subpath: pTRE2
+  - name: pTRE2hyg
+    subpath: pTRE2hyg
+  - name: pTRE2pur
+    subpath: pTRE2pur
+  - name: pTRE3G
+    subpath: pTRE3G
+  - name: pTRE3G-BI
+    subpath: pTRE3G-BI
+  - name: pTRE3G-BI-Het1
+    subpath: pTRE3G-BI-Het1
+  - name: pTRE3G-BI-mCherry
+    subpath: pTRE3G-BI-mCherry
+  - name: pTRE3G-BI-ZsGreen1
+    subpath: pTRE3G-BI-ZsGreen1
+  - name: pTRE3G-IRES
+    subpath: pTRE3G-IRES
+  - name: pTRE3G-mCherry
+    subpath: pTRE3G-mCherry
+  - name: pTRE3G-ZsGreen1
+    subpath: pTRE3G-ZsGreen1
+  - name: pVAX1
+    subpath: pVAX1
+  - name: pX330
+    subpath: pX330
+  - name: pZeoSV2(+)
+    subpath: pZeoSV2(%2B)
+  - name: pZeoSV2(-)
+    subpath: pZeoSV2(-)
+  - name: pZFHD1-2
+    subpath: pZFHD1-2

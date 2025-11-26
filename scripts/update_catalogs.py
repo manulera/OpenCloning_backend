@@ -25,4 +25,14 @@ async def update_seva_catalog(path: str):
                 f.write(f'{name}\t{genbank_link}\n')
 
 
+async def update_snapgene_catalog(path: str):
+    async with AsyncClient() as client:
+        response = await client.get(
+            'https://raw.githubusercontent.com/manulera/SnapGene_crawler/refs/heads/master/index.yaml'
+        )
+        with open(path, 'w') as f:
+            f.write(response.text)
+
+
 asyncio.run(update_seva_catalog('src/opencloning/catalogs/seva.tsv'))
+asyncio.run(update_snapgene_catalog('src/opencloning/catalogs/snapgene.yaml'))
