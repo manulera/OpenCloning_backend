@@ -30,6 +30,7 @@ from opencloning_linkml.datamodel import (
 from pydna.opencloning_models import SequenceLocationStr
 from ..dna_functions import (
     format_sequence_genbank,
+    get_sequence_from_benchling_url,
     request_from_addgene,
     request_from_snapgene,
     request_from_wekwikgene,
@@ -208,22 +209,27 @@ async def read_from_file(
 # directly the object.
 
 
-def repository_id_http_error_handler(exception: HTTPError, source: RepositoryIdSource):
+def repository_id_http_error_handler(exception, source: RepositoryIdSource):
 
-    if exception.code == 500:  # pragma: no cover
-        raise HTTPException(
-            503, f'{source.repository_name} returned: {exception} - {source.repository_name} might be down'
-        )
-    elif exception.code == 400 or exception.code == 404:
-        raise HTTPException(
-            404,
-            f'{source.repository_name} returned: {exception} - Likely you inserted a wrong {source.repository_name} id',
-        )
-    elif exception.code == 403:
-        raise HTTPException(
-            403,
-            f'Request to {source.repository_name} is not allowed. Please check that the URL is whitelisted.',
-        )
+    if isinstance(exception, HTTPError):
+        if exception.code == 500:  # pragma: no cover
+            raise HTTPException(
+                503, f'{source.repository_name} returned: {exception} - {source.repository_name} might be down'
+            )
+        elif exception.code == 400 or exception.code == 404:
+            raise HTTPException(
+                404,
+                f'{source.repository_name} returned: {exception} - Likely you inserted a wrong {source.repository_name} id',
+            )
+        elif exception.code == 403:
+            raise HTTPException(
+                403,
+                f'Request to {source.repository_name} is not allowed. Please check that the URL is whitelisted.',
+            )
+    elif isinstance(exception, ConnectError):
+        raise HTTPException(504, f'Unable to connect to {source.repository_name}')
+    else:
+        raise HTTPException(400, f'Unknown error: {exception}')
 
 
 # Redirect to the right repository
@@ -287,10 +293,8 @@ async def get_from_repository_id_genbank(source: RepositoryIdSource):
 async def get_from_repository_id_addgene(source: AddgeneIdSource):
     try:
         dseq = await request_from_addgene(source.repository_id)
-    except HTTPError as exception:
+    except Exception as exception:
         repository_id_http_error_handler(exception, source)
-    except ConnectError:
-        raise HTTPException(504, 'unable to connect to Addgene')
 
     return format_products(
         source.id,
@@ -316,10 +320,8 @@ async def get_from_repository_id_addgene(source: AddgeneIdSource):
 async def get_from_repository_id_wekwikgene(source: WekWikGeneIdSource):
     try:
         dseq = await request_from_wekwikgene(source.repository_id)
-    except HTTPError as exception:
+    except Exception as exception:
         repository_id_http_error_handler(exception, source)
-    except ConnectError:
-        raise HTTPException(504, 'unable to connect to WekWikGene')
     return format_products(
         source.id,
         [dseq],
@@ -344,12 +346,9 @@ async def get_from_benchling_url(
     source: Annotated[BenchlingUrlSource, Body(openapi_examples=request_examples.benchling_url_examples)]
 ):
     try:
-        dseqs = await get_sequences_from_file_url(source.repository_id)
-        return {
-            'sequences': [format_sequence_genbank(s, source.output_name) for s in dseqs],
-            'sources': [source for s in dseqs],
-        }
-    except HTTPError as exception:
+        dseq = await get_sequence_from_benchling_url(source.repository_id)
+        return format_products(source.id, [dseq], None, source.output_name)
+    except Exception as exception:
         repository_id_http_error_handler(exception, source)
 
 
@@ -366,7 +365,7 @@ async def get_from_repository_id_snapgene(
         plasmid_set, plasmid_name = source.repository_id.split('/')
         seq = await request_from_snapgene(plasmid_set, plasmid_name)
         return format_products(source.id, [seq], None, source.output_name)
-    except HTTPError as exception:
+    except Exception as exception:
         repository_id_http_error_handler(exception, source)
 
 
@@ -387,7 +386,7 @@ async def get_from_repository_id_euroscarf(source: EuroscarfSource):
         if not dseq.circular:
             dseq = dseq.looped()
         return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [source]}
-    except HTTPError as exception:
+    except Exception as exception:
         repository_id_http_error_handler(exception, source)
 
 
@@ -404,7 +403,7 @@ async def get_from_repository_id_igem(source: IGEMSource):
     try:
         dseq = (await get_sequences_from_file_url(source.sequence_file_url))[0]
         return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [source]}
-    except HTTPError as exception:
+    except Exception as exception:
         repository_id_http_error_handler(exception, source)
 
 
@@ -420,7 +419,7 @@ async def get_from_repository_id_open_dna_collections(source: OpenDNACollections
     try:
         dseq = (await get_sequences_from_file_url(source.sequence_file_url))[0]
         return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [source]}
-    except HTTPError as exception:
+    except Exception as exception:
         repository_id_http_error_handler(exception, source)
 
 
@@ -509,12 +508,8 @@ async def get_from_repository_id_seva(source: SEVASource):
     """
     try:
         dseq = await get_seva_plasmid(source.repository_id)
-    except HTTPError as exception:
-        repository_id_http_error_handler(exception, source)
-    except ConnectError:
-        raise HTTPException(504, 'unable to connect to SEVA')
     except Exception as exception:
-        raise HTTPException(400, f'Error parsing file: {exception}')
+        repository_id_http_error_handler(exception, source)
 
     return format_products(
         source.id,

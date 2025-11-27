@@ -8,7 +8,13 @@ from opencloning_linkml.datamodel import (
     TextFileSequence,
     SequenceFileFormat,
 )
-from pydna.opencloning_models import AddgeneIdSource, SEVASource, SnapGenePlasmidSource, WekWikGeneIdSource
+from pydna.opencloning_models import (
+    AddgeneIdSource,
+    SEVASource,
+    SnapGenePlasmidSource,
+    WekWikGeneIdSource,
+    BenchlingUrlSource,
+)
 from pydna.parsers import parse as pydna_parse
 from bs4 import BeautifulSoup
 from pydna.common_sub_strings import common_sub_strings
@@ -172,6 +178,15 @@ async def get_seva_plasmid(repository_id: str) -> Dseqrecord:
     return seq
 
 
+async def get_sequence_from_benchling_url(url: str) -> Dseqrecord:
+    dseqs = await get_sequences_from_file_url(url)
+    if len(dseqs) == 0:
+        raise ValueError('No sequences found in Benchling file')
+    dseq = dseqs[0]
+    dseq.source = BenchlingUrlSource(repository_id=url)
+    return dseq
+
+
 def correct_name(dseq: Dseqrecord):
     # Can set the name from keyword if locus is set to Exported
     if dseq.name.lower() == 'exported' and dseq.locus.lower() == 'exported' and 'keywords' in dseq.annotations:
@@ -273,15 +288,8 @@ def custom_file_parser(
 async def get_sequence_from_euroscarf_url(plasmid_id: str) -> Dseqrecord:
     url = f'http://www.euroscarf.de/plasmid_details.php?accno={plasmid_id}'
     async with get_http_client() as client:
-        try:
-            resp = await client.get(url)
-        except ConnectError as e:
-            raise HTTPError(url, 504, 'could not connect to euroscarf', 'could not connect to euroscarf', None) from e
-    # I don't think this ever happens
-    if resp.status_code != 200:
-        raise HTTPError(
-            url, resp.status_code, 'could not connect to euroscarf', 'could not connect to euroscarf', None
-        )
+        resp = await client.get(url)
+
     # Use beautifulsoup to parse the html
     soup = BeautifulSoup(resp.text, 'html.parser')
     # Identify if it's an error (seems to be a php error log without a body tag)

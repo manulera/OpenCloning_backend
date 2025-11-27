@@ -528,7 +528,7 @@ class AddgeneTest(unittest.TestCase):
         )
         response = client.post('/repository_id/addgene', json=source.model_dump())
         self.assertEqual(response.status_code, 504)
-        self.assertIn('unable to connect to Addgene', response.json()['detail'])
+        self.assertIn('Unable to connect to addgene', response.json()['detail'])
 
 
 class WekWikGeneSourceTest(unittest.TestCase):
@@ -571,7 +571,7 @@ class WekWikGeneSourceTest(unittest.TestCase):
         )
         response = client.post('/repository_id/wekwikgene', json=source.model_dump())
         self.assertEqual(response.status_code, 504)
-        self.assertIn('unable to connect to WekWikGene', response.json()['detail'])
+        self.assertIn('Unable to connect to wekwikgene', response.json()['detail'])
 
     def test_redirect(self):
         source = WekWikGeneIdSource(
@@ -1031,7 +1031,7 @@ class SEVASourceTest(unittest.TestCase):
             response = client.post('/repository_id/seva', json=source.model_dump())
             self.assertEqual(response.status_code, 504)
             payload = response.json()
-            self.assertEqual(payload['detail'], 'unable to connect to SEVA')
+            self.assertEqual(payload['detail'], 'Unable to connect to seva')
 
         # Mock incorrect file
         with respx.mock:
@@ -1039,7 +1039,7 @@ class SEVASourceTest(unittest.TestCase):
             response = client.post('/repository_id/seva', json=source.model_dump())
             self.assertEqual(response.status_code, 400)
             payload = response.json()
-            self.assertIn('Error parsing file', payload['detail'])
+            self.assertIn('Unknown error', payload['detail'])
             self.assertIn('No sequences found in SEVA file', payload['detail'])
 
         with respx.mock:
@@ -1049,7 +1049,7 @@ class SEVASourceTest(unittest.TestCase):
             response = client.post('/repository_id/seva', json=source.model_dump())
             self.assertEqual(response.status_code, 400)
             payload = response.json()
-            self.assertIn('Error parsing file', payload['detail'])
+            self.assertIn('Unknown error', payload['detail'])
             self.assertIn('Premature end of line', payload['detail'])
 
     def test_redirect(self):
