@@ -7,10 +7,8 @@ from opencloning_linkml.datamodel import (
     PlannotateAnnotationReport,
     TextFileSequence,
     SequenceFileFormat,
-    WekWikGeneIdSource,
-    SnapGenePlasmidSource,
 )
-from pydna.opencloning_models import AddgeneIdSource, SEVASource
+from pydna.opencloning_models import AddgeneIdSource, SEVASource, SnapGenePlasmidSource, WekWikGeneIdSource
 from pydna.parsers import parse as pydna_parse
 from bs4 import BeautifulSoup
 from pydna.common_sub_strings import common_sub_strings
@@ -96,6 +94,7 @@ async def request_from_snapgene(plasmid_set: dict, plasmid_name: str) -> Dseqrec
     if len(seqs) == 0:
         raise ValueError('No sequences found in SnapGene file')
     seq = seqs[0]
+    seq.name = plasmid_name
     seq.source = SnapGenePlasmidSource(repository_id=f'{plasmid_set}/{plasmid_name}')
     return seq
 
@@ -137,8 +136,8 @@ async def request_from_addgene(repository_id: str) -> Dseqrecord:
     return dseqr
 
 
-async def request_from_wekwikgene(source: WekWikGeneIdSource) -> Dseqrecord:
-    url = f'https://wekwikgene.wllsb.edu.cn/plasmids/{source.repository_id}'
+async def request_from_wekwikgene(repository_id: str) -> Dseqrecord:
+    url = f'https://wekwikgene.wllsb.edu.cn/plasmids/{repository_id}'
     async with get_http_client() as client:
         resp = await client.get(url)
     if resp.status_code == 404:
@@ -149,8 +148,7 @@ async def request_from_wekwikgene(source: WekWikGeneIdSource) -> Dseqrecord:
     sequence_name = soup.find('h1', class_='plasmid__info__name').text.replace(' ', '_')
     seq = (await get_sequences_from_file_url(sequence_file_url, 'snapgene'))[0]
     seq.name = sequence_name
-    source.sequence_file_url = sequence_file_url
-    seq.source = source
+    seq.source = WekWikGeneIdSource(repository_id=repository_id, sequence_file_url=sequence_file_url)
     return seq
 
 

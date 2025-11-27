@@ -23,6 +23,8 @@ def format_products(
 
     with id_mode(use_python_internal_id=False):
         formatted_sources = [p.source.to_pydantic_model(source_id).model_dump() for p in products]
+        for source in formatted_sources:
+            source['output_name'] = output_name
 
     if completed_source is not None:
         this_source_dict = completed_source.model_dump()

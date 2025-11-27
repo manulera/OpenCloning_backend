@@ -641,10 +641,6 @@ class SnapGenePlasmidSourceTest(unittest.TestCase):
         self.assertEqual(len(payload['sequences']), 1)
         self.assertEqual(len(payload['sources']), 1)
         out_source = payload['sources'][0]
-        # It should have been renamed
-        self.assertEqual(out_source['output_name'], 'pEASY-T1_(linearized)')
-        # Remove that and compare with original source
-        out_source['output_name'] = None
         self.assertEqual(out_source, source.model_dump())
         seq = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
         self.assertEqual(seq.name, 'pEASY-T1_(linearized)')
