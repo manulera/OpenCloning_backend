@@ -17,6 +17,7 @@ from pydna.opencloning_models import (
     WekWikGeneIdSource,
     BenchlingUrlSource,
     IGEMSource,
+    EuroscarfSource,
 )
 from pydna.parsers import parse as pydna_parse
 from bs4 import BeautifulSoup
@@ -311,7 +312,12 @@ async def get_sequence_from_euroscarf_url(plasmid_id: str) -> Dseqrecord:
         msg = f'Could not retrieve plasmid details, double-check the euroscarf site: {url}'
         raise HTTPError(url, 503, msg, msg, None)
     genbank_url = f'http://www.euroscarf.de/{subpath.get("href")}'
-    return (await get_sequences_from_file_url(genbank_url))[0]
+    seq = (await get_sequences_from_file_url(genbank_url))[0]
+    # Sometimes the files do not contain correct topology information, so we loop them
+    if not seq.circular:
+        seq = seq.looped()
+    seq.source = EuroscarfSource(repository_id=plasmid_id)
+    return seq
 
 
 async def annotate_with_plannotate(
