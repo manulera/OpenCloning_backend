@@ -31,6 +31,7 @@ from pydna.opencloning_models import SequenceLocationStr
 from ..dna_functions import (
     format_sequence_genbank,
     get_sequence_from_benchling_url,
+    get_sequence_from_openDNA_collections,
     request_from_addgene,
     request_from_snapgene,
     request_from_wekwikgene,
@@ -417,8 +418,21 @@ async def get_from_repository_id_igem(source: IGEMSource):
 )
 async def get_from_repository_id_open_dna_collections(source: OpenDNACollectionsSource):
     try:
-        dseq = (await get_sequences_from_file_url(source.sequence_file_url))[0]
-        return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [source]}
+        collection_name, plasmid_id = source.repository_id.split('/')
+        dseq = await get_sequence_from_openDNA_collections(collection_name, plasmid_id)
+        return format_products(
+            source.id,
+            [dseq],
+            source if source.sequence_file_url is not None else None,
+            source.output_name,
+            wrong_completed_source_error_message=f'''
+            The provided source is not valid.
+            We found the following:
+              - collection_name: {collection_name}
+              - plasmid_id: {plasmid_id}
+              - sequence_file_url: {dseq.source.sequence_file_url}
+            ''',
+        )
     except Exception as exception:
         repository_id_http_error_handler(exception, source)
 

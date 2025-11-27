@@ -18,5 +18,12 @@ def get_snapgene_catalog():
         return yaml.load(f, Loader=yaml.FullLoader)
 
 
+def get_openDNA_collections_catalog():
+    catalog_path = os.path.join(os.path.dirname(__file__), 'openDNA_collections.yaml')
+    with open(catalog_path, 'r') as f:
+        return yaml.load(f, Loader=yaml.FullLoader)
+
+
 seva_catalog = get_seva_catalog()
 snapgene_catalog = get_snapgene_catalog()
+openDNA_collections_catalog = get_openDNA_collections_catalog()

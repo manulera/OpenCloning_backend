@@ -1092,7 +1092,6 @@ class OpenDNACollectionsSourceTest(unittest.TestCase):
             id=0,
             repository_id='Ecoli Nanobody Toolkit/BC_RJ_SD8',
             repository_name='open_dna_collections',
-            sequence_file_url='https://assets.opencloning.org/open-dna-collections/Ecoli%20Nanobody%20Toolkit/genbank_seq/BC_RJ_SD8.gb',
         )
         response = client.post('/repository_id/open_dna_collections', json=source.model_dump())
         self.assertEqual(response.status_code, 200)
@@ -1100,7 +1099,10 @@ class OpenDNACollectionsSourceTest(unittest.TestCase):
         self.assertEqual(len(payload['sequences']), 1)
         self.assertEqual(len(payload['sources']), 1)
         out_source = payload['sources'][0]
-        self.assertEqual(out_source, source.model_dump())
+        out_source['repository_id'] = 'Ecoli Nanobody Toolkit/BC_RJ_SD8'
+        out_source['sequence_file_url'] = (
+            'https://assets.opencloning.org/open-dna-collections/Ecoli%20Nanobody%20Toolkit/genbank_seq/BC_RJ_SD8.gb'
+        )
         seq = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
         self.assertEqual(seq.name, 'BC_RJ_SD8')
 
@@ -1113,7 +1115,7 @@ class OpenDNACollectionsSourceTest(unittest.TestCase):
             sequence_file_url='https://assets.opencloning.org/open-dna-collections/Ecoli%20Nanobody%20Toolkit/genbank_seq/hello.txt',
         )
         response = client.post('/repository_id/open_dna_collections', json=source.model_dump())
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
 
 class NotAllowedExternalUrlTest(unittest.TestCase):

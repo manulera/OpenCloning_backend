@@ -1,4 +1,5 @@
 from urllib.error import HTTPError
+from urllib.parse import quote
 from Bio.Restriction.Restriction import RestrictionBatch
 from Bio.Seq import reverse_complement
 from pydna.dseqrecord import Dseqrecord
@@ -10,6 +11,7 @@ from opencloning_linkml.datamodel import (
 )
 from pydna.opencloning_models import (
     AddgeneIdSource,
+    OpenDNACollectionsSource,
     SEVASource,
     SnapGenePlasmidSource,
     WekWikGeneIdSource,
@@ -24,7 +26,7 @@ import warnings
 from Bio.SeqIO.InsdcIO import GenBankScanner, GenBankIterator
 import re
 
-from opencloning.catalogs import seva_catalog, snapgene_catalog
+from opencloning.catalogs import openDNA_collections_catalog, seva_catalog, snapgene_catalog
 from .http_client import get_http_client, ConnectError, TimeoutException
 from .ncbi_requests import get_genbank_sequence
 
@@ -332,3 +334,29 @@ async def annotate_with_plannotate(
             raise HTTPError(
                 url, 500, 'cannot connect to plannotate server', 'cannot connect to plannotate server', None
             ) from e
+
+
+async def get_sequence_from_openDNA_collections(collection_name: str, plasmid_id: str) -> Dseqrecord:
+    if collection_name not in openDNA_collections_catalog:
+        raise HTTPError(
+            collection_name,
+            404,
+            'invalid openDNA collections collection',
+            'invalid openDNA collections collection',
+            None,
+        )
+    plasmid = next((item for item in openDNA_collections_catalog[collection_name] if item['id'] == plasmid_id), None)
+    if plasmid is None:
+        raise HTTPError(
+            plasmid_id, 404, 'invalid openDNA collections plasmid', 'invalid openDNA collections plasmid', None
+        )
+
+    path = quote(plasmid['path'])
+    url = f'https://assets.opencloning.org/open-dna-collections/{path}'
+    seqs = await get_sequences_from_file_url(url)
+    if len(seqs) == 0:
+        raise ValueError('No sequences found in OpenDNA Collections file')
+    seq = seqs[0]
+    seq.name = plasmid['name'] if plasmid['name'] is not None else plasmid_id
+    seq.source = OpenDNACollectionsSource(repository_id=f'{collection_name}/{plasmid_id}', sequence_file_url=url)
+    return seq
