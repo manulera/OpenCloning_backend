@@ -734,19 +734,19 @@ class EuroscarfSourceTest(unittest.TestCase):
 
 
 class IGEMSourceTest(unittest.TestCase):
-    good_url = 'https://assets.opencloning.org/annotated-igem-distribution/results/plasmids/1.gb'
+    good_url = 'https://assets.opencloning.org/annotated-igem-distribution/results/plasmids/115.gb'
     no_gb_url = 'https://blah.com/1.txt'
     wrong_url = 'https://assets.opencloning.org/annotated-igem-distribution/results/plasmids/dummy.gb'
 
     @pytest.mark.flaky(reruns=3, reruns_delay=2)
     def test_igem(self):
         source = IGEMSource(
-            id=0, repository_name='igem', repository_id='BBa_C0062-dummy', sequence_file_url=self.good_url
+            id=0, repository_name='igem', repository_id='BBa_C0062-pSB1C5C', sequence_file_url=self.good_url
         )
         response = client.post('/repository_id/igem', json=source.model_dump())
         payload = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(payload['sources'][0]['repository_id'], 'BBa_C0062-dummy')
+        self.assertEqual(payload['sources'][0]['repository_id'], 'BBa_C0062-pSB1C5C')
         self.assertEqual(payload['sources'][0]['repository_name'], 'igem')
 
     def test_errors(self):

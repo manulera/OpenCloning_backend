@@ -31,11 +31,11 @@ from pydna.opencloning_models import SequenceLocationStr
 from ..dna_functions import (
     format_sequence_genbank,
     get_sequence_from_benchling_url,
+    get_sequence_from_iGEM2024,
     get_sequence_from_openDNA_collections,
     request_from_addgene,
     request_from_snapgene,
     request_from_wekwikgene,
-    get_sequences_from_file_url,
     custom_file_parser,
     get_sequence_from_euroscarf_url,
     get_seva_plasmid,
@@ -393,12 +393,22 @@ async def get_from_repository_id_euroscarf(source: EuroscarfSource):
     ),
 )
 async def get_from_repository_id_igem(source: IGEMSource):
-    # TODO: move this to the data model?
-    if not source.sequence_file_url.endswith('.gb'):
-        raise HTTPException(422, 'The sequence file must be a GenBank file')
     try:
-        dseq = (await get_sequences_from_file_url(source.sequence_file_url))[0]
-        return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [source]}
+        dseq = await get_sequence_from_iGEM2024(*source.repository_id.split('-'))
+        print(dseq.source.sequence_file_url)
+        print(source.sequence_file_url)
+        return format_products(
+            source.id,
+            [dseq],
+            source if source.sequence_file_url is not None else None,
+            source.output_name,
+            wrong_completed_source_error_message=f'''
+            The provided source is not valid.
+            We found the following:
+              - repository_id: {source.repository_id}
+              - sequence_file_url: {dseq.source.sequence_file_url}
+            ''',
+        )
     except Exception as exception:
         repository_id_http_error_handler(exception, source)
 

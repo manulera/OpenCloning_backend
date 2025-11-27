@@ -16,6 +16,7 @@ from pydna.opencloning_models import (
     SnapGenePlasmidSource,
     WekWikGeneIdSource,
     BenchlingUrlSource,
+    IGEMSource,
 )
 from pydna.parsers import parse as pydna_parse
 from bs4 import BeautifulSoup
@@ -26,7 +27,7 @@ import warnings
 from Bio.SeqIO.InsdcIO import GenBankScanner, GenBankIterator
 import re
 
-from opencloning.catalogs import openDNA_collections_catalog, seva_catalog, snapgene_catalog
+from opencloning.catalogs import iGEM2024_catalog, openDNA_collections_catalog, seva_catalog, snapgene_catalog
 from .http_client import get_http_client, ConnectError, TimeoutException
 from .ncbi_requests import get_genbank_sequence
 
@@ -363,4 +364,23 @@ async def get_sequence_from_openDNA_collections(collection_name: str, plasmid_id
     seq = seqs[0]
     seq.name = plasmid['name'] if plasmid['name'] is not None else plasmid_id
     seq.source = OpenDNACollectionsSource(repository_id=f'{collection_name}/{plasmid_id}', sequence_file_url=url)
+    return seq
+
+
+async def get_sequence_from_iGEM2024(part: str, backbone: str) -> Dseqrecord:
+    all_plasmids = [item for collection in iGEM2024_catalog.values() for item in collection]
+    plasmid = next((item for item in all_plasmids if item['part'] == part and item['backbone'] == backbone), None)
+    if plasmid is None:
+        raise HTTPError(
+            f'{part}-{backbone}',
+            404,
+            f'plasmid {part}-{backbone} not found in iGEM 2024',
+            f'plasmid {part}-{backbone} not found in iGEM 2024',
+            None,
+        )
+    url = f'https://assets.opencloning.org/annotated-igem-distribution/results/plasmids/{plasmid["id"]}.gb'
+    seqs = await get_sequences_from_file_url(url)
+    seq = seqs[0]
+    seq.name = f'{part}-{backbone}'
+    seq.source = IGEMSource(repository_id=f'{part}-{backbone}', sequence_file_url=url)
     return seq

@@ -57,6 +57,45 @@ async def update_openDNA_collections_catalog(path: str):
                     'path': item['path'],
                 }
             )
+        # Sort by id
+        for collection_name in reshaped_data:
+            reshaped_data[collection_name].sort(key=lambda x: x['id'])
+        with open(path, 'w') as f:
+            yaml.dump(reshaped_data, f)
+
+
+async def update_iGEM2024_catalog(path: str):
+    """iGEM 2024 distribution"""
+    async with AsyncClient() as client:
+        response = await client.get(
+            'https://raw.githubusercontent.com/manulera/annotated-igem-distribution/refs/heads/master/results/index.json'
+        )
+        data = response.json()
+        reshaped_data = {}
+        for item in data:
+            collection_name = item['Collection']
+            if collection_name not in reshaped_data:
+                reshaped_data[collection_name] = []
+            reshaped_data[collection_name].append(
+                {
+                    'part': item['Part Name'],
+                    'backbone': item['Plasmid Backbone'],
+                    'description': item['Short Desc / Name'],
+                    'id': item['Index ID'],
+                }
+            )
+        # Sort by part
+        for collection_name in reshaped_data:
+            reshaped_data[collection_name].sort(key=lambda x: x['part'])
+
+        # validate that no backbone or part contains a "-"
+        for collection_name in reshaped_data:
+            for item in reshaped_data[collection_name]:
+                dash_in_backbone = item['backbone'] is not None and '-' in item['backbone']
+                dash_in_part = '-' in item['part']
+                if dash_in_backbone or dash_in_part:
+                    raise ValueError(f'Backbone or part contains a "-" for {collection_name} {item}')
+
         with open(path, 'w') as f:
             yaml.dump(reshaped_data, f)
 
@@ -64,3 +103,4 @@ async def update_openDNA_collections_catalog(path: str):
 asyncio.run(update_seva_catalog('src/opencloning/catalogs/seva.tsv'))
 asyncio.run(update_snapgene_catalog('src/opencloning/catalogs/snapgene.yaml'))
 asyncio.run(update_openDNA_collections_catalog('src/opencloning/catalogs/openDNA_collections.yaml'))
+asyncio.run(update_iGEM2024_catalog('src/opencloning/catalogs/igem2024.yaml'))
