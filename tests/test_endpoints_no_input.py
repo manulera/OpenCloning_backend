@@ -49,6 +49,19 @@ class OligoHybridizationTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(payload, payload2)
 
+        # Don't specify input
+        modified_example = copy.deepcopy(default_example)
+        modified_example['source']['input'] = []
+        response = client.post('/oligonucleotide_hybridization', json=modified_example)
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(len(payload['sources']), 1)
+        self.assertEqual(len(payload['sequences']), 1)
+        source = OligoHybridizationSource.model_validate(payload['sources'][0])
+        sequence = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
+        self.assertEqual(sequence.seq.watson, watson_sequence.upper())
+        self.assertEqual(sequence.seq.crick, crick_sequence.upper())
+
     def test_no_valid_result(self):
         default_example = request_examples.oligonucleotide_hybridization_examples['default']['value']
         response = client.post(

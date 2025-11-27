@@ -660,10 +660,16 @@ class SnapGenePlasmidSourceTest(unittest.TestCase):
         self.assertEqual(seq.name, 'my_name')
 
     def test_invalid_url(self):
-        # Invalid url
+        # Invalid plasmid set
         source = SnapGenePlasmidSource(id=0, repository_id='hello/world', repository_name='snapgene')
         response = client.post('/repository_id/snapgene', json=source.model_dump())
         self.assertEqual(response.status_code, 404)
+
+        # Invalid plasmid name
+        source = SnapGenePlasmidSource(id=0, repository_id='basic_cloning_vectors/hello', repository_name='snapgene')
+        response = client.post('/repository_id/snapgene', json=source.model_dump())
+        self.assertEqual(response.status_code, 404)
+        self.assertIn('hello is not part of basic_cloning_vectors', response.json()['detail'])
 
         # Wrongly formatted url
         source_dict = source.model_dump()
@@ -995,6 +1001,12 @@ class SEVASourceTest(unittest.TestCase):
             sequence_file_url='https://seva-plasmids.com/maps-canonical/maps-plasmids-SEVAs-canonical-versions-web-1-3-gbk/pSEVA261.gbk',
         )
 
+        # Invalid repository id
+        source_dict = source.model_dump()
+        source_dict['repository_id'] = 'pSEVA99999999999999999999999'
+        response = client.post('/repository_id/seva', json=source_dict)
+        self.assertEqual(response.status_code, 404)
+
         source_dict = source.model_dump()
         source_dict['sequence_file_url'] = 'https://seva-plasmids.com/dummy.gbk'
         response = client.post('/repository_id/seva', json=source_dict)
@@ -1040,7 +1052,7 @@ class SEVASourceTest(unittest.TestCase):
             self.assertEqual(response.status_code, 400)
             payload = response.json()
             self.assertIn('Unknown error', payload['detail'])
-            self.assertIn('No sequences found in SEVA file', payload['detail'])
+            self.assertIn('No sequences found in file', payload['detail'])
 
         with respx.mock:
             with open(f'{test_files}/ase1_body_error.gb', 'r') as f:
@@ -1116,6 +1128,24 @@ class OpenDNACollectionsSourceTest(unittest.TestCase):
         )
         response = client.post('/repository_id/open_dna_collections', json=source.model_dump())
         self.assertEqual(response.status_code, 400)
+
+        source = OpenDNACollectionsSource(
+            id=0,
+            repository_id='hello/BC_RJ_SD8',
+            repository_name='open_dna_collections',
+        )
+        response = client.post('/repository_id/open_dna_collections', json=source.model_dump())
+        self.assertEqual(response.status_code, 404)
+        self.assertIn('invalid openDNA collections collection', response.json()['detail'])
+
+        source = OpenDNACollectionsSource(
+            id=0,
+            repository_id='Ecoli Nanobody Toolkit/hello',
+            repository_name='open_dna_collections',
+        )
+        response = client.post('/repository_id/open_dna_collections', json=source.model_dump())
+        self.assertEqual(response.status_code, 404)
+        self.assertIn('plasmid hello not found in Ecoli Nanobody Toolkit', response.json()['detail'])
 
 
 class NotAllowedExternalUrlTest(unittest.TestCase):

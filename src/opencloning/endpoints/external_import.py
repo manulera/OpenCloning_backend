@@ -141,12 +141,7 @@ async def read_from_file(
             warning_messages = [str(w.message) for w in warnings_captured]
 
     except ValueError as e:
-        raise HTTPException(422, f'Biopython cannot process this file: {e}.')
-
-    # This happens when textfiles are empty or contain something else, or when reading a text file as snapgene file,
-    # since StringIO does not raise an error when "Unexpected end of packet" is found
-    if len(dseqs) == 0:
-        raise HTTPException(422, 'Biopython cannot process this file.')
+        raise HTTPException(422, f'Biopython cannot process this file: {e}.') from e
 
     if index_in_file is not None:
         if index_in_file >= len(dseqs):

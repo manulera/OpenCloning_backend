@@ -96,11 +96,15 @@ async def request_from_snapgene(plasmid_set: dict, plasmid_name: str) -> Dseqrec
     if plasmid_set not in snapgene_catalog:
         raise HTTPError(plasmid_set, 404, 'invalid plasmid set', 'invalid plasmid set', None)
     if plasmid_name not in snapgene_catalog[plasmid_set]:
-        raise HTTPError(plasmid_name, 404, 'invalid plasmid name', 'invalid plasmid name', None)
+        raise HTTPError(
+            plasmid_name,
+            404,
+            f'{plasmid_name} is not part of {plasmid_set}',
+            f'{plasmid_name} is not part of {plasmid_set}',
+            None,
+        )
     url = f'https://www.snapgene.com/local/fetch.php?set={plasmid_set}&plasmid={plasmid_name}'
     seqs = await get_sequences_from_file_url(url, SequenceFileFormat('snapgene'))
-    if len(seqs) == 0:
-        raise ValueError('No sequences found in SnapGene file')
     seq = seqs[0]
     seq.name = plasmid_name
     seq.source = SnapGenePlasmidSource(repository_id=f'{plasmid_set}/{plasmid_name}')
@@ -168,8 +172,6 @@ async def get_seva_plasmid(repository_id: str) -> Dseqrecord:
         seq = await get_genbank_sequence(link)
     else:
         seqs = await get_sequences_from_file_url(link)
-        if len(seqs) == 0:
-            raise ValueError('No sequences found in SEVA file')
         seq = seqs[0]
 
     if not seq.circular:
@@ -182,8 +184,6 @@ async def get_seva_plasmid(repository_id: str) -> Dseqrecord:
 
 async def get_sequence_from_benchling_url(url: str) -> Dseqrecord:
     dseqs = await get_sequences_from_file_url(url)
-    if len(dseqs) == 0:
-        raise ValueError('No sequences found in Benchling file')
     dseq = dseqs[0]
     dseq.source = BenchlingUrlSource(repository_id=url)
     return dseq
@@ -284,6 +284,8 @@ def custom_file_parser(
                 )
                 out.append(Dseqrecord(parsed_seq, circular=circularize))
 
+    if len(out) == 0:
+        raise ValueError('No sequences found in file')
     return out
 
 
@@ -339,7 +341,7 @@ async def annotate_with_plannotate(
 async def get_sequence_from_openDNA_collections(collection_name: str, plasmid_id: str) -> Dseqrecord:
     if collection_name not in openDNA_collections_catalog:
         raise HTTPError(
-            collection_name,
+            f'{collection_name}/{plasmid_id}',
             404,
             'invalid openDNA collections collection',
             'invalid openDNA collections collection',
@@ -348,14 +350,16 @@ async def get_sequence_from_openDNA_collections(collection_name: str, plasmid_id
     plasmid = next((item for item in openDNA_collections_catalog[collection_name] if item['id'] == plasmid_id), None)
     if plasmid is None:
         raise HTTPError(
-            plasmid_id, 404, 'invalid openDNA collections plasmid', 'invalid openDNA collections plasmid', None
+            f'{collection_name}/{plasmid_id}',
+            404,
+            f'plasmid {plasmid_id} not found in {collection_name}',
+            f'plasmid {plasmid_id} not found in {collection_name}',
+            None,
         )
 
     path = quote(plasmid['path'])
     url = f'https://assets.opencloning.org/open-dna-collections/{path}'
     seqs = await get_sequences_from_file_url(url)
-    if len(seqs) == 0:
-        raise ValueError('No sequences found in OpenDNA Collections file')
     seq = seqs[0]
     seq.name = plasmid['name'] if plasmid['name'] is not None else plasmid_id
     seq.source = OpenDNACollectionsSource(repository_id=f'{collection_name}/{plasmid_id}', sequence_file_url=url)
