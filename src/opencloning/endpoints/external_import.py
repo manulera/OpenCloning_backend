@@ -276,8 +276,10 @@ async def get_from_repository_id_genbank(source: RepositoryIdSource):
         seq = await ncbi_requests.get_genbank_sequence(source.repository_id)
     except ConnectError as exception:
         raise HTTPException(504, f'Unable to connect to NCBI: {exception}')
+    except Exception as exception:
+        repository_id_http_error_handler(exception, source)
 
-    return {'sequences': [format_sequence_genbank(seq, source.output_name)], 'sources': [source.model_copy()]}
+    return format_products(source.id, [seq], None, source.output_name)
 
 
 @router.post(

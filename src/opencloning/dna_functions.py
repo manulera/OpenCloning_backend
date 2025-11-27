@@ -80,11 +80,14 @@ def get_invalid_enzyme_names(enzyme_names_list: list[str | None]) -> list[str]:
 
 
 async def get_sequences_from_file_url(
-    url: str, format: SequenceFileFormat = SequenceFileFormat('genbank')
+    url: str,
+    format: SequenceFileFormat = SequenceFileFormat('genbank'),
+    params: dict | None = None,
+    headers: dict | None = None,
 ) -> list[Dseqrecord]:
     # TODO once pydna parse is fixed it should handle urls that point to non-gb files
     async with get_http_client() as client:
-        resp = await client.get(url)
+        resp = await client.get(url, params=params, headers=headers)
 
     if resp.status_code != 200:
         raise HTTPError(url, 404, 'file requested from url not found', 'file requested from url not found', None)

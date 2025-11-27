@@ -1,6 +1,7 @@
 from fastapi import HTTPException
-from pydna.parsers import parse as pydna_parse
 from pydna.dseqrecord import Dseqrecord
+from pydna.opencloning_models import RepositoryIdSource
+
 from .app_settings import settings
 from .http_client import get_http_client, Response
 
@@ -97,6 +98,8 @@ async def get_sequence_length_from_sequence_accession(sequence_accession: str) -
 
 
 async def get_genbank_sequence(sequence_accession, start=None, end=None, strand=None) -> Dseqrecord:
+    from opencloning.dna_functions import get_sequences_from_file_url
+
     gb_strand = 1 if strand == 1 or strand is None else 2
     url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi'
     params = {
@@ -111,21 +114,15 @@ async def get_genbank_sequence(sequence_accession, start=None, end=None, strand=
     if headers is not None:
         params['api_key'] = headers['api_key']
 
-    resp = await async_get(url, headers=headers, params=params)
-    if resp.status_code == 200:
-        try:
-            return pydna_parse(resp.text)[0]
-        except Exception:
-            # Now the ncbi returns something like this:
-            # Example: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=blah&rettype=gbwithparts&retmode=text
-            # 'Error: F a i l e d  t o  u n d e r s t a n d  i d :  b l a h '
-            raise HTTPException(404, 'wrong sequence accession')
-    elif resp.status_code == 400:
+    try:
+        seq = (await get_sequences_from_file_url(url, params=params, headers=headers))[0]
+        seq.source = RepositoryIdSource(repository_name='genbank', repository_id=sequence_accession)
+        return seq
+    except ValueError:
+        # Now the ncbi returns something like this:
+        # Example: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=blah&rettype=gbwithparts&retmode=text
+        # 'Error: F a i l e d  t o  u n d e r s t a n d  i d :  b l a h '
         raise HTTPException(404, 'wrong sequence accession')
-    elif resp.status_code == 503:
-        raise HTTPException(503, 'NCBI returned an internal server error')
-    else:
-        raise HTTPException(503, 'NCBI returned an unexpected error')
 
 
 def validate_coordinates_pre_request(start, end, strand):
