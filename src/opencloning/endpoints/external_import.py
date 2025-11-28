@@ -213,8 +213,8 @@ def handle_repository_errors(exception: Exception, repository_name: str) -> None
         raise
     elif isinstance(exception, ConnectError):
         raise HTTPException(504, f'Unable to connect to {repository_name}: {exception}')
-    else:
-        raise
+    else:  # pragma: no cover
+        raise HTTPException(500, f'Unexpected error: {exception}')
 
 
 # Redirect to the right repository

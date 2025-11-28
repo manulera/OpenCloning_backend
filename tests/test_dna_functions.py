@@ -11,6 +11,7 @@ from opencloning.dna_functions import (
     MyGenBankScanner,
     get_sequence_from_euroscarf_url,
     oligonucleotide_hybridization_overhangs,
+    get_sequences_from_file_url,
 )
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
@@ -105,3 +106,19 @@ class OligonucleotideHybridizationTest(unittest.TestCase):
         self.assertRaises(
             ValueError, oligonucleotide_hybridization_overhangs, reverse_complement(seq1), reverse_complement(seq2), 10
         )
+
+
+class GetSequencesFromFileUrlTest(unittest.IsolatedAsyncioTestCase):
+    @respx.mock
+    async def test_get_sequences_from_file_url_error(self):
+        respx.get('https://assets.opencloning.org/annotated-igem-distribution/blah.gb').respond(503, text='')
+        with self.assertRaises(HTTPException) as e:
+            await get_sequences_from_file_url('https://assets.opencloning.org/annotated-igem-distribution/blah.gb')
+        self.assertEqual(e.exception.status_code, 503)
+        self.assertIn('the external server (not OpenCloning) returned an error', e.exception.detail)
+
+        respx.get('https://assets.opencloning.org/annotated-igem-distribution/blah.gb').respond(404, text='')
+        with self.assertRaises(HTTPException) as e:
+            await get_sequences_from_file_url('https://assets.opencloning.org/annotated-igem-distribution/blah.gb')
+        self.assertEqual(e.exception.status_code, 404)
+        self.assertIn('file requested from url not found', e.exception.detail)
