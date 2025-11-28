@@ -1,9 +1,11 @@
 from fastapi import HTTPException
+import math
 from pydna.dseqrecord import Dseqrecord
 from pydna.opencloning_models import RepositoryIdSource
 
 from .app_settings import settings
 from .http_client import get_http_client, Response
+from urllib.error import HTTPError
 
 headers = None if settings.NCBI_API_KEY is None else {'api_key': settings.NCBI_API_KEY}
 
@@ -12,7 +14,13 @@ async def async_get(url, headers, params=None) -> Response:
     async with get_http_client() as client:
         resp = await client.get(url, headers=headers, params=params, timeout=20.0)
         if resp.status_code == 500:
-            raise HTTPException(503, 'NCBI is down, try again later')
+            raise HTTPError(url, 503, 'NCBI is down, try again later', 'NCBI is down, try again later', None)
+        elif resp.status_code == 503:
+            raise HTTPError(
+                url, 503, 'NCBI returned an internal server error', 'NCBI returned an internal server error', None
+            )
+        elif resp.status_code != 200 and not math.floor(resp.status_code / 100) == 4:
+            raise HTTPError(url, 503, 'NCBI returned an unexpected error', 'NCBI returned an unexpected error', None)
         return resp
 
 
@@ -90,9 +98,9 @@ async def get_sequence_length_from_sequence_accession(sequence_accession: str) -
     resp = await async_get(url, headers=headers, params=params)
     data = resp.json()
     if 'result' not in data:
-        raise HTTPException(503, 'NCBI returned an error (try again)')
+        raise HTTPError(url, 503, 'NCBI returned an error (try again)', 'NCBI returned an error (try again)', None)
     if len(data['result']['uids']) == 0:
-        raise HTTPException(404, 'wrong sequence accession')
+        raise HTTPError(url, 404, 'wrong sequence accession', 'wrong sequence accession', None)
     sequence_id = data['result']['uids'][0]
     return data['result'][sequence_id]['slen']
 
@@ -115,14 +123,15 @@ async def get_genbank_sequence(sequence_accession, start=None, end=None, strand=
         params['api_key'] = headers['api_key']
 
     try:
-        seq = (await get_sequences_from_file_url(url, params=params, headers=headers))[0]
-        seq.source = RepositoryIdSource(repository_name='genbank', repository_id=sequence_accession)
-        return seq
-    except ValueError:
+        seq = (await get_sequences_from_file_url(url, params=params, headers=headers, get_function=async_get))[0]
+    except ValueError as e:
         # Now the ncbi returns something like this:
         # Example: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=blah&rettype=gbwithparts&retmode=text
         # 'Error: F a i l e d  t o  u n d e r s t a n d  i d :  b l a h '
-        raise HTTPException(404, 'wrong sequence accession')
+        raise HTTPException(404, 'invalid sequence accession') from e
+
+    seq.source = RepositoryIdSource(repository_name='genbank', repository_id=sequence_accession)
+    return seq
 
 
 def validate_coordinates_pre_request(start, end, strand):

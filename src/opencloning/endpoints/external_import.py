@@ -212,16 +212,13 @@ def repository_id_http_error_handler(exception, source: RepositoryIdSource):
             raise HTTPException(
                 503, f'{source.repository_name} returned: {exception} - {source.repository_name} might be down'
             )
-        elif exception.code == 400 or exception.code == 404:
-            raise HTTPException(
-                404,
-                f'{source.repository_name} returned: {exception} - Likely you inserted a wrong {source.repository_name} id',
-            )
         elif exception.code == 403:
             raise HTTPException(
                 403,
                 f'Request to {source.repository_name} is not allowed. Please check that the URL is whitelisted.',
             )
+        else:
+            raise HTTPException(exception.code, exception.msg)
     elif isinstance(exception, ConnectError):
         raise HTTPException(504, f'Unable to connect to {source.repository_name}')
     else:
@@ -460,7 +457,13 @@ async def genome_coordinates(
             if source.assembly_accession is None:
                 raise HTTPException(422, 'assembly_accession is required if locus_tag is set')
 
-            annotation = await ncbi_requests.get_annotation_from_locus_tag(source.locus_tag, source.assembly_accession)
+            try:
+                annotation = await ncbi_requests.get_annotation_from_locus_tag(
+                    source.locus_tag, source.assembly_accession
+                )
+            except HTTPError as exception:
+                raise HTTPException(exception.code, exception.msg) from exception
+
             gene_range = annotation['genomic_regions'][0]['gene_range']['range'][0]
             gene_strand = 1 if gene_range['orientation'] == 'plus' else -1
 

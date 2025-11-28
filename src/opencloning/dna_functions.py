@@ -1,5 +1,6 @@
 from urllib.error import HTTPError
 from urllib.parse import quote
+import math
 from Bio.Restriction.Restriction import RestrictionBatch
 from Bio.Seq import reverse_complement
 from pydna.dseqrecord import Dseqrecord
@@ -31,6 +32,7 @@ import re
 from opencloning.catalogs import iGEM2024_catalog, openDNA_collections_catalog, seva_catalog, snapgene_catalog
 from .http_client import get_http_client, ConnectError, TimeoutException
 from .ncbi_requests import get_genbank_sequence
+from typing import Callable
 
 
 def format_sequence_genbank(seq: Dseqrecord, seq_name: str = None) -> TextFileSequence:
@@ -84,12 +86,24 @@ async def get_sequences_from_file_url(
     format: SequenceFileFormat = SequenceFileFormat('genbank'),
     params: dict | None = None,
     headers: dict | None = None,
+    get_function: None | Callable = None,
 ) -> list[Dseqrecord]:
-    # TODO once pydna parse is fixed it should handle urls that point to non-gb files
-    async with get_http_client() as client:
-        resp = await client.get(url, params=params, headers=headers)
 
-    if resp.status_code != 200:
+    if get_function is None:
+        async with get_http_client() as client:
+            resp = await client.get(url, params=params, headers=headers)
+    else:
+        resp = await get_function(url, params=params, headers=headers)
+
+    if math.floor(resp.status_code / 100) == 5:
+        raise HTTPError(
+            url,
+            503,
+            'the external server (not OpenCloning) returned an error',
+            'the external server (not OpenCloning) returned an error',
+            None,
+        )
+    elif math.floor(resp.status_code / 100) != 2:
         raise HTTPError(url, 404, 'file requested from url not found', 'file requested from url not found', None)
     if format == SequenceFileFormat('snapgene'):
         return custom_file_parser(io.BytesIO(resp.content), format)
