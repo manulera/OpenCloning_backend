@@ -57,7 +57,7 @@ class OligoHybridizationTest(unittest.TestCase):
         payload = response.json()
         self.assertEqual(len(payload['sources']), 1)
         self.assertEqual(len(payload['sequences']), 1)
-        source = OligoHybridizationSource.model_validate(payload['sources'][0])
+        OligoHybridizationSource.model_validate(payload['sources'][0])
         sequence = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
         self.assertEqual(sequence.seq.watson, watson_sequence.upper())
         self.assertEqual(sequence.seq.crick, crick_sequence.upper())

@@ -15,19 +15,19 @@ def get_seva_catalog():
 def get_snapgene_catalog():
     snapgene_catalog_path = os.path.join(os.path.dirname(__file__), 'snapgene.yaml')
     with open(snapgene_catalog_path, 'r') as f:
-        return yaml.load(f, Loader=yaml.FullLoader)
+        return yaml.safe_load(f)
 
 
 def get_openDNA_collections_catalog():
     catalog_path = os.path.join(os.path.dirname(__file__), 'openDNA_collections.yaml')
     with open(catalog_path, 'r') as f:
-        return yaml.load(f, Loader=yaml.FullLoader)
+        return yaml.safe_load(f)
 
 
 def get_iGEM2024_catalog():
     catalog_path = os.path.join(os.path.dirname(__file__), 'igem2024.yaml')
     with open(catalog_path, 'r') as f:
-        return yaml.load(f, Loader=yaml.FullLoader)
+        return yaml.safe_load(f)
 
 
 seva_catalog = get_seva_catalog()

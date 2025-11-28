@@ -31,7 +31,7 @@ async def update_snapgene_catalog(path: str):
         response = await client.get(
             'https://raw.githubusercontent.com/manulera/SnapGene_crawler/refs/heads/master/index.yaml'
         )
-        data = yaml.load(response.text, Loader=yaml.FullLoader)
+        data = yaml.safe_load(response.text)
         for key, plasmid_set in data.items():
             data[key] = [plasmid['subpath'] for plasmid in plasmid_set['plasmids']]
 
