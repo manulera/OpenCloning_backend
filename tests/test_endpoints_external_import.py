@@ -799,7 +799,7 @@ class GenomeRegionTest(unittest.TestCase):
             elif example_name == 'viral_sequence':
                 self.assertEqual(response_source, request_source, msg)
 
-    @pytest.mark.flaky(reruns=3, reruns_delay=2)
+    @pytest.mark.flaky(reruns=0, reruns_delay=2)
     def test_exceptions(self):
         wait_time = 0.5
         # Load first example

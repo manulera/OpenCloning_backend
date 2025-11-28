@@ -68,7 +68,7 @@ class NcbiAsyncRequestsTest(unittest.IsolatedAsyncioTestCase):
         with pytest.raises(HTTPException) as e:
             await ncbi_requests.get_annotation_from_locus_tag('bluh4', 'blah4')
         assert e.value.status_code == 404
-        assert e.value.detail == 'wrong locus_tag'
+        assert e.value.detail == 'query "bluh4" gave no results'
 
         respx.get(get_url('blah5')).respond(
             200, json={'reports': [{'annotation': {'locus_tag': 'bluh5'}}, {'annotation': {'locus_tag': 'bluh5'}}]}
@@ -89,3 +89,16 @@ class NcbiAsyncRequestsTest(unittest.IsolatedAsyncioTestCase):
             ['GCF_000002945.2', 'GCF_000002945.1'],
             await ncbi_requests.get_assembly_accession_from_sequence_accession('NC_003424.3'),
         )
+
+    async def test_get_genome_region_from_annotation(self):
+        annotations = await ncbi_requests.get_annotations_from_query('aldolase', 'GCF_000146045.2')
+        annotation = next(a for a in annotations if a['locus_tag'] == 'YDR294C')
+        seq = await ncbi_requests.get_genome_region_from_annotation(annotation, 1000, 1000)
+        self.assertEqual(seq.source.locus_tag, 'YDR294C')
+        self.assertEqual(seq.source.gene_id, 851888)
+        self.assertEqual(seq.source.sequence_accession, 'NC_001136.10')
+        self.assertEqual(seq.source.assembly_accession, 'GCF_000146045.2')
+        self.assertEqual(seq.source.start, 1049459)
+        self.assertEqual(seq.source.end, 1053228)
+        self.assertEqual(seq.source.strand, -1)
+        self.assertEqual(len(seq), 3770)

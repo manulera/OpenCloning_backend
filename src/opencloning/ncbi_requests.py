@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 import math
 from pydna.dseqrecord import Dseqrecord
-from pydna.opencloning_models import RepositoryIdSource
+from pydna.opencloning_models import RepositoryIdSource, GenomeCoordinatesSource
 
 from .app_settings import settings
 from .http_client import get_http_client, Response
@@ -55,23 +55,11 @@ async def get_sequence_accessions_from_assembly_accession(assembly_accession: st
 
 
 async def get_annotation_from_locus_tag(locus_tag: str, assembly_accession: str) -> dict:
-    url = f'https://api.ncbi.nlm.nih.gov/datasets/v2alpha/genome/accession/{assembly_accession}/annotation_report?search_text={locus_tag}'
-    resp = await async_get(url, headers=headers)
-    if resp.status_code == 404:
-        raise HTTPException(404, 'wrong accession number')
-    data = resp.json()
-    if 'reports' not in data:
-        raise HTTPException(404, 'wrong locus_tag')
-
-    matching_annotations = list(a['annotation'] for a in data['reports'] if a['annotation']['locus_tag'] == locus_tag)
-
-    if len(matching_annotations) == 0:
-        raise HTTPException(404, 'wrong locus_tag')
-    elif len(matching_annotations) > 1:
-        # Not sure if this can ever happen, but just in case
+    annotations = await get_annotations_from_query(locus_tag, assembly_accession)
+    locus_tag_annotations = [a for a in annotations if locus_tag.upper() in a['locus_tag'].upper()]
+    if len(locus_tag_annotations) != 1:
         raise HTTPException(400, 'multiple matches for locus_tag')
-
-    return matching_annotations[0]
+    return locus_tag_annotations[0]
 
 
 async def get_annotations_from_query(query: str, assembly_accession: str) -> list[dict]:
@@ -83,9 +71,6 @@ async def get_annotations_from_query(query: str, assembly_accession: str) -> lis
     data = resp.json()
     if 'reports' not in data:
         raise HTTPException(404, f'query "{query}" gave no results')
-
-    if len(data['reports']) > 1:
-        raise HTTPException(400, 'multiple matches for query')
 
     return [r['annotation'] for r in data['reports']]
 
@@ -144,3 +129,74 @@ def validate_coordinates_pre_request(start, end, strand):
         raise HTTPException(422, 'start must be greater than 0')
     if end - start > 100000:
         raise HTTPException(400, 'sequence is too long (max 100000 bp)')
+
+
+def get_info_from_annotation(annotation: dict) -> dict:
+    start = int(annotation['genomic_regions'][0]['gene_range']['range'][0]['begin'])
+    end = int(annotation['genomic_regions'][0]['gene_range']['range'][0]['end'])
+    strand = 1 if annotation['genomic_regions'][0]['gene_range']['range'][0]['orientation'] == 'plus' else -1
+    gene_id = int(annotation['gene_id'])
+    sequence_accession = annotation['genomic_regions'][0]['gene_range']['accession_version']
+    locus_tag = annotation['locus_tag'] if 'locus_tag' in annotation else None
+    try:
+        assembly_accession = annotation['annotations'][0]['assembly_accession']
+    except KeyError:
+        assembly_accession = None
+
+    return start, end, strand, gene_id, sequence_accession, locus_tag, assembly_accession
+
+
+async def validate_locus_tag(
+    locus_tag: str, assembly_accession: str, gene_id: int | None, start: int, end: int, strand: int
+) -> None:
+    """Validate that the locus tag exists in the assembly and that the gene falls within the requested coordinates"""
+
+    annotation = await get_annotation_from_locus_tag(locus_tag, assembly_accession)
+    gene_start, gene_end, gene_strand, gene_id_annotation, *_ = get_info_from_annotation(annotation)
+
+    # This field will not be present in all cases, but should be there in reference genomes
+    if gene_id is not None:
+        if 'gene_id' not in annotation:
+            raise HTTPError(
+                'url',
+                400,
+                'gene_id is set, but not found in the annotation',
+                'gene_id is set, but not found in the annotation',
+                None,
+            )
+        if gene_id != gene_id_annotation:
+            raise HTTPError(
+                'url', 400, 'gene_id does not match the locus_tag', 'gene_id does not match the locus_tag', None
+            )
+    elif 'gene_id' in annotation:
+        gene_id = gene_id_annotation
+
+    # The gene should fall within the range (range might be bigger if bases were requested upstream or downstream)
+    if gene_start < start or gene_end > end or gene_strand != strand:
+        raise HTTPError(
+            400,
+            f'wrong coordinates, expected to fall within {start}, {end} on strand: {strand}',
+        )
+
+
+async def get_genome_region_from_annotation(
+    annotation: dict, padding_left: int = 0, padding_right: int = 0
+) -> Dseqrecord:
+    start, end, strand, gene_id, sequence_accession, locus_tag, assembly_accession = get_info_from_annotation(
+        annotation
+    )
+    start = start - padding_left
+    end = end + padding_right
+    seq = await get_genbank_sequence(sequence_accession, start, end, strand)
+    source = GenomeCoordinatesSource(
+        assembly_accession=assembly_accession,
+        sequence_accession=sequence_accession,
+        locus_tag=locus_tag,
+        gene_id=gene_id,
+        start=start,
+        end=end,
+        strand=strand,
+    )
+    seq.name = locus_tag
+    seq.source = source
+    return seq

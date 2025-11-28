@@ -448,44 +448,15 @@ async def genome_coordinates(
 
     # Validate that coordinates make sense
     ncbi_requests.validate_coordinates_pre_request(source.start, source.end, source.strand)
+    if source.locus_tag is not None and source.assembly_accession is None:
+        raise HTTPException(422, 'assembly_accession is required if locus_tag is set')
 
     # Source includes a locus tag in annotated assembly
-
     async def validate_locus_task():
         if source.locus_tag is not None:
-
-            if source.assembly_accession is None:
-                raise HTTPException(422, 'assembly_accession is required if locus_tag is set')
-
-            try:
-                annotation = await ncbi_requests.get_annotation_from_locus_tag(
-                    source.locus_tag, source.assembly_accession
-                )
-            except HTTPError as exception:
-                raise HTTPException(exception.code, exception.msg) from exception
-
-            gene_range = annotation['genomic_regions'][0]['gene_range']['range'][0]
-            gene_strand = 1 if gene_range['orientation'] == 'plus' else -1
-
-            # This field will not be present in all cases, but should be there in reference genomes
-            if source.gene_id is not None:
-                if 'gene_id' not in annotation:
-                    raise HTTPException(400, 'gene_id is set, but not found in the annotation')
-                if source.gene_id != int(annotation['gene_id']):
-                    raise HTTPException(400, 'gene_id does not match the locus_tag')
-            elif 'gene_id' in annotation:
-                source.gene_id = int(annotation['gene_id'])
-
-            # The gene should fall within the range (range might be bigger if bases were requested upstream or downstream)
-            if (
-                int(gene_range['begin']) < source.start
-                or int(gene_range['end']) > source.end
-                or gene_strand != source.strand
-            ):
-                raise HTTPException(
-                    400,
-                    f'wrong coordinates, expected to fall within {source.start}, {source.end} on strand: {source.strand}',
-                )
+            await ncbi_requests.validate_locus_tag(
+                source.locus_tag, source.assembly_accession, source.gene_id, source.start, source.end, source.strand
+            )
 
     async def validate_assembly_task():
         if source.assembly_accession is not None:
@@ -506,7 +477,12 @@ async def genome_coordinates(
 
     tasks = [validate_locus_task(), validate_assembly_task(), get_sequence_task()]
 
-    _, _, seq = await asyncio.gather(*tasks)
+    try:
+        _, _, seq = await asyncio.gather(*tasks)
+    except HTTPError as e:
+        raise HTTPException(e.code, e.msg) from e
+    except Exception as e:
+        raise HTTPException(500, f'Unknown error: {e}') from e
 
     # NCBI does not complain for coordinates that fall out of the sequence, so we have to check here
     if len(seq) != source.end - source.start + 1:
