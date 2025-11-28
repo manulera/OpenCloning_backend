@@ -143,6 +143,8 @@ def get_info_from_annotation(annotation: dict) -> dict:
         assembly_accession = annotation['annotations'][0]['assembly_accession']
     except KeyError:
         assembly_accession = None
+    except IndexError:
+        assembly_accession = None
 
     return start, end, strand, gene_id, sequence_accession, locus_tag, assembly_accession
 

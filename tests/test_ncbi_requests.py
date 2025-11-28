@@ -101,3 +101,63 @@ class NcbiAsyncRequestsTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(seq.source.end, 1053228)
         self.assertEqual(seq.source.strand, -1)
         self.assertEqual(len(seq), 3770)
+
+    async def test_get_info_from_annotation(self):
+        example_annotation = {
+            'gene_id': '851888',
+            'symbol': 'DPL1',
+            'name': 'sphinganine-1-phosphate aldolase DPL1',
+            'gene_type': 'protein-coding',
+            'locus_tag': 'YDR294C',
+            'genomic_regions': [
+                {
+                    'gene_range': {
+                        'accession_version': 'NC_001136.10',
+                        'range': [{'begin': '1050459', 'end': '1052228', 'orientation': 'minus'}],
+                    }
+                }
+            ],
+            'transcripts': [
+                {
+                    'accession_version': 'NM_001180602.1',
+                    'name': 'sphinganine-1-phosphate aldolase DPL1',
+                    'cds': {'accession_version': 'NM_001180602.1'},
+                    'genomic_locations': [
+                        {
+                            'genomic_accession_version': 'NC_001136.10',
+                            'genomic_range': {'begin': '1050459', 'end': '1052228', 'orientation': 'minus'},
+                        }
+                    ],
+                    'protein': {
+                        'accession_version': 'NP_010580.1',
+                        'name': 'sphinganine-1-phosphate aldolase DPL1',
+                        'length': 589,
+                    },
+                }
+            ],
+            'chromosomes': ['IV'],
+            'annotations': [{'assembly_accession': 'GCF_000146045.2'}],
+        }
+        start, end, strand, gene_id, sequence_accession, locus_tag, assembly_accession = (
+            ncbi_requests.get_info_from_annotation(example_annotation)
+        )
+        self.assertEqual(start, 1050459)
+        self.assertEqual(end, 1052228)
+        self.assertEqual(strand, -1)
+        self.assertEqual(gene_id, 851888)
+        self.assertEqual(sequence_accession, 'NC_001136.10')
+        self.assertEqual(locus_tag, 'YDR294C')
+        self.assertEqual(assembly_accession, 'GCF_000146045.2')
+
+        # If assembly accession is not present, it should be None
+        example_annotation['annotations'] = []
+        start, end, strand, gene_id, sequence_accession, locus_tag, assembly_accession = (
+            ncbi_requests.get_info_from_annotation(example_annotation)
+        )
+        self.assertEqual(assembly_accession, None)
+
+        del example_annotation['annotations']
+        start, end, strand, gene_id, sequence_accession, locus_tag, assembly_accession = (
+            ncbi_requests.get_info_from_annotation(example_annotation)
+        )
+        self.assertEqual(assembly_accession, None)
