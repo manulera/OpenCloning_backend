@@ -503,9 +503,7 @@ class AddgeneTest(unittest.TestCase):
             sequence_file_url='https://media.addgene.org/snapgene-media/wrongggggggg.gbk',
         )
         response = client.post('/repository_id/addgene', json=source.model_dump())
-        self.assertEqual(response.status_code, 404)
-
-        # TODO url exists but does not match id, or does not match
+        self.assertEqual(response.status_code, 400)
 
     def test_redirect(self):
         """Test repository_id endpoint should redirect based on repository_name value"""
@@ -530,7 +528,7 @@ class AddgeneTest(unittest.TestCase):
         )
         response = client.post('/repository_id/addgene', json=source.model_dump())
         self.assertEqual(response.status_code, 504)
-        self.assertIn('unable to connect to Addgene', response.json()['detail'])
+        self.assertIn('Unable to connect to addgene', response.json()['detail'])
 
 
 class WekWikGeneSourceTest(unittest.TestCase):
@@ -573,7 +571,7 @@ class WekWikGeneSourceTest(unittest.TestCase):
         )
         response = client.post('/repository_id/wekwikgene', json=source.model_dump())
         self.assertEqual(response.status_code, 504)
-        self.assertIn('unable to connect to WekWikGene', response.json()['detail'])
+        self.assertIn('Unable to connect to wekwikgene', response.json()['detail'])
 
     def test_redirect(self):
         source = WekWikGeneIdSource(
@@ -643,10 +641,6 @@ class SnapGenePlasmidSourceTest(unittest.TestCase):
         self.assertEqual(len(payload['sequences']), 1)
         self.assertEqual(len(payload['sources']), 1)
         out_source = payload['sources'][0]
-        # It should have been renamed
-        self.assertEqual(out_source['output_name'], 'pEASY-T1_(linearized)')
-        # Remove that and compare with original source
-        out_source['output_name'] = None
         self.assertEqual(out_source, source.model_dump())
         seq = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
         self.assertEqual(seq.name, 'pEASY-T1_(linearized)')
@@ -666,10 +660,16 @@ class SnapGenePlasmidSourceTest(unittest.TestCase):
         self.assertEqual(seq.name, 'my_name')
 
     def test_invalid_url(self):
-        # Invalid url
+        # Invalid plasmid set
         source = SnapGenePlasmidSource(id=0, repository_id='hello/world', repository_name='snapgene')
         response = client.post('/repository_id/snapgene', json=source.model_dump())
         self.assertEqual(response.status_code, 404)
+
+        # Invalid plasmid name
+        source = SnapGenePlasmidSource(id=0, repository_id='basic_cloning_vectors/hello', repository_name='snapgene')
+        response = client.post('/repository_id/snapgene', json=source.model_dump())
+        self.assertEqual(response.status_code, 404)
+        self.assertIn('hello is not part of basic_cloning_vectors', response.json()['detail'])
 
         # Wrongly formatted url
         source_dict = source.model_dump()
@@ -734,19 +734,19 @@ class EuroscarfSourceTest(unittest.TestCase):
 
 
 class IGEMSourceTest(unittest.TestCase):
-    good_url = 'https://assets.opencloning.org/annotated-igem-distribution/results/plasmids/1.gb'
+    good_url = 'https://assets.opencloning.org/annotated-igem-distribution/results/plasmids/115.gb'
     no_gb_url = 'https://blah.com/1.txt'
     wrong_url = 'https://assets.opencloning.org/annotated-igem-distribution/results/plasmids/dummy.gb'
 
-    @pytest.mark.flaky(reruns=3, reruns_delay=2)
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_igem(self):
         source = IGEMSource(
-            id=0, repository_name='igem', repository_id='BBa_C0062-dummy', sequence_file_url=self.good_url
+            id=0, repository_name='igem', repository_id='BBa_C0062-pSB1C5C', sequence_file_url=self.good_url
         )
         response = client.post('/repository_id/igem', json=source.model_dump())
         payload = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(payload['sources'][0]['repository_id'], 'BBa_C0062-dummy')
+        self.assertEqual(payload['sources'][0]['repository_id'], 'BBa_C0062-pSB1C5C')
         self.assertEqual(payload['sources'][0]['repository_name'], 'igem')
 
     def test_errors(self):
@@ -775,7 +775,7 @@ class GenomeRegionTest(unittest.TestCase):
         else:
             self.assertEqual(response_code, expected, msg)
 
-    @pytest.mark.flaky(reruns=3, reruns_delay=2)
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_examples(self):
         for example_name in request_examples.genome_region_examples:
             example = request_examples.genome_region_examples[example_name]
@@ -799,7 +799,7 @@ class GenomeRegionTest(unittest.TestCase):
             elif example_name == 'viral_sequence':
                 self.assertEqual(response_source, request_source, msg)
 
-    @pytest.mark.flaky(reruns=3, reruns_delay=2)
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_exceptions(self):
         wait_time = 0.5
         # Load first example
@@ -967,6 +967,15 @@ class SEVASourceTest(unittest.TestCase):
         seq = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
         self.assertEqual(seq.name, 'pSEVA261')
 
+        # Also works with missing link in data.js - see catalog script - (e.g. pSEVA2a2d1)
+        source = SEVASource(
+            id=0,
+            repository_id='pSEVA2a2d1',
+            repository_name='seva',
+        )
+        response = client.post('/repository_id/seva', json=source.model_dump())
+        self.assertEqual(response.status_code, 200)
+
     def test_ncbi_url(self):
         source = SEVASource(
             id=0,
@@ -989,11 +998,19 @@ class SEVASourceTest(unittest.TestCase):
             id=0,
             repository_id='pSEVA261',
             repository_name='seva',
-            sequence_file_url='https://seva-plasmids.com/dummy.gbk',
+            sequence_file_url='https://seva-plasmids.com/maps-canonical/maps-plasmids-SEVAs-canonical-versions-web-1-3-gbk/pSEVA261.gbk',
         )
 
-        response = client.post('/repository_id/seva', json=source.model_dump())
+        # Invalid repository id
+        source_dict = source.model_dump()
+        source_dict['repository_id'] = 'pSEVA99999999999999999999999'
+        response = client.post('/repository_id/seva', json=source_dict)
         self.assertEqual(response.status_code, 404)
+
+        source_dict = source.model_dump()
+        source_dict['sequence_file_url'] = 'https://seva-plasmids.com/dummy.gbk'
+        response = client.post('/repository_id/seva', json=source_dict)
+        self.assertEqual(response.status_code, 400)
 
         source_dict = source.model_dump()
         source_dict['repository_id'] = 'hello'
@@ -1008,35 +1025,41 @@ class SEVASourceTest(unittest.TestCase):
         source_dict = source.model_dump()
         source_dict['sequence_file_url'] = 'https://hello.com'
         response = client.post('/repository_id/seva', json=source_dict)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
         payload = response.json()
-        self.assertIn('invalid SEVA url', payload['detail'])
+        self.assertIn('The provided source is not valid.', payload['detail'])
+        self.assertIn('repository_id: pSEVA261', payload['detail'])
+        self.assertIn(
+            f'sequence_file_url: {source.sequence_file_url}',
+            payload['detail'],
+        )
 
         # Mock connection error
+
+        source = SEVASource(id=0, repository_id='pSEVA261', repository_name='seva')
+
         with respx.mock:
-            respx.get('https://seva-plasmids.com/dummy.gbk').mock(side_effect=httpx.ConnectError)
+            respx.get(source.sequence_file_url).mock(side_effect=httpx.ConnectError('Mock Error'))
             response = client.post('/repository_id/seva', json=source.model_dump())
             self.assertEqual(response.status_code, 504)
             payload = response.json()
-            self.assertEqual(payload['detail'], 'unable to connect to SEVA')
+            self.assertIn('Unable to connect to seva', payload['detail'])
 
         # Mock incorrect file
         with respx.mock:
-            respx.get('https://seva-plasmids.com/dummy.gbk').mock(return_value=httpx.Response(200, text='dummy test'))
+            respx.get(source.sequence_file_url).mock(return_value=httpx.Response(200, text='dummy test'))
             response = client.post('/repository_id/seva', json=source.model_dump())
             self.assertEqual(response.status_code, 400)
             payload = response.json()
-            self.assertIn('Error parsing file', payload['detail'])
-            self.assertIn('No sequences found in SEVA file', payload['detail'])
+            self.assertIn('No sequences found in file', payload['detail'])
 
         with respx.mock:
             with open(f'{test_files}/ase1_body_error.gb', 'r') as f:
                 mock_seq = f.read()
-            respx.get('https://seva-plasmids.com/dummy.gbk').mock(return_value=httpx.Response(200, text=mock_seq))
+            respx.get(source.sequence_file_url).mock(return_value=httpx.Response(200, text=mock_seq))
             response = client.post('/repository_id/seva', json=source.model_dump())
             self.assertEqual(response.status_code, 400)
             payload = response.json()
-            self.assertIn('Error parsing file', payload['detail'])
             self.assertIn('Premature end of line', payload['detail'])
 
     def test_redirect(self):
@@ -1079,7 +1102,6 @@ class OpenDNACollectionsSourceTest(unittest.TestCase):
             id=0,
             repository_id='Ecoli Nanobody Toolkit/BC_RJ_SD8',
             repository_name='open_dna_collections',
-            sequence_file_url='https://assets.opencloning.org/open-dna-collections/Ecoli%20Nanobody%20Toolkit/genbank_seq/BC_RJ_SD8.gb',
         )
         response = client.post('/repository_id/open_dna_collections', json=source.model_dump())
         self.assertEqual(response.status_code, 200)
@@ -1087,7 +1109,10 @@ class OpenDNACollectionsSourceTest(unittest.TestCase):
         self.assertEqual(len(payload['sequences']), 1)
         self.assertEqual(len(payload['sources']), 1)
         out_source = payload['sources'][0]
-        self.assertEqual(out_source, source.model_dump())
+        out_source['repository_id'] = 'Ecoli Nanobody Toolkit/BC_RJ_SD8'
+        out_source['sequence_file_url'] = (
+            'https://assets.opencloning.org/open-dna-collections/Ecoli%20Nanobody%20Toolkit/genbank_seq/BC_RJ_SD8.gb'
+        )
         seq = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
         self.assertEqual(seq.name, 'BC_RJ_SD8')
 
@@ -1100,7 +1125,25 @@ class OpenDNACollectionsSourceTest(unittest.TestCase):
             sequence_file_url='https://assets.opencloning.org/open-dna-collections/Ecoli%20Nanobody%20Toolkit/genbank_seq/hello.txt',
         )
         response = client.post('/repository_id/open_dna_collections', json=source.model_dump())
+        self.assertEqual(response.status_code, 400)
+
+        source = OpenDNACollectionsSource(
+            id=0,
+            repository_id='hello/BC_RJ_SD8',
+            repository_name='open_dna_collections',
+        )
+        response = client.post('/repository_id/open_dna_collections', json=source.model_dump())
         self.assertEqual(response.status_code, 404)
+        self.assertIn('invalid openDNA collections collection', response.json()['detail'])
+
+        source = OpenDNACollectionsSource(
+            id=0,
+            repository_id='Ecoli Nanobody Toolkit/hello',
+            repository_name='open_dna_collections',
+        )
+        response = client.post('/repository_id/open_dna_collections', json=source.model_dump())
+        self.assertEqual(response.status_code, 404)
+        self.assertIn('plasmid hello not found in Ecoli Nanobody Toolkit', response.json()['detail'])
 
 
 class NotAllowedExternalUrlTest(unittest.TestCase):

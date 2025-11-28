@@ -7,7 +7,7 @@ from httpx import (  # noqa: F401
     AsyncHTTPTransport,
     Request,
 )
-from urllib.error import HTTPError
+from fastapi import HTTPException
 import ssl
 import certifi
 from .app_settings import settings
@@ -22,7 +22,7 @@ class AllowedExternalUrlsTransport(AsyncHTTPTransport):
     async def handle_async_request(self, request: Request) -> Response:
         if any(str(request.url).startswith(url) for url in allowed_external_urls):
             return await super().handle_async_request(request)
-        raise HTTPError(request.url, 403, f'Request to {request.url} is not allowed', None, None)
+        raise HTTPException(403, f'Request to {request.url} is not allowed')
 
 
 proxy = None

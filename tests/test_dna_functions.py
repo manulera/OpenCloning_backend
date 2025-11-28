@@ -1,8 +1,7 @@
-from urllib.error import HTTPError
+from fastapi import HTTPException
 import unittest
 import os
 import respx
-import httpx
 from pydna.dseq import Dseq
 from Bio.Seq import reverse_complement
 
@@ -12,6 +11,7 @@ from opencloning.dna_functions import (
     MyGenBankScanner,
     get_sequence_from_euroscarf_url,
     oligonucleotide_hybridization_overhangs,
+    get_sequences_from_file_url,
 )
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
@@ -69,34 +69,18 @@ class MinorFunctionsAsyncTest(unittest.IsolatedAsyncioTestCase):
     @respx.mock
     async def test_error_euroscarf(self):
 
-        # Connection error
-        respx.get('http://www.euroscarf.de/plasmid_details.php').mock(
-            side_effect=httpx.ConnectError('Connection error')
-        )
-        with self.assertRaises(HTTPError) as e:
-            await get_sequence_from_euroscarf_url('blah')
-        self.assertEqual(e.exception.code, 504)
-        self.assertIn('could not connect to euroscarf', str(e.exception))
-
-        # As far as I can tell, this never happens (it always returns a 200 even if the page is missing)
-        respx.get('http://www.euroscarf.de/plasmid_details.php').respond(503, text='')
-        with self.assertRaises(HTTPError) as e:
-            await get_sequence_from_euroscarf_url('blah')
-        self.assertEqual(e.exception.code, 503)
-        self.assertIn('could not connect to euroscarf', str(e.exception))
-
         # If the format of the page would change, these errors should be raised
         respx.get('http://www.euroscarf.de/plasmid_details.php').respond(200, text='')
-        with self.assertRaises(HTTPError) as e:
+        with self.assertRaises(HTTPException) as e:
             await get_sequence_from_euroscarf_url('blah')
-        self.assertEqual(e.exception.code, 503)
-        self.assertIn('Could not retrieve plasmid details', str(e.exception))
+        self.assertEqual(e.exception.status_code, 503)
+        self.assertIn('Could not retrieve plasmid details', e.exception.detail)
 
         respx.get('http://www.euroscarf.de/plasmid_details.php').respond(200, text='<body>missing other</body>')
-        with self.assertRaises(HTTPError) as e:
+        with self.assertRaises(HTTPException) as e:
             await get_sequence_from_euroscarf_url('blah')
-        self.assertEqual(e.exception.code, 503)
-        self.assertIn('Could not retrieve plasmid details', str(e.exception))
+        self.assertEqual(e.exception.status_code, 503)
+        self.assertIn('Could not retrieve plasmid details', e.exception.detail)
 
 
 class OligonucleotideHybridizationTest(unittest.TestCase):
@@ -122,3 +106,19 @@ class OligonucleotideHybridizationTest(unittest.TestCase):
         self.assertRaises(
             ValueError, oligonucleotide_hybridization_overhangs, reverse_complement(seq1), reverse_complement(seq2), 10
         )
+
+
+class GetSequencesFromFileUrlTest(unittest.IsolatedAsyncioTestCase):
+    @respx.mock
+    async def test_get_sequences_from_file_url_error(self):
+        respx.get('https://assets.opencloning.org/annotated-igem-distribution/blah.gb').respond(503, text='')
+        with self.assertRaises(HTTPException) as e:
+            await get_sequences_from_file_url('https://assets.opencloning.org/annotated-igem-distribution/blah.gb')
+        self.assertEqual(e.exception.status_code, 503)
+        self.assertIn('the external server (not OpenCloning) returned an error', e.exception.detail)
+
+        respx.get('https://assets.opencloning.org/annotated-igem-distribution/blah.gb').respond(404, text='')
+        with self.assertRaises(HTTPException) as e:
+            await get_sequences_from_file_url('https://assets.opencloning.org/annotated-igem-distribution/blah.gb')
+        self.assertEqual(e.exception.status_code, 404)
+        self.assertIn('file requested from url not found', e.exception.detail)

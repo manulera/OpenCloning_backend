@@ -153,3 +153,14 @@ RECORD_STUBS=1 uvicorn opencloning.main:app --reload --reload-exclude='.venv'
 ```
 
 This will record the stubs (requests and responses) in the `stubs` folder.
+
+
+### Catalogs
+
+Catalogs are used to map ids to urls for several plasmid collections. They are stored in the `src/opencloning/catalogs` folder.
+
+To update the catalogs, run the following command:
+
+```bash
+poetry run python scripts/update_catalogs.py
+```

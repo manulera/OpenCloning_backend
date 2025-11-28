@@ -59,6 +59,7 @@ async def restriction(
         raise HTTPException(400, *e.args)
 
     return format_products(
+        source.id,
         products,
         completed_source,
         source.output_name,

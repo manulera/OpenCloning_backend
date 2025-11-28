@@ -32,7 +32,11 @@ repos:
         entry: python scripts/check_httpx_imports.py
         language: system
         files: \.py$
-        exclude: tests/
+        exclude: |
+            (?x)^(
+                tests/.*|
+                scripts/.*|
+            )$
   # Hook to ensure that primer3 is only imported in the primer3_functions.py file
   # This is to centralize how the settings etc. are handled.
   - repo: local
