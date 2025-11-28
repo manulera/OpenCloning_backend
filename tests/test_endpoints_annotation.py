@@ -6,7 +6,7 @@ import pytest
 from importlib import reload
 import respx
 import httpx
-from urllib.error import HTTPError
+from fastapi import HTTPException
 import os
 
 from opencloning.dna_functions import format_sequence_genbank, read_dsrecord_from_json, annotate_with_plannotate
@@ -116,9 +116,9 @@ class PlannotateAsyncTest(unittest.IsolatedAsyncioTestCase):
         # This is tested here because it's impossible to send a malformed request from the backend
         respx.post(f'{dummy_url}/annotate').respond(400, json={'error': 'bad request'})
 
-        with pytest.raises(HTTPError) as e:
+        with pytest.raises(HTTPException) as e:
             await annotate_with_plannotate('hello', 'hello.blah', f'{dummy_url}/annotate')
-        self.assertEqual(e.value.code, 400)
+        self.assertEqual(e.value.status_code, 400)
 
 
 class AnnotationTest(unittest.TestCase):

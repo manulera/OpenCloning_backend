@@ -1039,11 +1039,11 @@ class SEVASourceTest(unittest.TestCase):
         source = SEVASource(id=0, repository_id='pSEVA261', repository_name='seva')
 
         with respx.mock:
-            respx.get(source.sequence_file_url).mock(side_effect=httpx.ConnectError)
+            respx.get(source.sequence_file_url).mock(side_effect=httpx.ConnectError('Mock Error'))
             response = client.post('/repository_id/seva', json=source.model_dump())
             self.assertEqual(response.status_code, 504)
             payload = response.json()
-            self.assertEqual(payload['detail'], 'Unable to connect to seva')
+            self.assertIn('Unable to connect to seva', payload['detail'])
 
         # Mock incorrect file
         with respx.mock:
@@ -1051,7 +1051,6 @@ class SEVASourceTest(unittest.TestCase):
             response = client.post('/repository_id/seva', json=source.model_dump())
             self.assertEqual(response.status_code, 400)
             payload = response.json()
-            self.assertIn('Unknown error', payload['detail'])
             self.assertIn('No sequences found in file', payload['detail'])
 
         with respx.mock:
@@ -1061,7 +1060,6 @@ class SEVASourceTest(unittest.TestCase):
             response = client.post('/repository_id/seva', json=source.model_dump())
             self.assertEqual(response.status_code, 400)
             payload = response.json()
-            self.assertIn('Unknown error', payload['detail'])
             self.assertIn('Premature end of line', payload['detail'])
 
     def test_redirect(self):

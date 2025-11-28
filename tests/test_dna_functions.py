@@ -1,4 +1,4 @@
-from urllib.error import HTTPError
+from fastapi import HTTPException
 import unittest
 import os
 import respx
@@ -70,16 +70,16 @@ class MinorFunctionsAsyncTest(unittest.IsolatedAsyncioTestCase):
 
         # If the format of the page would change, these errors should be raised
         respx.get('http://www.euroscarf.de/plasmid_details.php').respond(200, text='')
-        with self.assertRaises(HTTPError) as e:
+        with self.assertRaises(HTTPException) as e:
             await get_sequence_from_euroscarf_url('blah')
-        self.assertEqual(e.exception.code, 503)
-        self.assertIn('Could not retrieve plasmid details', str(e.exception))
+        self.assertEqual(e.exception.status_code, 503)
+        self.assertIn('Could not retrieve plasmid details', e.exception.detail)
 
         respx.get('http://www.euroscarf.de/plasmid_details.php').respond(200, text='<body>missing other</body>')
-        with self.assertRaises(HTTPError) as e:
+        with self.assertRaises(HTTPException) as e:
             await get_sequence_from_euroscarf_url('blah')
-        self.assertEqual(e.exception.code, 503)
-        self.assertIn('Could not retrieve plasmid details', str(e.exception))
+        self.assertEqual(e.exception.status_code, 503)
+        self.assertIn('Could not retrieve plasmid details', e.exception.detail)
 
 
 class OligonucleotideHybridizationTest(unittest.TestCase):

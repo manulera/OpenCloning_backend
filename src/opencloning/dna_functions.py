@@ -1,4 +1,4 @@
-from urllib.error import HTTPError
+from fastapi import HTTPException
 from urllib.parse import quote
 import math
 from Bio.Restriction.Restriction import RestrictionBatch
@@ -96,32 +96,23 @@ async def get_sequences_from_file_url(
         resp = await get_function(url, params=params, headers=headers)
 
     if math.floor(resp.status_code / 100) == 5:
-        raise HTTPError(
-            url,
-            503,
-            'the external server (not OpenCloning) returned an error',
-            'the external server (not OpenCloning) returned an error',
-            None,
-        )
+        raise HTTPException(503, 'the external server (not OpenCloning) returned an error')
     elif math.floor(resp.status_code / 100) != 2:
-        raise HTTPError(url, 404, 'file requested from url not found', 'file requested from url not found', None)
-    if format == SequenceFileFormat('snapgene'):
-        return custom_file_parser(io.BytesIO(resp.content), format)
-    else:
-        return custom_file_parser(io.StringIO(resp.text), format)
+        raise HTTPException(404, 'file requested from url not found')
+    try:
+        if format == SequenceFileFormat('snapgene'):
+            return custom_file_parser(io.BytesIO(resp.content), format)
+        else:
+            return custom_file_parser(io.StringIO(resp.text), format)
+    except ValueError as e:
+        raise HTTPException(400, f'{e}') from e
 
 
 async def request_from_snapgene(plasmid_set: dict, plasmid_name: str) -> Dseqrecord:
     if plasmid_set not in snapgene_catalog:
-        raise HTTPError(plasmid_set, 404, 'invalid plasmid set', 'invalid plasmid set', None)
+        raise HTTPException(404, 'invalid plasmid set')
     if plasmid_name not in snapgene_catalog[plasmid_set]:
-        raise HTTPError(
-            plasmid_name,
-            404,
-            f'{plasmid_name} is not part of {plasmid_set}',
-            f'{plasmid_name} is not part of {plasmid_set}',
-            None,
-        )
+        raise HTTPException(404, f'{plasmid_name} is not part of {plasmid_set}')
     url = f'https://www.snapgene.com/local/fetch.php?set={plasmid_set}&plasmid={plasmid_name}'
     seqs = await get_sequences_from_file_url(url, SequenceFileFormat('snapgene'))
     seq = seqs[0]
@@ -136,7 +127,7 @@ async def request_from_addgene(repository_id: str) -> Dseqrecord:
     async with get_http_client() as client:
         resp = await client.get(url)
     if resp.status_code == 404:
-        raise HTTPError(url, 404, 'wrong addgene id', 'wrong addgene id', None)
+        raise HTTPException(404, 'wrong addgene id')
     soup = BeautifulSoup(resp.content, 'html.parser')
 
     # Get a span.material-name from the soup, see https://github.com/manulera/OpenCloning_backend/issues/182
@@ -150,12 +141,9 @@ async def request_from_addgene(repository_id: str) -> Dseqrecord:
             )
             break
     else:
-        raise HTTPError(
-            url,
+        raise HTTPException(
             404,
             f'The requested plasmid does not have full sequences, see https://www.addgene.org/{repository_id}/sequences/',
-            f'The requested plasmid does not have full sequences, see https://www.addgene.org/{repository_id}/sequences/',
-            None,
         )
     dseqr = (await get_sequences_from_file_url(sequence_file_url))[0]
     dseqr.name = plasmid_name
@@ -172,7 +160,7 @@ async def request_from_wekwikgene(repository_id: str) -> Dseqrecord:
     async with get_http_client() as client:
         resp = await client.get(url)
     if resp.status_code == 404:
-        raise HTTPError(url, 404, 'invalid wekwikgene id', 'invalid wekwikgene id', None)
+        raise HTTPException(404, 'invalid wekwikgene id')
     soup = BeautifulSoup(resp.content, 'html.parser')
     # Get the sequence file URL from the page
     sequence_file_url = soup.find('a', text=lambda x: x and 'Download Sequence' in x).get('href')
@@ -185,7 +173,7 @@ async def request_from_wekwikgene(repository_id: str) -> Dseqrecord:
 
 async def get_seva_plasmid(repository_id: str) -> Dseqrecord:
     if repository_id not in seva_catalog:
-        raise HTTPError(repository_id, 404, 'invalid SEVA id', 'invalid SEVA id', None)
+        raise HTTPException(404, 'invalid SEVA id')
     link = seva_catalog[repository_id]
     if 'http' not in link:
         seq = await get_genbank_sequence(link)
@@ -319,15 +307,15 @@ async def get_sequence_from_euroscarf_url(plasmid_id: str) -> Dseqrecord:
     body_tag = soup.find('body')
     if body_tag is None:
         if 'Call to a member function getName()' in resp.text:
-            raise HTTPError(url, 404, 'invalid euroscarf id', 'invalid euroscarf id', None)
+            raise HTTPException(404, 'invalid euroscarf id')
         else:
             msg = f'Could not retrieve plasmid details, double-check the euroscarf site: {url}'
-            raise HTTPError(url, 503, msg, msg, None)
+            raise HTTPException(503, msg)
     # Get the download link
     subpath = soup.find('a', href=lambda x: x and x.startswith('files/dna'))
     if subpath is None:
         msg = f'Could not retrieve plasmid details, double-check the euroscarf site: {url}'
-        raise HTTPError(url, 503, msg, msg, None)
+        raise HTTPException(503, msg)
     genbank_url = f'http://www.euroscarf.de/{subpath.get("href")}'
     seq = (await get_sequences_from_file_url(genbank_url))[0]
     # Sometimes the files do not contain correct topology information, so we loop them
@@ -349,37 +337,23 @@ async def annotate_with_plannotate(
             )
             if response.status_code != 200:
                 detail = response.json().get('detail', 'plannotate server error')
-                raise HTTPError(url, response.status_code, detail, detail, None)
+                raise HTTPException(response.status_code, detail)
             data = response.json()
             dseqr = custom_file_parser(io.StringIO(data['gb_file']), 'genbank')[0]
             report = [PlannotateAnnotationReport.model_validate(r) for r in data['report']]
             return dseqr, report, data['version']
         except TimeoutException as e:
-            raise HTTPError(url, 504, 'plannotate server timeout', 'plannotate server timeout', None) from e
+            raise HTTPException(504, 'plannotate server timeout') from e
         except ConnectError as e:
-            raise HTTPError(
-                url, 500, 'cannot connect to plannotate server', 'cannot connect to plannotate server', None
-            ) from e
+            raise HTTPException(500, 'cannot connect to plannotate server') from e
 
 
 async def get_sequence_from_openDNA_collections(collection_name: str, plasmid_id: str) -> Dseqrecord:
     if collection_name not in openDNA_collections_catalog:
-        raise HTTPError(
-            f'{collection_name}/{plasmid_id}',
-            404,
-            'invalid openDNA collections collection',
-            'invalid openDNA collections collection',
-            None,
-        )
+        raise HTTPException(404, 'invalid openDNA collections collection')
     plasmid = next((item for item in openDNA_collections_catalog[collection_name] if item['id'] == plasmid_id), None)
     if plasmid is None:
-        raise HTTPError(
-            f'{collection_name}/{plasmid_id}',
-            404,
-            f'plasmid {plasmid_id} not found in {collection_name}',
-            f'plasmid {plasmid_id} not found in {collection_name}',
-            None,
-        )
+        raise HTTPException(404, f'plasmid {plasmid_id} not found in {collection_name}')
 
     path = quote(plasmid['path'])
     url = f'https://assets.opencloning.org/open-dna-collections/{path}'
@@ -394,13 +368,7 @@ async def get_sequence_from_iGEM2024(part: str, backbone: str) -> Dseqrecord:
     all_plasmids = [item for collection in iGEM2024_catalog.values() for item in collection]
     plasmid = next((item for item in all_plasmids if item['part'] == part and item['backbone'] == backbone), None)
     if plasmid is None:
-        raise HTTPError(
-            f'{part}-{backbone}',
-            404,
-            f'plasmid {part}-{backbone} not found in iGEM 2024',
-            f'plasmid {part}-{backbone} not found in iGEM 2024',
-            None,
-        )
+        raise HTTPException(404, f'plasmid {part}-{backbone} not found in iGEM 2024')
     url = f'https://assets.opencloning.org/annotated-igem-distribution/results/plasmids/{plasmid["id"]}.gb'
     seqs = await get_sequences_from_file_url(url)
     seq = seqs[0]

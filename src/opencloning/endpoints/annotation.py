@@ -1,6 +1,5 @@
-from fastapi import Query, HTTPException
+from fastapi import Query
 from pydantic import create_model
-from urllib.error import HTTPError
 
 from ..get_router import get_router
 from opencloning_linkml.datamodel import TextFileSequence, AnnotationSource
@@ -46,15 +45,12 @@ if settings.PLANNOTATE_URL is not None:
     ):
         input_seqr = read_dsrecord_from_json(sequence)
         # Make a request submitting sequence as a file:
-        try:
-            seqr, annotations, version = await _annotate_with_plannotate(
-                sequence.file_content,
-                f'{sequence.id}.gb',
-                settings.PLANNOTATE_URL + 'annotate',
-                settings.PLANNOTATE_TIMEOUT,
-            )
-        except HTTPError as e:
-            raise HTTPException(e.code, e.msg) from e
+        seqr, annotations, version = await _annotate_with_plannotate(
+            sequence.file_content,
+            f'{sequence.id}.gb',
+            settings.PLANNOTATE_URL + 'annotate',
+            settings.PLANNOTATE_TIMEOUT,
+        )
 
         source.annotation_report = annotations
         source.annotation_tool = 'plannotate'

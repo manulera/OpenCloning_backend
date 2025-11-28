@@ -5,7 +5,6 @@ from pydna.opencloning_models import RepositoryIdSource, GenomeCoordinatesSource
 
 from .app_settings import settings
 from .http_client import get_http_client, Response
-from urllib.error import HTTPError
 
 headers = None if settings.NCBI_API_KEY is None else {'api_key': settings.NCBI_API_KEY}
 
@@ -14,13 +13,11 @@ async def async_get(url, headers, params=None) -> Response:
     async with get_http_client() as client:
         resp = await client.get(url, headers=headers, params=params, timeout=20.0)
         if resp.status_code == 500:
-            raise HTTPError(url, 503, 'NCBI is down, try again later', 'NCBI is down, try again later', None)
+            raise HTTPException(503, 'NCBI is down, try again later')
         elif resp.status_code == 503:
-            raise HTTPError(
-                url, 503, 'NCBI returned an internal server error', 'NCBI returned an internal server error', None
-            )
+            raise HTTPException(503, 'NCBI returned an internal server error')
         elif resp.status_code != 200 and not math.floor(resp.status_code / 100) == 4:
-            raise HTTPError(url, 503, 'NCBI returned an unexpected error', 'NCBI returned an unexpected error', None)
+            raise HTTPException(503, 'NCBI returned an unexpected error')
         return resp
 
 
@@ -83,9 +80,9 @@ async def get_sequence_length_from_sequence_accession(sequence_accession: str) -
     resp = await async_get(url, headers=headers, params=params)
     data = resp.json()
     if 'result' not in data:
-        raise HTTPError(url, 503, 'NCBI returned an error (try again)', 'NCBI returned an error (try again)', None)
+        raise HTTPException(503, 'NCBI returned an error (try again)')
     if len(data['result']['uids']) == 0:
-        raise HTTPError(url, 404, 'wrong sequence accession', 'wrong sequence accession', None)
+        raise HTTPException(404, 'wrong sequence accession')
     sequence_id = data['result']['uids'][0]
     return data['result'][sequence_id]['slen']
 
@@ -148,8 +145,11 @@ def get_info_from_annotation(annotation: dict) -> dict:
 
 async def validate_locus_tag(
     locus_tag: str, assembly_accession: str, gene_id: int | None, start: int, end: int, strand: int
-) -> None:
-    """Validate that the locus tag exists in the assembly and that the gene falls within the requested coordinates"""
+) -> int:
+    """
+    Validate that the locus tag exists in the assembly and that the gene falls within the requested coordinates.
+    Returns gene_id for convenience.
+    """
 
     annotation = await get_annotation_from_locus_tag(locus_tag, assembly_accession)
     gene_start, gene_end, gene_strand, gene_id_annotation, *_ = get_info_from_annotation(annotation)
@@ -157,26 +157,17 @@ async def validate_locus_tag(
     # This field will not be present in all cases, but should be there in reference genomes
     if gene_id is not None:
         if 'gene_id' not in annotation:
-            raise HTTPError(
-                'url',
-                400,
-                'gene_id is set, but not found in the annotation',
-                'gene_id is set, but not found in the annotation',
-                None,
-            )
+            raise HTTPException(400, 'gene_id is set, but not found in the annotation')
         if gene_id != gene_id_annotation:
-            raise HTTPError(
-                'url', 400, 'gene_id does not match the locus_tag', 'gene_id does not match the locus_tag', None
-            )
+            raise HTTPException(400, 'gene_id does not match the locus_tag')
     elif 'gene_id' in annotation:
         gene_id = gene_id_annotation
 
     # The gene should fall within the range (range might be bigger if bases were requested upstream or downstream)
     if gene_start < start or gene_end > end or gene_strand != strand:
-        raise HTTPError(
-            400,
-            f'wrong coordinates, expected to fall within {start}, {end} on strand: {strand}',
-        )
+        raise HTTPException(400, f'wrong coordinates, expected to fall within {start}, {end} on strand: {strand}')
+
+    return gene_id
 
 
 async def get_genome_region_from_annotation(
