@@ -106,11 +106,15 @@ async def get_genbank_sequence(sequence_accession, start=None, end=None, strand=
 
     try:
         seq = (await get_sequences_from_file_url(url, params=params, headers=headers, get_function=async_get))[0]
-    except ValueError as e:
+    except HTTPException as e:
         # Now the ncbi returns something like this:
         # Example: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=blah&rettype=gbwithparts&retmode=text
         # 'Error: F a i l e d  t o  u n d e r s t a n d  i d :  b l a h '
-        raise HTTPException(404, 'invalid sequence accession') from e
+        if 'No sequences found in file' in e.detail:
+            raise HTTPException(404, 'invalid sequence accession') from e
+        raise e
+    except Exception as e:
+        raise e
 
     seq.source = RepositoryIdSource(repository_name='genbank', repository_id=sequence_accession)
     return seq

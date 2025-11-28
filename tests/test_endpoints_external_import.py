@@ -738,7 +738,7 @@ class IGEMSourceTest(unittest.TestCase):
     no_gb_url = 'https://blah.com/1.txt'
     wrong_url = 'https://assets.opencloning.org/annotated-igem-distribution/results/plasmids/dummy.gb'
 
-    @pytest.mark.flaky(reruns=3, reruns_delay=2)
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_igem(self):
         source = IGEMSource(
             id=0, repository_name='igem', repository_id='BBa_C0062-pSB1C5C', sequence_file_url=self.good_url
@@ -775,7 +775,7 @@ class GenomeRegionTest(unittest.TestCase):
         else:
             self.assertEqual(response_code, expected, msg)
 
-    @pytest.mark.flaky(reruns=3, reruns_delay=2)
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_examples(self):
         for example_name in request_examples.genome_region_examples:
             example = request_examples.genome_region_examples[example_name]
@@ -799,7 +799,7 @@ class GenomeRegionTest(unittest.TestCase):
             elif example_name == 'viral_sequence':
                 self.assertEqual(response_source, request_source, msg)
 
-    @pytest.mark.flaky(reruns=0, reruns_delay=2)
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_exceptions(self):
         wait_time = 0.5
         # Load first example
