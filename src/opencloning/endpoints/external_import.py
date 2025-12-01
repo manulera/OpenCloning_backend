@@ -6,8 +6,9 @@ import asyncio
 from starlette.responses import RedirectResponse
 from Bio import BiopythonParserWarning
 from typing import Annotated
-from urllib.error import HTTPError
 from pydna.utils import location_boundaries
+
+from opencloning.endpoints.endpoint_utils import format_products
 
 from ..get_router import get_router
 from opencloning_linkml.datamodel import (
@@ -28,10 +29,12 @@ from opencloning_linkml.datamodel import (
 from pydna.opencloning_models import SequenceLocationStr
 from ..dna_functions import (
     format_sequence_genbank,
+    get_sequence_from_benchling_url,
+    get_sequence_from_iGEM2024,
+    get_sequence_from_openDNA_collections,
     request_from_addgene,
+    request_from_snapgene,
     request_from_wekwikgene,
-    get_sequences_from_file_url,
-    get_sequence_from_snapgene_url,
     custom_file_parser,
     get_sequence_from_euroscarf_url,
     get_seva_plasmid,
@@ -137,12 +140,7 @@ async def read_from_file(
             warning_messages = [str(w.message) for w in warnings_captured]
 
     except ValueError as e:
-        raise HTTPException(422, f'Biopython cannot process this file: {e}.')
-
-    # This happens when textfiles are empty or contain something else, or when reading a text file as snapgene file,
-    # since StringIO does not raise an error when "Unexpected end of packet" is found
-    if len(dseqs) == 0:
-        raise HTTPException(422, 'Biopython cannot process this file.')
+        raise HTTPException(422, f'Biopython cannot process this file: {e}.') from e
 
     if index_in_file is not None:
         if index_in_file >= len(dseqs):
@@ -206,22 +204,17 @@ async def read_from_file(
 # directly the object.
 
 
-def repository_id_http_error_handler(exception: HTTPError, source: RepositoryIdSource):
-
-    if exception.code == 500:  # pragma: no cover
-        raise HTTPException(
-            503, f'{source.repository_name} returned: {exception} - {source.repository_name} might be down'
-        )
-    elif exception.code == 400 or exception.code == 404:
-        raise HTTPException(
-            404,
-            f'{source.repository_name} returned: {exception} - Likely you inserted a wrong {source.repository_name} id',
-        )
-    elif exception.code == 403:
-        raise HTTPException(
-            403,
-            f'Request to {source.repository_name} is not allowed. Please check that the URL is whitelisted.',
-        )
+def handle_repository_errors(exception: Exception, repository_name: str) -> None:
+    """
+    Centralized error handler for repository requests.
+    Re-raises HTTPException as-is, converts ConnectError to HTTPException with 504 status.
+    """
+    if isinstance(exception, HTTPException):
+        raise
+    elif isinstance(exception, ConnectError):
+        raise HTTPException(504, f'Unable to connect to {repository_name}: {exception}')
+    else:  # pragma: no cover
+        raise HTTPException(500, f'Unexpected error: {exception}')
 
 
 # Redirect to the right repository
@@ -270,10 +263,10 @@ async def get_from_repository_id_genbank(source: RepositoryIdSource):
         if seq_length > 100000:
             raise HTTPException(400, 'sequence is too long (max 100000 bp)')
         seq = await ncbi_requests.get_genbank_sequence(source.repository_id)
-    except ConnectError as exception:
-        raise HTTPException(504, f'Unable to connect to NCBI: {exception}')
+    except Exception as exception:
+        handle_repository_errors(exception, 'NCBI')
 
-    return {'sequences': [format_sequence_genbank(seq, source.output_name)], 'sources': [source.model_copy()]}
+    return format_products(source.id, [seq], None, source.output_name)
 
 
 @router.post(
@@ -284,13 +277,23 @@ async def get_from_repository_id_genbank(source: RepositoryIdSource):
 )
 async def get_from_repository_id_addgene(source: AddgeneIdSource):
     try:
-        dseq, out_source = await request_from_addgene(source)
-    except HTTPError as exception:
-        repository_id_http_error_handler(exception, source)
-    except ConnectError:
-        raise HTTPException(504, 'unable to connect to Addgene')
+        dseq = await request_from_addgene(source.repository_id)
+    except Exception as exception:
+        handle_repository_errors(exception, source.repository_name)
 
-    return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [out_source]}
+    return format_products(
+        source.id,
+        [dseq],
+        source if source.sequence_file_url is not None else None,
+        source.output_name,
+        wrong_completed_source_error_message=f'''
+        The provided source is not valid.
+        We found the following:
+          - repository_id: {dseq.source.repository_id}
+          - sequence_file_url: {dseq.source.sequence_file_url}
+          - addgene_sequence_type: {dseq.source.addgene_sequence_type}
+        ''',
+    )
 
 
 @router.post(
@@ -301,12 +304,21 @@ async def get_from_repository_id_addgene(source: AddgeneIdSource):
 )
 async def get_from_repository_id_wekwikgene(source: WekWikGeneIdSource):
     try:
-        dseq, out_source = await request_from_wekwikgene(source)
-    except HTTPError as exception:
-        repository_id_http_error_handler(exception, source)
-    except ConnectError:
-        raise HTTPException(504, 'unable to connect to WekWikGene')
-    return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [out_source]}
+        dseq = await request_from_wekwikgene(source.repository_id)
+    except Exception as exception:
+        handle_repository_errors(exception, source.repository_name)
+    return format_products(
+        source.id,
+        [dseq],
+        source if source.sequence_file_url is not None else None,
+        source.output_name,
+        wrong_completed_source_error_message=f'''
+        The provided source is not valid.
+        We found the following:
+          - repository_id: {dseq.source.repository_id}
+          - sequence_file_url: {dseq.source.sequence_file_url}
+        ''',
+    )
 
 
 @router.post(
@@ -319,13 +331,10 @@ async def get_from_benchling_url(
     source: Annotated[BenchlingUrlSource, Body(openapi_examples=request_examples.benchling_url_examples)]
 ):
     try:
-        dseqs = await get_sequences_from_file_url(source.repository_id)
-        return {
-            'sequences': [format_sequence_genbank(s, source.output_name) for s in dseqs],
-            'sources': [source for s in dseqs],
-        }
-    except HTTPError as exception:
-        repository_id_http_error_handler(exception, source)
+        dseq = await get_sequence_from_benchling_url(source.repository_id)
+        return format_products(source.id, [dseq], None, source.output_name)
+    except Exception as exception:
+        handle_repository_errors(exception, source.repository_name)
 
 
 @router.post(
@@ -339,17 +348,10 @@ async def get_from_repository_id_snapgene(
 ):
     try:
         plasmid_set, plasmid_name = source.repository_id.split('/')
-        url = f'https://www.snapgene.com/local/fetch.php?set={plasmid_set}&plasmid={plasmid_name}'
-        dseq = await get_sequence_from_snapgene_url(url)
-        # Unless a name is provided, we use the plasmid name from snapgene
-        if source.output_name is None:
-            source.output_name = plasmid_name
-        return {
-            'sequences': [format_sequence_genbank(dseq, source.output_name)],
-            'sources': [source],
-        }
-    except HTTPError as exception:
-        repository_id_http_error_handler(exception, source)
+        seq = await request_from_snapgene(plasmid_set, plasmid_name)
+        return format_products(source.id, [seq], None, source.output_name)
+    except Exception as exception:
+        handle_repository_errors(exception, source.repository_name)
 
 
 @router.post(
@@ -365,12 +367,9 @@ async def get_from_repository_id_euroscarf(source: EuroscarfSource):
     """
     try:
         dseq = await get_sequence_from_euroscarf_url(source.repository_id)
-        # Sometimes the files do not contain correct topology information, so we loop them
-        if not dseq.circular:
-            dseq = dseq.looped()
-        return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [source]}
-    except HTTPError as exception:
-        repository_id_http_error_handler(exception, source)
+        return format_products(source.id, [dseq], None, source.output_name)
+    except Exception as exception:
+        handle_repository_errors(exception, source.repository_name)
 
 
 @router.post(
@@ -380,14 +379,22 @@ async def get_from_repository_id_euroscarf(source: EuroscarfSource):
     ),
 )
 async def get_from_repository_id_igem(source: IGEMSource):
-    # TODO: move this to the data model?
-    if not source.sequence_file_url.endswith('.gb'):
-        raise HTTPException(422, 'The sequence file must be a GenBank file')
     try:
-        dseq = (await get_sequences_from_file_url(source.sequence_file_url))[0]
-        return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [source]}
-    except HTTPError as exception:
-        repository_id_http_error_handler(exception, source)
+        dseq = await get_sequence_from_iGEM2024(*source.repository_id.split('-'))
+        return format_products(
+            source.id,
+            [dseq],
+            source if source.sequence_file_url is not None else None,
+            source.output_name,
+            wrong_completed_source_error_message=f'''
+            The provided source is not valid.
+            We found the following:
+              - repository_id: {source.repository_id}
+              - sequence_file_url: {dseq.source.sequence_file_url}
+            ''',
+        )
+    except Exception as exception:
+        handle_repository_errors(exception, source.repository_name)
 
 
 @router.post(
@@ -400,10 +407,23 @@ async def get_from_repository_id_igem(source: IGEMSource):
 )
 async def get_from_repository_id_open_dna_collections(source: OpenDNACollectionsSource):
     try:
-        dseq = (await get_sequences_from_file_url(source.sequence_file_url))[0]
-        return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [source]}
-    except HTTPError as exception:
-        repository_id_http_error_handler(exception, source)
+        collection_name, plasmid_id = source.repository_id.split('/')
+        dseq = await get_sequence_from_openDNA_collections(collection_name, plasmid_id)
+        return format_products(
+            source.id,
+            [dseq],
+            source if source.sequence_file_url is not None else None,
+            source.output_name,
+            wrong_completed_source_error_message=f'''
+            The provided source is not valid.
+            We found the following:
+              - collection_name: {collection_name}
+              - plasmid_id: {plasmid_id}
+              - sequence_file_url: {dseq.source.sequence_file_url}
+            ''',
+        )
+    except Exception as exception:
+        handle_repository_errors(exception, source.repository_name)
 
 
 @router.post(
@@ -418,38 +438,15 @@ async def genome_coordinates(
 
     # Validate that coordinates make sense
     ncbi_requests.validate_coordinates_pre_request(source.start, source.end, source.strand)
+    if source.locus_tag is not None and source.assembly_accession is None:
+        raise HTTPException(422, 'assembly_accession is required if locus_tag is set')
 
     # Source includes a locus tag in annotated assembly
-
     async def validate_locus_task():
         if source.locus_tag is not None:
-
-            if source.assembly_accession is None:
-                raise HTTPException(422, 'assembly_accession is required if locus_tag is set')
-
-            annotation = await ncbi_requests.get_annotation_from_locus_tag(source.locus_tag, source.assembly_accession)
-            gene_range = annotation['genomic_regions'][0]['gene_range']['range'][0]
-            gene_strand = 1 if gene_range['orientation'] == 'plus' else -1
-
-            # This field will not be present in all cases, but should be there in reference genomes
-            if source.gene_id is not None:
-                if 'gene_id' not in annotation:
-                    raise HTTPException(400, 'gene_id is set, but not found in the annotation')
-                if source.gene_id != int(annotation['gene_id']):
-                    raise HTTPException(400, 'gene_id does not match the locus_tag')
-            elif 'gene_id' in annotation:
-                source.gene_id = int(annotation['gene_id'])
-
-            # The gene should fall within the range (range might be bigger if bases were requested upstream or downstream)
-            if (
-                int(gene_range['begin']) < source.start
-                or int(gene_range['end']) > source.end
-                or gene_strand != source.strand
-            ):
-                raise HTTPException(
-                    400,
-                    f'wrong coordinates, expected to fall within {source.start}, {source.end} on strand: {source.strand}',
-                )
+            return await ncbi_requests.validate_locus_tag(
+                source.locus_tag, source.assembly_accession, source.gene_id, source.start, source.end, source.strand
+            )
 
     async def validate_assembly_task():
         if source.assembly_accession is not None:
@@ -470,7 +467,12 @@ async def genome_coordinates(
 
     tasks = [validate_locus_task(), validate_assembly_task(), get_sequence_task()]
 
-    _, _, seq = await asyncio.gather(*tasks)
+    try:
+        gene_id, _, seq = await asyncio.gather(*tasks)
+    except Exception as exception:
+        handle_repository_errors(exception, 'NCBI')
+
+    source.gene_id = gene_id
 
     # NCBI does not complain for coordinates that fall out of the sequence, so we have to check here
     if len(seq) != source.end - source.start + 1:
@@ -490,11 +492,19 @@ async def get_from_repository_id_seva(source: SEVASource):
     Return the sequence from a plasmid in SEVA.
     """
     try:
-        dseq, source = await get_seva_plasmid(source)
-        return {'sequences': [format_sequence_genbank(dseq, source.output_name)], 'sources': [source]}
-    except HTTPError as exception:
-        repository_id_http_error_handler(exception, source)
-    except ConnectError:
-        raise HTTPException(504, 'unable to connect to SEVA')
+        dseq = await get_seva_plasmid(source.repository_id)
     except Exception as exception:
-        raise HTTPException(400, f'Error parsing file: {exception}')
+        handle_repository_errors(exception, source.repository_name)
+
+    return format_products(
+        source.id,
+        [dseq],
+        source if source.sequence_file_url is not None else None,
+        source.output_name,
+        wrong_completed_source_error_message=f'''
+        The provided source is not valid.
+        We found the following:
+          - repository_id: {dseq.source.repository_id}
+          - sequence_file_url: {dseq.source.sequence_file_url}
+        ''',
+    )

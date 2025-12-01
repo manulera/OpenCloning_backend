@@ -9,6 +9,7 @@ from Bio.Restriction.Restriction import RestrictionBatch
 
 
 def format_products(
+    source_id: int,
     products: list[Dseqrecord],
     completed_source: Source | None,
     output_name: str,
@@ -16,25 +17,32 @@ def format_products(
     wrong_completed_source_error_message: str = 'The provided assembly is not valid.',
 ) -> dict[Literal['sources', 'sequences'], list[Source] | list[TextFileSequence]]:
 
+    formatted_products = [format_sequence_genbank(p, output_name) for p in products]
+    for p in formatted_products:
+        p.id = source_id
+
+    with id_mode(use_python_internal_id=False):
+        formatted_sources = [p.source.to_pydantic_model(source_id).model_dump() for p in products]
+        for source in formatted_sources:
+            source['output_name'] = output_name
+
     if completed_source is not None:
         this_source_dict = completed_source.model_dump()
-        for prod in products:
-            with id_mode(use_python_internal_id=False):
-                if prod.source.to_pydantic_model(0).model_dump() == this_source_dict:
-                    return {
-                        'sources': [this_source_dict],
-                        'sequences': [format_sequence_genbank(prod, completed_source.output_name)],
-                    }
+        for prod, source in zip(formatted_products, formatted_sources):
+            if source == this_source_dict:
+                return {
+                    'sources': [source],
+                    'sequences': [prod],
+                }
         raise HTTPException(400, wrong_completed_source_error_message)
 
     if len(products) == 0:
         raise HTTPException(400, no_products_error_message)
 
-    with id_mode(use_python_internal_id=False):
-        return {
-            'sources': [p.source.to_pydantic_model(0).model_dump() for p in products],
-            'sequences': [format_sequence_genbank(p, output_name) for p in products],
-        }
+    return {
+        'sources': formatted_sources,
+        'sequences': formatted_products,
+    }
 
 
 def parse_restriction_enzymes(enzymes: list[str]) -> RestrictionBatch:

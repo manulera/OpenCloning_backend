@@ -72,6 +72,11 @@ class ValidateEndPointTest(unittest.TestCase):
         with open(f'{test_files}/homologous_recombination.json') as ins:
             # Read it to json
             data = json.load(ins)
+
+        # To avoid having to change this every time the dependency
+        # is updated.
+        data['schema_version'] = schema_version
+
         response = client.post('/validate', json=data)
         self.assertEqual(response.status_code, 200)
         self.assertNotIn('x-warning', response.headers)
