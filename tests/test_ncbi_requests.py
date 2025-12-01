@@ -161,3 +161,12 @@ class NcbiAsyncRequestsTest(unittest.IsolatedAsyncioTestCase):
             ncbi_requests.get_info_from_annotation(example_annotation)
         )
         self.assertEqual(assembly_accession, None)
+
+        # If gene id or locus tag is not present, it should be None
+        del example_annotation['gene_id']
+        del example_annotation['locus_tag']
+        start, end, strand, gene_id, sequence_accession, locus_tag, assembly_accession = (
+            ncbi_requests.get_info_from_annotation(example_annotation)
+        )
+        self.assertEqual(gene_id, None)
+        self.assertEqual(locus_tag, None)
