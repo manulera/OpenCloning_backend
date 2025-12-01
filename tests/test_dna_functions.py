@@ -4,6 +4,7 @@ import os
 import respx
 from pydna.dseq import Dseq
 from Bio.Seq import reverse_complement
+from opencloning_linkml.datamodel import TextFileSequence, SequenceFileFormat
 
 from opencloning.dna_functions import (
     custom_file_parser,
@@ -12,6 +13,7 @@ from opencloning.dna_functions import (
     get_sequence_from_euroscarf_url,
     oligonucleotide_hybridization_overhangs,
     get_sequences_from_file_url,
+    read_dsrecord_from_json,
 )
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
@@ -122,3 +124,18 @@ class GetSequencesFromFileUrlTest(unittest.IsolatedAsyncioTestCase):
             await get_sequences_from_file_url('https://assets.opencloning.org/annotated-igem-distribution/blah.gb')
         self.assertEqual(e.exception.status_code, 404)
         self.assertIn('file requested from url not found', e.exception.detail)
+
+
+class ReadDsrecordFromJsonTest(unittest.TestCase):
+    def test_read_dsrecord_from_json_error(self):
+        seq = TextFileSequence(
+            id=1,
+            file_content='',
+            sequence_file_format=SequenceFileFormat('genbank'),
+            overhang_crick_3prime=0,
+            overhang_watson_3prime=0,
+        )
+        with self.assertRaises(HTTPException) as e:
+            read_dsrecord_from_json(seq)
+        self.assertEqual(e.exception.status_code, 422)
+        self.assertIn('The file for sequence with id 1 is not in a valid genbank format: ', e.exception.detail)

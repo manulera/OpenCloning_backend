@@ -20,7 +20,7 @@ from pydna.opencloning_models import (
     IGEMSource,
     EuroscarfSource,
 )
-from pydna.parsers import parse as pydna_parse
+
 from bs4 import BeautifulSoup
 from pydna.common_sub_strings import common_sub_strings
 from Bio.SeqIO import parse as seqio_parse
@@ -52,7 +52,13 @@ def format_sequence_genbank(seq: Dseqrecord, seq_name: str = None) -> TextFileSe
 
 
 def read_dsrecord_from_json(seq: TextFileSequence) -> Dseqrecord:
-    initial_dseqrecord: Dseqrecord = pydna_parse(seq.file_content)[0]
+    with io.StringIO(seq.file_content) as handle:
+        try:
+            initial_dseqrecord: Dseqrecord = custom_file_parser(handle, 'genbank')[0]
+        except ValueError as e:
+            raise HTTPException(
+                422, f'The file for sequence with id {seq.id} is not in a valid genbank format: {e}'
+            ) from e
     if seq.overhang_watson_3prime == 0 and seq.overhang_crick_3prime == 0:
         out_dseq_record = initial_dseqrecord
     else:

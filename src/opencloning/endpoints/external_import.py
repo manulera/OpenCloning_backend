@@ -38,6 +38,7 @@ from ..dna_functions import (
     custom_file_parser,
     get_sequence_from_euroscarf_url,
     get_seva_plasmid,
+    read_dsrecord_from_json,
 )
 from .. import request_examples
 from .. import ncbi_requests
@@ -196,6 +197,10 @@ async def read_from_file(
 
     if len(warning_messages) > 0:
         response.headers['x-warning'] = '; '.join(warning_messages)
+
+    # Validate that the sequences are in a valid genbank format
+    for seq in out_sequences:
+        read_dsrecord_from_json(seq)
 
     return {'sequences': out_sequences, 'sources': out_sources}
 
