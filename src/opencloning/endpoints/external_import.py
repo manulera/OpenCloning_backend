@@ -219,6 +219,9 @@ def handle_repository_errors(exception: Exception, repository_name: str) -> None
     elif isinstance(exception, ConnectError):
         raise HTTPException(504, f'Unable to connect to {repository_name}: {exception}')
     else:  # pragma: no cover
+        import traceback
+
+        traceback.print_exc()
         raise HTTPException(500, f'Unexpected error: {exception}')
 
 

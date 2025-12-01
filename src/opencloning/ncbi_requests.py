@@ -136,9 +136,9 @@ def get_info_from_annotation(annotation: dict) -> dict:
     start = int(annotation['genomic_regions'][0]['gene_range']['range'][0]['begin'])
     end = int(annotation['genomic_regions'][0]['gene_range']['range'][0]['end'])
     strand = 1 if annotation['genomic_regions'][0]['gene_range']['range'][0]['orientation'] == 'plus' else -1
-    gene_id = int(annotation['gene_id'])
     sequence_accession = annotation['genomic_regions'][0]['gene_range']['accession_version']
     locus_tag = annotation['locus_tag'] if 'locus_tag' in annotation else None
+    gene_id = int(annotation['gene_id']) if 'gene_id' in annotation else None
     try:
         assembly_accession = annotation['annotations'][0]['assembly_accession']
     except KeyError:
