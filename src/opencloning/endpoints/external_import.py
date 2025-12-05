@@ -25,6 +25,7 @@ from opencloning_linkml.datamodel import (
     SequenceFileFormat,
     SEVASource,
     OpenDNACollectionsSource,
+    NCBISequenceSource,
 )
 from pydna.opencloning_models import SequenceLocationStr
 from ..dna_functions import (
@@ -253,6 +254,7 @@ async def get_from_repository_id(
         | WekWikGeneIdSource
         | SEVASource
         | OpenDNACollectionsSource
+        | NCBISequenceSource
     ),
 ):
     return RedirectResponse(f'/repository_id/{source.repository_name}', status_code=307)
@@ -261,10 +263,10 @@ async def get_from_repository_id(
 @router.post(
     '/repository_id/genbank',
     response_model=create_model(
-        'RepositoryIdResponse', sources=(list[RepositoryIdSource], ...), sequences=(list[TextFileSequence], ...)
+        'RepositoryIdResponse', sources=(list[NCBISequenceSource], ...), sequences=(list[TextFileSequence], ...)
     ),
 )
-async def get_from_repository_id_genbank(source: RepositoryIdSource):
+async def get_from_repository_id_genbank(source: NCBISequenceSource):
     try:
         # This request already fails if the sequence does not exist
         seq_length = await ncbi_requests.get_sequence_length_from_sequence_accession(source.repository_id)

@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 import math
 from pydna.dseqrecord import Dseqrecord
-from pydna.opencloning_models import RepositoryIdSource, GenomeCoordinatesSource
+from pydna.opencloning_models import GenomeCoordinatesSource, NCBISequenceSource
 
 from .app_settings import settings
 from .http_client import get_http_client, Response
@@ -116,7 +116,7 @@ async def get_genbank_sequence(sequence_accession, start=None, end=None, strand=
     except Exception as e:
         raise e
 
-    seq.source = RepositoryIdSource(repository_name='genbank', repository_id=sequence_accession)
+    seq.source = NCBISequenceSource(repository_id=sequence_accession)
     return seq
 
 

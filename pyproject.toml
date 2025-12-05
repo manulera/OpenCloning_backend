@@ -25,12 +25,11 @@ pydantic = "^2.7.1"
 pandas = "^2.2.3"
 openpyxl = "^3.1.5"
 pyyaml = "^6.0.2"
-opencloning-linkml = "0.4.8"
 primer3-py = "2.2.0"
 biopython = "^1.85"
 packaging = "^25.0"
 pairwise-alignments-to-msa = "^0.1.1"
-pydna = {git = "https://github.com/pydna-group/pydna", rev = "e95e8603b082e50b7873eab0ae1f8abf7b4d25bc"}
+pydna = {git = "https://github.com/pydna-group/pydna", rev = "ff396f5c6bb5def586a6af250d08957060868848"}
 
 [tool.poetry.group.dev.dependencies]
 autopep8 = "^2.0.4"

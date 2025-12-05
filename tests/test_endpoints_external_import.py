@@ -13,7 +13,7 @@ import opencloning.request_examples as request_examples
 from opencloning.dna_functions import read_dsrecord_from_json
 import opencloning.main as _main
 from opencloning_linkml.datamodel import (
-    RepositoryIdSource,
+    NCBISequenceSource,
     TextFileSequence,
     UploadedFileSource,
     GenomeCoordinatesSource,
@@ -301,7 +301,7 @@ class GenBankTest(unittest.TestCase):
     # TODO these tests will not work off-line, so the case where connection cannot be established should be handled in some way
     def test_request_gene(self):
         """Test whether the gene is requested from GenBank"""
-        source = RepositoryIdSource(
+        source = NCBISequenceSource(
             id=1,
             repository_name='genbank',
             repository_id='NM_001018957.2',
@@ -314,7 +314,7 @@ class GenBankTest(unittest.TestCase):
 
     def test_request_wrong_id(self):
         """Test a wrong Genbank id"""
-        source = RepositoryIdSource(
+        source = NCBISequenceSource(
             id=1,
             repository_name='genbank',
             repository_id='wrong_id',
@@ -331,7 +331,7 @@ class GenBankTest(unittest.TestCase):
         )
         # 400 is the error code for a wrong sequence accession :_)
         respx.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi').respond(400, text='')
-        source = RepositoryIdSource(
+        source = NCBISequenceSource(
             id=1,
             repository_name='genbank',
             repository_id='wrong_id',
@@ -347,7 +347,7 @@ class GenBankTest(unittest.TestCase):
         respx.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi').mock(
             side_effect=httpx.ConnectError('Connection error')
         )
-        source = RepositoryIdSource(
+        source = NCBISequenceSource(
             id=1,
             repository_name='genbank',
             repository_id='NM_001018957.2',
@@ -367,7 +367,7 @@ class GenBankTest(unittest.TestCase):
 
     def test_redirect(self):
         """The repository_id endpoint should redirect based on repository_name value"""
-        source = RepositoryIdSource(
+        source = NCBISequenceSource(
             id=1,
             repository_name='genbank',
             repository_id='NM_001018957.2',
@@ -380,7 +380,7 @@ class GenBankTest(unittest.TestCase):
 
     def test_rename(self):
         """If passing output_name, it renames the output"""
-        source = RepositoryIdSource(
+        source = NCBISequenceSource(
             id=1,
             repository_name='genbank',
             repository_id='NM_001018957.2',
@@ -394,7 +394,7 @@ class GenBankTest(unittest.TestCase):
 
     def test_long_sequence(self):
         """Test that a long sequence raises an error"""
-        source = RepositoryIdSource(
+        source = NCBISequenceSource(
             id=1,
             repository_name='genbank',
             repository_id='CU329670.1',
