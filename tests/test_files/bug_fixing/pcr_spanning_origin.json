@@ -23,11 +23,7 @@
       "type": "ManuallyTypedSource",
       "output_name": null,
       "database_id": null,
-      "input": [],
-      "overhang_crick_3prime": 0,
-      "overhang_watson_3prime": 0,
-      "user_input": "ATGCAAACAGTAATGATGGATGACATTCAAAGCACTGATTCTATTGCTGAAAAAGATAATCACTCTAATAATGAATCTAACTTTACTTG",
-      "circular": true
+      "input": []
     },
     {
       "id": 2,
@@ -79,7 +75,7 @@
   ],
   "description": "",
   "files": null,
-  "schema_version": "0.4.3",
+  "schema_version": "0.4.9",
   "backend_version": null,
   "frontend_version": null
 }

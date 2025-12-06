@@ -1156,25 +1156,21 @@ files = [
 
 [[package]]
 name = "opencloning-linkml"
-version = "0.4.8.post7.dev0+357d344"
+version = "0.4.9"
 description = "A LinkML data model for OpenCloning"
 optional = false
-python-versions = "^3.10"
+python-versions = "<4.0,>=3.10"
 groups = ["main"]
-files = []
-develop = false
+files = [
+    {file = "opencloning_linkml-0.4.9-py3-none-any.whl", hash = "sha256:1adcaffacf167c90475b23c4e134093db369af73be27d2b9ac9ab3cfeb39a7f1"},
+    {file = "opencloning_linkml-0.4.9.tar.gz", hash = "sha256:a243d1875df0bf7b3c9487770cd64c0db25c84254a292e2dcea94d9598e9717c"},
+]
 
 [package.dependencies]
-pydantic = "^2.7.1"
+pydantic = ">=2.7.1,<3.0.0"
 
 [package.extras]
 docs = ["linkml (>=1.9.2,<2.0.0)"]
-
-[package.source]
-type = "git"
-url = "https://github.com/OpenCloning/OpenCloning_LinkML"
-reference = "357d34453346ca5db7fa2c5895edc0fadd92f80a"
-resolved_reference = "357d34453346ca5db7fa2c5895edc0fadd92f80a"
 
 [[package]]
 name = "openpyxl"
@@ -1766,7 +1762,7 @@ wheel = "*"
 
 [[package]]
 name = "pydna"
-version = "5.5.4-post.17+ff396f5c"
+version = "5.5.4-post.22+6f25090e"
 description = "Representing double stranded DNA and functions for simulating cloning and homologous recombination between DNA molecules."
 optional = false
 python-versions = ">=3.10,<4.0"
@@ -1782,7 +1778,7 @@ numpy = [
     {version = ">1.26", markers = "python_version < \"3.12\""},
     {version = ">=2.3.0", markers = "python_version >= \"3.12\""},
 ]
-opencloning-linkml = {git = "https://github.com/OpenCloning/OpenCloning_LinkML", rev = "357d34453346ca5db7fa2c5895edc0fadd92f80a"}
+opencloning-linkml = "^0.4.9"
 prettytable = ">=3.5.0"
 pydivsufsort = ">=0.0.14"
 pyfiglet = "0.8.post1"
@@ -1798,8 +1794,8 @@ gel = ["matplotlib (>=3.4.3)", "pillow (>=8.4.0)", "scipy (>=1.11.3) ; python_ve
 [package.source]
 type = "git"
 url = "https://github.com/pydna-group/pydna"
-reference = "ff396f5c6bb5def586a6af250d08957060868848"
-resolved_reference = "ff396f5c6bb5def586a6af250d08957060868848"
+reference = "6f25090ec653e38219021aa46fa4440f888e958c"
+resolved_reference = "6f25090ec653e38219021aa46fa4440f888e958c"
 
 [[package]]
 name = "pyfiglet"
@@ -2698,4 +2694,4 @@ test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "990d6c1d43375132d03f7deada7f5c6a98e451123573fa8f5a4ff6166b6b958d"
+content-hash = "66cafb4bdee008393fc8504786d074cd2ba9d54a88978de413825a42ba8b69d5"

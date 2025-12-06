@@ -246,8 +246,7 @@ def handle_repository_errors(exception: Exception, repository_name: str) -> None
 )
 async def get_from_repository_id(
     source: (
-        RepositoryIdSource
-        | AddgeneIdSource
+        AddgeneIdSource
         | BenchlingUrlSource
         | SnapGenePlasmidSource
         | EuroscarfSource
@@ -257,7 +256,17 @@ async def get_from_repository_id(
         | NCBISequenceSource
     ),
 ):
-    return RedirectResponse(f'/repository_id/{source.repository_name}', status_code=307)
+    mapping_dict = {
+        'AddgeneIdSource': 'addgene',
+        'BenchlingUrlSource': 'benchling',
+        'SnapGenePlasmidSource': 'snapgene',
+        'EuroscarfSource': 'euroscarf',
+        'WekWikGeneIdSource': 'wekwikgene',
+        'SEVASource': 'seva',
+        'OpenDNACollectionsSource': 'open_dna_collections',
+        'NCBISequenceSource': 'genbank',
+    }
+    return RedirectResponse(f'/repository_id/{mapping_dict[source.type]}', status_code=307)
 
 
 @router.post(
@@ -289,7 +298,7 @@ async def get_from_repository_id_addgene(source: AddgeneIdSource):
     try:
         dseq = await request_from_addgene(source.repository_id)
     except Exception as exception:
-        handle_repository_errors(exception, source.repository_name)
+        handle_repository_errors(exception, 'Addgene')
 
     return format_products(
         source.id,
@@ -316,7 +325,7 @@ async def get_from_repository_id_wekwikgene(source: WekWikGeneIdSource):
     try:
         dseq = await request_from_wekwikgene(source.repository_id)
     except Exception as exception:
-        handle_repository_errors(exception, source.repository_name)
+        handle_repository_errors(exception, 'WeKwikGene')
     return format_products(
         source.id,
         [dseq],
@@ -344,7 +353,7 @@ async def get_from_benchling_url(
         dseq = await get_sequence_from_benchling_url(source.repository_id)
         return format_products(source.id, [dseq], None, source.output_name)
     except Exception as exception:
-        handle_repository_errors(exception, source.repository_name)
+        handle_repository_errors(exception, 'Benchling')
 
 
 @router.post(
@@ -361,7 +370,7 @@ async def get_from_repository_id_snapgene(
         seq = await request_from_snapgene(plasmid_set, plasmid_name)
         return format_products(source.id, [seq], None, source.output_name)
     except Exception as exception:
-        handle_repository_errors(exception, source.repository_name)
+        handle_repository_errors(exception, 'Snapgene')
 
 
 @router.post(
@@ -379,7 +388,7 @@ async def get_from_repository_id_euroscarf(source: EuroscarfSource):
         dseq = await get_sequence_from_euroscarf_url(source.repository_id)
         return format_products(source.id, [dseq], None, source.output_name)
     except Exception as exception:
-        handle_repository_errors(exception, source.repository_name)
+        handle_repository_errors(exception, 'Euroscarf')
 
 
 @router.post(
@@ -404,7 +413,7 @@ async def get_from_repository_id_igem(source: IGEMSource):
             ''',
         )
     except Exception as exception:
-        handle_repository_errors(exception, source.repository_name)
+        handle_repository_errors(exception, 'iGEM')
 
 
 @router.post(
@@ -433,7 +442,7 @@ async def get_from_repository_id_open_dna_collections(source: OpenDNACollections
             ''',
         )
     except Exception as exception:
-        handle_repository_errors(exception, source.repository_name)
+        handle_repository_errors(exception, 'OpenDNA Collections')
 
 
 @router.post(
@@ -447,7 +456,12 @@ async def genome_coordinates(
 ):
 
     # Validate that coordinates make sense
-    ncbi_requests.validate_coordinates_pre_request(source.start, source.end, source.strand)
+    try:
+        location_str = SequenceLocationStr(source.coordinates)
+        start, end, strand = location_str.get_ncbi_format_coordinates()
+    except Exception as e:
+        raise HTTPException(422, f'Invalid coordinates: {e}') from e
+
     if source.locus_tag is not None and source.assembly_accession is None:
         raise HTTPException(422, 'assembly_accession is required if locus_tag is set')
 
@@ -455,7 +469,12 @@ async def genome_coordinates(
     async def validate_locus_task():
         if source.locus_tag is not None:
             return await ncbi_requests.validate_locus_tag(
-                source.locus_tag, source.assembly_accession, source.gene_id, source.start, source.end, source.strand
+                source.locus_tag,
+                source.assembly_accession,
+                source.gene_id,
+                start,
+                end,
+                strand,
             )
 
     async def validate_assembly_task():
@@ -464,16 +483,14 @@ async def genome_coordinates(
             sequence_accessions = await ncbi_requests.get_sequence_accessions_from_assembly_accession(
                 source.assembly_accession
             )
-            if source.sequence_accession not in sequence_accessions:
+            if source.repository_id not in sequence_accessions:
                 raise HTTPException(
                     400,
-                    f'Sequence accession {source.sequence_accession} not contained in assembly accession {source.assembly_accession}, which contains accessions: {", ".join(sequence_accessions)}',
+                    f'Sequence accession {source.repository_id} not contained in assembly accession {source.assembly_accession}, which contains accessions: {", ".join(sequence_accessions)}',
                 )
 
     async def get_sequence_task():
-        return await ncbi_requests.get_genbank_sequence(
-            source.sequence_accession, source.start, source.end, source.strand
-        )
+        return await ncbi_requests.get_genbank_sequence(source.repository_id, start, end, strand)
 
     tasks = [validate_locus_task(), validate_assembly_task(), get_sequence_task()]
 
@@ -485,7 +502,7 @@ async def genome_coordinates(
     source.gene_id = gene_id
 
     # NCBI does not complain for coordinates that fall out of the sequence, so we have to check here
-    if len(seq) != source.end - source.start + 1:
+    if len(seq) != len(location_str.to_biopython_location()):
         raise HTTPException(400, 'coordinates fall outside the sequence')
 
     return {'sequences': [format_sequence_genbank(seq, source.output_name)], 'sources': [source.model_copy()]}
@@ -504,7 +521,7 @@ async def get_from_repository_id_seva(source: SEVASource):
     try:
         dseq = await get_seva_plasmid(source.repository_id)
     except Exception as exception:
-        handle_repository_errors(exception, source.repository_name)
+        handle_repository_errors(exception, 'SEVA')
 
     return format_products(
         source.id,
