@@ -90,7 +90,6 @@ async def main(
         addgene_source = AddgeneIdSource(
             id=0,
             repository_id=plasmid,
-            repository_name='addgene',
         )
         resp = await get_from_repository_id_addgene(addgene_source)
         plasmid_source: AddgeneIdSource = AddgeneIdSource.model_validate(resp['sources'][0])

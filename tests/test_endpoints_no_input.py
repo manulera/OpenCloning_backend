@@ -11,6 +11,7 @@ from opencloning_linkml.datamodel import (
     TextFileSequence,
     ManuallyTypedSource,
     OligoHybridizationSource,
+    ManuallyTypedSequence,
 )
 
 
@@ -96,10 +97,11 @@ class ManuallyTypedTest(unittest.TestCase):
         # Test linear (default)
         source = ManuallyTypedSource(
             id=0,
-            user_input='ATGC',
         )
+        sequence = ManuallyTypedSequence(id=0, sequence='ATGC')
+        data = {'source': source.model_dump(), 'sequence': sequence.model_dump()}
 
-        response = client.post('/manually_typed', json=source.model_dump())
+        response = client.post('/manually_typed', json=data)
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         resulting_sequences = [
@@ -113,8 +115,8 @@ class ManuallyTypedTest(unittest.TestCase):
         self.assertEqual(sources[0], source)
 
         # Test circular
-        source.circular = True
-        response = client.post('/manually_typed', json=source.model_dump())
+        data['sequence']['circular'] = True
+        response = client.post('/manually_typed', json=data)
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         resulting_sequences = [
@@ -131,12 +133,11 @@ class ManuallyTypedTest(unittest.TestCase):
         # Test overhangs
         source = ManuallyTypedSource(
             id=0,
-            user_input='ATGC',
-            overhang_crick_3prime=1,
-            overhang_watson_3prime=2,
         )
+        sequence = ManuallyTypedSequence(id=0, sequence='ATGC', overhang_crick_3prime=1, overhang_watson_3prime=2)
+        data = {'source': source.model_dump(), 'sequence': sequence.model_dump()}
 
-        response = client.post('/manually_typed', json=source.model_dump())
+        response = client.post('/manually_typed', json=data)
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         resulting_sequences = [
@@ -147,17 +148,19 @@ class ManuallyTypedTest(unittest.TestCase):
         self.assertEqual(resulting_sequences[0].seq, Dseq.from_full_sequence_and_overhangs('ATGC', 1, 2))
 
         # Test that if overhangs are set, it cannot be circular
-        wrong_source = source.model_dump()
-        wrong_source['circular'] = True
+        wrong_data = data.copy()
+        wrong_data['sequence']['circular'] = True
 
-        response = client.post('/manually_typed', json=wrong_source)
+        response = client.post('/manually_typed', json=wrong_data)
         self.assertEqual(response.status_code, 422)
 
     # Test that it fails if not acgt or empty
     def test_manually_typed_fail(self):
 
-        response = client.post('/manually_typed', json={'user_input': 'ATGZ'})
+        response = client.post(
+            '/manually_typed', json={'source': {'id': 0}, 'sequence': {'id': 0, 'sequence': 'ATGZ'}}
+        )
         self.assertEqual(response.status_code, 422)
 
-        response = client.post('/manually_typed', json={'user_input': ''})
+        response = client.post('/manually_typed', json={'source': {'id': 0}, 'sequence': {'id': 0, 'sequence': ''}})
         self.assertEqual(response.status_code, 422)

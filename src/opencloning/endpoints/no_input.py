@@ -16,6 +16,7 @@ from opencloning_linkml.datamodel import (
     TextFileSequence,
     ManuallyTypedSource,
     OligoHybridizationSource,
+    ManuallyTypedSequence,
 )
 
 from .. import request_examples
@@ -30,17 +31,14 @@ router = get_router()
         'ManuallyTypedResponse', sources=(list[ManuallyTypedSource], ...), sequences=(list[TextFileSequence], ...)
     ),
 )
-async def manually_typed(source: ManuallyTypedSource):
+async def manually_typed(source: ManuallyTypedSource, sequence: ManuallyTypedSequence):
     """Return the sequence from a manually typed sequence"""
-    if source.circular:
-        # TODO: This should be done in the model validator
-        if source.overhang_crick_3prime != 0 or source.overhang_watson_3prime != 0:
-            raise HTTPException(422, 'Circular sequences cannot have overhangs.')
-        seq = Dseqrecord(source.user_input, circular=source.circular)
+    if sequence.circular:
+        seq = Dseqrecord(sequence.sequence, circular=sequence.circular)
     else:
         seq = Dseqrecord(
             Dseq.from_full_sequence_and_overhangs(
-                source.user_input, source.overhang_crick_3prime, source.overhang_watson_3prime
+                sequence.sequence, sequence.overhang_crick_3prime, sequence.overhang_watson_3prime
             )
         )
     return {'sequences': [format_sequence_genbank(seq, source.output_name)], 'sources': [source]}

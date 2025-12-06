@@ -81,7 +81,6 @@
       "database_id": null,
       "input": [],
       "repository_id": "71287",
-      "repository_name": "addgene",
       "sequence_file_url": "https://media.addgene.org/snapgene-media/v2.0.0/sequences/352460/6c8b0369-e549-4517-95da-8d07146ca49d/addgene-plasmid-71287-sequence-352460.gbk",
       "addgene_sequence_type": "addgene-full"
     },
@@ -92,7 +91,6 @@
       "database_id": null,
       "input": [],
       "repository_id": "71287",
-      "repository_name": "addgene",
       "sequence_file_url": "https://media.addgene.org/snapgene-media/v2.0.0/sequences/352460/6c8b0369-e549-4517-95da-8d07146ca49d/addgene-plasmid-71287-sequence-352460.gbk",
       "addgene_sequence_type": "addgene-full"
     },
@@ -103,7 +101,6 @@
       "database_id": null,
       "input": [],
       "repository_id": "213912",
-      "repository_name": "addgene",
       "sequence_file_url": "https://media.addgene.org/snapgene-media/v2.0.0/sequences/437264/8bd82b44-a1c3-4f81-8936-ebcc16d171e9/addgene-plasmid-213912-sequence-437264.gbk",
       "addgene_sequence_type": "addgene-full"
     },
@@ -114,7 +111,6 @@
       "database_id": null,
       "input": [],
       "repository_id": "213913",
-      "repository_name": "addgene",
       "sequence_file_url": "https://media.addgene.org/snapgene-media/v2.0.0/sequences/437263/af62d64e-1f22-4dce-aafa-7935d1665700/addgene-plasmid-213913-sequence-437263.gbk",
       "addgene_sequence_type": "addgene-full"
     },
@@ -125,7 +121,6 @@
       "database_id": null,
       "input": [],
       "repository_id": "133748",
-      "repository_name": "addgene",
       "sequence_file_url": "https://media.addgene.org/snapgene-media/v2.0.0/sequences/271264/c0ae5f43-46e6-4175-a0c1-9a00cbb92034/addgene-plasmid-133748-sequence-271264.gbk",
       "addgene_sequence_type": "addgene-full"
     },
@@ -135,8 +130,7 @@
       "output_name": "pDONR_P2r-P3",
       "database_id": null,
       "input": [],
-      "repository_id": "gateway_cloning_vectors/pDONR_P2r-P3",
-      "repository_name": "snapgene"
+      "repository_id": "gateway_cloning_vectors/pDONR_P2r-P3"
     },
     {
       "id": 7,
@@ -207,7 +201,6 @@
       "database_id": null,
       "input": [],
       "repository_id": "63143",
-      "repository_name": "addgene",
       "sequence_file_url": "https://media.addgene.org/snapgene-media/v2.0.0/sequences/223326/8c81fe9a-fb57-40bc-93d6-e17d83502061/addgene-plasmid-63143-sequence-223326.gbk",
       "addgene_sequence_type": "addgene-full"
     }
@@ -258,7 +251,7 @@
   ],
   "description": "",
   "files": null,
-  "schema_version": "0.4.3",
+  "schema_version": "0.4.9",
   "backend_version": null,
   "frontend_version": null
 }

@@ -41,7 +41,6 @@
       "database_id": null,
       "input": [],
       "repository_id": "19342",
-      "repository_name": "addgene",
       "sequence_file_url": "https://media.addgene.org/snapgene-media/v2.0.0/sequences/8997/a6b027f8-013a-4b68-bf7e-359f34a653d0/addgene-plasmid-19342-sequence-8997.gbk",
       "addgene_sequence_type": "depositor-full"
     },
@@ -82,13 +81,11 @@
       "output_name": null,
       "database_id": null,
       "input": [],
+      "repository_id": "CU329670.1",
+      "coordinates": "1877189..1881726",
       "assembly_accession": "GCA_000002945.3",
-      "sequence_accession": "CU329670.1",
       "locus_tag": "SPOM_SPAPB1A10.09",
-      "gene_id": null,
-      "start": 1877189,
-      "end": 1881726,
-      "strand": 1
+      "gene_id": null
     },
     {
       "id": 4,
@@ -139,7 +136,7 @@
   ],
   "description": "Deletion of the ORF of ase1 by homologous recombination in S.pombe",
   "files": null,
-  "schema_version": "0.4.3",
+  "schema_version": "0.4.9",
   "backend_version": null,
   "frontend_version": null
 }

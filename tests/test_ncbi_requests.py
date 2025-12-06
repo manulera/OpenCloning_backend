@@ -8,6 +8,8 @@ import respx
 from fastapi import HTTPException
 import unittest
 
+from Bio.SeqFeature import SimpleLocation
+
 
 class NcbiAsyncRequestsTest(unittest.IsolatedAsyncioTestCase):
 
@@ -95,11 +97,9 @@ class NcbiAsyncRequestsTest(unittest.IsolatedAsyncioTestCase):
         seq = await ncbi_requests.get_genome_region_from_annotation(annotation, 1000, 1000)
         self.assertEqual(seq.source.locus_tag, 'YDR294C')
         self.assertEqual(seq.source.gene_id, 851888)
-        self.assertEqual(seq.source.sequence_accession, 'NC_001136.10')
+        self.assertEqual(seq.source.repository_id, 'NC_001136.10')
         self.assertEqual(seq.source.assembly_accession, 'GCF_000146045.2')
-        self.assertEqual(seq.source.start, 1049459)
-        self.assertEqual(seq.source.end, 1053228)
-        self.assertEqual(seq.source.strand, -1)
+        self.assertEqual(seq.source.coordinates, SimpleLocation(1049458, 1053228, -1))
         self.assertEqual(len(seq), 3770)
 
     async def test_get_info_from_annotation(self):

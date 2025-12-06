@@ -133,7 +133,7 @@
   "primers": [],
   "description": "",
   "files": null,
-  "schema_version": "0.4.3",
+  "schema_version": "0.4.9",
   "backend_version": null,
   "frontend_version": null
 }
