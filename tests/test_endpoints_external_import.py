@@ -821,6 +821,7 @@ class GenomeRegionTest(unittest.TestCase):
         s = correct_source.model_copy(deep=True)
         s.coordinates = '1..10'
         response = client.post('/genome_coordinates', json=s.model_dump())
+        self.assertIn('gene should fall within', response.json()['detail'])
         self.assertStatusCode(response.status_code, 400)
         time.sleep(wait_time)
 
@@ -908,6 +909,17 @@ class GenomeRegionTest(unittest.TestCase):
             response = client.post('/genome_coordinates', json=correct_source.model_dump())
             self.assertEqual(response.status_code, 503)
             self.assertIn('NCBI is down', response.json()['detail'])
+
+    def test_max_sequence_length(self):
+        correct_source = GenomeCoordinatesSource.model_validate(
+            request_examples.genome_region_examples['full']['value']
+        )
+        correct_source.coordinates = f'1..{app_settings.NCBI_MAX_SEQUENCE_LENGTH + 1}'
+        response = client.post('/genome_coordinates', json=correct_source.model_dump())
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            f'sequence is too long (max {app_settings.NCBI_MAX_SEQUENCE_LENGTH} bp)', response.json()['detail']
+        )
 
 
 class SEVASourceTest(unittest.TestCase):

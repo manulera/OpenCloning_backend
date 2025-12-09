@@ -1,4 +1,5 @@
 from fastapi import Body, Query, HTTPException, Response, UploadFile, File
+from opencloning.app_settings import settings
 from pydantic import create_model
 import io
 import warnings
@@ -279,8 +280,8 @@ async def get_from_repository_id_genbank(source: NCBISequenceSource):
     try:
         # This request already fails if the sequence does not exist
         seq_length = await ncbi_requests.get_sequence_length_from_sequence_accession(source.repository_id)
-        if seq_length > 100000:
-            raise HTTPException(400, 'sequence is too long (max 100000 bp)')
+        if seq_length > settings.NCBI_MAX_SEQUENCE_LENGTH:
+            raise HTTPException(400, f'sequence is too long (max {settings.NCBI_MAX_SEQUENCE_LENGTH} bp)')
         seq = await ncbi_requests.get_genbank_sequence(source.repository_id)
     except Exception as exception:
         handle_repository_errors(exception, 'NCBI')
@@ -458,9 +459,13 @@ async def genome_coordinates(
     # Validate that coordinates make sense
     try:
         location_str = SequenceLocationStr(source.coordinates)
+        location = location_str.to_biopython_location()
         start, end, strand = location_str.get_ncbi_format_coordinates()
     except Exception as e:
         raise HTTPException(422, f'Invalid coordinates: {e}') from e
+
+    if len(location) > settings.NCBI_MAX_SEQUENCE_LENGTH:
+        raise HTTPException(400, f'sequence is too long (max {settings.NCBI_MAX_SEQUENCE_LENGTH} bp)')
 
     if source.locus_tag is not None and source.assembly_accession is None:
         raise HTTPException(422, 'assembly_accession is required if locus_tag is set')
@@ -502,7 +507,7 @@ async def genome_coordinates(
     source.gene_id = gene_id
 
     # NCBI does not complain for coordinates that fall out of the sequence, so we have to check here
-    if len(seq) != len(location_str.to_biopython_location()):
+    if len(seq) != len(location):
         raise HTTPException(400, 'coordinates fall outside the sequence')
 
     return {'sequences': [format_sequence_genbank(seq, source.output_name)], 'sources': [source.model_copy()]}

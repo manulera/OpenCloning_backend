@@ -172,7 +172,10 @@ async def validate_locus_tag(
 
     # The gene should fall within the range (range might be bigger if bases were requested upstream or downstream)
     if gene_start < start or gene_end > end or gene_strand != strand:
-        raise HTTPException(400, f'wrong coordinates, expected to fall within {start}, {end} on strand: {strand}')
+        raise HTTPException(
+            400,
+            f'wrong coordinates, the gene should fall within the requested coordinates, {start}, {end} on strand: {strand}',
+        )
 
     return gene_id
 
