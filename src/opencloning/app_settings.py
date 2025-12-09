@@ -22,6 +22,11 @@ if os.environ.get('ALLOWED_ORIGINS') is not None:
 
 # External services settings =================================
 NCBI_API_KEY = os.environ.get('NCBI_API_KEY')
+NCBI_MAX_SEQUENCE_LENGTH = (
+    int(os.environ.get('NCBI_MAX_SEQUENCE_LENGTH'))
+    if os.environ.get('NCBI_MAX_SEQUENCE_LENGTH') is not None
+    else 500000
+)
 PLANNOTATE_URL = os.environ['PLANNOTATE_URL'] if 'PLANNOTATE_URL' in os.environ else None
 PLANNOTATE_TIMEOUT = int(os.environ['PLANNOTATE_TIMEOUT']) if 'PLANNOTATE_TIMEOUT' in os.environ else 20
 # Handle trailing slash:
@@ -58,6 +63,7 @@ class Settings(BaseModel):
     BATCH_CLONING: bool
     RECORD_STUBS: bool
     NCBI_API_KEY: str | None
+    NCBI_MAX_SEQUENCE_LENGTH: int
     ALLOWED_ORIGINS: list[str]
     PLANNOTATE_URL: str | None
     PLANNOTATE_TIMEOUT: int
@@ -73,6 +79,7 @@ settings = Settings(
     BATCH_CLONING=BATCH_CLONING,
     RECORD_STUBS=RECORD_STUBS,
     NCBI_API_KEY=NCBI_API_KEY,
+    NCBI_MAX_SEQUENCE_LENGTH=NCBI_MAX_SEQUENCE_LENGTH,
     ALLOWED_ORIGINS=ALLOWED_ORIGINS,
     PLANNOTATE_URL=PLANNOTATE_URL,
     PLANNOTATE_TIMEOUT=PLANNOTATE_TIMEOUT,

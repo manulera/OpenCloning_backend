@@ -13,7 +13,7 @@ import opencloning.request_examples as request_examples
 from opencloning.dna_functions import read_dsrecord_from_json
 import opencloning.main as _main
 from opencloning_linkml.datamodel import (
-    RepositoryIdSource,
+    NCBISequenceSource,
     TextFileSequence,
     UploadedFileSource,
     GenomeCoordinatesSource,
@@ -301,9 +301,8 @@ class GenBankTest(unittest.TestCase):
     # TODO these tests will not work off-line, so the case where connection cannot be established should be handled in some way
     def test_request_gene(self):
         """Test whether the gene is requested from GenBank"""
-        source = RepositoryIdSource(
+        source = NCBISequenceSource(
             id=1,
-            repository_name='genbank',
             repository_id='NM_001018957.2',
         )
         response = client.post('/repository_id/genbank', json=source.model_dump())
@@ -314,9 +313,8 @@ class GenBankTest(unittest.TestCase):
 
     def test_request_wrong_id(self):
         """Test a wrong Genbank id"""
-        source = RepositoryIdSource(
+        source = NCBISequenceSource(
             id=1,
-            repository_name='genbank',
             repository_id='wrong_id',
         )
         response = client.post('/repository_id/genbank', json=source.model_dump())
@@ -331,9 +329,8 @@ class GenBankTest(unittest.TestCase):
         )
         # 400 is the error code for a wrong sequence accession :_)
         respx.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi').respond(400, text='')
-        source = RepositoryIdSource(
+        source = NCBISequenceSource(
             id=1,
-            repository_name='genbank',
             repository_id='wrong_id',
         )
         response = client.post('/repository_id/genbank', json=source.model_dump())
@@ -347,9 +344,8 @@ class GenBankTest(unittest.TestCase):
         respx.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi').mock(
             side_effect=httpx.ConnectError('Connection error')
         )
-        source = RepositoryIdSource(
+        source = NCBISequenceSource(
             id=1,
-            repository_name='genbank',
             repository_id='NM_001018957.2',
         )
         response = client.post('/repository_id/genbank', json=source.model_dump())
@@ -367,9 +363,8 @@ class GenBankTest(unittest.TestCase):
 
     def test_redirect(self):
         """The repository_id endpoint should redirect based on repository_name value"""
-        source = RepositoryIdSource(
+        source = NCBISequenceSource(
             id=1,
-            repository_name='genbank',
             repository_id='NM_001018957.2',
         )
         response = client.post('/repository_id', json=source.model_dump())
@@ -380,9 +375,8 @@ class GenBankTest(unittest.TestCase):
 
     def test_rename(self):
         """If passing output_name, it renames the output"""
-        source = RepositoryIdSource(
+        source = NCBISequenceSource(
             id=1,
-            repository_name='genbank',
             repository_id='NM_001018957.2',
             output_name='hello',
         )
@@ -394,9 +388,8 @@ class GenBankTest(unittest.TestCase):
 
     def test_long_sequence(self):
         """Test that a long sequence raises an error"""
-        source = RepositoryIdSource(
+        source = NCBISequenceSource(
             id=1,
-            repository_name='genbank',
             repository_id='CU329670.1',
         )
         response = client.post('/repository_id/genbank', json=source.model_dump())
@@ -424,7 +417,6 @@ class AddgeneTest(unittest.TestCase):
         for example in examples:
             source = AddgeneIdSource(
                 id=1,
-                repository_name='addgene',
                 repository_id=example['id'],
             )
 
@@ -451,7 +443,6 @@ class AddgeneTest(unittest.TestCase):
         """Works for an Addgene url that has now been replaced by a newer one"""
         source = AddgeneIdSource(
             id=1,
-            repository_name='addgene',
             repository_id='65109',
             addgene_sequence_type='addgene-full',
             sequence_file_url='https://media.addgene.org/snapgene-media/v1.7.9-0-g88a3305/sequences/110162/c1c98803-c8ba-44a6-95b8-d6a94097e36f/addgene-plasmid-65109-sequence-110162.gbk',
@@ -477,7 +468,6 @@ class AddgeneTest(unittest.TestCase):
         # Non-existing id
         source = AddgeneIdSource(
             id=1,
-            repository_name='addgene',
             repository_id='DUMMYTEST',
         )
 
@@ -488,7 +478,6 @@ class AddgeneTest(unittest.TestCase):
         # Id that has no full-sequences
         source = AddgeneIdSource(
             id=1,
-            repository_name='addgene',
             repository_id='39291',
         )
         response = client.post('/repository_id/addgene', json=source.model_dump())
@@ -498,7 +487,6 @@ class AddgeneTest(unittest.TestCase):
         # url does not exist
         source = AddgeneIdSource(
             id=1,
-            repository_name='addgene',
             repository_id='39282',
             sequence_file_url='https://media.addgene.org/snapgene-media/wrongggggggg.gbk',
         )
@@ -509,7 +497,6 @@ class AddgeneTest(unittest.TestCase):
         """Test repository_id endpoint should redirect based on repository_name value"""
         source = AddgeneIdSource(
             id=1,
-            repository_name='addgene',
             repository_id='39282',
         )
         response = client.post('/repository_id', json=source.model_dump())
@@ -523,12 +510,11 @@ class AddgeneTest(unittest.TestCase):
         respx.get('https://www.addgene.org/39282/sequences/').mock(side_effect=httpx.ConnectError('Connection error'))
         source = AddgeneIdSource(
             id=1,
-            repository_name='addgene',
             repository_id='39282',
         )
         response = client.post('/repository_id/addgene', json=source.model_dump())
         self.assertEqual(response.status_code, 504)
-        self.assertIn('Unable to connect to addgene', response.json()['detail'])
+        self.assertIn('Unable to connect to Addgene', response.json()['detail'])
 
 
 class WekWikGeneSourceTest(unittest.TestCase):
@@ -536,7 +522,6 @@ class WekWikGeneSourceTest(unittest.TestCase):
     def test_valid_id(self):
         source = WekWikGeneIdSource(
             id=1,
-            repository_name='wekwikgene',
             repository_id='0000304',
         )
         response = client.post('/repository_id/wekwikgene', json=source.model_dump())
@@ -551,7 +536,6 @@ class WekWikGeneSourceTest(unittest.TestCase):
     def test_invalid_id(self):
         source = WekWikGeneIdSource(
             id=1,
-            repository_name='wekwikgene',
             repository_id='999999999999999999999999999999',  # Non-existent ID
         )
         response = client.post('/repository_id/wekwikgene', json=source.model_dump())
@@ -562,7 +546,6 @@ class WekWikGeneSourceTest(unittest.TestCase):
     def test_wekwikgene_down(self):
         source = WekWikGeneIdSource(
             id=1,
-            repository_name='wekwikgene',
             repository_id='0000304',
         )
 
@@ -571,12 +554,11 @@ class WekWikGeneSourceTest(unittest.TestCase):
         )
         response = client.post('/repository_id/wekwikgene', json=source.model_dump())
         self.assertEqual(response.status_code, 504)
-        self.assertIn('Unable to connect to wekwikgene', response.json()['detail'])
+        self.assertIn('Unable to connect to WeKwikGene', response.json()['detail'])
 
     def test_redirect(self):
         source = WekWikGeneIdSource(
             id=1,
-            repository_name='wekwikgene',
             repository_id='0000304',
         )
         response = client.post('/repository_id', json=source.model_dump())
@@ -590,7 +572,7 @@ class BenchlingUrlSourceTest(unittest.TestCase):
 
     def test_valid_url(self):
         url = 'https://benchling.com/siverson/f/lib_B94YxDHhQh-cidar-moclo-library/seq_dh1FrJTc-b0015_dh.gb'
-        source = BenchlingUrlSource(id=0, repository_id=url, repository_name='benchling')
+        source = BenchlingUrlSource(id=0, repository_id=url)
         response = client.post('/repository_id/benchling', json=source.model_dump())
         self.assertEqual(response.status_code, 200)
         payload = response.json()
@@ -601,7 +583,7 @@ class BenchlingUrlSourceTest(unittest.TestCase):
     def test_invalid_url(self):
         # We have to initialize the object with a valid url
         url = 'https://benchling.com/siverson/f/lib_B94YxDHhQh-cidar-moclo-library/seq_dh1FrJTc-b0015_dh.gb'
-        source_object = BenchlingUrlSource(id=0, repository_id=url, repository_name='benchling')
+        source_object = BenchlingUrlSource(id=0, repository_id=url)
 
         # In the dict, we can then edit
         source_dict = source_object.model_dump()
@@ -622,7 +604,7 @@ class BenchlingUrlSourceTest(unittest.TestCase):
 
         # One that matches the pattern but does not exist
         url = 'https://benchling.com/bluh/blah.gb'
-        source = BenchlingUrlSource(id=0, repository_id=url, repository_name='benchling')
+        source = BenchlingUrlSource(id=0, repository_id=url)
         response = client.post('/repository_id/benchling', json=source.model_dump())
         self.assertEqual(response.status_code, 404)
         self.assertIn('file requested from url not found', response.json()['detail'])
@@ -632,9 +614,7 @@ class SnapGenePlasmidSourceTest(unittest.TestCase):
 
     def test_valid_url(self):
 
-        source = SnapGenePlasmidSource(
-            id=0, repository_id='basic_cloning_vectors/pEASY-T1_(linearized)', repository_name='snapgene'
-        )
+        source = SnapGenePlasmidSource(id=0, repository_id='basic_cloning_vectors/pEASY-T1_(linearized)')
         response = client.post('/repository_id/snapgene', json=source.model_dump())
         self.assertEqual(response.status_code, 200)
         payload = response.json()
@@ -649,7 +629,6 @@ class SnapGenePlasmidSourceTest(unittest.TestCase):
         source2 = SnapGenePlasmidSource(
             id=0,
             repository_id='basic_cloning_vectors/pEASY-T1_(linearized)',
-            repository_name='snapgene',
             output_name='my_name',
         )
         response = client.post('/repository_id/snapgene', json=source2.model_dump())
@@ -661,12 +640,12 @@ class SnapGenePlasmidSourceTest(unittest.TestCase):
 
     def test_invalid_url(self):
         # Invalid plasmid set
-        source = SnapGenePlasmidSource(id=0, repository_id='hello/world', repository_name='snapgene')
+        source = SnapGenePlasmidSource(id=0, repository_id='hello/world')
         response = client.post('/repository_id/snapgene', json=source.model_dump())
         self.assertEqual(response.status_code, 404)
 
         # Invalid plasmid name
-        source = SnapGenePlasmidSource(id=0, repository_id='basic_cloning_vectors/hello', repository_name='snapgene')
+        source = SnapGenePlasmidSource(id=0, repository_id='basic_cloning_vectors/hello')
         response = client.post('/repository_id/snapgene', json=source.model_dump())
         self.assertEqual(response.status_code, 404)
         self.assertIn('hello is not part of basic_cloning_vectors', response.json()['detail'])
@@ -681,7 +660,7 @@ class SnapGenePlasmidSourceTest(unittest.TestCase):
 class EuroscarfSourceTest(unittest.TestCase):
 
     def test_valid_url(self):
-        source = EuroscarfSource(id=0, repository_id='P30174', repository_name='euroscarf')
+        source = EuroscarfSource(id=0, repository_id='P30174')
         response = client.post('/repository_id/euroscarf', json=source.model_dump())
         self.assertEqual(response.status_code, 200)
         payload = response.json()
@@ -695,7 +674,7 @@ class EuroscarfSourceTest(unittest.TestCase):
         self.assertTrue(any('yEGFP' in f.qualifiers['gene'] for f in sequence.features))
 
         # Ensure that linear files are circularised
-        source = EuroscarfSource(id=0, repository_id='P30555', repository_name='euroscarf')
+        source = EuroscarfSource(id=0, repository_id='P30555')
         response = client.post('/repository_id/euroscarf', json=source.model_dump())
         self.assertEqual(response.status_code, 200)
         payload = response.json()
@@ -705,7 +684,7 @@ class EuroscarfSourceTest(unittest.TestCase):
 
     def test_invalid_url(self):
         # Compatible with regex, but does not exist
-        source = EuroscarfSource(id=0, repository_id='P99999999999999', repository_name='euroscarf')
+        source = EuroscarfSource(id=0, repository_id='P99999999999999')
         response = client.post('/repository_id/euroscarf', json=source.model_dump())
         self.assertEqual(response.status_code, 404)
 
@@ -718,7 +697,7 @@ class EuroscarfSourceTest(unittest.TestCase):
     @respx.mock
     def test_circularize_plasmid(self):
         # We mock a request in which we would get a linear plasmid
-        source = EuroscarfSource(id=0, repository_id='P9999999999999', repository_name='euroscarf')
+        source = EuroscarfSource(id=0, repository_id='P9999999999999')
         respx.get('http://www.euroscarf.de/plasmid_details.php').respond(
             200, text='<html><body><a href="files/dna/test.gb">Download</a></body></html>'
         )
@@ -740,21 +719,16 @@ class IGEMSourceTest(unittest.TestCase):
 
     @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_igem(self):
-        source = IGEMSource(
-            id=0, repository_name='igem', repository_id='BBa_C0062-pSB1C5C', sequence_file_url=self.good_url
-        )
+        source = IGEMSource(id=0, repository_id='BBa_C0062-pSB1C5C', sequence_file_url=self.good_url)
         response = client.post('/repository_id/igem', json=source.model_dump())
         payload = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(payload['sources'][0]['repository_id'], 'BBa_C0062-pSB1C5C')
-        self.assertEqual(payload['sources'][0]['repository_name'], 'igem')
 
     def test_errors(self):
 
         # The repository_id does not start with the part_name, even if url is valid
-        source = IGEMSource(
-            id=0, repository_name='igem', repository_id='BBa_C0062-dummy', sequence_file_url=self.good_url
-        )
+        source = IGEMSource(id=0, repository_id='BBa_C0062-dummy', sequence_file_url=self.good_url)
 
         # The url is not a GenBank file
         source_json = source.model_dump()
@@ -763,7 +737,7 @@ class IGEMSourceTest(unittest.TestCase):
         self.assertEqual(response.status_code, 422)
 
         # The url does not exist
-        source = IGEMSource(id=0, repository_name='igem', repository_id='dummy-test', sequence_file_url=self.wrong_url)
+        source = IGEMSource(id=0, repository_id='dummy-test', sequence_file_url=self.wrong_url)
         response = client.post('/repository_id/igem', json=source.model_dump())
         self.assertEqual(response.status_code, 404)
 
@@ -845,9 +819,9 @@ class GenomeRegionTest(unittest.TestCase):
 
         # Wrong coordinates
         s = correct_source.model_copy(deep=True)
-        s.start = 1
-        s.end = 10
+        s.coordinates = '1..10'
         response = client.post('/genome_coordinates', json=s.model_dump())
+        self.assertIn('gene should fall within', response.json()['detail'])
         self.assertStatusCode(response.status_code, 400)
         time.sleep(wait_time)
 
@@ -893,7 +867,7 @@ class GenomeRegionTest(unittest.TestCase):
         s.locus_tag = None
         s.gene_id = None
         s.assembly_accession = None
-        s.sequence_accession = 'blah'
+        s.repository_id = 'blah'
         response = client.post('/genome_coordinates', json=s.model_dump())
         self.assertStatusCode(response.status_code, 404)
         time.sleep(wait_time)
@@ -902,39 +876,27 @@ class GenomeRegionTest(unittest.TestCase):
         viral_source = GenomeCoordinatesSource.model_validate(
             request_examples.genome_region_examples['viral_sequence']['value']
         )
-        viral_source.start = 10
-        viral_source.end = 1
+        viral_source.coordinates = '10..1'
         response = client.post('/genome_coordinates', json=viral_source.model_dump())
         self.assertStatusCode(response.status_code, 422)
         time.sleep(wait_time)
 
-        viral_source.start = 0
-        viral_source.end = 20
-        response = client.post('/genome_coordinates', json=viral_source.model_dump())
-        self.assertStatusCode(response.status_code, 422)
-        time.sleep(wait_time)
-
-        viral_source.start = 1
-        viral_source.end = 20
-        viral_source.strand = 0
+        viral_source.coordinates = '0..20'
         response = client.post('/genome_coordinates', json=viral_source.model_dump())
         self.assertStatusCode(response.status_code, 422)
         time.sleep(wait_time)
 
         # Coordinates outside of the sequence
-        viral_source.start = 1
-        # the length is 2151
-        viral_source.end = 2152
-        viral_source.strand = 1
+        viral_source.coordinates = '1..2152'
         response = client.post('/genome_coordinates', json=viral_source.model_dump())
         self.assertStatusCode(response.status_code, 400)
         time.sleep(wait_time)
 
         # Coordinates too long
-        viral_source.start = 1
-        viral_source.end = 100004
+        viral_source.coordinates = '1..100004'
         response = client.post('/genome_coordinates', json=viral_source.model_dump())
         self.assertStatusCode(response.status_code, 400)
+        self.assertIn('coordinates fall outside the sequence', response.json()['detail'])
 
     def test_ncbi_down(self):
         correct_source = GenomeCoordinatesSource.model_validate(
@@ -948,13 +910,23 @@ class GenomeRegionTest(unittest.TestCase):
             self.assertEqual(response.status_code, 503)
             self.assertIn('NCBI is down', response.json()['detail'])
 
+    def test_max_sequence_length(self):
+        correct_source = GenomeCoordinatesSource.model_validate(
+            request_examples.genome_region_examples['full']['value']
+        )
+        correct_source.coordinates = f'1..{app_settings.NCBI_MAX_SEQUENCE_LENGTH + 1}'
+        response = client.post('/genome_coordinates', json=correct_source.model_dump())
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            f'sequence is too long (max {app_settings.NCBI_MAX_SEQUENCE_LENGTH} bp)', response.json()['detail']
+        )
+
 
 class SEVASourceTest(unittest.TestCase):
     def test_seva_url(self):
         source = SEVASource(
             id=0,
             repository_id='pSEVA261',
-            repository_name='seva',
             sequence_file_url='https://seva-plasmids.com/maps-canonical/maps-plasmids-SEVAs-canonical-versions-web-1-3-gbk/pSEVA261.gbk',
         )
         response = client.post('/repository_id/seva', json=source.model_dump())
@@ -971,7 +943,6 @@ class SEVASourceTest(unittest.TestCase):
         source = SEVASource(
             id=0,
             repository_id='pSEVA2a2d1',
-            repository_name='seva',
         )
         response = client.post('/repository_id/seva', json=source.model_dump())
         self.assertEqual(response.status_code, 200)
@@ -980,7 +951,6 @@ class SEVASourceTest(unittest.TestCase):
         source = SEVASource(
             id=0,
             repository_id='pSEVA2214',
-            repository_name='seva',
             sequence_file_url='https://www.ncbi.nlm.nih.gov/nuccore/MH650998',
         )
         response = client.post('/repository_id/seva', json=source.model_dump())
@@ -997,7 +967,6 @@ class SEVASourceTest(unittest.TestCase):
         source = SEVASource(
             id=0,
             repository_id='pSEVA261',
-            repository_name='seva',
             sequence_file_url='https://seva-plasmids.com/maps-canonical/maps-plasmids-SEVAs-canonical-versions-web-1-3-gbk/pSEVA261.gbk',
         )
 
@@ -1036,14 +1005,14 @@ class SEVASourceTest(unittest.TestCase):
 
         # Mock connection error
 
-        source = SEVASource(id=0, repository_id='pSEVA261', repository_name='seva')
+        source = SEVASource(id=0, repository_id='pSEVA261')
 
         with respx.mock:
             respx.get(source.sequence_file_url).mock(side_effect=httpx.ConnectError('Mock Error'))
             response = client.post('/repository_id/seva', json=source.model_dump())
             self.assertEqual(response.status_code, 504)
             payload = response.json()
-            self.assertIn('Unable to connect to seva', payload['detail'])
+            self.assertIn('Unable to connect to SEVA', payload['detail'])
 
         # Mock incorrect file
         with respx.mock:
@@ -1066,7 +1035,6 @@ class SEVASourceTest(unittest.TestCase):
         source = SEVASource(
             id=0,
             repository_id='pSEVA261',
-            repository_name='seva',
             sequence_file_url='https://seva-plasmids.com/maps-canonical/maps-plasmids-SEVAs-canonical-versions-web-1-3-gbk/pSEVA261.gbk',
         )
         with open(f'{test_files}/ase1.gb', 'r') as f:
@@ -1081,7 +1049,6 @@ class SEVASourceTest(unittest.TestCase):
         source = SEVASource(
             id=0,
             repository_id='pSEVA261',
-            repository_name='seva',
             sequence_file_url='https://seva-plasmids.com/maps-canonical/maps-plasmids-SEVAs-canonical-versions-web-1-3-gbk/pSEVA261.gbk',
         )
         with open(f'{test_files}/ase1.gb', 'r') as f:
@@ -1101,7 +1068,6 @@ class OpenDNACollectionsSourceTest(unittest.TestCase):
         source = OpenDNACollectionsSource(
             id=0,
             repository_id='Ecoli Nanobody Toolkit/BC_RJ_SD8',
-            repository_name='open_dna_collections',
         )
         response = client.post('/repository_id/open_dna_collections', json=source.model_dump())
         self.assertEqual(response.status_code, 200)
@@ -1121,7 +1087,6 @@ class OpenDNACollectionsSourceTest(unittest.TestCase):
         source = OpenDNACollectionsSource(
             id=0,
             repository_id='Ecoli Nanobody Toolkit/BC_RJ_SD8',
-            repository_name='open_dna_collections',
             sequence_file_url='https://assets.opencloning.org/open-dna-collections/Ecoli%20Nanobody%20Toolkit/genbank_seq/hello.txt',
         )
         response = client.post('/repository_id/open_dna_collections', json=source.model_dump())
@@ -1130,7 +1095,6 @@ class OpenDNACollectionsSourceTest(unittest.TestCase):
         source = OpenDNACollectionsSource(
             id=0,
             repository_id='hello/BC_RJ_SD8',
-            repository_name='open_dna_collections',
         )
         response = client.post('/repository_id/open_dna_collections', json=source.model_dump())
         self.assertEqual(response.status_code, 404)
@@ -1139,7 +1103,6 @@ class OpenDNACollectionsSourceTest(unittest.TestCase):
         source = OpenDNACollectionsSource(
             id=0,
             repository_id='Ecoli Nanobody Toolkit/hello',
-            repository_name='open_dna_collections',
         )
         response = client.post('/repository_id/open_dna_collections', json=source.model_dump())
         self.assertEqual(response.status_code, 404)
@@ -1159,7 +1122,6 @@ class NotAllowedExternalUrlTest(unittest.TestCase):
         source = SEVASource(
             id=0,
             repository_id='pSEVA261',
-            repository_name='seva',
             sequence_file_url='https://seva-plasmids.com/dummy.gbk',
         )
         response = client.post('/repository_id/seva', json=source.model_dump())

@@ -40,16 +40,17 @@ def process_folder(working_dir: str):
     # We do this to have action to .end and .start
     pcr_sources = [PCRSource.model_validate(s.model_dump()) for s in pcr_sources]
     locus_source = next(s for s in strategy.sources if s.type == 'GenomeCoordinatesSource')
+    locus_location = Location.fromstring(locus_source.coordinates)
     hrec_source = next(s for s in strategy.sources if s.type == 'HomologousRecombinationSource')
     # We do this to have action to .end and .start
     hrec_source: HomologousRecombinationSource = HomologousRecombinationSource.model_validate(hrec_source.model_dump())
 
-    chromosome = chromosomes[locus_source.sequence_accession]
+    chromosome = chromosomes[locus_source.repository_id]
     insertion_start = (
-        locus_source.start + location_boundaries(Location.fromstring(hrec_source.input[0].right_location))[1]
+        locus_location.start + location_boundaries(Location.fromstring(hrec_source.input[0].right_location))[1]
     )
     insertion_end = (
-        locus_source.start + location_boundaries(Location.fromstring(hrec_source.input[-1].left_location))[0]
+        locus_location.start + location_boundaries(Location.fromstring(hrec_source.input[-1].left_location))[0]
     )
 
     # Write out the sequences in genbank format and extract some relevant info

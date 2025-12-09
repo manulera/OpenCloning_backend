@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 import unittest
 import shutil
 import os
-from opencloning_linkml.datamodel import ManuallyTypedSource, RestrictionEnzymeDigestionSource
+from opencloning_linkml.datamodel import ManuallyTypedSource, RestrictionEnzymeDigestionSource, ManuallyTypedSequence
 from pytest import MonkeyPatch
 from importlib import reload
 from pydna.dseqrecord import Dseqrecord
@@ -43,12 +43,11 @@ class StubRouteTest(unittest.TestCase):
         reload(main)
 
     def test_stub_route(self):
-        source = ManuallyTypedSource(
-            id=0,
-            user_input='ATGC',
-        )
+        source = ManuallyTypedSource(id=0)
+        sequence = ManuallyTypedSequence(id=0, sequence='ATGC')
+        data = {'source': source.model_dump(), 'sequence': sequence.model_dump()}
 
-        response = self.client.post('/manually_typed', json=source.model_dump())
+        response = self.client.post('/manually_typed', json=data)
         self.assertEqual(response.status_code, 200)
 
         self.assertTrue(os.path.exists('stubs/manually_typed/'))

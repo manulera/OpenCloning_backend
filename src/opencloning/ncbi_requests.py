@@ -1,7 +1,8 @@
 from fastapi import HTTPException
 import math
 from pydna.dseqrecord import Dseqrecord
-from pydna.opencloning_models import RepositoryIdSource, GenomeCoordinatesSource
+from pydna.opencloning_models import GenomeCoordinatesSource, NCBISequenceSource
+from Bio.SeqFeature import Location
 
 from .app_settings import settings
 from .http_client import get_http_client, Response
@@ -90,6 +91,10 @@ async def get_sequence_length_from_sequence_accession(sequence_accession: str) -
 async def get_genbank_sequence(sequence_accession, start=None, end=None, strand=None) -> Dseqrecord:
     from opencloning.dna_functions import get_sequences_from_file_url
 
+    # Ensure that start, end, and strand are either all None or none are None
+    if (start is None or end is None or strand is None) and not (start is None and end is None and strand is None):
+        raise ValueError('start, end, and strand must either all be None or none be None')
+
     gb_strand = 1 if strand == 1 or strand is None else 2
     url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi'
     params = {
@@ -116,20 +121,16 @@ async def get_genbank_sequence(sequence_accession, start=None, end=None, strand=
     except Exception as e:
         raise e
 
-    seq.source = RepositoryIdSource(repository_name='genbank', repository_id=sequence_accession)
+    if start is not None:
+        if strand == -1:
+            location = Location.fromstring(f'complement({start}..{end})')
+        else:
+            location = Location.fromstring(f'{start}..{end}')
+    else:
+        location = None
+
+    seq.source = NCBISequenceSource(repository_id=sequence_accession, coordinates=location)
     return seq
-
-
-def validate_coordinates_pre_request(start, end, strand):
-    # TODO: move this to the class
-    if strand not in [1, -1]:
-        raise HTTPException(422, 'strand must be 1 or -1')
-    if start >= end:
-        raise HTTPException(422, 'start must be less than end')
-    if start < 1:
-        raise HTTPException(422, 'start must be greater than 0')
-    if end - start > 100000:
-        raise HTTPException(400, 'sequence is too long (max 100000 bp)')
 
 
 def get_info_from_annotation(annotation: dict) -> dict:
@@ -171,7 +172,10 @@ async def validate_locus_tag(
 
     # The gene should fall within the range (range might be bigger if bases were requested upstream or downstream)
     if gene_start < start or gene_end > end or gene_strand != strand:
-        raise HTTPException(400, f'wrong coordinates, expected to fall within {start}, {end} on strand: {strand}')
+        raise HTTPException(
+            400,
+            f'wrong coordinates, the gene should fall within the requested coordinates, {start}, {end} on strand: {strand}',
+        )
 
     return gene_id
 
@@ -185,14 +189,14 @@ async def get_genome_region_from_annotation(
     start = start - padding_left
     end = end + padding_right
     seq = await get_genbank_sequence(sequence_accession, start, end, strand)
+    location_str = f'{start}..{end}' if strand != -1 else f'complement({start}..{end})'
+    coordinates = Location.fromstring(location_str)
     source = GenomeCoordinatesSource(
         assembly_accession=assembly_accession,
-        sequence_accession=sequence_accession,
+        repository_id=sequence_accession,
+        coordinates=coordinates,
         locus_tag=locus_tag,
         gene_id=gene_id,
-        start=start,
-        end=end,
-        strand=strand,
     )
     seq.name = locus_tag
     seq.source = source

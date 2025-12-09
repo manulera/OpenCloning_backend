@@ -56,13 +56,11 @@
       "output_name": null,
       "database_id": null,
       "input": [],
+      "repository_id": "NC_000913.3",
+      "coordinates": "complement(362231..367305)",
       "assembly_accession": "GCF_000005845.2",
-      "sequence_accession": "NC_000913.3",
       "locus_tag": "b0344",
-      "gene_id": 945006,
-      "start": 362231,
-      "end": 367305,
-      "strand": -1
+      "gene_id": 945006
     },
     {
       "id": 2,
@@ -70,8 +68,7 @@
       "output_name": "pDONR221",
       "database_id": null,
       "input": [],
-      "repository_id": "gateway_cloning_vectors/pDONR221",
-      "repository_name": "snapgene"
+      "repository_id": "gateway_cloning_vectors/pDONR221"
     },
     {
       "id": 3,
@@ -79,8 +76,7 @@
       "output_name": "pcDNA6.2_C-YFP-DEST",
       "database_id": null,
       "input": [],
-      "repository_id": "gateway_cloning_vectors/pcDNA6.2_C-YFP-DEST",
-      "repository_name": "snapgene"
+      "repository_id": "gateway_cloning_vectors/pcDNA6.2_C-YFP-DEST"
     },
     {
       "id": 4,
@@ -196,7 +192,7 @@
   ],
   "description": "Cloning the lacZ gene from E. coli into an entry clone, then expression clone",
   "files": null,
-  "schema_version": "0.4.3",
+  "schema_version": "0.4.9",
   "backend_version": null,
   "frontend_version": null
 }
