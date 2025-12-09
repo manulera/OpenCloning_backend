@@ -186,10 +186,8 @@ async def get_genome_region_from_annotation(
     start = start - padding_left
     end = end + padding_right
     seq = await get_genbank_sequence(sequence_accession, start, end, strand)
-    if strand == -1:
-        coordinates = Location.fromstring(f'complement({start}..{end})')
-    else:
-        coordinates = Location.fromstring(f'{start}..{end}')
+    location_str = f'{start}..{end}' if strand != -1 else f'complement({start}..{end})'
+    coordinates = Location.fromstring(location_str)
     source = GenomeCoordinatesSource(
         assembly_accession=assembly_accession,
         repository_id=sequence_accession,

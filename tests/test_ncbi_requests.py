@@ -170,3 +170,8 @@ class NcbiAsyncRequestsTest(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(gene_id, None)
         self.assertEqual(locus_tag, None)
+
+    async def test_get_genbank_sequence_errors(self):
+        with pytest.raises(ValueError) as e:
+            await ncbi_requests.get_genbank_sequence('NC_003424.3', None, 10, 1)
+        assert e.value.args[0] == 'start, end, and strand must either all be None or none be None'
