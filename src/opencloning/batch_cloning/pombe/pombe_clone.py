@@ -14,7 +14,7 @@ async def main(
     gene: str,
     assembly_accession: str,
     output_dir: str,
-    plasmid_input: UploadFile | dict = '19343',
+    plasmid_input: UploadFile | str = '19343',
     padding: int = 1000,
 ):
     print(f"\033[92mCloning {gene}\033[0m")
