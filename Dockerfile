@@ -2,7 +2,7 @@
 # https://github.com/manulera/OpenCloning_backend
 
 # BUILDER IMAGE
-FROM python:3.12-alpine AS builder
+FROM python:3.12-alpine3.21 AS builder
 
 RUN apk update --no-cache && apk add --no-cache build-base bash cmake git
 
