@@ -7,22 +7,18 @@ FROM python:3.12-alpine AS builder
 RUN apk update --no-cache && apk add --no-cache build-base bash cmake git
 
 # Build mafft from source
-# mafft creates an entire directory, that's what we copy later and that's why it needs
-# to be added to the path
-RUN wget https://mafft.cbrc.jp/alignment/software/mafft-7.525-without-extensions-src.tgz
-RUN tar -xzf mafft-7.525-without-extensions-src.tgz
-RUN cd mafft-7.525-without-extensions/core && \
+RUN git clone https://gitlab.com/manulera/mafft.git
+RUN cd mafft && git checkout 3cf6cfa8b81756b27eed28ed368474b9ee50e2da
+RUN cd mafft/core && \
     sed -i 's/^PREFIX = .*/PREFIX = \/usr\/local\/bin\/mafft/' Makefile && \
     make && \
     make install
 
 # Build MARS from source
-RUN wget https://github.com/manulera/MARS/archive/refs/tags/v0.2.3.tar.gz && \
-tar -xzf v0.2.3.tar.gz && \
-cd MARS-0.2.3 && \
+RUN wget https://github.com/manulera/MARS/archive/refs/tags/v0.2.6.tar.gz && \
+tar -xzf v0.2.6.tar.gz && \
+cd MARS-0.2.6 && \
 ./pre-install.sh && \
-# Fix https://github.com/lorrainea/MARS/issues/20
-sed -i '/template <size_t PAGESIZE>/i\ #ifdef PAGESIZE\n#undef PAGESIZE\n#endif' ./seqan/file/file_page.h && \
 make -f Makefile && \
 mv mars /usr/local/bin/mars
 
