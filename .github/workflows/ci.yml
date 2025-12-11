@@ -98,6 +98,7 @@ jobs:
           sed '/## Docker-test-comment/,$d' Dockerfile > Dockerfile.test &&
           echo "RUN poetry install --only main --only test" >> Dockerfile.test &&
           echo "ENV PATH=\"/usr/local/bin/mafft/bin:\$PATH\"" >> Dockerfile.test &&
+          echo "COPY ./tests ./tests" >> Dockerfile.test &&
           echo "RUN poetry run pytest -vs" >> Dockerfile.test
 
       - name: Build and test Docker image
