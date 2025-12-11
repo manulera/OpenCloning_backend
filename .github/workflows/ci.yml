@@ -86,6 +86,27 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
 
+  test_in_docker:
+    name: Test in Docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Create testing Dockerfile
+        run: |
+          sed '/## Docker-test-comment/,$d' Dockerfile > Dockerfile.test &&
+          echo "RUN poetry install --only main --only test" >> Dockerfile.test &&
+          echo "ENV PATH="/usr/local/bin/mafft/bin:$PATH"" >> Dockerfile.test &&
+          echo "RUN poetry run pytest -vs" >> Dockerfile.test
+
+      - name: Build and test Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.test
+          tags: manulera/opencloningbackend:test
+
   # Update docker image when committing to master branch
   push_to_registry:
     name: Push Docker image to Docker Hub

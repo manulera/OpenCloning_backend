@@ -53,10 +53,13 @@ COPY ./README.md .
 ARG PACKAGE_VERSION="0.1.0"
 RUN sed -i "s/^version = .*/version = \"${PACKAGE_VERSION}\"/" pyproject.toml
 
+## Docker-test-comment
+# The above comment is used to build another Dockerfile to run the tests in the container during CI.
+
 RUN poetry install --only main
 
 # FINAL IMAGE
-FROM python:3.12-alpine
+FROM python:3.12-alpine3.21
 
 # You need bash to run mafft and runtime libraries for MARS
 RUN apk update --no-cache && apk add --no-cache bash libstdc++ libgomp libgcc

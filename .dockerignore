@@ -4,7 +4,6 @@ examples/
 .venv/
 .git/
 .pytest_cache/
-tests/
 .DS_Store
 .flake8
 __pycache__/
