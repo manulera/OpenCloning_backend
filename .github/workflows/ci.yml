@@ -97,18 +97,22 @@ jobs:
         run: |
           sed '/## Docker-test-comment/,$d' Dockerfile > Dockerfile.test &&
           echo "RUN poetry install --only main --only test" >> Dockerfile.test &&
-          echo "ENV PATH=\"/usr/local/bin/mafft/bin:\$PATH\"" >> Dockerfile.test &&
-          echo "COPY ./tests ./tests" >> Dockerfile.test &&
-          echo "RUN poetry run pytest -vs" >> Dockerfile.test
+          echo "ENV PATH=\"/usr/local/bin/mafft/bin:\$PATH\"" >> Dockerfile.test
 
-      - name: Build and test Docker image
+      - name: Build test image
         uses: docker/build-push-action@v6
-        env:
-          NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
         with:
           context: .
           file: Dockerfile.test
           tags: manulera/opencloningbackend:test
+
+      - name: Run tests in container
+        run: |
+          docker run --rm \
+            -e NCBI_API_KEY="${{ secrets.NCBI_API_KEY }}" \
+            -v "${{ github.workspace }}/tests:/home/backend/tests" \
+            manulera/opencloningbackend:test \
+            poetry run pytest -vs
 
   # Update docker image when committing to master branch
   push_to_registry:
