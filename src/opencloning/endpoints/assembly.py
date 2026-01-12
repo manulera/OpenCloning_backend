@@ -278,15 +278,12 @@ async def gibson_assembly(
 async def restriction_and_ligation(
     source: RestrictionAndLigationSource,
     sequences: Annotated[list[TextFileSequence], Field(min_length=1)],
-    allow_partial_overlap: bool = Query(False, description='Allow for partially overlapping sticky ends.'),
     circular_only: bool = Query(False, description='Only return circular assemblies.'),
 ):
 
     fragments = [read_dsrecord_from_json(seq) for seq in sequences]
     enzymes = parse_restriction_enzymes(source.restriction_enzymes)
     completed_source = source if is_assembly_complete(source) else None
-    # if completed_source:
-    #     allow_partial_overlap = True
 
     try:
         products = _restriction_ligation_assembly(fragments, enzymes, circular_only=circular_only)

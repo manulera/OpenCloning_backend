@@ -115,6 +115,23 @@ class LigationTest(unittest.TestCase):
         data = response.json()
         self.assertEqual(data['detail'], 'No ligations were found.')
 
+    def test_allow_partial_overlap(self):
+        """Test that the allow_partial_overlap parameter works."""
+        # Partial ligation
+        a = Dseqrecord(Dseq.from_full_sequence_and_overhangs('AAAGAA', 0, 3))
+        b = Dseqrecord(Dseq.from_full_sequence_and_overhangs('AAAGAA', 3, 0))
+        source = LigationSource(id=0)
+        json_seqs = [format_sequence_genbank(seq).model_dump() for seq in [a, b]]
+        data = {'source': source.model_dump(), 'sequences': json_seqs}
+        response = client.post('/ligation', json=data, params={'allow_partial_overlap': True})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        resulting_sequences = [
+            read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']
+        ]
+        self.assertEqual(len(resulting_sequences), 1)
+        self.assertEqual(str(resulting_sequences[0].seq), 'AAAGAAAGAA')
+
     def test_linear_assembly_no_order(self):
         """Test that when order is not provided, no duplicate sequences are returned as options."""
 
