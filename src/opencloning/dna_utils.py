@@ -9,15 +9,50 @@ import subprocess
 import os
 import shutil
 from pydna.parsers import parse
-from Bio.Align import PairwiseAligner
+from Bio.Align import PairwiseAligner, Alignment
 from Bio.Data.IUPACData import ambiguous_dna_values as _ambiguous_dna_values
 from pairwise_alignments_to_msa.alignment import aligned_tuples_to_MSA
+from copy import deepcopy
+import numpy as np
 
 aligner = PairwiseAligner(scoring='blastn')
 
 ambiguous_only_dna_values = {**_ambiguous_dna_values}
 for normal_base in 'ACGT':
     del ambiguous_only_dna_values[normal_base]
+
+
+def get_sequence_shift(sequence: str, reference: str) -> int:
+    """Given two identical but shifted sequences, return the shift."""
+    if sequence == reference:
+        return 0
+    else:
+        result = (sequence.upper() * 2).find(reference.upper())
+        if result == -1:
+            raise ValueError('Sequence not found in reference')
+        return result % len(sequence)
+
+
+def remove_padding(alignment: Alignment, reference: str) -> (str, str):
+    """Remove the padding from the permutated sequence."""
+    new_alignment = deepcopy(alignment)
+    permutated_sequence = new_alignment.sequences[1]
+    sequence_shift = get_sequence_shift(permutated_sequence, reference)
+    padding = len(permutated_sequence) - len(reference)
+    if padding == 0:
+        return tuple(new_alignment)
+    unshifted = permutated_sequence[sequence_shift:] + permutated_sequence[:sequence_shift]
+    replaced = unshifted[:-padding] + '-' * padding
+    new_alignment.sequences[1] = replaced[-sequence_shift:] + replaced[:-sequence_shift]
+
+    # Remove positions in the alignment where both positions contain a dash
+    # this happens because of - matching Ns in the permutated sequence.
+    # It's not the best way to do this, but it works for now.
+    out_seqs = tuple(new_alignment)
+    seqs_array = np.array([list(s) for s in out_seqs])
+    # Drop positions where both sequences are dashes
+    seqs_array = seqs_array[:, ~np.all(seqs_array == '-', axis=0)]
+    return tuple(''.join(s) for s in seqs_array)
 
 
 def sum_is_sticky(three_prime_end: tuple[str, str], five_prime_end: tuple[str, str], partial: bool = False) -> int:
@@ -111,12 +146,13 @@ def align_sanger_traces(dseqr: Dseqrecord, sanger_traces: list[str]) -> list[str
     aligned_pairs = []
     for trace in sanger_traces:
         # If the sequence is circular, permutate both fwd and reverse complement
+        rc_trace = reverse_complement(trace)
         if dseqr.circular:
             fwd = permutate_trace(query_str, trace)
-            rvs = permutate_trace(query_str, reverse_complement(trace))
+            rvs = permutate_trace(query_str, rc_trace)
         else:
             fwd = trace
-            rvs = reverse_complement(trace)
+            rvs = rc_trace
 
         # Pairwise-align and keep the best alignment
         fwd_alignment = next(aligner.align(query_str, fwd))
@@ -124,7 +160,11 @@ def align_sanger_traces(dseqr: Dseqrecord, sanger_traces: list[str]) -> list[str
 
         best_alignment = fwd_alignment if fwd_alignment.score > rvs_alignment.score else rvs_alignment
 
-        formatted_alignment = best_alignment.format('fasta').split()[1::2]
-        aligned_pairs.append(tuple(formatted_alignment))
+        if dseqr.circular:
+            trace4padding = trace if best_alignment is fwd_alignment else rc_trace
+            formatted_alignment = remove_padding(best_alignment, trace4padding)
+        else:
+            formatted_alignment = tuple(best_alignment)
+        aligned_pairs.append(formatted_alignment)
 
     return aligned_tuples_to_MSA(aligned_pairs)
