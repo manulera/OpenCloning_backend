@@ -20,6 +20,26 @@ for normal_base in 'ACGT':
     del ambiguous_only_dna_values[normal_base]
 
 
+def get_sequence_shift(sequence: str, reference: str) -> int:
+    """Given two identical but shifted sequences, return the shift."""
+    if sequence == reference:
+        return 0
+    else:
+        result = (sequence.upper() * 2).find(reference.upper())
+        if result == -1:
+            raise ValueError('Sequence not found in reference')
+        return result % len(sequence)
+
+
+def remove_padding(permutated_sequence: str, reference: str) -> str:
+    """Remove the padding from the permutated sequence."""
+    sequence_shift = get_sequence_shift(permutated_sequence, reference)
+    padding = len(permutated_sequence) - len(reference)
+    unshifted = permutated_sequence[sequence_shift:] + permutated_sequence[:sequence_shift]
+    replaced = unshifted[:-padding] + '-' * padding
+    return replaced[-sequence_shift:] + replaced[:-sequence_shift]
+
+
 def sum_is_sticky(three_prime_end: tuple[str, str], five_prime_end: tuple[str, str], partial: bool = False) -> int:
     """Return the overlap length if the 3' end of seq1 and 5' end of seq2 ends are sticky and compatible for ligation.
     Return 0 if they are not compatible."""
@@ -125,6 +145,13 @@ def align_sanger_traces(dseqr: Dseqrecord, sanger_traces: list[str]) -> list[str
         best_alignment = fwd_alignment if fwd_alignment.score > rvs_alignment.score else rvs_alignment
 
         formatted_alignment = best_alignment.format('fasta').split()[1::2]
+        # Replace padding Ns with dashes
+        if dseqr.circular:
+            if best_alignment is fwd_alignment:
+                trace4padding = trace
+            else:
+                trace4padding = reverse_complement(trace)
+            formatted_alignment[1] = remove_padding(formatted_alignment[1], trace4padding)
         aligned_pairs.append(tuple(formatted_alignment))
 
     return aligned_tuples_to_MSA(aligned_pairs)

@@ -1,7 +1,7 @@
 import os
 import unittest
 from unittest.mock import patch
-from opencloning.dna_utils import sum_is_sticky, align_sanger_traces, permutate_trace
+from opencloning.dna_utils import sum_is_sticky, align_sanger_traces, permutate_trace, remove_padding
 from pydna.dseq import Dseq
 from pydna.parsers import parse
 from pydna.dseqrecord import Dseqrecord
@@ -99,16 +99,21 @@ class AlignSangerTrackTest(unittest.TestCase):
 
         # Works with circular sequences
         seq = seq.looped()
-        end_of_seq = 'ggtggtgggattggtataaagtggtagggtaagtatgtgtgtattatttacgatc'
-        start_of_seq = 'gatcaataacagtgtttgtggagca'
-        trace_across_origin = end_of_seq + start_of_seq
-        alignment = align_sanger_traces(seq, [trace_across_origin])
-        # The alignment returns the sequence without shifting it
-        self.assertEqual(alignment[0].upper(), str(seq.seq))
-        self.assertTrue(
-            alignment[1],
-            end_of_seq + (len(seq) - len(trace_across_origin)) * '-' + start_of_seq,
-        )
+        end_of_seq = 'ggtggtgggattggtataaagtggtagggtaagtatgtgtgtattatttacgatc'.replace('g', 'n')
+        start_of_seq = 'gatcaataacagtgtttgtggagca'.replace('g', 'n')
+        for rev_comp in [False, True]:
+            trace_across_origin = end_of_seq + start_of_seq
+            if rev_comp:
+                trace_across_origin = reverse_complement(trace_across_origin)
+            alignment = align_sanger_traces(seq, [trace_across_origin])
+            # The alignment returns the sequence without shifting it
+            self.assertEqual(alignment[0].upper(), str(seq.seq))
+            # It has shifted the trace, and replaced padding Ns with dashes, but kept the
+            # original Ns as such
+            self.assertEqual(
+                alignment[1],
+                (start_of_seq + (len(seq) - len(trace_across_origin)) * '-' + end_of_seq).upper(),
+            )
 
         # Works with circular sequences reversed
         trace_across_origin_rc = reverse_complement(trace_across_origin)
@@ -135,6 +140,17 @@ class AlignSangerTrackTest(unittest.TestCase):
 
         with self.assertRaises(RuntimeError):
             permutate_trace('a', 'aa')
+
+    def test_remove_padding(self):
+        full_seq = 'gatcaataacagtgtttgtggagctgtgtgtattatttacgatc'.upper()
+        trace = full_seq[:-15]
+
+        for rotation in range(len(full_seq)):
+
+            # This is the equivalent of permutate_trace(full_seq, trace), but a real example can return
+            # the same result for subsequent rotations, so we just mock it like this
+            permutated_trace = trace[rotation:] + 'N' * 15 + trace[:rotation]
+            assert remove_padding(permutated_trace, trace) == trace[rotation:] + '-' * 15 + trace[:rotation]
 
     def test_binaries_missing(self):
         seq = Dseqrecord('ACGT')
