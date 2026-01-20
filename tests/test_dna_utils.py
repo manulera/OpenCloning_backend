@@ -6,6 +6,7 @@ from pydna.dseq import Dseq
 from pydna.parsers import parse
 from pydna.dseqrecord import Dseqrecord
 from Bio.Seq import reverse_complement
+from Bio.Align import Alignment
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
@@ -98,11 +99,11 @@ class AlignSangerTrackTest(unittest.TestCase):
         self.assertEqual(alignment_rc[1], alignment[1])
 
         # Works with circular sequences
-        seq = seq.looped()
-        end_of_seq = 'ggtggtgggattggtataaagtggtagggtaagtatgtgtgtattatttacgatc'.replace('g', 'n')
-        start_of_seq = 'gatcaataacagtgtttgtggagca'.replace('g', 'n')
+        end_of_seq = 'ggtggtgggattggtataaagtggtagggtaagtatgtgtgtattatttacgatc'.upper().replace('G', 'N')
+        start_of_seq = 'gatcaataacagtgtttgtggagca'.upper()
+        seq = Dseqrecord(start_of_seq + end_of_seq, circular=True)
         for rev_comp in [False, True]:
-            trace_across_origin = end_of_seq + start_of_seq
+            trace_across_origin = end_of_seq + start_of_seq[:4] + start_of_seq[8:]
             if rev_comp:
                 trace_across_origin = reverse_complement(trace_across_origin)
             alignment = align_sanger_traces(seq, [trace_across_origin])
@@ -112,7 +113,13 @@ class AlignSangerTrackTest(unittest.TestCase):
             # original Ns as such
             self.assertEqual(
                 alignment[1],
-                (start_of_seq + (len(seq) - len(trace_across_origin)) * '-' + end_of_seq).upper(),
+                (
+                    start_of_seq[:4]
+                    + '----'
+                    + start_of_seq[8:]
+                    + (len(seq) - len(trace_across_origin) - 4) * '-'
+                    + end_of_seq
+                ).upper(),
             )
 
         # Works with circular sequences reversed
@@ -149,8 +156,37 @@ class AlignSangerTrackTest(unittest.TestCase):
 
             # This is the equivalent of permutate_trace(full_seq, trace), but a real example can return
             # the same result for subsequent rotations, so we just mock it like this
+            ref = full_seq[rotation:] + full_seq[:rotation]
             permutated_trace = trace[rotation:] + 'N' * 15 + trace[:rotation]
-            assert remove_padding(permutated_trace, trace) == trace[rotation:] + '-' * 15 + trace[:rotation]
+            seq, coords = Alignment.parse_printed_alignment([bytes(ref, 'utf-8'), bytes(permutated_trace, 'utf-8')])
+
+            alignment = Alignment([s.decode() for s in seq], coords)
+            assert remove_padding(alignment, trace)[1] == trace[rotation:] + '-' * 15 + trace[:rotation]
+
+        # Works without padding
+        seq, coords = Alignment.parse_printed_alignment([bytes(full_seq, 'utf-8'), bytes(full_seq, 'utf-8')])
+        alignment = Alignment([s.decode() for s in seq], coords)
+        s1, s2 = remove_padding(alignment, full_seq)
+        assert s1 == full_seq
+        assert s2 == full_seq
+
+        trace = 'GGTGGTGGGATTGGTATAAAGTGGTAGGGTAAGTATGTGTGTATTATTTACGATCAAAACAGTGTTTGTGGAGCA'
+        # Removes double -/- resulting from -/N
+        seq, coords = Alignment.parse_printed_alignment(
+            [
+                bytes(
+                    'GATCAATAACAGTGTTTGTGGAGCA-----GAGTAGATTACTTAAAGTATGACAATTGCTTCAACGAAGGGAAAAGCGGCGTTCCCTTGATGGTGGTGGGATTGGTATAAAGTGGTAGGGTAAGTATGTGTGTATTATTTACGATC',
+                    'utf-8',
+                ),
+                bytes(
+                    '-----AAAACAGTGTTTGTGGAGCANNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNGGTGGTGGGATTGGTATAAAGTGGTAGGGTAAGTATGTGTGTATTATTTACGATC',
+                    'utf-8',
+                ),
+            ]
+        )
+        alignment = Alignment([s.decode() for s in seq], coords)
+        s1, s2 = remove_padding(alignment, trace)
+        self.assertNotIn('-', s1)
 
     def test_binaries_missing(self):
         seq = Dseqrecord('ACGT')
