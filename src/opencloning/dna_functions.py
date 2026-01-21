@@ -47,7 +47,7 @@ def format_sequence_genbank(seq: Dseqrecord, seq_name: str = None) -> TextFileSe
         file_content=seq.format('genbank'),
         sequence_file_format=SequenceFileFormat('genbank'),
         overhang_crick_3prime=seq.seq.ovhg,
-        overhang_watson_3prime=seq.seq.watson_ovhg(),
+        overhang_watson_3prime=seq.seq.watson_ovhg,
     )
 
 

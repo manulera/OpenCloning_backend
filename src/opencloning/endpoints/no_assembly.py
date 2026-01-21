@@ -86,7 +86,7 @@ async def polymerase_extension(
     if dseq.circular:
         raise HTTPException(400, 'The sequence must be linear.')
 
-    if dseq.seq.ovhg == dseq.seq.watson_ovhg() == 0:
+    if dseq.seq.ovhg == dseq.seq.watson_ovhg == 0:
         raise HTTPException(400, 'The sequence must have an overhang.')
 
     out_sequence = Dseqrecord(dseq.seq.fill_in(), features=dseq.features)

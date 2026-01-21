@@ -439,9 +439,9 @@ class TestSimplePairPrimers(TestCase):
         """
         from Bio.Restriction import EcoRI, BamHI, AflIII, BsaI
 
-        template = Dseqrecord('ATGCATGCATGCATGCATGCATGC')
+        template = Dseqrecord('ATGCATGCATGCAAAAATGCATGCATGC')
         minimal_hybridization_length = 10
-        target_tm = 55
+        target_tm = 45
         left_enzyme = EcoRI
         right_enzyme = BamHI
         filler_bases = 'GC'
