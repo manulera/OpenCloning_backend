@@ -130,8 +130,8 @@ async def request_from_snapgene(plasmid_set: dict, plasmid_name: str) -> Dseqrec
 async def request_from_addgene(repository_id: str) -> Dseqrecord:
 
     url = f'https://www.addgene.org/{repository_id}/sequences/'
-    async with get_http_client() as client:
-        resp = await client.get(url)
+    async with get_http_client() as addgene_client:
+        resp = await addgene_client.get(url)
     if resp.status_code == 404:
         raise HTTPException(404, 'wrong addgene id')
     soup = BeautifulSoup(resp.content, 'html.parser')
@@ -151,7 +151,14 @@ async def request_from_addgene(repository_id: str) -> Dseqrecord:
             404,
             f'The requested plasmid does not have full sequences, see https://www.addgene.org/{repository_id}/sequences/',
         )
-    dseqr = (await get_sequences_from_file_url(sequence_file_url))[0]
+
+    async with get_http_client() as addgene_client:
+        # For media.addgene.org URLs, we need to first visit www.addgene.org
+        # to get the authentication cookie (__Secure_media_edge_auth)
+        await addgene_client.get('https://www.addgene.org/', follow_redirects=True)
+
+        dseqr = (await get_sequences_from_file_url(sequence_file_url, get_function=addgene_client.get))[0]
+
     dseqr.name = plasmid_name
     dseqr.source = AddgeneIdSource(
         repository_id=repository_id,
