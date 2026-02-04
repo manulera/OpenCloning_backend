@@ -295,7 +295,7 @@ async def restriction_and_ligation(
         products,
         completed_source,
         source.output_name,
-        no_products_error_message='No compatible restriction-ligation was found.',
+        no_products_error_message=f'No compatible restriction-ligation was found with {", ".join(source.restriction_enzymes)}.',
     )
 
 
