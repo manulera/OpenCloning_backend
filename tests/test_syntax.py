@@ -104,9 +104,23 @@ class TestSyntax(unittest.TestCase):
         # Has no parts that match the syntax
         plasmid4 = pydna_parse('tests/test_files/pAG25.gb')[0]
 
-        self.assertEqual(moclo_syntax.assign_plasmid_to_syntax_part(plasmid1), ['CCCT-AACG'])
-        self.assertEqual(moclo_syntax.assign_plasmid_to_syntax_part(plasmid2), ['TACA-CCCT'])
-        self.assertEqual(moclo_syntax.assign_plasmid_to_syntax_part(plasmid3), ['ATCC-TGGC', 'CCCT-AACG'])
+        result = moclo_syntax.assign_plasmid_to_syntax_part(plasmid1)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['key'], 'CCCT-AACG')
+        self.assertEqual(result[0]['longest_feature'].qualifiers['label'], ['ConS'])
+
+        result = moclo_syntax.assign_plasmid_to_syntax_part(plasmid2)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['key'], 'TACA-CCCT')
+        self.assertEqual(result[0]['longest_feature'].qualifiers['label'], ['AmpR'])
+
+        result = moclo_syntax.assign_plasmid_to_syntax_part(plasmid3)
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0]['key'], 'ATCC-TGGC')
+        self.assertEqual(result[0]['longest_feature'].qualifiers['label'], ['mTurquoise2'])
+        self.assertEqual(result[1]['key'], 'CCCT-AACG')
+        self.assertEqual(result[1]['longest_feature'].qualifiers['label'], ['Con4'])
+
         self.assertEqual(moclo_syntax.assign_plasmid_to_syntax_part(plasmid4), [])
 
 

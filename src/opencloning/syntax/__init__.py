@@ -158,7 +158,7 @@ class Syntax(BaseModel):
     def get_assembly_enzyme(self) -> RestrictionType:
         return parse_restriction_enzymes([self.assembly_enzyme]).format(self.assembly_enzyme)
 
-    def assign_plasmid_to_syntax_part(self, plasmid: Dseqrecord) -> str:
+    def assign_plasmid_to_syntax_part(self, plasmid: Dseqrecord) -> list[dict]:
         graph = self.to_edges_graph()
         assembly_enzyme = self.get_assembly_enzyme()
         result = []
@@ -182,5 +182,10 @@ class Syntax(BaseModel):
                 right_node = reverse_complement(five_ovhg).upper()
 
                 if left_node in graph and right_node in graph and nx.has_path(graph, left_node, right_node):
-                    result.append(f"{left_node}-{right_node}")
+                    result.append(
+                        {
+                            'key': f"{left_node}-{right_node}",
+                            'longest_feature': max(fragment.features, key=lambda x: len(x.location), default=None),
+                        }
+                    )
         return result
