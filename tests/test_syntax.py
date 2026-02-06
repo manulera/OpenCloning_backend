@@ -1,8 +1,7 @@
 import os
-from opencloning.syntax.models import Syntax, Part
+from opencloning.syntax import Syntax, Part
 from pydantic import ValidationError
 import unittest
-from opencloning.syntax import assign_plasmid_to_syntax_part
 from pydna.parsers import parse as pydna_parse
 from Bio.Restriction import BsaI
 
@@ -94,6 +93,22 @@ class TestSyntax(unittest.TestCase):
     def test_get_assembly_enzyme(self):
         self.assertEqual(moclo_syntax.get_assembly_enzyme(), BsaI)
 
+    def test_assign_plasmid_to_syntax_part(self):
+
+        # Has a part that is specifically named
+        plasmid1 = pydna_parse('tests/test_files/syntax/pYTK002.gb')[0]
+        # Spans multiple parts
+        plasmid2 = pydna_parse('tests/test_files/syntax/pYTK095.gb')[0]
+        # Has 2 parts
+        plasmid3 = pydna_parse('tests/test_files/syntax/moclo_ytk_multi_part.gb')[0]
+        # Has no parts that match the syntax
+        plasmid4 = pydna_parse('tests/test_files/pAG25.gb')[0]
+
+        self.assertEqual(moclo_syntax.assign_plasmid_to_syntax_part(plasmid1), ['CCCT-AACG'])
+        self.assertEqual(moclo_syntax.assign_plasmid_to_syntax_part(plasmid2), ['TACA-CCCT'])
+        self.assertEqual(moclo_syntax.assign_plasmid_to_syntax_part(plasmid3), ['ATCC-TGGC', 'CCCT-AACG'])
+        self.assertEqual(moclo_syntax.assign_plasmid_to_syntax_part(plasmid4), [])
+
 
 class TestPart(unittest.TestCase):
     def test_part_validation(self):
@@ -144,21 +159,3 @@ class TestPart(unittest.TestCase):
         self.assertEqual(part.left_codon_start, 0)
         self.assertEqual(part.right_codon_start, 0)
         self.assertEqual(part.color, '')
-
-
-class TestAssignPlasmidToSyntaxPart(unittest.TestCase):
-    def test_assign_plasmid_to_syntax_part(self):
-
-        # Has a part that is specifically named
-        plasmid1 = pydna_parse('tests/test_files/syntax/pYTK002.gb')[0]
-        # Spans multiple parts
-        plasmid2 = pydna_parse('tests/test_files/syntax/pYTK095.gb')[0]
-        # Has 2 parts
-        plasmid3 = pydna_parse('tests/test_files/syntax/moclo_ytk_multi_part.gb')[0]
-        # Has no parts that match the syntax
-        plasmid4 = pydna_parse('tests/test_files/pAG25.gb')[0]
-
-        self.assertEqual(assign_plasmid_to_syntax_part(plasmid1, moclo_syntax), ['CCCT-AACG'])
-        self.assertEqual(assign_plasmid_to_syntax_part(plasmid2, moclo_syntax), ['TACA-CCCT'])
-        self.assertEqual(assign_plasmid_to_syntax_part(plasmid3, moclo_syntax), ['ATCC-TGGC', 'CCCT-AACG'])
-        self.assertEqual(assign_plasmid_to_syntax_part(plasmid4, moclo_syntax), [])
