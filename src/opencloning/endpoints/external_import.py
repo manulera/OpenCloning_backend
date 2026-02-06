@@ -129,7 +129,7 @@ async def read_from_file(
     if sequence_file_format == 'snapgene':
         file_streamer = io.BytesIO(file_content)
     else:
-        file_streamer = io.StringIO(file_content.decode())
+        file_streamer = io.StringIO(file_content.decode('utf-8', errors='replace'))
 
     try:
         # Capture warnings without converting to errors:
