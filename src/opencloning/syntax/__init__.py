@@ -112,12 +112,12 @@ class Part(BaseModel):
 class Syntax(BaseModel):
     """Represents a complete syntax definition."""
 
-    syntax_name: str = Field(alias='syntaxName')
-    assembly_enzyme: str = Field(alias='assemblyEnzyme')
-    domestication_enzyme: str = Field(alias='domesticationEnzyme')
-    related_dois: List[str] = Field(alias='relatedDois')
+    syntaxName: str = Field(alias='syntax_name')
+    assemblyEnzyme: str = Field(alias='assembly_enzyme')
+    domesticationEnzyme: str = Field(alias='domestication_enzyme')
+    relatedDois: List[str] = Field(alias='related_dois')
     submitters: List[str]
-    overhang_names: Dict[DNASequence, str] = Field(alias='overhangNames')
+    overhangNames: Dict[DNASequence, str] = Field(alias='overhang_names')
     parts: List[Part]
 
     @field_validator('submitters')
@@ -128,7 +128,7 @@ class Syntax(BaseModel):
                 raise ValueError(f"Submitter must be a valid ORCID, got: {submitter}")
         return value
 
-    @field_validator('overhang_names')
+    @field_validator('overhangNames')
     @classmethod
     def validate_overhang_names(cls, value: Dict[DNASequence, str]) -> Dict[DNASequence, str]:
         for overhang in value.keys():
@@ -156,7 +156,7 @@ class Syntax(BaseModel):
         return graph
 
     def get_assembly_enzyme(self) -> RestrictionType:
-        return parse_restriction_enzymes([self.assembly_enzyme]).format(self.assembly_enzyme)
+        return parse_restriction_enzymes([self.assemblyEnzyme]).format(self.assemblyEnzyme)
 
     def assign_plasmid_to_syntax_part(self, plasmid: Dseqrecord) -> list[dict]:
         graph = self.to_edges_graph()
