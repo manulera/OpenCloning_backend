@@ -18,6 +18,7 @@ from ..pydantic_models import (
 from opencloning_linkml.datamodel import TextFileSequence
 from ..get_router import get_router
 from .._version import __version__ as backend_version
+from ..syntax import Syntax
 
 
 router = get_router()
@@ -99,6 +100,12 @@ async def cloning_strategy_is_valid(data: dict, response: Response):
 
     except ValidationError:
         raise HTTPException(status_code=422, detail='The cloning strategy is invalid')
+
+
+@router.post('/validate_syntax')
+async def validate_syntax(syntax: Syntax):
+    """Validate a syntax"""
+    return Response(status_code=200)
 
 
 @router.post('/rename_sequence', response_model=TextFileSequence)

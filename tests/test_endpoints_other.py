@@ -11,6 +11,7 @@ from opencloning_linkml._version import __version__ as schema_version
 from opencloning._version import __version__ as backend_version
 import pytest
 from importlib import reload
+from opencloning.syntax import Syntax
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
@@ -172,3 +173,16 @@ class AlignSangerTest(unittest.TestCase):
         json_seq.id = 0
         response = client.post('/align_sanger', json={'sequence': json_seq.model_dump(), 'traces': ['ACGT']})
         assert response.status_code == 400
+
+
+class ValidateSyntaxTest(unittest.TestCase):
+    def test_validate_syntax(self):
+        syntax = Syntax.model_validate_json(open(os.path.join(test_files, 'syntax', 'moclo_syntax.json')).read())
+        response = client.post('/validate_syntax', json=syntax.model_dump())
+        assert response.status_code == 200
+
+    def test_error(self):
+        syntax = Syntax.model_validate_json(open(os.path.join(test_files, 'syntax', 'moclo_syntax.json')).read())
+        syntax.syntaxName = ''
+        response = client.post('/validate_syntax', json=syntax.model_dump())
+        assert response.status_code == 422
