@@ -112,7 +112,7 @@ class Part(BaseModel):
 class Syntax(BaseModel):
     """Represents a complete syntax definition."""
 
-    syntaxName: str = Field(alias='syntax_name')
+    syntaxName: str = Field(alias='syntax_name', min_length=1)
     assemblyEnzyme: str = Field(alias='assembly_enzyme')
     domesticationEnzyme: str = Field(alias='domestication_enzyme')
     relatedDois: List[str] = Field(alias='related_dois')
