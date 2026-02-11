@@ -2,26 +2,7 @@
 # https://github.com/manulera/OpenCloning_backend
 
 # BUILDER IMAGE
-FROM python:3.12-alpine3.21 AS builder
-
-RUN apk update --no-cache && apk add --no-cache build-base bash cmake git
-
-# Build mafft from source
-RUN git clone https://gitlab.com/manulera/mafft.git
-RUN cd mafft && git checkout 3cf6cfa8b81756b27eed28ed368474b9ee50e2da
-RUN cd mafft/core && \
-    sed -i 's/^PREFIX = .*/PREFIX = \/usr\/local\/bin\/mafft/' Makefile && \
-    make && \
-    make install
-
-# Build MARS from source
-RUN wget https://github.com/manulera/MARS/archive/refs/tags/v0.2.6.tar.gz && \
-tar -xzf v0.2.6.tar.gz && \
-cd MARS-0.2.6 && \
-./pre-install.sh && \
-make -f Makefile && \
-mv mars /usr/local/bin/mars
-
+FROM manulera/opencloningbackend-base:python_3.12-alpine3.21 AS builder
 
 RUN adduser -s /bin/bash -D backend
 USER backend
