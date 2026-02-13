@@ -9,9 +9,30 @@ from pydantic import BaseModel, Field, GetJsonSchemaHandler, field_validator
 from pydantic.json_schema import JsonSchemaValue
 from pydantic_core import core_schema
 
+from opencloning.dna_functions import get_invalid_enzyme_names
 from opencloning.endpoints.endpoint_utils import parse_restriction_enzymes
 
 from .css_colors import CSS_COLORS
+
+
+def open_graph_at_node(graph: nx.DiGraph, node: str) -> nx.DiGraph:
+    """Remove all incoming edges to a node in the graph.
+
+    Args:
+        graph: The directed graph to modify
+        node: The node whose incoming edges should be removed
+
+    Returns:
+        A new graph with all incoming edges to the node removed
+    """
+    new_graph = graph.copy()
+    for edge in graph.in_edges(node):
+        new_graph.remove_edge(*edge)
+    return new_graph
+
+
+def is_part_palindromic(left_overhang: str, right_overhang: str) -> bool:
+    return left_overhang == reverse_complement(left_overhang) and right_overhang == reverse_complement(right_overhang)
 
 
 class DNASequence(str):
@@ -112,13 +133,13 @@ class Part(BaseModel):
 class Syntax(BaseModel):
     """Represents a complete syntax definition."""
 
-    syntaxName: str = Field(alias='syntax_name', min_length=1)
-    assemblyEnzyme: str = Field(alias='assembly_enzyme')
-    domesticationEnzyme: str = Field(alias='domestication_enzyme')
-    relatedDois: List[str] = Field(alias='related_dois')
-    submitters: List[str]
+    syntaxName: str = Field(alias='syntax_name', default='')
+    assemblyEnzyme: str = Field(alias='assembly_enzyme', min_length=1)
+    domesticationEnzyme: str | None = Field(alias='domestication_enzyme', min_length=1, default=None)
+    relatedDois: List[str] = Field(alias='related_dois', default_factory=list)
+    submitters: List[str] = Field(default_factory=list)
     overhangNames: Dict[DNASequence, str] = Field(alias='overhang_names')
-    parts: List[Part]
+    parts: List[Part] = Field(alias='parts', min_length=2)
 
     @field_validator('submitters')
     @classmethod
@@ -144,6 +165,16 @@ class Syntax(BaseModel):
             if part.id in seen_ids:
                 raise ValueError(f"Duplicate part ID found: {part.id}")
             seen_ids.add(part.id)
+        return value
+
+    @field_validator('assemblyEnzyme', 'domesticationEnzyme')
+    @classmethod
+    def validate_enzyme(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        invalid_enzymes = get_invalid_enzyme_names([value])
+        if len(invalid_enzymes):
+            raise ValueError(f"Invalid enzyme: {value}")
         return value
 
     class Config:
@@ -181,11 +212,27 @@ class Syntax(BaseModel):
                 left_node = three_ovhg.upper()
                 right_node = reverse_complement(five_ovhg).upper()
 
-                if left_node in graph and right_node in graph and nx.has_path(graph, left_node, right_node):
+                # Parts that have both overhangs palindromic are assigned the part
+                # that does not traverse the first node, which is normally the intended
+                # assignment. One example is the BB2_AB plasmid in GoldenPiCS, which
+                # has overhangs GATC-CCGG (A-B), so it can be either A->B or B->A.
+                # We keep A->B as the intended assignment.
+
+                graph2use = graph
+                if is_part_palindromic(left_node, right_node):
+                    graph2use = open_graph_at_node(graph, list(graph.nodes)[0])
+
+                if (
+                    left_node in graph2use
+                    and right_node in graph2use
+                    and nx.has_path(graph2use, left_node, right_node)
+                ):
                     result.append(
                         {
                             'key': f"{left_node}-{right_node}",
                             'longest_feature': max(fragment.features, key=lambda x: len(x.location), default=None),
                         }
                     )
+        # Remove duplicates with same key, keeping the first occurrence.
+        result = list({d['key']: d for d in reversed(result)}.values())[::-1]
         return result
