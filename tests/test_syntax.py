@@ -1,9 +1,13 @@
 import os
-from opencloning.syntax import Syntax, Part
+
+from opencloning.syntax import Syntax, Part, open_graph_at_node, is_part_palindromic
+
 from pydantic import ValidationError
 import unittest
 from pydna.parsers import parse as pydna_parse
 from Bio.Restriction import BsaI
+import networkx as nx
+from pydna.dseqrecord import Dseqrecord
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
@@ -27,7 +31,13 @@ class TestSyntax(unittest.TestCase):
                     'name': 'part1',
                     'left_overhang': 'ACGT',
                     'right_overhang': 'CGTA',
-                }
+                },
+                {
+                    'id': 2,
+                    'name': 'part2',
+                    'left_overhang': 'TTAA',
+                    'right_overhang': 'AAAC',
+                },
             ],
         }
 
@@ -90,6 +100,35 @@ class TestSyntax(unittest.TestCase):
             },
         )
 
+    def test_validate_enzyme(self):
+        self.assertRaises(
+            ValidationError, Syntax.model_validate, {**self._get_valid_syntax_dict(), 'assemblyEnzyme': ''}
+        )
+        self.assertRaises(
+            ValidationError,
+            Syntax.model_validate,
+            {**self._get_valid_syntax_dict(), 'assemblyEnzyme': None},
+        )
+        self.assertRaises(
+            ValidationError,
+            Syntax.model_validate,
+            {**self._get_valid_syntax_dict(), 'assemblyEnzyme': 'InvalidEnzyme'},
+        )
+        self.assertRaises(
+            ValidationError,
+            Syntax.model_validate,
+            {**self._get_valid_syntax_dict(), 'domesticationEnzyme': 'InvalidEnzyme'},
+        )
+        self.assertRaises(
+            ValidationError,
+            Syntax.model_validate,
+            {**self._get_valid_syntax_dict(), 'domesticationEnzyme': ''},
+        )
+
+        Syntax.model_validate({**self._get_valid_syntax_dict(), 'assemblyEnzyme': 'BsaI'})
+        Syntax.model_validate({**self._get_valid_syntax_dict(), 'domesticationEnzyme': 'BsmBI'})
+        Syntax.model_validate({**self._get_valid_syntax_dict(), 'domesticationEnzyme': None})
+
     def test_get_assembly_enzyme(self):
         self.assertEqual(moclo_syntax.get_assembly_enzyme(), BsaI)
 
@@ -122,6 +161,37 @@ class TestSyntax(unittest.TestCase):
         self.assertEqual(result[1]['longest_feature'].qualifiers['label'], ['Con4'])
 
         self.assertEqual(moclo_syntax.assign_plasmid_to_syntax_part(plasmid4), [])
+
+    def test_assign_palindromic_part(self):
+        dummy_syntax = Syntax(
+            assembly_enzyme='BsaI',
+            overhang_names={},
+            parts=[
+                Part(
+                    id=1,
+                    name='1',
+                    left_overhang='ACGT',
+                    right_overhang='TTAA',
+                ),
+                Part(
+                    id=2,
+                    name='2',
+                    left_overhang='TTAA',
+                    right_overhang='AAAC',
+                ),
+                Part(
+                    id=3,
+                    name='3',
+                    left_overhang='AAAC',
+                    right_overhang='ACGT',
+                ),
+            ],
+        )
+
+        seq = Dseqrecord('tgggtctcaACGTagagtcacacaggactactaTTAAagagacctac', circular=True)
+        self.assertEqual(
+            dummy_syntax.assign_plasmid_to_syntax_part(seq), [{'key': 'ACGT-TTAA', 'longest_feature': None}]
+        )
 
 
 class TestPart(unittest.TestCase):
@@ -173,3 +243,18 @@ class TestPart(unittest.TestCase):
         self.assertEqual(part.left_codon_start, 0)
         self.assertEqual(part.right_codon_start, 0)
         self.assertEqual(part.color, '')
+
+
+class TestUtils(unittest.TestCase):
+    def test_open_graph_at_node(self):
+        graph = nx.DiGraph()
+        graph.add_edge('A', 'B')
+        graph.add_edge('B', 'C')
+        graph.add_edge('C', 'D')
+        graph.add_edge('D', 'A')
+        open_graph = open_graph_at_node(graph, 'A')
+        self.assertEqual(list(open_graph.edges()), [('A', 'B'), ('B', 'C'), ('C', 'D')])
+
+    def test_is_part_palindromic(self):
+        self.assertTrue(is_part_palindromic('ACGT', 'TTAA'))
+        self.assertFalse(is_part_palindromic('ACGT', 'GCCA'))
