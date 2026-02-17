@@ -118,8 +118,8 @@ class Part(BaseModel):
     @field_validator('left_overhang', 'right_overhang')
     @classmethod
     def validate_overhang(cls, value: DNASequence) -> DNASequence:
-        if len(value) != 4:
-            raise ValueError(f"Overhang must be 4 characters long, got: {value}")
+        if len(value) < 3:
+            raise ValueError(f"Overhang must be 3 or more characters long, got: {value}")
         return DNASequence(value)
 
     @field_validator('left_codon_start', 'right_codon_start')
@@ -153,8 +153,8 @@ class Syntax(BaseModel):
     @classmethod
     def validate_overhang_names(cls, value: Dict[DNASequence, str]) -> Dict[DNASequence, str]:
         for overhang in value.keys():
-            if len(overhang) != 4:
-                raise ValueError(f"Overhang must be 4 characters long, got: {overhang}")
+            if len(overhang) < 3:
+                raise ValueError(f"Overhang must be 3 or more characters long, got: {overhang}")
         return value
 
     @field_validator('parts')
