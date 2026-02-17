@@ -135,7 +135,7 @@ class Syntax(BaseModel):
 
     syntaxName: str = Field(alias='syntax_name', default='')
     assemblyEnzyme: str = Field(alias='assembly_enzyme', min_length=1)
-    domesticationEnzyme: str | None = Field(alias='domestication_enzyme', min_length=1, default=None)
+    domesticationEnzyme: str | None = Field(alias='domestication_enzyme', default=None)
     relatedDois: List[str] = Field(alias='related_dois', default_factory=list)
     submitters: List[str] = Field(default_factory=list)
     overhangNames: Dict[DNASequence, str] = Field(alias='overhang_names')
@@ -170,8 +170,8 @@ class Syntax(BaseModel):
     @field_validator('assemblyEnzyme', 'domesticationEnzyme')
     @classmethod
     def validate_enzyme(cls, value: str | None) -> str | None:
-        if value is None:
-            return value
+        if value is None or value == '':
+            return None
         invalid_enzymes = get_invalid_enzyme_names([value])
         if len(invalid_enzymes):
             raise ValueError(f"Invalid enzyme: {value}")
