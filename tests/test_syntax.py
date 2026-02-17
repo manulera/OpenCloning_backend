@@ -61,17 +61,16 @@ class TestSyntax(unittest.TestCase):
         syntax_dict = self._get_valid_syntax_dict()
         Syntax.model_validate(syntax_dict)
 
-        # Invalid overhang names (not 4 characters)
+        # Invalid overhang names (not >=3 characters)
         self.assertRaises(
             ValidationError,
             Syntax.model_validate,
-            {**syntax_dict, 'overhangNames': {'ACG': 'test'}},
+            {**syntax_dict, 'overhangNames': {'AC': 'test'}},
         )
-        self.assertRaises(
-            ValidationError,
-            Syntax.model_validate,
-            {**syntax_dict, 'overhangNames': {'ACGTG': 'test'}},
-        )
+
+        Syntax.model_validate({**syntax_dict, 'overhangNames': {'ACGTG': 'test'}})
+        Syntax.model_validate({**syntax_dict, 'overhangNames': {'ACGT': 'test'}})
+        Syntax.model_validate({**syntax_dict, 'overhangNames': {'ACG': 'test'}})
 
     def test_validate_parts_unique_ids(self):
         syntax_dict = self._get_valid_syntax_dict()
@@ -209,7 +208,7 @@ class TestPart(unittest.TestCase):
 
         # Invalid overhangs or inside
         for side in ['left', 'right']:
-            self.assertRaises(ValidationError, Part.model_validate, {**part_dict, f"{side}_overhang": 'CCCTT'})
+            self.assertRaises(ValidationError, Part.model_validate, {**part_dict, f"{side}_overhang": 'CC'})
             self.assertRaises(ValidationError, Part.model_validate, {**part_dict, f"{side}_overhang": 'NNNN'})
             self.assertRaises(ValidationError, Part.model_validate, {**part_dict, f"{side}_overhang": ''})
             self.assertRaises(ValidationError, Part.model_validate, {**part_dict, f"{side}_inside": 'NNNN'})
