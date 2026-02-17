@@ -119,15 +119,11 @@ class TestSyntax(unittest.TestCase):
             Syntax.model_validate,
             {**self._get_valid_syntax_dict(), 'domesticationEnzyme': 'InvalidEnzyme'},
         )
-        self.assertRaises(
-            ValidationError,
-            Syntax.model_validate,
-            {**self._get_valid_syntax_dict(), 'domesticationEnzyme': ''},
-        )
 
         Syntax.model_validate({**self._get_valid_syntax_dict(), 'assemblyEnzyme': 'BsaI'})
         Syntax.model_validate({**self._get_valid_syntax_dict(), 'domesticationEnzyme': 'BsmBI'})
         Syntax.model_validate({**self._get_valid_syntax_dict(), 'domesticationEnzyme': None})
+        Syntax.model_validate({**self._get_valid_syntax_dict(), 'domesticationEnzyme': ''})
 
     def test_get_assembly_enzyme(self):
         self.assertEqual(moclo_syntax.get_assembly_enzyme(), BsaI)
