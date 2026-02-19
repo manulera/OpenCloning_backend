@@ -1,4 +1,5 @@
 from pydna.dseqrecord import Dseqrecord
+from pydna.primer import Primer
 from pydna.design import primer_design, assembly_fragments
 from Bio.SeqFeature import SimpleLocation
 from pydna.utils import locations_overlap, shift_location, location_boundaries
@@ -8,7 +9,6 @@ from Bio.Restriction.Restriction import RestrictionType
 from Bio.Data.IUPACData import ambiguous_dna_values as _ambiguous_dna_values
 from typing import Callable
 from .primer3_functions import primer3_calc_tm, PrimerDesignSettings
-from opencloning_linkml.datamodel import Primer as PrimerModel
 
 ambiguous_dna_values = _ambiguous_dna_values.copy()
 # Remove acgt
@@ -92,51 +92,81 @@ def gibson_assembly_primers(
     spacers: list[str] | None = None,
     tm_func: Callable[[str], float] = default_tm_func,
     estimate_function: Callable[[str], float] | None = None,
-) -> list[PrimerModel]:
+    amplify_templates: list[bool] | None = None,
+) -> list[Primer]:
 
-    initial_amplicons = [
-        primer_design(
-            template,
-            limit=minimal_hybridization_length,
-            target_tm=target_tm,
-            tm_func=tm_func,
-            estimate_function=estimate_function,
-        )
-        for template in templates
-    ]
+    if amplify_templates is None:
+        amplify_templates = [True] * len(templates)
+    if len(amplify_templates) != len(templates):
+        raise ValueError('The number of amplify_templates must be the same as the number of templates.')
+    for prev, next in zip(amplify_templates[:-1], amplify_templates[1:]):
+        if not prev and not next:
+            raise ValueError('Two consecutive templates with amplify_templates=False are not allowed.')
+    if len(templates) == 1 and amplify_templates[0] is False:
+        raise ValueError('amplify_templates cannot be False for a single template.')
 
-    for i, amplicon in enumerate(initial_amplicons):
-        if None in amplicon.primers():
-            raise ValueError(f'Primers could not be designed for template {templates[i].name}, try changing settings.')
+    # For the function assembly_fragments, maxlink is the maximum length of a Dseqrecord to be considered a spacer.
+    # It's important to check that the amplify_templates=False parts are not longer than maxlink, otherwise, they
+    # would be considered as spacers. This is perhaps not ideal, as there could be a case, for now we just do it
+    # like this.
 
-    maxlink = 40
+    maxlink = minimal_hybridization_length * 2
     if spacers is not None:
         maxlink = max(len(spacer) for spacer in spacers)
+
+    inputs: list[Amplicon | Dseqrecord] = list()
+    for i, template in enumerate(templates):
+        if amplify_templates[i]:
+            inputs.append(
+                primer_design(
+                    template,
+                    limit=minimal_hybridization_length,
+                    target_tm=target_tm,
+                    tm_func=tm_func,
+                    estimate_function=estimate_function,
+                )
+            )
+        else:
+            if len(template) < maxlink:
+                raise ValueError(
+                    f'Template {template.name} ({len(template)} bps) is shorter than the longest spacer or 2x the minimal hybridization length.'
+                )
+            inputs.append(template)
+
+    for i, amplicon in enumerate(inputs):
+        if amplify_templates[i] is True and None in amplicon.primers():
+            raise ValueError(f'Primers could not be designed for template {templates[i].name}, try changing settings.')
+
+    if spacers is not None:
         spacers = [Dseqrecord(spacer) for spacer in spacers]
-        initial_amplicons_with_spacers = []
+        inputs_withspacers = []
         # For linear assemblies, the first spacer is the first thing
         if not circular:
-            initial_amplicons_with_spacers.append(spacers.pop(0))
-        for amplicon in initial_amplicons:
-            initial_amplicons_with_spacers.append(amplicon)
-            initial_amplicons_with_spacers.append(spacers.pop(0))
-        initial_amplicons = initial_amplicons_with_spacers
+            inputs_withspacers.append(spacers.pop(0))
+        for part in inputs:
+            inputs_withspacers.append(part)
+            inputs_withspacers.append(spacers.pop(0))
+        inputs = inputs_withspacers
         # Maxlink is used to define what is a spacer or what is a template (see docs)
 
-    assembly_amplicons: list[Amplicon] = assembly_fragments(
-        initial_amplicons, overlap=homology_length, circular=circular, maxlink=maxlink
+    assembly_output: list[Amplicon] = assembly_fragments(
+        inputs, overlap=homology_length, circular=circular, maxlink=maxlink
     )
 
-    all_primers = sum((list(amplicon.primers()) for amplicon in assembly_amplicons), [])
+    all_primers = list()
+    for i, part in enumerate(assembly_output):
+        all_primers.extend(list(part.primers() if amplify_templates[i] is True else [None, None]))
 
     for i in range(0, len(all_primers), 2):
         fwd, rvs = all_primers[i : i + 2]
+        if fwd is None or rvs is None:
+            continue
         template = templates[i // 2]
         template_name = template.name if template.name != 'name' else f'seq_{template.id}'
         fwd.name = f'{template_name}_fwd'
         rvs.name = f'{template_name}_rvs'
 
-    return [PrimerModel(id=0, name=primer.name, sequence=str(primer.seq)) for primer in all_primers]
+    return all_primers
 
 
 def sanitize_enzyme_site(site: str) -> str:
@@ -158,7 +188,7 @@ def simple_pair_primers(
     right_enzyme_inverted: bool = False,
     tm_func: Callable[[str], float] = default_tm_func,
     estimate_function: Callable[[str], float] | None = None,
-) -> tuple[PrimerModel, PrimerModel]:
+) -> tuple[Primer, Primer]:
     """
     Design primers to amplify a DNA fragment, if left_enzyme or right_enzyme are set, the primers will be designed
     to include the restriction enzyme sites.
@@ -202,10 +232,7 @@ def simple_pair_primers(
     fwd_primer_name = f'{template_name}_{left_enzyme}_fwd' if left_enzyme is not None else f'{template_name}_fwd'
     rvs_primer_name = f'{template_name}_{right_enzyme}_rvs' if right_enzyme is not None else f'{template_name}_rvs'
 
-    return (
-        PrimerModel(id=0, name=fwd_primer_name, sequence=str(fwd_primer_seq)),
-        PrimerModel(id=0, name=rvs_primer_name, sequence=str(rvs_primer_seq)),
-    )
+    return (Primer(fwd_primer_seq, name=fwd_primer_name), Primer(rvs_primer_seq, name=rvs_primer_name))
 
 
 # def gateway_attB_primers(

@@ -275,6 +275,37 @@ class PrimerDesignTest(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 422)
 
+    def test_gibson_assembly_amplify_templates(self):
+        to_amplify = Dseqrecord('aagccagaagtgcatttggatccaagtgcctccattttaaatctctcatcttc', name='to_amplify')
+        to_amplify.add_feature(0, len(to_amplify), label='to_amplify')
+        spacer_like = Dseqrecord('attaattcctttgaagaagaaattttgggtttgtggtctgagcctaaat', name='spacer_like')
+        spacer_like.add_feature(0, len(spacer_like), label='spacer_like')
+
+        queries = [
+            {
+                'sequence': format_sequence_genbank(to_amplify).model_dump(),
+                'location': SequenceLocationStr.from_start_and_end(start=0, end=len(to_amplify)),
+                'forward_orientation': True,
+            },
+            {
+                'sequence': format_sequence_genbank(spacer_like).model_dump(),
+                'location': None,
+                'forward_orientation': True,
+            },
+        ]
+
+        params = {'homology_length': 20, 'minimal_hybridization_length': 15, 'target_tm': 55, 'circular': True}
+
+        response = client.post(
+            '/primer_design/gibson_assembly', json={'pcr_templates': queries, 'spacers': None}, params=params
+        )
+
+        primers = [PrimerModel.model_validate(p) if p is not None else None for p in response.json()['primers']]
+        self.assertEqual(primers[0].name, 'to_amplify_fwd')
+        self.assertEqual(primers[1].name, 'to_amplify_rvs')
+        self.assertEqual(primers[2], None)
+        self.assertEqual(primers[3], None)
+
     def test_simple_pair(self):
         from Bio.Restriction import EcoRI, BamHI
 
