@@ -102,8 +102,19 @@ def gibson_assembly_primers(
     for prev, next in zip(amplify_templates[:-1], amplify_templates[1:]):
         if not prev and not next:
             raise ValueError('Two consecutive templates with amplify_templates=False are not allowed.')
+    if circular and (not amplify_templates[-1] and not amplify_templates[0]):
+        raise ValueError('Two consecutive templates with amplify_templates=False are not allowed.')
+
     if len(templates) == 1 and amplify_templates[0] is False:
         raise ValueError('amplify_templates cannot be False for a single template.')
+
+    if spacers is not None and not circular:
+        if spacers[0] != '' and not amplify_templates[0]:
+            raise ValueError(
+                'The first spacer must be empty if the first template is not amplified in linear assembly.'
+            )
+        if spacers[-1] != '' and not amplify_templates[-1]:
+            raise ValueError('The last spacer must be empty if the last template is not amplified in linear assembly.')
 
     # For the function assembly_fragments, maxlink is the maximum length of a Dseqrecord to be considered a spacer.
     # It's important to check that the amplify_templates=False parts are not longer than maxlink, otherwise, they
@@ -148,7 +159,7 @@ def gibson_assembly_primers(
             inputs_withspacers.append(spacers.pop(0))
         inputs = inputs_withspacers
         # Maxlink is used to define what is a spacer or what is a template (see docs)
-
+    inputs = [i for i in inputs if len(i) > 0]
     assembly_output: list[Amplicon] = assembly_fragments(
         inputs, overlap=homology_length, circular=circular, maxlink=maxlink
     )

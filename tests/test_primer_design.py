@@ -9,7 +9,7 @@ from unittest import TestCase
 from pydna.dseqrecord import Dseqrecord
 from pydna.amplify import pcr
 from pydna.parsers import parse
-from pydna.assembly2 import Assembly, gibson_overlap
+from pydna.assembly2 import Assembly, gibson_overlap, gibson_assembly
 import pytest
 from Bio.Data.IUPACData import ambiguous_dna_values
 import os
@@ -452,6 +452,27 @@ class TestGibsonAssemblyPrimers(TestCase):
         self.assertEqual(primers[2], None)
         self.assertEqual(primers[3], None)
 
+        # Test linear assembly
+        primers = gibson_assembly_primers(
+            [to_amplify, spacer_like],
+            homology_length=15,
+            minimal_hybridization_length=15,
+            target_tm=55,
+            circular=False,
+            amplify_templates=[True, False],
+            spacers=['ATATATA', 'GCGCGCGC', ''],
+        )
+        self.assertEqual(len(primers), 4)
+        self.assertEqual(primers[2], None)
+        self.assertEqual(primers[3], None)
+        pcr_product = pcr(primers[0], primers[1], to_amplify)
+
+        assembly_product = gibson_assembly([pcr_product, spacer_like], limit=15)[0]
+        self.assertEqual(
+            str(assembly_product.seq).lower(),
+            ('ATATATA' + str(to_amplify.seq) + 'GCGCGCGC' + str(spacer_like.seq)).lower(),
+        )
+
     def test_validation_errors(self):
         """
         Test the validation errors for the gibson_assembly_primers function.
@@ -478,6 +499,17 @@ class TestGibsonAssemblyPrimers(TestCase):
                 amplify_templates=[True, False, False],
             )
         self.assertEqual(str(e.value), 'Two consecutive templates with amplify_templates=False are not allowed.')
+
+        # Also in circular
+        with pytest.raises(ValueError) as e:
+            gibson_assembly_primers(
+                templates,
+                homology_length,
+                minimal_hybridization_length,
+                target_tm,
+                circular=True,
+                amplify_templates=[False, True, False],
+            )
 
         # No mismatch in length between templates and amplify_templates
         with pytest.raises(ValueError) as e:
@@ -518,6 +550,36 @@ class TestGibsonAssemblyPrimers(TestCase):
                 amplify_templates=[False],
             )
         self.assertEqual(str(e.value), 'amplify_templates cannot be False for a single template.')
+
+        # First spacer cannot be empty if the first template is not amplified in linear assembly
+        with pytest.raises(ValueError) as e:
+            gibson_assembly_primers(
+                templates[:2],
+                homology_length,
+                minimal_hybridization_length,
+                target_tm,
+                circular=False,
+                spacers=['ACGT', '', ''],
+                amplify_templates=[False, True],
+            )
+        self.assertEqual(
+            str(e.value), 'The first spacer must be empty if the first template is not amplified in linear assembly.'
+        )
+
+        # Last spacer must be empty if the last template is not amplified in linear assembly
+        with pytest.raises(ValueError) as e:
+            gibson_assembly_primers(
+                templates[:2],
+                homology_length,
+                minimal_hybridization_length,
+                target_tm,
+                circular=False,
+                spacers=['', '', 'ACGT'],
+                amplify_templates=[True, False],
+            )
+        self.assertEqual(
+            str(e.value), 'The last spacer must be empty if the last template is not amplified in linear assembly.'
+        )
 
 
 class TestSimplePairPrimers(TestCase):
