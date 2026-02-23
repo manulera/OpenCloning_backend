@@ -183,6 +183,6 @@ class ValidateSyntaxTest(unittest.TestCase):
 
     def test_error(self):
         syntax = Syntax.model_validate_json(open(os.path.join(test_files, 'syntax', 'moclo_syntax.json')).read())
-        syntax.assemblyEnzyme = ''
+        syntax.assemblyEnzymes = []
         response = client.post('/validate_syntax', json=syntax.model_dump())
         assert response.status_code == 422

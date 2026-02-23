@@ -1,6 +1,6 @@
 {
   "syntaxName": "MoClo YTK",
-  "assemblyEnzyme": "BsaI",
+  "assemblyEnzymes": ["BsaI"],
   "domesticationEnzyme": "BsmBI",
   "relatedDois": [
     "10.1021/sb500366v"

@@ -134,7 +134,7 @@ class Syntax(BaseModel):
     """Represents a complete syntax definition."""
 
     syntaxName: str = Field(alias='syntax_name', default='')
-    assemblyEnzyme: str = Field(alias='assembly_enzyme', min_length=1)
+    assemblyEnzymes: List[str] = Field(alias='assembly_enzymes', min_length=1)
     domesticationEnzyme: str | None = Field(alias='domestication_enzyme', default=None)
     relatedDois: List[str] = Field(alias='related_dois', default_factory=list)
     submitters: List[str] = Field(default_factory=list)
@@ -167,9 +167,19 @@ class Syntax(BaseModel):
             seen_ids.add(part.id)
         return value
 
-    @field_validator('assemblyEnzyme', 'domesticationEnzyme')
+    @field_validator('assemblyEnzymes')
     @classmethod
-    def validate_enzyme(cls, value: str | None) -> str | None:
+    def validate_assembly_enzymes(cls, value: List[str]) -> List[str]:
+        if not value:
+            raise ValueError('assemblyEnzymes must contain at least one enzyme')
+        invalid_enzymes = get_invalid_enzyme_names(value)
+        if invalid_enzymes:
+            raise ValueError(f"Invalid enzyme(s): {', '.join(invalid_enzymes)}")
+        return value
+
+    @field_validator('domesticationEnzyme')
+    @classmethod
+    def validate_domestication_enzyme(cls, value: str | None) -> str | None:
         if value is None or value == '':
             return None
         invalid_enzymes = get_invalid_enzyme_names([value])
@@ -186,14 +196,15 @@ class Syntax(BaseModel):
             graph.add_edge(part.left_overhang, part.right_overhang)
         return graph
 
-    def get_assembly_enzyme(self) -> RestrictionType:
-        return parse_restriction_enzymes([self.assemblyEnzyme]).format(self.assemblyEnzyme)
+    def get_assembly_enzymes(self) -> List[RestrictionType]:
+        batch = parse_restriction_enzymes(self.assemblyEnzymes)
+        return [batch.format(name) for name in self.assemblyEnzymes]
 
     def assign_plasmid_to_syntax_part(self, plasmid: Dseqrecord) -> list[dict]:
         graph = self.to_edges_graph()
-        assembly_enzyme = self.get_assembly_enzyme()
+        assembly_enzymes = self.get_assembly_enzymes()
         result = []
-        for fragment in plasmid.cut(assembly_enzyme):
+        for fragment in plasmid.cut(assembly_enzymes):
             for rc in [True, False]:
                 query = fragment.reverse_complement() if rc else fragment
                 three_type, three_ovhg = query.seq.three_prime_end()
@@ -201,12 +212,12 @@ class Syntax(BaseModel):
                 # It must only have 5' overhangs
                 if three_type != five_type or five_type != "5'":
                     continue
-                # It must not contain the recognition site of the enzyme inside
+                # It must not contain the recognition site of any enzyme inside
                 # since they are always in the backbone, not the part.
                 # We use compsite, because the simple search method requires the
                 # cutsite to be there, and not sure how behaviour will be querying
                 # the overhangs.
-                if assembly_enzyme.compsite.search(str(query.seq)) is not None:
+                if any(enzyme.compsite.search(str(query.seq)) is not None for enzyme in assembly_enzymes):
                     continue
 
                 left_node = three_ovhg.upper()

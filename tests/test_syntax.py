@@ -5,7 +5,7 @@ from opencloning.syntax import Syntax, Part, open_graph_at_node, is_part_palindr
 from pydantic import ValidationError
 import unittest
 from pydna.parsers import parse as pydna_parse
-from Bio.Restriction import BsaI
+from Bio.Restriction import BsaI, BsmBI
 import networkx as nx
 from pydna.dseqrecord import Dseqrecord
 
@@ -20,7 +20,7 @@ class TestSyntax(unittest.TestCase):
         """Helper method to create a minimal valid syntax dictionary."""
         return {
             'syntaxName': 'Test Syntax',
-            'assemblyEnzyme': 'BsaI',
+            'assemblyEnzymes': ['BsaI'],
             'domesticationEnzyme': 'BsmBI',
             'relatedDois': ['10.1000/xyz123'],
             'submitters': ['0000-0000-0000-0000'],
@@ -101,17 +101,17 @@ class TestSyntax(unittest.TestCase):
 
     def test_validate_enzyme(self):
         self.assertRaises(
-            ValidationError, Syntax.model_validate, {**self._get_valid_syntax_dict(), 'assemblyEnzyme': ''}
+            ValidationError, Syntax.model_validate, {**self._get_valid_syntax_dict(), 'assemblyEnzymes': []}
         )
         self.assertRaises(
             ValidationError,
             Syntax.model_validate,
-            {**self._get_valid_syntax_dict(), 'assemblyEnzyme': None},
+            {**self._get_valid_syntax_dict(), 'assemblyEnzymes': None},
         )
         self.assertRaises(
             ValidationError,
             Syntax.model_validate,
-            {**self._get_valid_syntax_dict(), 'assemblyEnzyme': 'InvalidEnzyme'},
+            {**self._get_valid_syntax_dict(), 'assemblyEnzymes': ['InvalidEnzyme']},
         )
         self.assertRaises(
             ValidationError,
@@ -119,13 +119,20 @@ class TestSyntax(unittest.TestCase):
             {**self._get_valid_syntax_dict(), 'domesticationEnzyme': 'InvalidEnzyme'},
         )
 
-        Syntax.model_validate({**self._get_valid_syntax_dict(), 'assemblyEnzyme': 'BsaI'})
+        Syntax.model_validate({**self._get_valid_syntax_dict(), 'assemblyEnzymes': ['BsaI']})
         Syntax.model_validate({**self._get_valid_syntax_dict(), 'domesticationEnzyme': 'BsmBI'})
         Syntax.model_validate({**self._get_valid_syntax_dict(), 'domesticationEnzyme': None})
         Syntax.model_validate({**self._get_valid_syntax_dict(), 'domesticationEnzyme': ''})
 
     def test_get_assembly_enzyme(self):
-        self.assertEqual(moclo_syntax.get_assembly_enzyme(), BsaI)
+        self.assertEqual(moclo_syntax.get_assembly_enzymes()[0], BsaI)
+
+    def test_assembly_enzyme_multiple(self):
+        syntax = Syntax.model_validate({**self._get_valid_syntax_dict(), 'assemblyEnzymes': ['BsaI', 'BsmBI']})
+        enzymes = syntax.get_assembly_enzymes()
+        self.assertEqual(enzymes[0], BsaI)
+        self.assertEqual(enzymes[1], BsmBI)
+        self.assertEqual(len(enzymes), 2)
 
     def test_assign_plasmid_to_syntax_part(self):
 
@@ -159,7 +166,7 @@ class TestSyntax(unittest.TestCase):
 
     def test_assign_palindromic_part(self):
         dummy_syntax = Syntax(
-            assembly_enzyme='BsaI',
+            assembly_enzymes=['BsaI'],
             overhang_names={},
             parts=[
                 Part(
