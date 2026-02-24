@@ -39,7 +39,7 @@ jobs:
       - name: Install poetry
         run: |
           python -m pip install --upgrade pip
-          pip install poetry
+          pip install poetry==2.3.2
       - name: Load cached venv
         if: ${{ matrix.mode == 'lock' }}
         id: cached-poetry-dependencies
@@ -52,7 +52,7 @@ jobs:
         run: rm poetry.lock
       - name: Install dependencies
         if: ${{ matrix.mode != 'lock' }} || steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install
+        run: poetry cache clear --all && poetry install
       - name: Run tests
         env:
           PYTHONUNBUFFERED: "1"
