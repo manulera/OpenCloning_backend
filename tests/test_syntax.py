@@ -127,13 +127,6 @@ class TestSyntax(unittest.TestCase):
     def test_get_assembly_enzyme(self):
         self.assertEqual(moclo_syntax.get_assembly_enzymes()[0], BsaI)
 
-    def test_assembly_enzyme_multiple(self):
-        syntax = Syntax.model_validate({**self._get_valid_syntax_dict(), 'assemblyEnzymes': ['BsaI', 'BsmBI']})
-        enzymes = syntax.get_assembly_enzymes()
-        self.assertEqual(enzymes[0], BsaI)
-        self.assertEqual(enzymes[1], BsmBI)
-        self.assertEqual(len(enzymes), 2)
-
     def test_assign_plasmid_to_syntax_part(self):
 
         # Has a part that is specifically named
@@ -163,6 +156,40 @@ class TestSyntax(unittest.TestCase):
         self.assertEqual(result[1]['longest_feature'].qualifiers['label'], ['Con4'])
 
         self.assertEqual(moclo_syntax.assign_plasmid_to_syntax_part(plasmid4), [])
+
+        # Does not work with single cut in the plasmid
+        result = moclo_syntax.assign_plasmid_to_syntax_part(Dseqrecord('AAggtctcaACGTagagtcacac', circular=True))
+        self.assertEqual(len(result), 0)
+
+    def test_assembly_enzyme_multiple(self):
+        syntax = Syntax.model_validate({**self._get_valid_syntax_dict(), 'assemblyEnzymes': ['BsaI', 'BsmBI']})
+        enzymes = syntax.get_assembly_enzymes()
+        self.assertEqual(enzymes[0], BsaI)
+        self.assertEqual(enzymes[1], BsmBI)
+        self.assertEqual(len(enzymes), 2)
+
+        sequences = [
+            Dseqrecord('AAggtctcaACGTagagtcacacaggactactaCGTAagagaccAA', circular=True),  # both BsaI
+            Dseqrecord('AAcgtctcaACGTagagtcacacaggactactaCGTAagagacgAA', circular=True),  # both BsmBI
+            Dseqrecord('AAggtctcaACGTagagtcacacaggactactaCGTAagagacgAA', circular=True),  # one of each
+            Dseqrecord('AAcgtctcaACGTagagtcacacaggactactaCGTAagagaccAA', circular=True),  # one of each
+        ]
+        for i, seq in enumerate(sequences):
+            result = syntax.assign_plasmid_to_syntax_part(seq)
+            if i < 2:
+                self.assertEqual(len(result), 1)
+                self.assertEqual(result[0]['key'], 'ACGT-CGTA')
+            else:
+                self.assertEqual(len(result), 0)
+
+        # If both parts present, detects only the first one. This is because
+        # plasmids won't be digested with both enzymes at the same time (at least in
+        # goldenBraid).
+        result = syntax.assign_plasmid_to_syntax_part(
+            Dseqrecord(str(sequences[0].seq) + 'AAcgtctcaTTAAagagtcacacaggactactaAAACagagacgAA', circular=True)
+        )
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['key'], 'ACGT-CGTA')
 
     def test_assign_palindromic_part(self):
         dummy_syntax = Syntax(
