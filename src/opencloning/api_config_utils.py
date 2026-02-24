@@ -59,7 +59,7 @@ class RecordStubRoute(APIRoute):
                 with open(f'{stub_folder}/response_body.json', 'w') as f:
                     json.dump(formatted_response['body'], f, indent=4)
 
-            print(9 * ' ', '> stub written to', stub_folder)
+                print(9 * ' ', '> stub written to', stub_folder)
             return response
 
         return custom_route_handler
