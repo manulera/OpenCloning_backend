@@ -39,13 +39,21 @@ class RecordStubRoute(APIRoute):
                 detail = {'detail': exc.detail}
                 response = JSONResponse(content=detail, status_code=exc.status_code)
 
-            if type(response) is JSONResponse:
+            # FastAPI 0.133+ uses plain Response (not JSONResponse) for the fast
+            # serialization path; treat any response with JSON body as stubbable.
+            formatted_response = None
+            if isinstance(response, JSONResponse) or (
+                isinstance(response, Response)
+                and getattr(response, 'media_type', None)
+                and 'application/json' in (response.media_type or '')
+            ):
                 formatted_response = {
                     'statusCode': response.status_code,
                     'body': json.loads(response.body),
                     'headers': dict(response.headers),
                 }
 
+            if formatted_response is not None:
                 formatted_time = datetime.datetime.now().strftime('%Y_%m_%d-%H_%M_%S')
                 stub_folder = f'stubs{formatted_request["path"]}/{formatted_time}'
                 existing_folders = glob.glob(f'{stub_folder}_*')
@@ -59,7 +67,7 @@ class RecordStubRoute(APIRoute):
                 with open(f'{stub_folder}/response_body.json', 'w') as f:
                     json.dump(formatted_response['body'], f, indent=4)
 
-            print(9 * ' ', '> stub written to', stub_folder)
+                print(9 * ' ', '> stub written to', stub_folder)
             return response
 
         return custom_route_handler

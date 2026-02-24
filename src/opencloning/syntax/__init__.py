@@ -134,7 +134,7 @@ class Syntax(BaseModel):
     """Represents a complete syntax definition."""
 
     syntaxName: str = Field(alias='syntax_name', default='')
-    assemblyEnzyme: str = Field(alias='assembly_enzyme', min_length=1)
+    assemblyEnzymes: List[str] = Field(alias='assembly_enzymes', min_length=1)
     domesticationEnzyme: str | None = Field(alias='domestication_enzyme', default=None)
     relatedDois: List[str] = Field(alias='related_dois', default_factory=list)
     submitters: List[str] = Field(default_factory=list)
@@ -167,9 +167,19 @@ class Syntax(BaseModel):
             seen_ids.add(part.id)
         return value
 
-    @field_validator('assemblyEnzyme', 'domesticationEnzyme')
+    @field_validator('assemblyEnzymes')
     @classmethod
-    def validate_enzyme(cls, value: str | None) -> str | None:
+    def validate_assembly_enzymes(cls, value: List[str]) -> List[str]:
+        if not value:
+            raise ValueError('assemblyEnzymes must contain at least one enzyme')
+        invalid_enzymes = get_invalid_enzyme_names(value)
+        if invalid_enzymes:
+            raise ValueError(f"Invalid enzyme(s): {', '.join(invalid_enzymes)}")
+        return value
+
+    @field_validator('domesticationEnzyme')
+    @classmethod
+    def validate_domestication_enzyme(cls, value: str | None) -> str | None:
         if value is None or value == '':
             return None
         invalid_enzymes = get_invalid_enzyme_names([value])
@@ -186,53 +196,67 @@ class Syntax(BaseModel):
             graph.add_edge(part.left_overhang, part.right_overhang)
         return graph
 
-    def get_assembly_enzyme(self) -> RestrictionType:
-        return parse_restriction_enzymes([self.assemblyEnzyme]).format(self.assemblyEnzyme)
+    def get_assembly_enzymes(self) -> List[RestrictionType]:
+        batch = parse_restriction_enzymes(self.assemblyEnzymes)
+        return [batch.format(name) for name in self.assemblyEnzymes]
 
     def assign_plasmid_to_syntax_part(self, plasmid: Dseqrecord) -> list[dict]:
         graph = self.to_edges_graph()
-        assembly_enzyme = self.get_assembly_enzyme()
+        assembly_enzymes = self.get_assembly_enzymes()
         result = []
-        for fragment in plasmid.cut(assembly_enzyme):
-            for rc in [True, False]:
-                query = fragment.reverse_complement() if rc else fragment
-                three_type, three_ovhg = query.seq.three_prime_end()
-                five_type, five_ovhg = query.seq.five_prime_end()
-                # It must only have 5' overhangs
-                if three_type != five_type or five_type != "5'":
-                    continue
-                # It must not contain the recognition site of the enzyme inside
-                # since they are always in the backbone, not the part.
-                # We use compsite, because the simple search method requires the
-                # cutsite to be there, and not sure how behaviour will be querying
-                # the overhangs.
-                if assembly_enzyme.compsite.search(str(query.seq)) is not None:
-                    continue
 
-                left_node = three_ovhg.upper()
-                right_node = reverse_complement(five_ovhg).upper()
+        # Enzymes are processed in order, so the first enzyme that finds a part is used.
+        # This is for syntaxes like GoldenBraid, that in the omega 1 assembly uses BsmBI
+        # for the backbone, and BtgZI for the parts.
+        # The order of the enzymes therefore matters, and in that case we put BsmBI first,
+        # because in principle domesticated parts should not have BsmBI recognition sites.
 
-                # Parts that have both overhangs palindromic are assigned the part
-                # that does not traverse the first node, which is normally the intended
-                # assignment. One example is the BB2_AB plasmid in GoldenPiCS, which
-                # has overhangs GATC-CCGG (A-B), so it can be either A->B or B->A.
-                # We keep A->B as the intended assignment.
+        for enzyme in assembly_enzymes:
+            for fragment in plasmid.cut(enzyme):
+                for rc in [True, False]:
+                    query = fragment.reverse_complement() if rc else fragment
+                    three_type, three_ovhg = query.seq.three_prime_end()
+                    five_type, five_ovhg = query.seq.five_prime_end()
+                    # It must only have 5' overhangs
+                    if three_type != five_type or five_type != "5'":
+                        continue
+                    # It must not contain the recognition site of any enzyme inside
+                    # since they are always in the backbone, not the part.
+                    # We use compsite, because the simple search method requires the
+                    # cutsite to be there, and not sure how behaviour will be querying
+                    # the overhangs.
+                    if enzyme.compsite.search(str(query.seq)) is not None:
+                        continue
 
-                graph2use = graph
-                if is_part_palindromic(left_node, right_node):
-                    graph2use = open_graph_at_node(graph, list(graph.nodes)[0])
+                    left_node = three_ovhg.upper()
+                    right_node = reverse_complement(five_ovhg).upper()
+                    # This most likely means single cut in the plasmid
+                    if left_node == right_node:
+                        continue
 
-                if (
-                    left_node in graph2use
-                    and right_node in graph2use
-                    and nx.has_path(graph2use, left_node, right_node)
-                ):
-                    result.append(
-                        {
-                            'key': f"{left_node}-{right_node}",
-                            'longest_feature': max(fragment.features, key=lambda x: len(x.location), default=None),
-                        }
-                    )
+                    # Parts that have both overhangs palindromic are assigned the part
+                    # that does not traverse the first node, which is normally the intended
+                    # assignment. One example is the BB2_AB plasmid in GoldenPiCS, which
+                    # has overhangs GATC-CCGG (A-B), so it can be either A->B or B->A.
+                    # We keep A->B as the intended assignment.
+
+                    graph2use = graph
+                    if is_part_palindromic(left_node, right_node):
+                        graph2use = open_graph_at_node(graph, list(graph.nodes)[0])
+
+                    if (
+                        left_node in graph2use
+                        and right_node in graph2use
+                        and nx.has_path(graph2use, left_node, right_node)
+                    ):
+                        result.append(
+                            {
+                                'key': f"{left_node}-{right_node}",
+                                'longest_feature': max(fragment.features, key=lambda x: len(x.location), default=None),
+                            }
+                        )
+            if len(result) > 0:
+                break
         # Remove duplicates with same key, keeping the first occurrence.
         result = list({d['key']: d for d in reversed(result)}.values())[::-1]
         return result

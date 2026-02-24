@@ -5,7 +5,7 @@ from opencloning.syntax import Syntax, Part, open_graph_at_node, is_part_palindr
 from pydantic import ValidationError
 import unittest
 from pydna.parsers import parse as pydna_parse
-from Bio.Restriction import BsaI
+from Bio.Restriction import BsaI, BsmBI
 import networkx as nx
 from pydna.dseqrecord import Dseqrecord
 
@@ -20,7 +20,7 @@ class TestSyntax(unittest.TestCase):
         """Helper method to create a minimal valid syntax dictionary."""
         return {
             'syntaxName': 'Test Syntax',
-            'assemblyEnzyme': 'BsaI',
+            'assemblyEnzymes': ['BsaI'],
             'domesticationEnzyme': 'BsmBI',
             'relatedDois': ['10.1000/xyz123'],
             'submitters': ['0000-0000-0000-0000'],
@@ -101,17 +101,17 @@ class TestSyntax(unittest.TestCase):
 
     def test_validate_enzyme(self):
         self.assertRaises(
-            ValidationError, Syntax.model_validate, {**self._get_valid_syntax_dict(), 'assemblyEnzyme': ''}
+            ValidationError, Syntax.model_validate, {**self._get_valid_syntax_dict(), 'assemblyEnzymes': []}
         )
         self.assertRaises(
             ValidationError,
             Syntax.model_validate,
-            {**self._get_valid_syntax_dict(), 'assemblyEnzyme': None},
+            {**self._get_valid_syntax_dict(), 'assemblyEnzymes': None},
         )
         self.assertRaises(
             ValidationError,
             Syntax.model_validate,
-            {**self._get_valid_syntax_dict(), 'assemblyEnzyme': 'InvalidEnzyme'},
+            {**self._get_valid_syntax_dict(), 'assemblyEnzymes': ['InvalidEnzyme']},
         )
         self.assertRaises(
             ValidationError,
@@ -119,13 +119,13 @@ class TestSyntax(unittest.TestCase):
             {**self._get_valid_syntax_dict(), 'domesticationEnzyme': 'InvalidEnzyme'},
         )
 
-        Syntax.model_validate({**self._get_valid_syntax_dict(), 'assemblyEnzyme': 'BsaI'})
+        Syntax.model_validate({**self._get_valid_syntax_dict(), 'assemblyEnzymes': ['BsaI']})
         Syntax.model_validate({**self._get_valid_syntax_dict(), 'domesticationEnzyme': 'BsmBI'})
         Syntax.model_validate({**self._get_valid_syntax_dict(), 'domesticationEnzyme': None})
         Syntax.model_validate({**self._get_valid_syntax_dict(), 'domesticationEnzyme': ''})
 
     def test_get_assembly_enzyme(self):
-        self.assertEqual(moclo_syntax.get_assembly_enzyme(), BsaI)
+        self.assertEqual(moclo_syntax.get_assembly_enzymes()[0], BsaI)
 
     def test_assign_plasmid_to_syntax_part(self):
 
@@ -157,9 +157,43 @@ class TestSyntax(unittest.TestCase):
 
         self.assertEqual(moclo_syntax.assign_plasmid_to_syntax_part(plasmid4), [])
 
+        # Does not work with single cut in the plasmid
+        result = moclo_syntax.assign_plasmid_to_syntax_part(Dseqrecord('AAggtctcaACGTagagtcacac', circular=True))
+        self.assertEqual(len(result), 0)
+
+    def test_assembly_enzyme_multiple(self):
+        syntax = Syntax.model_validate({**self._get_valid_syntax_dict(), 'assemblyEnzymes': ['BsaI', 'BsmBI']})
+        enzymes = syntax.get_assembly_enzymes()
+        self.assertEqual(enzymes[0], BsaI)
+        self.assertEqual(enzymes[1], BsmBI)
+        self.assertEqual(len(enzymes), 2)
+
+        sequences = [
+            Dseqrecord('AAggtctcaACGTagagtcacacaggactactaCGTAagagaccAA', circular=True),  # both BsaI
+            Dseqrecord('AAcgtctcaACGTagagtcacacaggactactaCGTAagagacgAA', circular=True),  # both BsmBI
+            Dseqrecord('AAggtctcaACGTagagtcacacaggactactaCGTAagagacgAA', circular=True),  # one of each
+            Dseqrecord('AAcgtctcaACGTagagtcacacaggactactaCGTAagagaccAA', circular=True),  # one of each
+        ]
+        for i, seq in enumerate(sequences):
+            result = syntax.assign_plasmid_to_syntax_part(seq)
+            if i < 2:
+                self.assertEqual(len(result), 1)
+                self.assertEqual(result[0]['key'], 'ACGT-CGTA')
+            else:
+                self.assertEqual(len(result), 0)
+
+        # If both parts present, detects only the first one. This is because
+        # plasmids won't be digested with both enzymes at the same time (at least in
+        # goldenBraid).
+        result = syntax.assign_plasmid_to_syntax_part(
+            Dseqrecord(str(sequences[0].seq) + 'AAcgtctcaTTAAagagtcacacaggactactaAAACagagacgAA', circular=True)
+        )
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['key'], 'ACGT-CGTA')
+
     def test_assign_palindromic_part(self):
         dummy_syntax = Syntax(
-            assembly_enzyme='BsaI',
+            assembly_enzymes=['BsaI'],
             overhang_names={},
             parts=[
                 Part(
