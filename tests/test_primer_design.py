@@ -9,15 +9,13 @@ from unittest import TestCase
 from pydna.dseqrecord import Dseqrecord
 from pydna.amplify import pcr
 from pydna.parsers import parse
-from pydna.assembly2 import Assembly, gibson_overlap
+from pydna.assembly2 import Assembly, gibson_overlap, gibson_assembly
 import pytest
 from Bio.Data.IUPACData import ambiguous_dna_values
-from Bio.Seq import reverse_complement
 import os
 from opencloning.primer3_functions import PrimerDesignSettings
 
-from opencloning.temp_functions import primer_model_to_pydna_primer
-from opencloning_linkml.datamodel import Primer as PrimerModel
+from pydna.primer import Primer
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
@@ -298,7 +296,7 @@ class TestGibsonAssemblyPrimers(TestCase):
 
         # Check if all primers are instances of PrimerModel
         for primer in primers:
-            self.assertIsInstance(primer, PrimerModel)
+            self.assertIsInstance(primer, Primer)
 
         # Check if primer names are correctly formatted
         for i, primer in enumerate(primers):
@@ -312,8 +310,8 @@ class TestGibsonAssemblyPrimers(TestCase):
         for i in range(len(templates)):
             amplicons.append(
                 pcr(
-                    primer_model_to_pydna_primer(primers[i * 2]),
-                    primer_model_to_pydna_primer(primers[i * 2 + 1]),
+                    primers[i * 2],
+                    primers[i * 2 + 1],
                     templates[i],
                 )
             )
@@ -344,8 +342,8 @@ class TestGibsonAssemblyPrimers(TestCase):
         for i in range(len(templates)):
             amplicons.append(
                 pcr(
-                    primer_model_to_pydna_primer(primers[i * 2]),
-                    primer_model_to_pydna_primer(primers[i * 2 + 1]),
+                    primers[i * 2],
+                    primers[i * 2 + 1],
                     templates[i],
                 )
             )
@@ -381,14 +379,14 @@ class TestGibsonAssemblyPrimers(TestCase):
             templates, homology_length, minimal_hybridization_length, target_tm, circular, spacers=spacers
         )
 
-        self.assertTrue(primers[0].sequence.startswith('TTAAGTACccccAAACAGTA'))
-        self.assertTrue(reverse_complement(primers[-1].sequence).endswith('TTAAGTACccccAAACAGTA'))
+        self.assertTrue(primers[0].seq.startswith('TTAAGTACccccAAACAGTA'))
+        self.assertTrue(primers[-1].seq.reverse_complement().endswith('TTAAGTACccccAAACAGTA'))
 
-        self.assertTrue(reverse_complement(primers[1].sequence).endswith('GATTCTATaaaaGTTTACAA'))
-        self.assertTrue(primers[2].sequence.startswith('GATTCTATaaaaGTTTACAA'))
+        self.assertTrue(primers[1].seq.reverse_complement().endswith('GATTCTATaaaaGTTTACAA'))
+        self.assertTrue(primers[2].seq.startswith('GATTCTATaaaaGTTTACAA'))
 
-        self.assertTrue(reverse_complement(primers[3].sequence).endswith('AAATGGAAttttAAGGACAA'))
-        self.assertTrue(primers[4].sequence.startswith('AAATGGAAttttAAGGACAA'))
+        self.assertTrue(primers[3].seq.reverse_complement().endswith('AAATGGAAttttAAGGACAA'))
+        self.assertTrue(primers[4].seq.startswith('AAATGGAAttttAAGGACAA'))
 
     @pytest.mark.xfail(reason='Waiting on https://github.com/BjornFJohansson/pydna/issues/265')
     def test_primer_errors(self):
@@ -431,6 +429,158 @@ class TestGibsonAssemblyPrimers(TestCase):
         except ValueError as e:
             self.assertEqual(str(e), 'Primers could not be designed for template 1, 2, try changing settings.')
 
+    def test_primer_with_amplify_templates(self):
+        to_amplify = Dseqrecord('aagccagaagtgcatttggatccaagtgcctccattttaaatctctcatcttc', name='to_amplify')
+        to_amplify.add_feature(0, len(to_amplify), label='to_amplify')
+        spacer_like = Dseqrecord('attaattcctttgaagaagaaattttgggtttgtggtctgagcctaaat', name='spacer_like')
+        spacer_like.add_feature(0, len(spacer_like), label='spacer_like')
+
+        primers = gibson_assembly_primers(
+            [to_amplify, spacer_like],
+            homology_length=15,
+            minimal_hybridization_length=15,
+            target_tm=55,
+            circular=True,
+            amplify_templates=[True, False],
+        )
+
+        self.assertEqual(len(primers), 4)
+        self.assertEqual(primers[0].name, 'to_amplify_fwd')
+        self.assertEqual(primers[1].name, 'to_amplify_rvs')
+        self.assertTrue(primers[0].seq.startswith('ggtctgagcctaaat'))
+        self.assertTrue(primers[1].seq.reverse_complement().endswith('attaattcctttgaa'))
+        self.assertEqual(primers[2], None)
+        self.assertEqual(primers[3], None)
+
+        # Test linear assembly
+        primers = gibson_assembly_primers(
+            [to_amplify, spacer_like],
+            homology_length=15,
+            minimal_hybridization_length=15,
+            target_tm=55,
+            circular=False,
+            amplify_templates=[True, False],
+            spacers=['ATATATA', 'GCGCGCGC', ''],
+        )
+        self.assertEqual(len(primers), 4)
+        self.assertEqual(primers[2], None)
+        self.assertEqual(primers[3], None)
+        pcr_product = pcr(primers[0], primers[1], to_amplify)
+
+        assembly_product = gibson_assembly([pcr_product, spacer_like], limit=15)[0]
+        self.assertEqual(
+            str(assembly_product.seq).lower(),
+            ('ATATATA' + str(to_amplify.seq) + 'GCGCGCGC' + str(spacer_like.seq)).lower(),
+        )
+
+    def test_validation_errors(self):
+        """
+        Test the validation errors for the gibson_assembly_primers function.
+        """
+        templates = [
+            Dseqrecord('AAACAGTAATACGTTCCTTTTTTATGATGATGGATGACATTCAAAGCACTGATTCTAT'),
+            Dseqrecord('GTTTACAACGGCAATGAACGTTCCTTTTTTATGATATGCCCAGCTTCATGAAATGGAA'),
+            Dseqrecord('AAGGACAACGTTCCTTTTTTATGATATATATGGCACAGTATGATCAAAAGTTAAGTAC'),
+        ]
+        templates[1].name = 'template_1'
+        homology_length = 20
+        minimal_hybridization_length = 15
+        target_tm = 55
+        circular = False
+
+        # Not two consecutive templates with amplify_templates=False
+        with pytest.raises(ValueError) as e:
+            gibson_assembly_primers(
+                templates,
+                homology_length,
+                minimal_hybridization_length,
+                target_tm,
+                circular,
+                amplify_templates=[True, False, False],
+            )
+        self.assertEqual(str(e.value), 'Two consecutive templates with amplify_templates=False are not allowed.')
+
+        # Also in circular
+        with pytest.raises(ValueError) as e:
+            gibson_assembly_primers(
+                templates,
+                homology_length,
+                minimal_hybridization_length,
+                target_tm,
+                circular=True,
+                amplify_templates=[False, True, False],
+            )
+
+        # No mismatch in length between templates and amplify_templates
+        with pytest.raises(ValueError) as e:
+            gibson_assembly_primers(
+                templates,
+                homology_length,
+                minimal_hybridization_length,
+                target_tm,
+                circular,
+                amplify_templates=[True, False],
+            )
+        self.assertEqual(str(e.value), 'The number of amplify_templates must be the same as the number of templates.')
+
+        # Spacer too long
+        with pytest.raises(ValueError) as e:
+            gibson_assembly_primers(
+                templates,
+                homology_length,
+                minimal_hybridization_length,
+                target_tm,
+                circular,
+                spacers=['', 'ACGT' * 100],
+                amplify_templates=[True, False, True],
+            )
+        self.assertEqual(
+            str(e.value),
+            'Template template_1 (58 bps) is shorter than the longest spacer or 2x the minimal hybridization length.',
+        )
+
+        # Single input, amplify_templates=False
+        with pytest.raises(ValueError) as e:
+            gibson_assembly_primers(
+                templates[:1],
+                homology_length,
+                minimal_hybridization_length,
+                target_tm,
+                circular,
+                amplify_templates=[False],
+            )
+        self.assertEqual(str(e.value), 'amplify_templates cannot be False for a single template.')
+
+        # First spacer cannot be empty if the first template is not amplified in linear assembly
+        with pytest.raises(ValueError) as e:
+            gibson_assembly_primers(
+                templates[:2],
+                homology_length,
+                minimal_hybridization_length,
+                target_tm,
+                circular=False,
+                spacers=['ACGT', '', ''],
+                amplify_templates=[False, True],
+            )
+        self.assertEqual(
+            str(e.value), 'The first spacer must be empty if the first template is not amplified in linear assembly.'
+        )
+
+        # Last spacer must be empty if the last template is not amplified in linear assembly
+        with pytest.raises(ValueError) as e:
+            gibson_assembly_primers(
+                templates[:2],
+                homology_length,
+                minimal_hybridization_length,
+                target_tm,
+                circular=False,
+                spacers=['', '', 'ACGT'],
+                amplify_templates=[True, False],
+            )
+        self.assertEqual(
+            str(e.value), 'The last spacer must be empty if the last template is not amplified in linear assembly.'
+        )
+
 
 class TestSimplePairPrimers(TestCase):
     def test_restriction_enzyme_primers(self):
@@ -453,8 +603,8 @@ class TestSimplePairPrimers(TestCase):
         )
 
         # Check that primers contain the correct restriction sites
-        self.assertTrue(fwd.sequence.startswith('GC' + str(EcoRI.site)))
-        self.assertTrue(rvs.sequence.startswith('GC' + str(BamHI.site)))
+        self.assertTrue(fwd.seq.startswith('GC' + str(EcoRI.site)))
+        self.assertTrue(rvs.seq.startswith('GC' + str(BamHI.site)))
 
         # Check that the name is correct
         self.assertEqual(fwd.name, 'dummy_EcoRI_fwd')
@@ -474,22 +624,22 @@ class TestSimplePairPrimers(TestCase):
             template, minimal_hybridization_length, target_tm, left_enzyme, None, filler_bases
         )
 
-        self.assertTrue(fwd.sequence.startswith('GC' + str(EcoRI.site)))
-        self.assertFalse(rvs.sequence.startswith('GC' + str(BamHI.site)))
+        self.assertTrue(fwd.seq.startswith('GC' + str(EcoRI.site)))
+        self.assertFalse(rvs.seq.startswith('GC' + str(BamHI.site)))
 
         # Test with only right enzyme
         fwd, rvs = simple_pair_primers(
             template, minimal_hybridization_length, target_tm, None, right_enzyme, filler_bases
         )
 
-        self.assertFalse(fwd.sequence.startswith('GC' + str(EcoRI.site)))
-        self.assertTrue(rvs.sequence.startswith('GC' + str(BamHI.site)))
+        self.assertFalse(fwd.seq.startswith('GC' + str(EcoRI.site)))
+        self.assertTrue(rvs.seq.startswith('GC' + str(BamHI.site)))
 
         # Test with no enzymes
         fwd, rvs = simple_pair_primers(template, minimal_hybridization_length, target_tm, None, None, filler_bases)
 
-        self.assertFalse(fwd.sequence.startswith('GC' + str(EcoRI.site)))
-        self.assertFalse(rvs.sequence.startswith('GC' + str(BamHI.site)))
+        self.assertFalse(fwd.seq.startswith('GC' + str(EcoRI.site)))
+        self.assertFalse(rvs.seq.startswith('GC' + str(BamHI.site)))
 
         # Test with enzyme that has ambiguous bases
         fwd, rvs = simple_pair_primers(template, minimal_hybridization_length, target_tm, AflIII, AflIII, filler_bases)
@@ -497,8 +647,8 @@ class TestSimplePairPrimers(TestCase):
             str(AflIII.site).replace('R', ambiguous_dna_values['R'][0]).replace('Y', ambiguous_dna_values['Y'][0])
         )
 
-        self.assertTrue(fwd.sequence.startswith('GC' + actual_site))
-        self.assertTrue(rvs.sequence.startswith('GC' + actual_site))
+        self.assertTrue(fwd.seq.startswith('GC' + actual_site))
+        self.assertTrue(rvs.seq.startswith('GC' + actual_site))
 
         # Test spacers on one side only
         spacers = ['ACGT' * 10, '']
@@ -506,8 +656,8 @@ class TestSimplePairPrimers(TestCase):
             template, minimal_hybridization_length, target_tm, left_enzyme, right_enzyme, filler_bases, spacers=spacers
         )
 
-        self.assertTrue('GC' + str(left_enzyme.site) + 'ACGT' * 10 in fwd.sequence)
-        self.assertTrue('GC' + str(right_enzyme.site) in rvs.sequence)
+        self.assertTrue('GC' + str(left_enzyme.site) + 'ACGT' * 10 in fwd.seq)
+        self.assertTrue('GC' + str(right_enzyme.site) in rvs.seq)
 
         # Both spacers
         spacers = ['ACGT' * 10, 'ACGT' * 10]
@@ -515,8 +665,8 @@ class TestSimplePairPrimers(TestCase):
             template, minimal_hybridization_length, target_tm, left_enzyme, right_enzyme, filler_bases, spacers=spacers
         )
 
-        self.assertTrue('GC' + str(left_enzyme.site) + 'ACGT' * 10 in fwd.sequence)
-        self.assertTrue('GC' + str(right_enzyme.site) + 'ACGT' * 10 in rvs.sequence)
+        self.assertTrue('GC' + str(left_enzyme.site) + 'ACGT' * 10 in fwd.seq)
+        self.assertTrue('GC' + str(right_enzyme.site) + 'ACGT' * 10 in rvs.seq)
 
         # Test with left_enzyme_inverted and right_enzyme_inverted
         fwd, rvs = simple_pair_primers(
@@ -531,8 +681,8 @@ class TestSimplePairPrimers(TestCase):
             right_enzyme_inverted=True,
         )
 
-        self.assertTrue('GCGAGACC' + 'ACGT' * 10 in fwd.sequence)
-        self.assertTrue('GCGAGACC' + 'ACGT' * 10 in rvs.sequence)
+        self.assertTrue('GCGAGACC' + 'ACGT' * 10 in fwd.seq)
+        self.assertTrue('GCGAGACC' + 'ACGT' * 10 in rvs.seq)
 
     def test_without_restriction_enzymes(self):
         """
@@ -548,8 +698,8 @@ class TestSimplePairPrimers(TestCase):
         fwd, rvs = simple_pair_primers(template, minimal_hybridization_length, target_tm, None, None, filler_bases)
 
         # Check that primers are correct
-        self.assertTrue(fwd.sequence.startswith('ATGCA'))
-        self.assertTrue(rvs.sequence.startswith('GTCAT'))
+        self.assertTrue(fwd.seq.startswith('ATGCA'))
+        self.assertTrue(rvs.seq.startswith('GTCAT'))
 
 
 class TestEbicPrimers(TestCase):

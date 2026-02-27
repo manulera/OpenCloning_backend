@@ -48,3 +48,7 @@ def restriction_sequence_cut_to_cutsite_tuple(
 
 def primer_model_to_pydna_primer(primer_model: PrimerModel) -> PydnaPrimer:
     return PydnaPrimer(primer_model.sequence, id=str(primer_model.id), name=primer_model.name)
+
+
+def pydna_primer_to_primer_model(pydna_primer: PydnaPrimer) -> PrimerModel:
+    return PrimerModel(id=0, name=pydna_primer.name, sequence=str(pydna_primer.seq))

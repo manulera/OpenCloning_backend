@@ -4,6 +4,8 @@ import re
 from Bio.Restriction import RestrictionBatch
 from Bio.SeqUtils import gc_fraction
 
+from opencloning.temp_functions import pydna_primer_to_primer_model
+
 from ..dna_functions import get_invalid_enzyme_names
 from opencloning_linkml.datamodel import Primer as PrimerModel
 from opencloning.pydantic_models import PrimerDesignQuery
@@ -24,10 +26,11 @@ from ..primer3_functions import (
 from ..get_router import get_router
 from ..ebic.primer_design import ebic_primers
 from pydantic import BaseModel
+import copy
 
 router = get_router()
 
-PrimerDesignResponse = create_model('PrimerDesignResponse', primers=(list[PrimerModel], ...))
+PrimerDesignResponse = create_model('PrimerDesignResponse', primers=(list[PrimerModel | None], ...))
 
 
 def validate_spacers(spacers: list[str] | None, nb_templates: int, circular: bool):
@@ -101,7 +104,13 @@ async def primer_design_homologous_recombination(
 
 @router.post('/primer_design/gibson_assembly', response_model=PrimerDesignResponse)
 async def primer_design_gibson_assembly(
-    pcr_templates: list[PrimerDesignQuery],
+    pcr_templates: list[PrimerDesignQuery] = Body(
+        ...,
+        description='''The templates to design primers for. If the location is not
+        provided for a pcr_template, primers won't be designed for that part (the part will be included
+        in the Gibson as is).''',
+        min_length=1,
+    ),
     settings: PrimerDesignSettings = Body(description='Primer design settings.', default_factory=PrimerDesignSettings),
     spacers: list[str] | None = Body(
         None,
@@ -116,19 +125,26 @@ async def primer_design_gibson_assembly(
     ),
     circular: bool = Query(False, description='Whether the assembly is circular.'),
 ):
-    """Design primers for Gibson assembly"""
+    """Design primers for Gibson assembly. If the location is not provided for a pcr_template, primers won't be designed for that part."""
+
     # Validate the spacers
     validate_spacers(spacers, len(pcr_templates), circular)
     templates = list()
+    amplify_templates = list()
     for query in pcr_templates:
         dseqr = read_dsrecord_from_json(query.sequence)
-        location = query.location.to_biopython_location()
-        template = location.extract(dseqr)
-        if not query.forward_orientation:
-            template = template.reverse_complement()
-        # For naming the primers
-        template.name = dseqr.name
-        template.id = dseqr.id
+        if query.location is not None:
+            location = query.location.to_biopython_location()
+            template = location.extract(dseqr)
+            if not query.forward_orientation:
+                template = template.reverse_complement()
+            # For naming the primers
+            template.name = dseqr.name
+            template.id = dseqr.id
+            amplify_templates.append(True)
+        else:
+            template = copy.deepcopy(dseqr)
+            amplify_templates.append(False)
         templates.append(template)
     try:
         primers = gibson_assembly_primers(
@@ -139,11 +155,12 @@ async def primer_design_gibson_assembly(
             circular,
             spacers,
             tm_func=lambda x: primer3_calc_tm(x, settings),
+            amplify_templates=amplify_templates,
         )
     except ValueError as e:
         raise HTTPException(400, *e.args)
 
-    return {'primers': primers}
+    return {'primers': [pydna_primer_to_primer_model(primer) if primer is not None else None for primer in primers]}
 
 
 @router.post('/primer_design/simple_pair', response_model=PrimerDesignResponse)
@@ -193,7 +210,7 @@ async def primer_design_simple_pair(
     # This is to my knowledge the only way to get the enzymes
     rb = RestrictionBatch()
     try:
-        fwd, rvs = simple_pair_primers(
+        primers = simple_pair_primers(
             template,
             minimal_hybridization_length,
             target_tm,
@@ -208,7 +225,7 @@ async def primer_design_simple_pair(
     except ValueError as e:
         raise HTTPException(400, *e.args)
 
-    return {'primers': [fwd, rvs]}
+    return {'primers': [pydna_primer_to_primer_model(primer) for primer in primers]}
 
 
 @router.post('/primer_design/ebic', response_model=PrimerDesignResponse)

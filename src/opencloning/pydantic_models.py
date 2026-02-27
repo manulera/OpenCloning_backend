@@ -67,9 +67,11 @@ class BaseCloningStrategy(_CloningStrategy):
 class PrimerDesignQuery(BaseModel):
     model_config = {'arbitrary_types_allowed': True}
     sequence: _TextFileSequence
-    location: SequenceLocationStr
+    location: SequenceLocationStr | None
     forward_orientation: bool = True
 
     @field_validator('location', mode='before')
     def parse_location(cls, v):
+        if v is None:
+            return None
         return SequenceLocationStr.field_validator(v)
