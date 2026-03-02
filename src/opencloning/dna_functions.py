@@ -274,6 +274,14 @@ def custom_file_parser(
     out = list()
 
     with file_streamer as handle:
+        if sequence_file_format == 'genbank':
+            # Filter out lines starting with "BASE COUNT" (ignore leading whitespace)
+            filtered_lines = list()
+            for line in handle:
+                if not line.lstrip().startswith('BASE COUNT'):
+                    filtered_lines.append(line)
+            handle = io.StringIO(''.join(filtered_lines))
+
         try:
             for parsed_seq in seqio_parse(handle, sequence_file_format):
                 circularize = circularize or (
