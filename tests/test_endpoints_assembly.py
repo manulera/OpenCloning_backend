@@ -903,6 +903,48 @@ class RestrictionAndLigationTest(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertTrue('Too many assemblies' in response.json()['detail'])
 
+    def test_sort_by_recognition_sites(self):
+        fragments = [
+            Dseqrecord('AAggtctcaACGTagagtcacacaggactactaCGTAagagaccAA', circular=True),
+            Dseqrecord('AAggtctcaCGTAagagtcacacaggactactaACGTagagaccAA', circular=True),
+        ]
+
+        source = RestrictionAndLigationSource(
+            id=0,
+            restriction_enzymes=['BsaI'],
+        )
+        json_fragments = [format_sequence_genbank(f) for f in fragments]
+        for i, f in enumerate(json_fragments):
+            f.id = i + 1
+
+        for sorting in [True, False]:
+            data = {'source': source.model_dump(), 'sequences': [f.model_dump() for f in json_fragments]}
+            response = client.post(
+                '/restriction_and_ligation', json=data, params={'sort_by_recognition_sites': sorting}
+            )
+            self.assertEqual(response.status_code, 200)
+            payload = response.json()
+            seqs1 = [read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']]
+
+            shifted_fragment = fragments[0].shifted(21)
+            json_shifted_fragment = format_sequence_genbank(shifted_fragment)
+            json_shifted_fragment.id = 1
+            data['sequences'][0] = json_shifted_fragment.model_dump()
+            data['sequences'] = data['sequences']
+            response = client.post(
+                '/restriction_and_ligation', json=data, params={'sort_by_recognition_sites': sorting}
+            )
+            self.assertEqual(response.status_code, 200)
+            payload = response.json()
+            seqs2 = [read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']]
+
+            if sorting:
+                self.assertEqual(len(seqs1[0]), len(seqs2[0]))
+                self.assertEqual(len(seqs1[1]), len(seqs2[1]))
+            else:
+                self.assertNotEqual(len(seqs1[0]), len(seqs2[0]))
+                self.assertNotEqual(len(seqs1[1]), len(seqs2[1]))
+
 
 class CrisprTest(unittest.TestCase):
 
