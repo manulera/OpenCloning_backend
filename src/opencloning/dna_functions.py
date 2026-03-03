@@ -276,6 +276,7 @@ def custom_file_parser(
     with file_streamer as handle:
         if sequence_file_format == 'genbank':
             # Filter out lines starting with "BASE COUNT" (ignore leading whitespace)
+            # TODO: Remove if biopython handles this correctly
             filtered_lines = list()
             for line in handle:
                 if not line.lstrip().startswith('BASE COUNT'):
