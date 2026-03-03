@@ -52,6 +52,10 @@ class PermissiveParserOtherTest(unittest.TestCase):
             plasmid = custom_file_parser(f, 'genbank')[0]
             self.assertEqual(plasmid.circular, True)
 
+    def test_permissive_parser_base_count_misplaced(self):
+        with open(f'{test_files}/base_count_misplaced.gb', 'r') as f:
+            custom_file_parser(f, 'genbank')[0]
+
 
 class MinorFunctionsTest(unittest.TestCase):
     def test_correct_name(self):
