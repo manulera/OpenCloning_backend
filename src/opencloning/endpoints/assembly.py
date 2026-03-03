@@ -279,6 +279,14 @@ async def restriction_and_ligation(
     source: RestrictionAndLigationSource,
     sequences: Annotated[list[TextFileSequence], Field(min_length=1)],
     circular_only: bool = Query(False, description='Only return circular assemblies.'),
+    sort_by_recognition_sites: bool = Query(
+        False,
+        description='''
+        Sort the products by the number of recognition sites from the first enzyme.
+        This is useful for Golden Gate assembly, where you tipically want the product that lost
+        the Type IIS recognition site.
+        ''',
+    ),
 ):
 
     fragments = [read_dsrecord_from_json(seq) for seq in sequences]
@@ -289,6 +297,10 @@ async def restriction_and_ligation(
         products = _restriction_ligation_assembly(fragments, enzymes, circular_only=circular_only)
     except ValueError as e:
         raise HTTPException(400, *e.args)
+
+    if len(enzymes) > 0 and sort_by_recognition_sites:
+        enzyme = parse_restriction_enzymes([source.restriction_enzymes[0]])
+        products.sort(key=lambda x: len(x.seq.get_cutsites(enzyme)))
 
     return format_products(
         source.id,
