@@ -1,5 +1,6 @@
 from fastapi import Query, HTTPException
 from typing import Union
+import copy
 from pydna.dseqrecord import Dseqrecord
 from pydna.primer import Primer as PydnaPrimer
 from pydantic import create_model, Field
@@ -25,6 +26,7 @@ from opencloning_linkml.datamodel import (
     GatewaySource,
     Primer as PrimerModel,
     TextFileSequence,
+    RecombinaseSource,
 )
 
 from pydna.assembly2 import (
@@ -40,10 +42,13 @@ from pydna.assembly2 import (
     crispr_integration as _crispr_integration,
     cre_lox_integration as _cre_lox_integration,
     cre_lox_excision as _cre_lox_excision,
+    recombinase_integration as _recombinase_integration,
+    recombinase_excision as _recombinase_excision,
 )
 from pydna.cre_lox import annotate_loxP_sites
 
 from pydna.gateway import annotate_gateway_sites
+from pydna.recombinase import RecombinaseCollection, Recombinase
 from ..get_router import get_router
 
 router = get_router()
@@ -376,4 +381,49 @@ async def cre_lox_recombination(
         completed_source,
         source.output_name,
         no_products_error_message='No compatible Cre/Lox recombination was found.',
+    )
+
+
+@router.post(
+    '/recombinase',
+    response_model=create_model(
+        'RecombinaseResponse',
+        sources=(list[RecombinaseSource], ...),
+        sequences=(list[TextFileSequence], ...),
+    ),
+)
+async def recombinase(
+    source: RecombinaseSource,
+    sequences: Annotated[list[TextFileSequence], Field(min_length=1)],
+    reverse_recombinase: bool = Query(False, description='Whether to use the reverse reaction of the recombinase.'),
+):
+    fragments = [read_dsrecord_from_json(seq) for seq in sequences]
+    completed_source = source if is_assembly_complete(source) else None
+    try:
+        collection = RecombinaseCollection([Recombinase(**r.model_dump()) for r in source.recombinases])
+    except ValueError as e:
+        raise HTTPException(422, *e.args)
+
+    reverse_collection = copy.deepcopy(collection)
+    reverse_collection.recombinases.extend([r.get_reverse_recombinase() for r in reverse_collection.recombinases])
+    if reverse_recombinase:
+        collection = reverse_collection
+
+    if len(fragments) == 1:
+        products = _recombinase_excision(fragments[0], collection)
+    else:
+        products = []
+        if not fragments[0].circular:
+            products.extend(_recombinase_integration(fragments[0], fragments[1:], collection))
+        if not fragments[1].circular:
+            products.extend(_recombinase_integration(fragments[1], fragments[:1], collection))
+
+    products = [reverse_collection.annotate(p) for p in products]
+
+    return format_products(
+        source.id,
+        products,
+        completed_source,
+        source.output_name,
+        no_products_error_message='No compatible reaction was found with the provided recombinases.',
     )
