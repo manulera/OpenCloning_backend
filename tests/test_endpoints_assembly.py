@@ -1273,7 +1273,6 @@ class GatewaySourceTest(unittest.TestCase):
         payload = response.json()
         self.assertIn('Inputs are not compatible for LR reaction', payload['detail'])
         self.assertIn('fragment 1: attB1', payload['detail'])
-        print(payload['detail'])
         self.assertTrue(payload['detail'].endswith('fragment 2: attB1, attP1, attL1, attR1'))
 
     def test_only_multi_site(self):
@@ -1450,8 +1449,6 @@ class RecombinaseTest(unittest.TestCase):
 
         genome = Dseqrecord(f"cccccc{site1.upper()}aaaaa")
         insert = Dseqrecord(f"{site2.upper()}bbbbb", circular=True)
-        print(genome.seq)
-        print(insert.seq)
         fragments = [format_sequence_genbank(genome), format_sequence_genbank(insert)]
         fragments[0].id = 1
         fragments[1].id = 2
@@ -1470,6 +1467,16 @@ class RecombinaseTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertEqual(len(payload['sources']), 1)
+
+        # We can do the reverse reaction
+        data = {
+            'source': source.model_dump(),
+            'sequences': payload['sequences'],
+        }
+        response = client.post('/recombinase', json=data, params={'reverse_recombinase': True})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(len(payload['sources']), 2)
 
     def test_recombinase_integration_two_site_pairs(self):
         site1 = 'AAaaTTC'
