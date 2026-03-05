@@ -21,6 +21,8 @@ from opencloning_linkml.datamodel import (
     CRISPRSource,
     GatewaySource,
     CreLoxRecombinationSource,
+    RecombinaseSource,
+    Recombinase,
 )
 
 
@@ -1271,7 +1273,7 @@ class GatewaySourceTest(unittest.TestCase):
         payload = response.json()
         self.assertIn('Inputs are not compatible for LR reaction', payload['detail'])
         self.assertIn('fragment 1: attB1', payload['detail'])
-        self.assertTrue(payload['detail'].endswith('fragment 2: attB1, attL1, attR1, attP1'))
+        self.assertTrue(payload['detail'].endswith('fragment 2: attB1, attP1, attL1, attR1'))
 
     def test_only_multi_site(self):
         attB1 = self.attB1
@@ -1437,3 +1439,130 @@ class CreLoxRecombinationTest(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         payload = response.json()
         self.assertIn('No compatible Cre/Lox', payload['detail'])
+
+
+class RecombinaseTest(unittest.TestCase):
+
+    def test_recombinase(self):
+        site1 = 'ATGCCCTAAaaCT'
+        site2 = 'CAaaTTTTTTTCCCT'
+
+        genome = Dseqrecord(f"cccccc{site1.upper()}aaaaa")
+        insert = Dseqrecord(f"{site2.upper()}bbbbb", circular=True)
+        fragments = [format_sequence_genbank(genome), format_sequence_genbank(insert)]
+        fragments[0].id = 1
+        fragments[1].id = 2
+        rec = Recombinase(
+            name='blah',
+            site1=site1,
+            site2=site2,
+        )
+
+        source = RecombinaseSource(id=0, recombinases=[rec])
+        data = {
+            'source': source.model_dump(),
+            'sequences': [f.model_dump() for f in fragments],
+        }
+        response = client.post('/recombinase', json=data)
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(len(payload['sources']), 1)
+
+        # We can do the reverse reaction
+        data = {
+            'source': source.model_dump(),
+            'sequences': payload['sequences'],
+        }
+        response = client.post('/recombinase', json=data, params={'reverse_recombinase': True})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(len(payload['sources']), 2)
+
+    def test_recombinase_integration_two_site_pairs(self):
+        site1 = 'AAaaTTC'
+        site2 = 'CCaaGC'
+        site3 = 'GAccACC'
+        site4 = 'TCccAAC'
+        rec1 = Recombinase(
+            site1=site1,
+            site2=site2,
+            site1_name='s1',
+            site2_name='s2',
+        )
+        rec2 = Recombinase(
+            site1=site3,
+            site2=site4,
+            site1_name='s1',
+            site2_name='s2',
+        )
+        source = RecombinaseSource(id=0, recombinases=[rec1, rec2])
+        seq = Dseqrecord(f"ggg{site1}aaa{site3}ttt")
+        seq2 = Dseqrecord(f"ccc{site2}ttt{site4}aaa")
+        fragments = [format_sequence_genbank(seq), format_sequence_genbank(seq2)]
+        fragments[0].id = 1
+        fragments[1].id = 2
+        data = {
+            'source': source.model_dump(),
+            'sequences': [f.model_dump() for f in fragments],
+        }
+        response = client.post('/recombinase', json=data)
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        resulting_sequences = [
+            read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']
+        ]
+        self.assertEqual(len(resulting_sequences), 2)
+        self.assertEqual(str(resulting_sequences[0].seq).upper(), 'GGGAAAAGCTTTTCCCACCTTT')
+        self.assertEqual(str(resulting_sequences[1].seq).upper(), 'CCCCCAATTCAAAGACCAACAAA')
+        # The number of recombinases returned is the same:
+        source_recombinases = [Recombinase.model_validate(s) for s in payload['sources'][0]['recombinases']]
+        self.assertEqual(len(source_recombinases), 2)
+        self.assertEqual(source_recombinases[0], rec1)
+        self.assertEqual(source_recombinases[1], rec2)
+
+        # The same reaction again does not work
+        data = {
+            'source': source.model_dump(),
+            'sequences': payload['sequences'],
+        }
+        response2 = client.post('/recombinase', json=data)
+        self.assertEqual(response2.status_code, 400)
+        payload2 = response2.json()
+        self.assertIn('No compatible reaction was found with the provided recombinases.', payload2['detail'])
+
+        # The reverse does, and regenerates the original sequences
+        data = {
+            'source': source.model_dump(),
+            'sequences': payload['sequences'],
+        }
+        response = client.post('/recombinase', json=data, params={'reverse_recombinase': True})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        resulting_sequences = [
+            read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']
+        ]
+        self.assertEqual(len(resulting_sequences), 2)
+        self.assertEqual(str(resulting_sequences[0].seq).upper(), str(seq.seq).upper())
+        self.assertEqual(str(resulting_sequences[1].seq).upper(), str(seq2.seq).upper())
+
+    def test_recombinase_validation(self):
+        site1 = 'AAaaTTC'
+        site2 = 'CCggGC'
+
+        data = {
+            'source': {'id': 0, 'recombinases': [{'site1': site1, 'site2': site2}]},
+            'sequences': [format_sequence_genbank(Dseqrecord(f"ggg{site1}aaa")).model_dump()],
+        }
+        response = client.post('/recombinase', json=data)
+        self.assertEqual(response.status_code, 422)
+        payload = response.json()
+        self.assertIn('Recombinase recognition sites do not have matching homology cores', payload['detail'])
+
+        site1 = 'AAAAAAA'
+
+        data = {
+            'source': {'id': 0, 'recombinases': [{'site1': site1, 'site2': site2}]},
+            'sequences': [format_sequence_genbank(Dseqrecord(f"ggg{site1}aaa")).model_dump()],
+        }
+        response = client.post('/recombinase', json=data)
+        self.assertEqual(response.status_code, 422)

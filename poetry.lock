@@ -1169,14 +1169,14 @@ files = [
 
 [[package]]
 name = "opencloning-linkml"
-version = "0.4.9"
+version = "1.0.0"
 description = "A LinkML data model for OpenCloning"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "opencloning_linkml-0.4.9-py3-none-any.whl", hash = "sha256:1adcaffacf167c90475b23c4e134093db369af73be27d2b9ac9ab3cfeb39a7f1"},
-    {file = "opencloning_linkml-0.4.9.tar.gz", hash = "sha256:a243d1875df0bf7b3c9487770cd64c0db25c84254a292e2dcea94d9598e9717c"},
+    {file = "opencloning_linkml-1.0.0-py3-none-any.whl", hash = "sha256:59fbb9b77e1170a338c501399f912cd31b605515c525f9cb8b1e88d2e8b8377f"},
+    {file = "opencloning_linkml-1.0.0.tar.gz", hash = "sha256:318c2ebcb563ca266258cd699d8eac4b2bd61c1d8c8a647131bb7351815a84da"},
 ]
 
 [package.dependencies]
@@ -1808,7 +1808,7 @@ wheel = "*"
 
 [[package]]
 name = "pydna"
-version = "5.5.7.post1+1ef52e4b"
+version = "5.5.7.post17+b5679857"
 description = "Representing double stranded DNA and functions for simulating cloning and homologous recombination between DNA molecules."
 optional = false
 python-versions = ">=3.10,<4.0"
@@ -1818,13 +1818,13 @@ develop = false
 
 [package.dependencies]
 appdirs = ">=1.4.4"
-biopython = "^1.85"
+biopython = "1.85"
 networkx = ">=2.8.8"
 numpy = [
     {version = ">1.26", markers = "python_version < \"3.12\""},
     {version = ">=2.3.0", markers = "python_version >= \"3.12\""},
 ]
-opencloning-linkml = "^0.4.9"
+opencloning-linkml = "^1"
 prettytable = ">=3.5.0"
 pydivsufsort = ">=0.0.14"
 pyfiglet = "0.8.post1"
@@ -1841,8 +1841,8 @@ primer-screen = ["pyahocorasick (>=2.2.0)"]
 [package.source]
 type = "git"
 url = "https://github.com/pydna-group/pydna"
-reference = "1ef52e4ba398bf4ea05d5ad4b8c496ef65fe7be0"
-resolved_reference = "1ef52e4ba398bf4ea05d5ad4b8c496ef65fe7be0"
+reference = "b567985784744768579f6c1fad20bd4b70ee29ba"
+resolved_reference = "b567985784744768579f6c1fad20bd4b70ee29ba"
 
 [[package]]
 name = "pyfiglet"
@@ -2761,4 +2761,4 @@ test = ["pytest (>=6.0.0)", "setuptools (>=77)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "597c1be776d7d0feb1ec48d19082d0959fd3b40766104bf259e16f9e24a7f02c"
+content-hash = "1183c85c1d0a223d85f4eb2fcf762858979b19da163d27097a93c8a84f8281b2"
