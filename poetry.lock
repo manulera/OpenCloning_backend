@@ -1808,7 +1808,7 @@ wheel = "*"
 
 [[package]]
 name = "pydna"
-version = "5.5.7.post17+b5679857"
+version = "5.5.7.post2+cbff5df4"
 description = "Representing double stranded DNA and functions for simulating cloning and homologous recombination between DNA molecules."
 optional = false
 python-versions = ">=3.10,<4.0"
@@ -1818,7 +1818,7 @@ develop = false
 
 [package.dependencies]
 appdirs = ">=1.4.4"
-biopython = "1.85"
+biopython = "^1.86"
 networkx = ">=2.8.8"
 numpy = [
     {version = ">1.26", markers = "python_version < \"3.12\""},
@@ -1841,8 +1841,8 @@ primer-screen = ["pyahocorasick (>=2.2.0)"]
 [package.source]
 type = "git"
 url = "https://github.com/pydna-group/pydna"
-reference = "b567985784744768579f6c1fad20bd4b70ee29ba"
-resolved_reference = "b567985784744768579f6c1fad20bd4b70ee29ba"
+reference = "cbff5df432286ee94c85c896630394c3083f6f59"
+resolved_reference = "cbff5df432286ee94c85c896630394c3083f6f59"
 
 [[package]]
 name = "pyfiglet"
@@ -2761,4 +2761,4 @@ test = ["pytest (>=6.0.0)", "setuptools (>=77)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "1183c85c1d0a223d85f4eb2fcf762858979b19da163d27097a93c8a84f8281b2"
+content-hash = "22c9682e2073711b7bdb2cf924619044cd4f8c4c9c42602f1870f9e10256ca1c"
