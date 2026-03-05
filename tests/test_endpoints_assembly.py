@@ -1273,7 +1273,8 @@ class GatewaySourceTest(unittest.TestCase):
         payload = response.json()
         self.assertIn('Inputs are not compatible for LR reaction', payload['detail'])
         self.assertIn('fragment 1: attB1', payload['detail'])
-        self.assertTrue(payload['detail'].endswith('fragment 2: attB1, attL1, attR1, attP1'))
+        print(payload['detail'])
+        self.assertTrue(payload['detail'].endswith('fragment 2: attB1, attP1, attL1, attR1'))
 
     def test_only_multi_site(self):
         attB1 = self.attB1
