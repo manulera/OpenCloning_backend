@@ -29,7 +29,7 @@ primer3-py = "^2.3"
 biopython = {git = "https://github.com/manulera/biopython", rev = "2b4e11f0d48ef593f18cba9bf0fe8e99bb6e5bcf"}
 packaging = "^25.0"
 pairwise-alignments-to-msa = "^0.1.1"
-pydna = {git = "https://github.com/pydna-group/pydna", rev = "b567985784744768579f6c1fad20bd4b70ee29ba"}
+pydna = {git = "https://github.com/pydna-group/pydna", rev = "cbff5df432286ee94c85c896630394c3083f6f59"}
 
 [tool.poetry.group.dev.dependencies]
 autopep8 = "^2.0.4"
