@@ -143,3 +143,19 @@ class ReadDsrecordFromJsonTest(unittest.TestCase):
             read_dsrecord_from_json(seq)
         self.assertEqual(e.exception.status_code, 422)
         self.assertIn('The file for sequence with id 1 is not in a valid genbank format: ', e.exception.detail)
+
+    def test_read_dsrecord_from_json_with_overhangs(self):
+        # Name is parsed as well as sequence
+        with open(f'{test_files}/all_cre_lox.gb', 'r') as f:
+            content = f.read()
+        seq = TextFileSequence(
+            id=1,
+            file_content=content,
+            sequence_file_format=SequenceFileFormat('genbank'),
+            overhang_crick_3prime=1,
+            overhang_watson_3prime=2,
+        )
+        dseqr = read_dsrecord_from_json(seq)
+        self.assertEqual(dseqr.seq.ovhg, 1)
+        self.assertEqual(dseqr.seq.watson_ovhg, 2)
+        self.assertEqual(dseqr.name, 'all_cre_lox')
