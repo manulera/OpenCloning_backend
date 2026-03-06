@@ -54,19 +54,14 @@ def format_sequence_genbank(seq: Dseqrecord, seq_name: str = None) -> TextFileSe
 def read_dsrecord_from_json(seq: TextFileSequence) -> Dseqrecord:
     with io.StringIO(seq.file_content) as handle:
         try:
-            initial_dseqrecord: Dseqrecord = custom_file_parser(handle, 'genbank')[0]
+            out_dseq_record: Dseqrecord = custom_file_parser(handle, 'genbank')[0]
         except ValueError as e:
             raise HTTPException(
                 422, f'The file for sequence with id {seq.id} is not in a valid genbank format: {e}'
             ) from e
-    if seq.overhang_watson_3prime == 0 and seq.overhang_crick_3prime == 0:
-        out_dseq_record = initial_dseqrecord
-    else:
-        out_dseq_record = Dseqrecord(
-            Dseq.from_full_sequence_and_overhangs(
-                str(initial_dseqrecord.seq), seq.overhang_crick_3prime, seq.overhang_watson_3prime
-            ),
-            features=initial_dseqrecord.features,
+    if seq.overhang_watson_3prime != 0 or seq.overhang_crick_3prime != 0:
+        out_dseq_record.seq = Dseq.from_full_sequence_and_overhangs(
+            str(out_dseq_record.seq), seq.overhang_crick_3prime, seq.overhang_watson_3prime
         )
     # We set the id to the integer converted to integer (this is only
     # useful for assemblies)
