@@ -1029,7 +1029,7 @@ class SEVASourceTest(unittest.TestCase):
             response = client.post('/repository_id/seva', json=source.model_dump())
             self.assertEqual(response.status_code, 400)
             payload = response.json()
-            self.assertIn('Premature end of line', payload['detail'])
+            self.assertIn('No sequences found in file', payload['detail'])
 
     def test_redirect(self):
         source = SEVASource(
