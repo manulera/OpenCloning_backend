@@ -9,7 +9,6 @@ from opencloning_linkml.datamodel import TextFileSequence, SequenceFileFormat
 from opencloning.dna_functions import (
     custom_file_parser,
     correct_name,
-    MyGenBankScanner,
     get_sequence_from_euroscarf_url,
     oligonucleotide_hybridization_overhangs,
     get_sequences_from_file_url,
@@ -64,11 +63,6 @@ class MinorFunctionsTest(unittest.TestCase):
             dseq = custom_file_parser(f, 'genbank')[0]
         correct_name(dseq)
         self.assertEqual(dseq.name, 'pFA6a-kanMX6')
-
-    def test_error_on_genbank_scanner(self):
-
-        with self.assertRaises(ValueError):
-            MyGenBankScanner(debug=0)._feed_first_line(None, 'LOCUS hello bye')
 
 
 class MinorFunctionsAsyncTest(unittest.IsolatedAsyncioTestCase):

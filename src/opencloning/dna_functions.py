@@ -24,10 +24,8 @@ from pydna.opencloning_models import (
 from bs4 import BeautifulSoup
 from pydna.common_sub_strings import common_sub_strings
 from Bio.SeqIO import parse as seqio_parse
+from pydna.parsers import parse as pydna_parse
 import io
-import warnings
-from Bio.SeqIO.InsdcIO import GenBankScanner, GenBankIterator
-import re
 
 from opencloning.catalogs import iGEM2024_catalog, openDNA_collections_catalog, seva_catalog, snapgene_catalog
 from .http_client import get_http_client, ConnectError, TimeoutException
@@ -232,29 +230,11 @@ def oligonucleotide_hybridization_overhangs(
     return [pos_rvs - pos_fwd for pos_fwd, pos_rvs, length in matches]
 
 
-class MyGenBankScanner(GenBankScanner):
-    def _feed_first_line(self, consumer, line):
-        # A regex for LOCUS       pKM265       4536 bp    DNA   circular  SYN        21-JUN-2013
-        m = re.match(
-            r'(?i)LOCUS\s+(?P<name>\S+)\s+(?P<size>\d+ bp)\s+(?P<molecule_type>\S+)(?:\s+(?P<topology>circular|linear))?(?:\s+.+\s+)?(?P<date>\d+-\w+-\d+)?',
-            line,
-        )
-        if m is None:
-            raise ValueError('LOCUS line cannot be parsed')
-        name, size, molecule_type, topology, date = m.groups()
-
-        consumer.locus(name)
-        consumer.size(size[:-3])
-        consumer.molecule_type(molecule_type)
-        consumer.topology(topology.lower() if topology is not None else None)
-        consumer.date(date)
-
-
-class MyGenBankIterator(GenBankIterator):
-
-    def __init__(self, source):
-        super(GenBankIterator, self).__init__(source, fmt='GenBank')
-        self.records = MyGenBankScanner(debug=0).parse_records(self.stream)
+def parse(file_streamer: io.BytesIO | io.StringIO, sequence_file_format: SequenceFileFormat) -> list[Dseqrecord]:
+    if sequence_file_format == SequenceFileFormat('genbank'):
+        return pydna_parse(file_streamer.read(), is_path=False)
+    else:
+        return seqio_parse(file_streamer, sequence_file_format)
 
 
 def custom_file_parser(
@@ -269,44 +249,12 @@ def custom_file_parser(
     out = list()
 
     with file_streamer as handle:
-        if sequence_file_format == 'genbank':
-            # Filter out lines starting with "BASE COUNT" (ignore leading whitespace)
-            # TODO: Remove if biopython handles this correctly
-            filtered_lines = list()
-            for line in handle:
-                if not line.lstrip().startswith('BASE COUNT'):
-                    filtered_lines.append(line)
-            handle = io.StringIO(''.join(filtered_lines))
 
-        try:
-            for parsed_seq in seqio_parse(handle, sequence_file_format):
-                circularize = circularize or (
-                    'topology' in parsed_seq.annotations.keys() and parsed_seq.annotations['topology'] == 'circular'
-                )
-                if sequence_file_format == 'genbank' and 'topology' not in parsed_seq.annotations.keys():
-                    # If we could not parse the topology from the LOCUS line, raise an error to
-                    # fallback to regex-based parsing
-                    raise ValueError('LOCUS line does not contain topology')
-                out.append(Dseqrecord(parsed_seq, circular=circularize))
-
-        except ValueError as e:
-            # If not locus-related error, raise
-            if 'LOCUS line does not contain' not in str(e):
-                raise e
-
-            # If the error is about the LOCUS line, we try to parse with regex
-            warnings.warn(
-                'LOCUS line is wrongly formatted, we used a more permissive parser.',
-                stacklevel=2,
+        for parsed_seq in parse(handle, sequence_file_format):
+            circularize = circularize or (
+                'topology' in parsed_seq.annotations.keys() and parsed_seq.annotations['topology'] == 'circular'
             )
-            # Reset the file handle position to the start since we consumed it in the first attempt
-            handle.seek(0)
-            out = list()
-            for parsed_seq in MyGenBankIterator(handle):
-                circularize = circularize or (
-                    'topology' in parsed_seq.annotations.keys() and parsed_seq.annotations['topology'] == 'circular'
-                )
-                out.append(Dseqrecord(parsed_seq, circular=circularize))
+            out.append(Dseqrecord(parsed_seq, circular=circularize))
 
     if len(out) == 0:
         raise ValueError('No sequences found in file')
