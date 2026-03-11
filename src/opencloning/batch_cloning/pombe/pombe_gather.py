@@ -32,7 +32,8 @@ def main(input_dir: str):
 
     # Primer summary table:
     primer_summary = list()
-    primer_names = ['primer_fwd', 'primer_rvs', 'primer_fwd_check', 'primer_rvs_check']
+    primer_names = ['primer_fwd_check', 'primer_fwd', 'primer_rvs', 'primer_rvs_check']
+
     for _, row in df.iterrows():
         gene = row['gene']
         for primer_name in primer_names:

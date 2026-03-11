@@ -30,6 +30,10 @@
             color: #666;
         }
 
+        p.explanation a {
+            color: #0066cc;
+        }
+
         input[type="submit"] {
             display: block;
             margin: 20px auto 40px;
@@ -42,12 +46,62 @@
 
 <body>
     <h1>Batch Cloning Gene List</h1>
+    <p class="explanation" style="margin-bottom: 24px;">
+    <p>Design gene-deletion clones for <em>Schizosaccharomyces pombe</em> in batch.</p>
+    </p>
+    <h3>How to use</h3>
+    <ul>
+        <li>Enter S.&nbsp;pombe systematic gene IDs (e.g. SPBC15D4.01c).</li>
+        <li>Select a marker plasmid.</li>
+        <li>Specify verification primers (optional).</li>
+        <li>The pipeline fetches cloning primers from the Pombe Primer Project (PPPP).</li>
+        <li>Designs homologous-recombination strategies for each gene.</li>
+    </ul>
+
+    <h3>What it returns</h3>
+    <p>After a delay (can be long), it returns a ZIP archive with:</p>
+
+    <ul>
+        <li>Per-gene folders that contain:
+            <ul>
+                <li>Genbank files with the sequences involved</li>
+                <li>A json file containing the entire cloning strategy. You can drag-and-drop
+                    it into the <a href="https://app.opencloning.org" target="_blank" rel="noopener">OpenCloning
+                        website</a> to visualize the strategy.
+                    It will look similar to <a
+                        href="https://app.opencloning.org/?source=example&example=homologous_recombination.json"
+                        target="_blank" rel="noopener">this</a>.
+                </li>
+
+            </ul>
+        </li>
+
+        <li>Summary tables (TSV, Excel, YAML)</li>
+    </ul>
+
+    <h3>Best way to get started</h3>
+
+    <p>
+        Just try with the below example, it will return a zip file and you can drag-and-drop the json file
+        into <a href="https://app.opencloning.org" target="_blank" rel="noopener">OpenCloning</a> to visualize the
+        strategy.
+        Check also the summary.xlsx file to see the primers.
+    </p>
+
     <form>
-        <label for="gene_list">Enter your list of genes (one gene per line):</label><br>
+        <label for="gene_list">Gene list (one gene per line):</label><br>
+        <p class="explanation">
+            S. pombe systematic IDs only (e.g. SPAPB1A10.09, SPBC15D4.01c). One gene ID per line; empty lines are
+            ignored.
+        </p>
         <textarea id="gene_list" name="gene_list" required>SPAPB1A10.09
 SPBC15D4.01c</textarea><br>
         <br><br>
-        <label for="plasmid_option">Choose a plasmid option:</label><br>
+        <label for="plasmid_option">Plasmid source</label><br>
+        <p class="explanation">
+            The plasmid supplies the marker cassette (e.g. KanMX6, NatMX6) to be PCR-amplified and integrated into each
+            gene locus via homologous recombination.
+        </p>
         <div>
             <input type="radio" id="plasmid_addgene" name="plasmid_option" value="addgene" checked
                 onchange="togglePlasmidInput()">
@@ -61,21 +115,28 @@ SPBC15D4.01c</textarea><br>
         </div><br>
 
         <div id="plasmid_file_input" style="display: none;">
-            <label for="plasmid_file_upload">Upload Plasmid Sequence File:</label><br>
+            <label for="plasmid_file_upload">Upload plasmid sequence file</label><br>
+            <p class="explanation">
+                Accepted formats: GenBank (.gb, .gbk, .genbank), FASTA (.fasta, .fa), or snapgene (.dna).
+            </p>
             <input type="file" id="plasmid_file_upload" name="plasmid_file"
                 accept=".gb,.gbk,.genbank,.fasta,.fa,.seq,.dna"><br><br>
         </div>
 
         <div id="addgene_input">
-            <label for="addgene_id">Addgene Identifier:</label><br>
-            <input value="19343" type="text" id="addgene_id" name="addgene_id"><br><br>
+            <label for="addgene_id">Addgene identifier</label><br>
+            <p class="explanation">
+                Numeric Addgene ID of the plasmid (e.g. 19343 for pFA6a-KanMX6). Find IDs at
+                <a href="https://www.addgene.org" target="_blank" rel="noopener">addgene.org</a>.
+            </p>
+            <input value="19343" type="text" id="addgene_id" name="addgene_id" placeholder="e.g. 19343"><br><br>
         </div>
 
         <div>
-            <label for="primer_check">Checking primers:</label><br>
+            <label for="primer_check">Checking primers</label><br>
             <p class="explanation">
-                These primers are used to verify the integration of the marker cassette. Default primers are provided
-                for KanMX6 and NatMX6 cassettes, but you can specify your own primers if using a different marker.
+                Primers used for PCR verification of marker cassette integration. Choose NatMX6 or KanMX6 for
+                standard cassettes, or &quot;Other&quot; to enter custom primers (e.g. for HygMX6 or another marker).
             </p>
             <input type="radio" id="natmx6" name="primer_check" value="natmx6" checked onchange="togglePrimerCheck()">
             <label for="natmx6">NatMx6</label>
@@ -88,23 +149,27 @@ SPBC15D4.01c</textarea><br>
         </div>
         <br>
         <div id="checking_primers">
-            <label for="checking-primer-forward">Checking Primer Forward:</label><br>
+            <label for="checking-primer-forward">Checking primer (forward)</label><br>
             <p class="explanation">
-                Should align with the top strand of the resulting allele, and will produce a PCR product with a primer
-                that aligns with the bottom strand on the right side of the insertion.
+                Aligns to the top strand of the modified allele and pairs with a right-side primer. DNA bases only
+                (A, C, G, T).
             </p>
             <input type="text" id="checking-primer-forward" name="checking_primer_forward" pattern="[ACGTacgt]+"
-                required minlength="1"><br><br>
+                required minlength="1" placeholder="e.g. GTACCACTCTTGACGACACG"><br><br>
 
-            <label for="checking-primer-reverse">Checking Primer Reverse:</label><br>
+            <label for="checking-primer-reverse">Checking primer (reverse)</label><br>
             <p class="explanation">
-                Should align with the bottom strand of the resulting allele, and will produce a PCR product with a
-                primer that aligns with the top strand on the left side of the insertion.
+                Aligns to the bottom strand of the modified allele and pairs with a left-side primer. DNA bases only
+                (A, C, G, T).
             </p>
             <input type="text" id="checking-primer-reverse" name="checking_primer_reverse" pattern="[ACGTacgt]+"
-                required minlength="1"><br><br>
+                required minlength="1" placeholder="e.g. GCATGCTCATGTAGAGCGCC"><br><br>
         </div>
 
+        <p class="explanation" style="margin-top: 16px;">
+            Submit to run the pipeline. You will receive a ZIP file containing per-gene folders (primers, cloning
+            strategy, GenBank sequences) and summary tables (TSV, Excel, YAML).
+        </p>
         <br>
         <input type="submit" value="Submit" id="submit-button">
         <div id="loading-message" style="display: none;">

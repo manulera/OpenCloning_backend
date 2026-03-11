@@ -8,6 +8,8 @@ from pydna.primer import Primer
 from pydna.opencloning_models import CloningStrategy
 from fastapi.datastructures import UploadFile
 from pydna.parsers import parse as pydna_parse
+from opencloning.dna_functions import custom_file_parser
+import io
 
 
 async def main(
@@ -24,9 +26,13 @@ async def main(
 
     # Get plasmid sequence =================================================================================
     if isinstance(plasmid_input, UploadFile):
-        file_content = (await plasmid_input.read()).decode()
+        file_content = await plasmid_input.read()
+        if plasmid_input.filename.endswith('.dna'):
+            file_streamer = io.BytesIO(file_content)
+            plasmid = custom_file_parser(file_streamer, 'snapgene')[0]
+        else:
+            plasmid = pydna_parse(file_content)[0]
 
-        plasmid = pydna_parse(file_content)[0]
     else:
         plasmid = await request_from_addgene(plasmid_input)
 
@@ -49,6 +55,7 @@ async def main(
     pcr_check1.name = 'check_pcr_left'
     pcr_check2 = pcr_assembly(alleles[0], primers[3], common_primers[0], limit=14, mismatches=0)[0]
     pcr_check2.name = 'check_pcr_right'
+    alleles[0].name = 'deletion_allele'
 
     cs = CloningStrategy.from_dseqrecords([pcr_check1, pcr_check2])
 
