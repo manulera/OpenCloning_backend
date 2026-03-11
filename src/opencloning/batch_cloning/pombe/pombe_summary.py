@@ -68,9 +68,9 @@ def process_folder(working_dir: str):
         if seq.name == 'check_pcr_right':
             check_pcr_right_length = len(seq.seq)
 
-    primer_names = ['primer_fwd', 'primer_rvs', 'primer_fwd_check', None, 'primer_rvs_check', None]
     primer_dict = dict()
 
+    primer_names = ['primer_fwd_check', 'primer_fwd', 'primer_rvs', None, 'primer_rvs_check', None]
     for i, primer in enumerate(strategy.primers):
         if primer_names[i] is None:
             continue
