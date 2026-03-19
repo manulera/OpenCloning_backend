@@ -1,10 +1,12 @@
 import os
 import unittest
+from pydna.opencloning_models import id_mode
 from fastapi.testclient import TestClient
 import json
 from pydna.dseqrecord import Dseqrecord
 from pydna.parsers import parse
 import opencloning.main as _main
+from pydna.opencloning_models import CloningStrategy as PydnaCloningStrategy
 from opencloning.dna_functions import format_sequence_genbank, read_dsrecord_from_json
 from opencloning_linkml.datamodel import TextFileSequence, CloningStrategy as BaseCloningStrategy
 from opencloning_linkml._version import __version__ as schema_version
@@ -186,3 +188,14 @@ class ValidateSyntaxTest(unittest.TestCase):
         syntax.assemblyEnzymes = []
         response = client.post('/validate_syntax', json=syntax.model_dump())
         assert response.status_code == 422
+
+
+class NormalizeCloningStrategyTest(unittest.TestCase):
+    def test_normalize_cloning_strategy(self):
+        with open(f'{test_files}/cs_wrong.json') as ins:
+            data = json.load(ins)
+        response = client.post('/normalize_cloning_strategy', json=data)
+        assert response.status_code == 200
+        with id_mode(use_python_internal_id=False):
+            normalized_by_pydna = PydnaCloningStrategy.model_validate(data).normalize().model_dump()
+        assert response.json() == normalized_by_pydna
