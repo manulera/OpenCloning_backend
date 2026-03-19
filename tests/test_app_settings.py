@@ -37,7 +37,10 @@ class TestAppSettings(unittest.TestCase):
         self.assertEqual(app_settings.settings.BATCH_CLONING, True)
         self.assertEqual(app_settings.settings.RECORD_STUBS, False)
         # self.assertEqual(app_settings.settings.NCBI_API_KEY, None) > This is different in the CI
-        self.assertEqual(app_settings.settings.ALLOWED_ORIGINS, ['http://localhost:3000', 'http://localhost:5173'])
+        self.assertEqual(
+            app_settings.settings.ALLOWED_ORIGINS,
+            ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:3002'],
+        )
         self.assertEqual(app_settings.settings.PLANNOTATE_URL, None)
         self.assertEqual(app_settings.settings.PLANNOTATE_TIMEOUT, 20)
         self.assertEqual(app_settings.settings.PROXY_URL, None)
