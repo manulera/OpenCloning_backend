@@ -6,7 +6,7 @@ from opencloning_linkml._version import __version__ as schema_version
 import os
 
 from ..bug_fixing.backend_v0_3 import fix_backend_v0_3
-
+from pydna.opencloning_models import id_mode
 from ..dna_functions import (
     format_sequence_genbank,
     read_dsrecord_from_json,
@@ -19,6 +19,7 @@ from opencloning_linkml.datamodel import TextFileSequence
 from ..get_router import get_router
 from .._version import __version__ as backend_version
 from ..syntax import Syntax
+from pydna.opencloning_models import CloningStrategy as PydnaCloningStrategy
 
 
 router = get_router()
@@ -106,6 +107,14 @@ async def cloning_strategy_is_valid(data: dict, response: Response):
 async def validate_syntax(syntax: Syntax):
     """Validate a syntax"""
     return Response(status_code=200)
+
+
+@router.post('/normalize_cloning_strategy', response_model=BaseCloningStrategy)
+async def normalize_cloning_strategy(cs: BaseCloningStrategy):
+    """Normalize a cloning strategy"""
+    with id_mode(use_python_internal_id=False):
+        cs_pydna = PydnaCloningStrategy.model_validate(cs.model_dump())
+        return cs_pydna.normalize().model_dump()
 
 
 @router.post('/rename_sequence', response_model=TextFileSequence)
