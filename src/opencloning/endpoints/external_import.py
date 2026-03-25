@@ -8,11 +8,15 @@ from starlette.responses import RedirectResponse
 from Bio import BiopythonParserWarning
 from typing import Annotated
 from pydna.utils import location_boundaries
+import tempfile
+from pydna.opencloning_models import CloningStrategy as PydnaCloningStrategy
 
 from opencloning.endpoints.endpoint_utils import format_products
+from pydna.snapgene_history_parser import parse_snapgene_history
 
 from ..get_router import get_router
 from opencloning_linkml.datamodel import (
+    CloningStrategy,
     TextFileSequence,
     UploadedFileSource,
     RepositoryIdSource,
@@ -207,8 +211,20 @@ async def read_from_file(
     return {'sequences': out_sequences, 'sources': out_sources}
 
 
-# TODO: a bit inconsistent that here you don't put {source: {...}} in the request, but
-# directly the object.
+@router.post('/read_snapgene_history', response_model=CloningStrategy)
+async def read_snapgene_history(file: UploadFile = File(...)):
+    file_content = await file.read()
+    try:
+        with tempfile.NamedTemporaryFile() as temp_file:
+            temp_file.write(file_content)
+            temp_file.flush()
+            seqr = parse_snapgene_history(temp_file.name)
+            cloning_strategy = PydnaCloningStrategy.from_dseqrecords([seqr])
+            return cloning_strategy.model_dump()
+    except Exception as e:
+        raise HTTPException(
+            501, 'We could not read the history from the file, use the read_from_file endpoint instead.'
+        ) from e
 
 
 def handle_repository_errors(exception: Exception, repository_name: str) -> None:
@@ -225,6 +241,10 @@ def handle_repository_errors(exception: Exception, repository_name: str) -> None
 
         traceback.print_exc()
         raise HTTPException(500, f'Unexpected error: {exception}')
+
+
+# TODO: a bit inconsistent that here you don't put {source: {...}} in the request, but
+# directly the object.
 
 
 # Redirect to the right repository
