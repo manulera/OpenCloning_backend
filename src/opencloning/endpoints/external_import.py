@@ -2,6 +2,7 @@ from fastapi import Body, Query, HTTPException, Response, UploadFile, File
 from opencloning.app_settings import settings
 from pydantic import create_model
 import io
+import os
 import warnings
 import asyncio
 from starlette.responses import RedirectResponse
@@ -12,7 +13,7 @@ import tempfile
 from pydna.opencloning_models import CloningStrategy as PydnaCloningStrategy
 
 from opencloning.endpoints.endpoint_utils import format_products
-from pydna.snapgene_history_parser import parse_snapgene_history
+from pydna.snapgene_history_parser import parse_snapgene_history, SnapgeneHistoryParserWarning
 
 from ..get_router import get_router
 from opencloning_linkml.datamodel import (
@@ -211,19 +212,38 @@ async def read_from_file(
     return {'sequences': out_sequences, 'sources': out_sources}
 
 
-@router.post('/read_snapgene_history', response_model=CloningStrategy)
-async def read_snapgene_history(file: UploadFile = File(...)):
+@router.post(
+    '/read_snapgene_history',
+    response_model=CloningStrategy,
+    responses={
+        200: {
+            'description': 'The history was successfully parsed',
+            'headers': {
+                'x-warning': {
+                    'description': 'A warning returned if some of the snapgene operations are not supported',
+                    'schema': {'type': 'string'},
+                },
+            },
+        },
+    },
+)
+async def read_snapgene_history(response: Response, file: UploadFile = File(...)):
     file_content = await file.read()
     try:
-        with tempfile.NamedTemporaryFile() as temp_file:
-            temp_file.write(file_content)
-            temp_file.flush()
-            seqr = parse_snapgene_history(temp_file.name)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            file_path = os.path.join(temp_dir, file.filename)
+            with open(file_path, 'wb') as f:
+                f.write(file_content)
+            with warnings.catch_warnings(record=True, category=SnapgeneHistoryParserWarning) as warnings_captured:
+                seqr = parse_snapgene_history(file_path)
+            if warnings_captured:
+                warning_messages = [str(w.message) for w in warnings_captured]
+                response.headers['x-warning'] = '; '.join(warning_messages)
             cloning_strategy = PydnaCloningStrategy.from_dseqrecords([seqr])
             return cloning_strategy.model_dump()
     except Exception as e:
         raise HTTPException(
-            501, 'We could not read the history from the file, use the read_from_file endpoint instead.'
+            501, f'We could not read the history from the file, use the read_from_file endpoint instead: {e}'
         ) from e
 
 
