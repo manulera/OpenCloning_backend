@@ -1127,3 +1127,34 @@ class NotAllowedExternalUrlTest(unittest.TestCase):
         response = client.post('/repository_id/seva', json=source.model_dump())
         self.assertEqual(response.status_code, 403)
         self.assertIn('not allowed', response.json()['detail'])
+
+
+class SnapgeneHistoryTest(unittest.TestCase):
+    def test_snapgene_history(self):
+        file_name = f'{test_files}/gateway_manual_cloning/expression-attP1_2-attP2_2.dna'
+        with open(file_name, 'rb') as f:
+            response = client.post('/read_snapgene_history', files={'file': f})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIn('sources', payload)
+        self.assertIn('sequences', payload)
+        self.assertIn('primers', payload)
+        self.assertNotIn('x-warning', response.headers)
+
+    def test_warnings(self):
+        file_name = f'{test_files}/circularize.dna'
+        with open(file_name, 'rb') as f:
+            response = client.post('/read_snapgene_history', files={'file': f})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIn('sources', payload)
+        self.assertIn('sequences', payload)
+        self.assertIn('primers', payload)
+        self.assertIn('x-warning', response.headers)
+        self.assertIn('Stopped at change topology operation', response.headers['x-warning'])
+
+    def test_not_supported_operations(self):
+        file_name = f'{test_files}/blunt_linear_ligation.dna'
+        with open(file_name, 'rb') as f:
+            response = client.post('/read_snapgene_history', files={'file': f})
+        self.assertEqual(response.status_code, 501)

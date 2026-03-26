@@ -2,17 +2,22 @@ from fastapi import Body, Query, HTTPException, Response, UploadFile, File
 from opencloning.app_settings import settings
 from pydantic import create_model
 import io
+import os
 import warnings
 import asyncio
 from starlette.responses import RedirectResponse
 from Bio import BiopythonParserWarning
 from typing import Annotated
 from pydna.utils import location_boundaries
+import tempfile
+from pydna.opencloning_models import CloningStrategy as PydnaCloningStrategy
 
 from opencloning.endpoints.endpoint_utils import format_products
+from pydna.snapgene_history_parser import parse_snapgene_history, SnapgeneHistoryParserWarning
 
 from ..get_router import get_router
 from opencloning_linkml.datamodel import (
+    CloningStrategy,
     TextFileSequence,
     UploadedFileSource,
     RepositoryIdSource,
@@ -207,8 +212,39 @@ async def read_from_file(
     return {'sequences': out_sequences, 'sources': out_sources}
 
 
-# TODO: a bit inconsistent that here you don't put {source: {...}} in the request, but
-# directly the object.
+@router.post(
+    '/read_snapgene_history',
+    response_model=CloningStrategy,
+    responses={
+        200: {
+            'description': 'The history was successfully parsed',
+            'headers': {
+                'x-warning': {
+                    'description': 'A warning returned if some of the snapgene operations are not supported',
+                    'schema': {'type': 'string'},
+                },
+            },
+        },
+    },
+)
+async def read_snapgene_history(response: Response, file: UploadFile = File(...)):
+    file_content = await file.read()
+    try:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            file_path = os.path.join(temp_dir, file.filename)
+            with open(file_path, 'wb') as f:
+                f.write(file_content)
+            with warnings.catch_warnings(record=True, category=SnapgeneHistoryParserWarning) as warnings_captured:
+                seqr = parse_snapgene_history(file_path)
+            if warnings_captured:
+                warning_messages = [str(w.message) for w in warnings_captured]
+                response.headers['x-warning'] = '; '.join(warning_messages)
+            cloning_strategy = PydnaCloningStrategy.from_dseqrecords([seqr])
+            return cloning_strategy.model_dump()
+    except Exception as e:
+        raise HTTPException(
+            501, f'We could not read the history from the file, use the read_from_file endpoint instead: {e}'
+        ) from e
 
 
 def handle_repository_errors(exception: Exception, repository_name: str) -> None:
@@ -225,6 +261,10 @@ def handle_repository_errors(exception: Exception, repository_name: str) -> None
 
         traceback.print_exc()
         raise HTTPException(500, f'Unexpected error: {exception}')
+
+
+# TODO: a bit inconsistent that here you don't put {source: {...}} in the request, but
+# directly the object.
 
 
 # Redirect to the right repository

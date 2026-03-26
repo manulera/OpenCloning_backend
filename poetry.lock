@@ -1808,7 +1808,7 @@ wheel = "*"
 
 [[package]]
 name = "pydna"
-version = "5.5.8.post17+e7b98167"
+version = "5.5.8.post17+fc28dd68"
 description = "Representing double stranded DNA and functions for simulating cloning and homologous recombination between DNA molecules."
 optional = false
 python-versions = ">=3.10,<4.0"
@@ -1830,6 +1830,7 @@ pydivsufsort = ">=0.0.14"
 pyfiglet = "0.8.post1"
 regex = ">=2024.11.6,<2027.0.0"
 seguid = ">=0.0.5"
+sgffp = {git = "https://github.com/manulera/sgffp", rev = "parse-new-history-section"}
 
 [package.extras]
 clipboard = ["pyperclip (>=1.8.2)"]
@@ -1841,8 +1842,8 @@ primer-screen = ["pyahocorasick (>=2.2.0)"]
 [package.source]
 type = "git"
 url = "https://github.com/pydna-group/pydna"
-reference = "e7b98167e5c45069dc7cc22e8926bd677b9614fa"
-resolved_reference = "e7b98167e5c45069dc7cc22e8926bd677b9614fa"
+reference = "fc28dd68e02aa193ed4a22dab3c56d6a5cded3b6"
+resolved_reference = "fc28dd68e02aa193ed4a22dab3c56d6a5cded3b6"
 
 [[package]]
 name = "pyfiglet"
@@ -2463,6 +2464,28 @@ files = [
 pydivsufsort = ["pydivsufsort (<=0.0.14) ; python_version < \"3.9\"", "pydivsufsort (>=0.0.18) ; python_version >= \"3.9\""]
 
 [[package]]
+name = "sgffp"
+version = "0.15.2"
+description = "Read, write, and manipulate SnapGene files (.dna, .rna, .prot)"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = []
+develop = false
+
+[package.dependencies]
+xmltodict = ">=0.14"
+
+[package.extras]
+dev = ["pytest (>=8.0)", "pytest-cov (>=4.0)"]
+
+[package.source]
+type = "git"
+url = "https://github.com/manulera/sgffp"
+reference = "parse-new-history-section"
+resolved_reference = "4481404063a0f627159edab57766a8a7ce6e263e"
+
+[[package]]
 name = "six"
 version = "1.17.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -2758,7 +2781,22 @@ packaging = ">=24.0"
 [package.extras]
 test = ["pytest (>=6.0.0)", "setuptools (>=77)"]
 
+[[package]]
+name = "xmltodict"
+version = "1.0.4"
+description = "Makes working with XML feel like you are working with JSON"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "xmltodict-1.0.4-py3-none-any.whl", hash = "sha256:a4a00d300b0e1c59fc2bfccb53d7b2e88c32f200df138a0dd2229f842497026a"},
+    {file = "xmltodict-1.0.4.tar.gz", hash = "sha256:6d94c9f834dd9e44514162799d344d815a3a4faec913717a9ecbfa5be1bb8e61"},
+]
+
+[package.extras]
+test = ["pytest", "pytest-cov"]
+
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "2d856e88b8ffbe7cf5aac5b202e08dc45e20ac0c4d78ac1e4cce5cc23d5866e7"
+content-hash = "70746c828d8670fa79651f9729108c98b7c96311ae56615e414fd63bbd032a73"
