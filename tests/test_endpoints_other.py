@@ -18,7 +18,7 @@ from opencloning.syntax import Syntax
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
 
-client = TestClient(_main.app)
+client = TestClient(_main._app)
 
 
 class VersionTest(unittest.TestCase):

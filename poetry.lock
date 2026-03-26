@@ -1808,7 +1808,7 @@ wheel = "*"
 
 [[package]]
 name = "pydna"
-version = "5.5.8.post17+fc28dd68"
+version = "5.5.8.post18+25772b76"
 description = "Representing double stranded DNA and functions for simulating cloning and homologous recombination between DNA molecules."
 optional = false
 python-versions = ">=3.10,<4.0"
@@ -1830,7 +1830,7 @@ pydivsufsort = ">=0.0.14"
 pyfiglet = "0.8.post1"
 regex = ">=2024.11.6,<2027.0.0"
 seguid = ">=0.0.5"
-sgffp = {git = "https://github.com/manulera/sgffp", rev = "parse-new-history-section"}
+sgffp = "^0.15.4"
 
 [package.extras]
 clipboard = ["pyperclip (>=1.8.2)"]
@@ -1842,8 +1842,8 @@ primer-screen = ["pyahocorasick (>=2.2.0)"]
 [package.source]
 type = "git"
 url = "https://github.com/pydna-group/pydna"
-reference = "fc28dd68e02aa193ed4a22dab3c56d6a5cded3b6"
-resolved_reference = "fc28dd68e02aa193ed4a22dab3c56d6a5cded3b6"
+reference = "25772b76ac7dfff52b9f8bec4cc6e0279372afc0"
+resolved_reference = "25772b76ac7dfff52b9f8bec4cc6e0279372afc0"
 
 [[package]]
 name = "pyfiglet"
@@ -2465,25 +2465,21 @@ pydivsufsort = ["pydivsufsort (<=0.0.14) ; python_version < \"3.9\"", "pydivsufs
 
 [[package]]
 name = "sgffp"
-version = "0.15.2"
+version = "0.15.4"
 description = "Read, write, and manipulate SnapGene files (.dna, .rna, .prot)"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
-files = []
-develop = false
+files = [
+    {file = "sgffp-0.15.4-py3-none-any.whl", hash = "sha256:0e55e3cbfb3f47bfedc6394c5b7e6c76066983f1ec59b7e4b53d6954b5168ba8"},
+    {file = "sgffp-0.15.4.tar.gz", hash = "sha256:d37218246ce1c6bce48a8de84c322d9a71011f97f39e24538db867e3b196ccaa"},
+]
 
 [package.dependencies]
 xmltodict = ">=0.14"
 
 [package.extras]
 dev = ["pytest (>=8.0)", "pytest-cov (>=4.0)"]
-
-[package.source]
-type = "git"
-url = "https://github.com/manulera/sgffp"
-reference = "parse-new-history-section"
-resolved_reference = "4481404063a0f627159edab57766a8a7ce6e263e"
 
 [[package]]
 name = "six"
@@ -2799,4 +2795,4 @@ test = ["pytest", "pytest-cov"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "70746c828d8670fa79651f9729108c98b7c96311ae56615e414fd63bbd032a73"
+content-hash = "b0d0a4cce0cc79f32cfd0b28424c873cc5d9992254590c0c56da7c28adbd43ec"

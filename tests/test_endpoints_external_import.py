@@ -31,7 +31,7 @@ from opencloning import app_settings, http_client
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
-client = TestClient(_main.app)
+client = TestClient(_main._app)
 
 
 class ReadFileTest(unittest.TestCase):
