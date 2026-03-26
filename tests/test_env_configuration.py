@@ -56,7 +56,7 @@ class TestServeFrontend(unittest.TestCase):
         MonkeyPatch().setenv('SERVE_FRONTEND', '1')
         reload(app_settings)
         reload(main)
-        client = TestClient(main.app)
+        client = TestClient(main._app)
         self.client = client
 
     # DO this after each test

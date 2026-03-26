@@ -28,7 +28,7 @@ from opencloning_linkml.datamodel import (
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
-client = TestClient(_main.app)
+client = TestClient(_main._app)
 
 
 def get_all_feature_labels(seq: Dseqrecord):

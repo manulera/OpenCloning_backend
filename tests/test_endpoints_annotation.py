@@ -22,7 +22,7 @@ from opencloning_linkml.datamodel import (
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
-client = TestClient(_main.app)
+client = TestClient(_main._app)
 
 dummy_url = 'http://dummy/url'
 
@@ -36,7 +36,7 @@ class PlannotateTest(unittest.TestCase):
         reload(http_client)
         reload(annotation_endpoints)
         reload(_main)
-        self.client = TestClient(_main.app)
+        self.client = TestClient(_main._app)
 
     def tearDown(self):
         pytest.MonkeyPatch().setenv('PLANNOTATE_URL', '')
@@ -102,7 +102,7 @@ class PlannotateAsyncTest(unittest.IsolatedAsyncioTestCase):
         reload(http_client)
         reload(annotation_endpoints)
         reload(_main)
-        self.client = TestClient(_main.app)
+        self.client = TestClient(_main._app)
 
     def tearDown(self):
         pytest.MonkeyPatch().setenv('PLANNOTATE_URL', '')

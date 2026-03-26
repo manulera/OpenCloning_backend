@@ -19,7 +19,7 @@ from opencloning.temp_functions import get_enzymes_from_source, restriction_sequ
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
-client = TestClient(_main.app)
+client = TestClient(_main._app)
 
 
 class RestrictionTest(unittest.TestCase):

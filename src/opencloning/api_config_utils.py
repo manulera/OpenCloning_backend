@@ -70,28 +70,3 @@ class RecordStubRoute(APIRoute):
             return response
 
         return custom_route_handler
-
-
-# Workaround for internal server errors: https://github.com/tiangolo/fastapi/discussions/7847#discussioncomment-5144709
-async def custom_http_exception_handler(request: Request, exc: Exception, app, allow_origins):
-
-    response = JSONResponse(content={'message': 'internal server error'}, status_code=500)
-
-    origin = request.headers.get('origin')
-
-    if origin:
-        allow_all_origins = '*' in allow_origins
-        # Always set Allow-Credentials since the app is configured with allow_credentials=True
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
-
-        if allow_all_origins:
-            # Per CORS spec, Access-Control-Allow-Origin cannot be '*' when credentials are
-            # allowed; the specific request origin must be echoed back instead.
-            response.headers['Access-Control-Allow-Origin'] = origin
-            response.headers.add_vary_header('Origin')
-        elif origin in allow_origins:
-            # Mirror back the allowed origin
-            response.headers['Access-Control-Allow-Origin'] = origin
-            response.headers.add_vary_header('Origin')
-
-    return response

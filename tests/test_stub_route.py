@@ -26,7 +26,7 @@ class StubRouteTest(unittest.TestCase):
         reload(no_assembly_endpoints)
         reload(main)
 
-        client = TestClient(main.app)
+        client = TestClient(main._app)
         self.client = client
         # remove the stubs folder
         shutil.rmtree('stubs', ignore_errors=True)
