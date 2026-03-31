@@ -35,6 +35,8 @@ if PLANNOTATE_URL is not None and not PLANNOTATE_URL.endswith('/'):
 
 PROXY_URL = os.environ.get('PROXY_URL')
 PROXY_CERT_FILE = os.environ.get('PROXY_CERT_FILE')
+ADDGENE_USERNAME = os.environ.get('ADDGENE_USERNAME')
+ADDGENE_PASSWORD = os.environ.get('ADDGENE_PASSWORD')
 
 # Allowed external URLs ===========================================
 default_allowed_urls = [
@@ -70,6 +72,8 @@ class Settings(BaseModel):
     PROXY_URL: str | None
     # Must be a full path to the proxy certificate file
     PROXY_CERT_FILE: str | None
+    ADDGENE_USERNAME: str | None
+    ADDGENE_PASSWORD: str | None
     # Allowed external URLs
     ALLOWED_EXTERNAL_URLS: list[str]
 
@@ -85,5 +89,7 @@ settings = Settings(
     PLANNOTATE_TIMEOUT=PLANNOTATE_TIMEOUT,
     PROXY_URL=PROXY_URL,
     PROXY_CERT_FILE=PROXY_CERT_FILE,
+    ADDGENE_USERNAME=ADDGENE_USERNAME,
+    ADDGENE_PASSWORD=ADDGENE_PASSWORD,
     ALLOWED_EXTERNAL_URLS=ALLOWED_EXTERNAL_URLS,
 )

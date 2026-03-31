@@ -19,6 +19,8 @@ class TestAppSettings(unittest.TestCase):
             'PLANNOTATE_TIMEOUT': os.getenv('PLANNOTATE_TIMEOUT'),
             'PROXY_URL': os.getenv('PROXY_URL'),
             'PROXY_CERT_FILE': os.getenv('PROXY_CERT_FILE'),
+            'ADDGENE_USERNAME': os.getenv('ADDGENE_USERNAME'),
+            'ADDGENE_PASSWORD': os.getenv('ADDGENE_PASSWORD'),
         }
 
     def tearDown(self):
@@ -45,6 +47,8 @@ class TestAppSettings(unittest.TestCase):
         self.assertEqual(app_settings.settings.PLANNOTATE_TIMEOUT, 20)
         self.assertEqual(app_settings.settings.PROXY_URL, None)
         self.assertEqual(app_settings.settings.PROXY_CERT_FILE, None)
+        self.assertEqual(app_settings.settings.ADDGENE_USERNAME, None)
+        self.assertEqual(app_settings.settings.ADDGENE_PASSWORD, None)
 
     def test_settings_from_env(self):
         monkeypatch = pytest.MonkeyPatch()
@@ -57,6 +61,8 @@ class TestAppSettings(unittest.TestCase):
         monkeypatch.setenv('PLANNOTATE_TIMEOUT', '30')
         monkeypatch.setenv('PROXY_URL', 'http://dummy/url')
         monkeypatch.setenv('PROXY_CERT_FILE', 'dummy/cert.pem')
+        monkeypatch.setenv('ADDGENE_USERNAME', 'dummy-user')
+        monkeypatch.setenv('ADDGENE_PASSWORD', 'dummy-password')
 
         reload(app_settings)
 
@@ -69,6 +75,8 @@ class TestAppSettings(unittest.TestCase):
         self.assertEqual(app_settings.settings.PLANNOTATE_TIMEOUT, 30)
         self.assertEqual(app_settings.settings.PROXY_URL, 'http://dummy/url')
         self.assertEqual(app_settings.settings.PROXY_CERT_FILE, 'dummy/cert.pem')
+        self.assertEqual(app_settings.settings.ADDGENE_USERNAME, 'dummy-user')
+        self.assertEqual(app_settings.settings.ADDGENE_PASSWORD, 'dummy-password')
 
         # Test boolean inputs
         monkeypatch.setenv('SERVE_FRONTEND', 'True')

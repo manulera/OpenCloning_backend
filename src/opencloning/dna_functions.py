@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from urllib.parse import quote
+from urllib.parse import quote, urljoin
 import math
 from Bio.Restriction.Restriction import RestrictionBatch
 from Bio.Seq import reverse_complement
@@ -28,6 +28,7 @@ from pydna.parsers import parse as pydna_parse
 import io
 
 from opencloning.catalogs import iGEM2024_catalog, openDNA_collections_catalog, seva_catalog, snapgene_catalog
+from . import app_settings
 from .http_client import get_http_client, ConnectError, TimeoutException
 from .ncbi_requests import get_genbank_sequence
 from typing import Callable
@@ -122,33 +123,60 @@ async def request_from_snapgene(plasmid_set: dict, plasmid_name: str) -> Dseqrec
 
 async def request_from_addgene(repository_id: str) -> Dseqrecord:
 
-    url = f'https://www.addgene.org/{repository_id}/sequences/'
-    async with get_http_client() as addgene_client:
-        resp = await addgene_client.get(url)
-    if resp.status_code == 404:
-        raise HTTPException(404, 'wrong addgene id')
-    soup = BeautifulSoup(resp.content, 'html.parser')
-
-    # Get a span.material-name from the soup, see https://github.com/manulera/OpenCloning_backend/issues/182
-    plasmid_name = soup.find('span', class_='material-name').text.replace(' ', '_')
-
-    # Find the link to either the addgene-full (preferred) or depositor-full (secondary)
-    for addgene_sequence_type in ['depositor-full', 'addgene-full']:
-        if soup.find(id=addgene_sequence_type) is not None:
-            sequence_file_url = next(
-                a.get('href') for a in soup.find(id=addgene_sequence_type).findAll(class_='genbank-file-download')
-            )
-            break
-    else:
+    addgene_login_url = 'https://www.addgene.org/users/login/'
+    addgene_username = app_settings.settings.ADDGENE_USERNAME
+    addgene_password = app_settings.settings.ADDGENE_PASSWORD
+    if addgene_username is None or addgene_password is None:
         raise HTTPException(
-            404,
-            f'The requested plasmid does not have full sequences, see https://www.addgene.org/{repository_id}/sequences/',
+            503,
+            'Addgene access requires credentials. Please set ADDGENE_USERNAME and ADDGENE_PASSWORD environment '
+            'variables and ensure your use complies with Addgene Terms of Use. For more information, see README.md.',
         )
 
     async with get_http_client() as addgene_client:
-        # For media.addgene.org URLs, we need to first visit www.addgene.org
-        # to get the authentication cookie (__Secure_media_edge_auth)
-        await addgene_client.get('https://www.addgene.org/', follow_redirects=True)
+        # Addgene now requires an authenticated login session to access sequence files.
+        login_page_response = await addgene_client.get(addgene_login_url)
+        login_page_soup = BeautifulSoup(login_page_response.content, 'html.parser')
+        csrf_input = login_page_soup.find('input', attrs={'name': 'csrfmiddlewaretoken'})
+        if csrf_input is None or csrf_input.get('value') is None:
+            raise HTTPException(503, 'could not retrieve Addgene login token')
+
+        login_payload = {
+            'username': addgene_username,
+            'password': addgene_password,
+            'csrfmiddlewaretoken': csrf_input['value'],
+            'next': f'/{repository_id}/sequences/',  # Redirect to the plasmid sequences page after login
+        }
+        login_headers = {
+            'Referer': addgene_login_url,
+        }
+        resp = await addgene_client.post(
+            addgene_login_url, data=login_payload, headers=login_headers, follow_redirects=True
+        )
+
+        if resp.status_code == 404:
+            raise HTTPException(404, 'wrong addgene id')
+        if resp.status_code >= 400:
+            raise HTTPException(503, 'could not log in to Addgene')
+
+        soup = BeautifulSoup(resp.content, 'html.parser')
+
+        # Get a span.material-name from the soup, see https://github.com/manulera/OpenCloning_backend/issues/182
+        plasmid_name = soup.find('span', class_='material-name').text.replace(' ', '_')
+
+        # Find the link to either the addgene-full (preferred) or depositor-full (secondary)
+        for addgene_sequence_type in ['depositor-full', 'addgene-full']:
+            if soup.find(id=addgene_sequence_type) is not None:
+                sequence_file_url = next(
+                    a.get('href') for a in soup.find(id=addgene_sequence_type).findAll(class_='genbank-file-download')
+                )
+                sequence_file_url = urljoin('https://www.addgene.org', sequence_file_url)
+                break
+        else:
+            raise HTTPException(
+                404,
+                f'The requested plasmid does not have full sequences, see https://www.addgene.org/{repository_id}/sequences/',
+            )
 
         dseqr = (await get_sequences_from_file_url(sequence_file_url, get_function=addgene_client.get))[0]
 
