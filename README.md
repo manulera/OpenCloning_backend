@@ -128,6 +128,29 @@ For more specific tasks:
 pytest -v -ks
 ```
 
+## Addgene authenticated access
+
+Addgene now requires authenticated access to retrieve sequence files.
+
+To be able to access AddGene sequences, create an account on AddGene and set these environment variables to enable Addgene imports:
+
+```bash
+export ADDGENE_USERNAME="your_addgene_username"
+export ADDGENE_PASSWORD="your_addgene_password"
+```
+
+For one-off local runs you can also prefix commands:
+
+```bash
+ADDGENE_USERNAME="your_addgene_username" ADDGENE_PASSWORD="your_addgene_password" pytest -v -ks
+```
+
+If these variables are not set, Addgene import endpoints return an informative error explaining that credentials are required.
+
+Use of Addgene credentials and data must comply with Addgene Terms of Use.
+
+For CI, configure repository secrets named `ADDGENE_USERNAME` and `ADDGENE_PASSWORD` so Addgene-dependent tests can run.
+
 ## Notes
 
 ### Ping a particular library version from github:

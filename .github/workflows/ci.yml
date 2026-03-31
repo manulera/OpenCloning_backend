@@ -57,6 +57,8 @@ jobs:
         env:
           PYTHONUNBUFFERED: "1"
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
+          ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
+          ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
         run: poetry run python -u -m pytest --tb=short -v --capture=no --cov='.' --cov-report term --cov-report xml:coverage.xml
 
       - name: Stop workflow if mode is fresh
@@ -110,6 +112,8 @@ jobs:
         run: |
           docker run --rm \
             -e NCBI_API_KEY="${{ secrets.NCBI_API_KEY }}" \
+            -e ADDGENE_USERNAME="${{ secrets.ADDGENE_USERNAME }}" \
+            -e ADDGENE_PASSWORD="${{ secrets.ADDGENE_PASSWORD }}" \
             -v "${{ github.workspace }}/tests:/home/backend/tests" \
             manulera/opencloningbackend:test \
             poetry run pytest -vs

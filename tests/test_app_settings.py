@@ -1,35 +1,21 @@
 import unittest
 import pytest
 from importlib import reload
-import os
 
 from opencloning import app_settings
 
 
 class TestAppSettings(unittest.TestCase):
     def setUp(self):
-        # Store original environment variables
-        self.original_env = {
-            'SERVE_FRONTEND': os.getenv('SERVE_FRONTEND'),
-            'BATCH_CLONING': os.getenv('BATCH_CLONING'),
-            'RECORD_STUBS': os.getenv('RECORD_STUBS'),
-            'NCBI_API_KEY': os.getenv('NCBI_API_KEY'),
-            'ALLOWED_ORIGINS': os.getenv('ALLOWED_ORIGINS'),
-            'PLANNOTATE_URL': os.getenv('PLANNOTATE_URL'),
-            'PLANNOTATE_TIMEOUT': os.getenv('PLANNOTATE_TIMEOUT'),
-            'PROXY_URL': os.getenv('PROXY_URL'),
-            'PROXY_CERT_FILE': os.getenv('PROXY_CERT_FILE'),
-        }
+        self.monkeypatch = pytest.MonkeyPatch()
+        self.monkeypatch.delenv('ADDGENE_USERNAME', raising=False)
+        self.monkeypatch.delenv('ADDGENE_PASSWORD', raising=False)
+        self.monkeypatch2 = pytest.MonkeyPatch()
+        reload(app_settings)
 
     def tearDown(self):
-        # Restore original environment variables
-        monkeypatch = pytest.MonkeyPatch()
-        for key, value in self.original_env.items():
-            if value is None:
-                monkeypatch.delenv(key, raising=False)
-            else:
-                monkeypatch.setenv(key, value)
-        reload(os)
+        self.monkeypatch2.undo()
+        self.monkeypatch.undo()
         reload(app_settings)
 
     def test_default_values(self):
@@ -45,18 +31,21 @@ class TestAppSettings(unittest.TestCase):
         self.assertEqual(app_settings.settings.PLANNOTATE_TIMEOUT, 20)
         self.assertEqual(app_settings.settings.PROXY_URL, None)
         self.assertEqual(app_settings.settings.PROXY_CERT_FILE, None)
+        self.assertEqual(app_settings.settings.ADDGENE_USERNAME, None)
+        self.assertEqual(app_settings.settings.ADDGENE_PASSWORD, None)
 
     def test_settings_from_env(self):
-        monkeypatch = pytest.MonkeyPatch()
-        monkeypatch.setenv('SERVE_FRONTEND', '1')
-        monkeypatch.setenv('BATCH_CLONING', '0')
-        monkeypatch.setenv('RECORD_STUBS', '1')
-        monkeypatch.setenv('NCBI_API_KEY', 'test')
-        monkeypatch.setenv('ALLOWED_ORIGINS', 'hello,bye')
-        monkeypatch.setenv('PLANNOTATE_URL', 'http://dummy/url')
-        monkeypatch.setenv('PLANNOTATE_TIMEOUT', '30')
-        monkeypatch.setenv('PROXY_URL', 'http://dummy/url')
-        monkeypatch.setenv('PROXY_CERT_FILE', 'dummy/cert.pem')
+        self.monkeypatch2.setenv('SERVE_FRONTEND', '1')
+        self.monkeypatch2.setenv('BATCH_CLONING', '0')
+        self.monkeypatch2.setenv('RECORD_STUBS', '1')
+        self.monkeypatch2.setenv('NCBI_API_KEY', 'test')
+        self.monkeypatch2.setenv('ALLOWED_ORIGINS', 'hello,bye')
+        self.monkeypatch2.setenv('PLANNOTATE_URL', 'http://dummy/url')
+        self.monkeypatch2.setenv('PLANNOTATE_TIMEOUT', '30')
+        self.monkeypatch2.setenv('PROXY_URL', 'http://dummy/url')
+        self.monkeypatch2.setenv('PROXY_CERT_FILE', 'dummy/cert.pem')
+        self.monkeypatch2.setenv('ADDGENE_USERNAME', 'dummy-user')
+        self.monkeypatch2.setenv('ADDGENE_PASSWORD', 'dummy-password')
 
         reload(app_settings)
 
@@ -69,16 +58,18 @@ class TestAppSettings(unittest.TestCase):
         self.assertEqual(app_settings.settings.PLANNOTATE_TIMEOUT, 30)
         self.assertEqual(app_settings.settings.PROXY_URL, 'http://dummy/url')
         self.assertEqual(app_settings.settings.PROXY_CERT_FILE, 'dummy/cert.pem')
+        self.assertEqual(app_settings.settings.ADDGENE_USERNAME, 'dummy-user')
+        self.assertEqual(app_settings.settings.ADDGENE_PASSWORD, 'dummy-password')
 
         # Test boolean inputs
-        monkeypatch.setenv('SERVE_FRONTEND', 'True')
+        self.monkeypatch2.setenv('SERVE_FRONTEND', 'True')
         reload(app_settings)
         self.assertEqual(app_settings.settings.SERVE_FRONTEND, True)
 
-        monkeypatch.setenv('SERVE_FRONTEND', 'TRUE')
+        self.monkeypatch2.setenv('SERVE_FRONTEND', 'TRUE')
         reload(app_settings)
         self.assertEqual(app_settings.settings.SERVE_FRONTEND, True)
 
-        monkeypatch.setenv('SERVE_FRONTEND', 'true')
+        self.monkeypatch2.setenv('SERVE_FRONTEND', 'true')
         reload(app_settings)
         self.assertEqual(app_settings.settings.SERVE_FRONTEND, True)

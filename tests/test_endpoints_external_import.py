@@ -516,6 +516,31 @@ class AddgeneTest(unittest.TestCase):
         self.assertEqual(response.status_code, 504)
         self.assertIn('Unable to connect to Addgene', response.json()['detail'])
 
+    @respx.mock
+    def test_missing_addgene_credentials_error(self):
+        monkeypatch = pytest.MonkeyPatch()
+        monkeypatch.delenv('ADDGENE_USERNAME', raising=False)
+        monkeypatch.delenv('ADDGENE_PASSWORD', raising=False)
+        reload(app_settings)
+        try:
+            respx.get('https://www.addgene.org/39282/sequences/').mock(
+                return_value=httpx.Response(
+                    200, text='<html><div class="anonymous-user-sequence-alert">login required</div></html>'
+                )
+            )
+            source = AddgeneIdSource(
+                id=1,
+                repository_id='39282',
+            )
+            response = client.post('/repository_id/addgene', json=source.model_dump())
+            self.assertEqual(response.status_code, 503)
+            self.assertIn('ADDGENE_USERNAME', response.json()['detail'])
+            self.assertIn('ADDGENE_PASSWORD', response.json()['detail'])
+            self.assertIn('Addgene Terms of Use', response.json()['detail'])
+        finally:
+            monkeypatch.undo()
+            reload(app_settings)
+
 
 class WekWikGeneSourceTest(unittest.TestCase):
 
