@@ -11,10 +11,12 @@ class TestAppSettings(unittest.TestCase):
         self.monkeypatch = pytest.MonkeyPatch()
         self.monkeypatch.delenv('ADDGENE_USERNAME', raising=False)
         self.monkeypatch.delenv('ADDGENE_PASSWORD', raising=False)
+        self.monkeypatch2 = pytest.MonkeyPatch()
         reload(app_settings)
 
     def tearDown(self):
         self.monkeypatch.undo()
+        self.monkeypatch2.undo()
         reload(os)
         reload(app_settings)
 
@@ -35,18 +37,17 @@ class TestAppSettings(unittest.TestCase):
         self.assertEqual(app_settings.settings.ADDGENE_PASSWORD, None)
 
     def test_settings_from_env(self):
-        self.monkeypatch = pytest.MonkeyPatch()
-        self.monkeypatch.setenv('SERVE_FRONTEND', '1')
-        self.monkeypatch.setenv('BATCH_CLONING', '0')
-        self.monkeypatch.setenv('RECORD_STUBS', '1')
-        self.monkeypatch.setenv('NCBI_API_KEY', 'test')
-        self.monkeypatch.setenv('ALLOWED_ORIGINS', 'hello,bye')
-        self.monkeypatch.setenv('PLANNOTATE_URL', 'http://dummy/url')
-        self.monkeypatch.setenv('PLANNOTATE_TIMEOUT', '30')
-        self.monkeypatch.setenv('PROXY_URL', 'http://dummy/url')
-        self.monkeypatch.setenv('PROXY_CERT_FILE', 'dummy/cert.pem')
-        self.monkeypatch.setenv('ADDGENE_USERNAME', 'dummy-user')
-        self.monkeypatch.setenv('ADDGENE_PASSWORD', 'dummy-password')
+        self.monkeypatch2.setenv('SERVE_FRONTEND', '1')
+        self.monkeypatch2.setenv('BATCH_CLONING', '0')
+        self.monkeypatch2.setenv('RECORD_STUBS', '1')
+        self.monkeypatch2.setenv('NCBI_API_KEY', 'test')
+        self.monkeypatch2.setenv('ALLOWED_ORIGINS', 'hello,bye')
+        self.monkeypatch2.setenv('PLANNOTATE_URL', 'http://dummy/url')
+        self.monkeypatch2.setenv('PLANNOTATE_TIMEOUT', '30')
+        self.monkeypatch2.setenv('PROXY_URL', 'http://dummy/url')
+        self.monkeypatch2.setenv('PROXY_CERT_FILE', 'dummy/cert.pem')
+        self.monkeypatch2.setenv('ADDGENE_USERNAME', 'dummy-user')
+        self.monkeypatch2.setenv('ADDGENE_PASSWORD', 'dummy-password')
 
         reload(app_settings)
 
@@ -63,14 +64,14 @@ class TestAppSettings(unittest.TestCase):
         self.assertEqual(app_settings.settings.ADDGENE_PASSWORD, 'dummy-password')
 
         # Test boolean inputs
-        self.monkeypatch.setenv('SERVE_FRONTEND', 'True')
+        self.monkeypatch2.setenv('SERVE_FRONTEND', 'True')
         reload(app_settings)
         self.assertEqual(app_settings.settings.SERVE_FRONTEND, True)
 
-        self.monkeypatch.setenv('SERVE_FRONTEND', 'TRUE')
+        self.monkeypatch2.setenv('SERVE_FRONTEND', 'TRUE')
         reload(app_settings)
         self.assertEqual(app_settings.settings.SERVE_FRONTEND, True)
 
-        self.monkeypatch.setenv('SERVE_FRONTEND', 'true')
+        self.monkeypatch2.setenv('SERVE_FRONTEND', 'true')
         reload(app_settings)
         self.assertEqual(app_settings.settings.SERVE_FRONTEND, True)
