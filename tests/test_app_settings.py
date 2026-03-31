@@ -1,7 +1,6 @@
 import unittest
 import pytest
 from importlib import reload
-import os
 
 from opencloning import app_settings
 
@@ -15,9 +14,8 @@ class TestAppSettings(unittest.TestCase):
         reload(app_settings)
 
     def tearDown(self):
-        self.monkeypatch.undo()
         self.monkeypatch2.undo()
-        reload(os)
+        self.monkeypatch.undo()
         reload(app_settings)
 
     def test_default_values(self):
