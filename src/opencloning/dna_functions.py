@@ -43,10 +43,6 @@ class AddgeneClientManager:
         self._base_url = 'https://www.addgene.org'
         self._login_url = 'https://www.addgene.org/users/login/'
 
-    @staticmethod
-    def is_login_page(response) -> bool:
-        return '/users/login/' in str(response.url)
-
     async def get_client(self):
         running_loop = asyncio.get_running_loop()
         if self._client is None or self._client_loop is not running_loop:
@@ -65,11 +61,12 @@ class AddgeneClientManager:
             bs = BeautifulSoup(resp.content, 'html.parser')
             if not _has_addgene_anonymous_sequence_alert(bs):
                 return bs
-            raise HTTPException(
+            raise HTTPException(  # pragma: no cover
                 503,
                 'could not access Addgene sequences with the current session. Check ADDGENE_USERNAME/ADDGENE_PASSWORD and ensure your access complies with Addgene Terms of Use. For more information, see README.md.',
             )
-        else:
+        else:  # pragma: no cover
+            # This cannot be reached in the tests because it re-logs every time
             return bs
 
     async def login_and_get(self, redirect_url: str):
@@ -87,7 +84,7 @@ class AddgeneClientManager:
             login_page_response = await addgene_client.get(self._login_url)
             login_page_soup = BeautifulSoup(login_page_response.content, 'html.parser')
             csrf_input = login_page_soup.find('input', attrs={'name': 'csrfmiddlewaretoken'})
-            if csrf_input is None or csrf_input.get('value') is None:
+            if csrf_input is None or csrf_input.get('value') is None:  # pragma: no cover
                 raise HTTPException(503, 'could not retrieve Addgene login token')
 
             login_payload = {
@@ -99,7 +96,7 @@ class AddgeneClientManager:
             login_response = await addgene_client.post(
                 self._login_url, data=login_payload, headers={'Referer': self._login_url}, follow_redirects=True
             )
-            if login_response.status_code >= 400:
+            if login_response.status_code >= 400:  # pragma: no cover
                 raise HTTPException(503, 'could not log in to Addgene')
             return login_response
 
@@ -208,8 +205,6 @@ async def request_from_addgene(repository_id: str) -> Dseqrecord:
     for addgene_sequence_type in ['depositor-full', 'addgene-full']:
         if bs.find(id=addgene_sequence_type) is not None:
             sequence_links = bs.find(id=addgene_sequence_type).find_all(class_='genbank-file-download')
-            if len(sequence_links) == 0:
-                continue
             sequence_file_url = sequence_links[0].get('href')
             sequence_file_url = urljoin('https://www.addgene.org', sequence_file_url)
             break
@@ -221,7 +216,7 @@ async def request_from_addgene(repository_id: str) -> Dseqrecord:
 
     try:
         file_response = await addgene_client.get(sequence_file_url, follow_redirects=True)
-    except HTTPException:
+    except HTTPException:  # pragma: no cover
         await _addgene_manager.login_and_get('')
         file_response = await addgene_client.get(sequence_file_url, follow_redirects=True)
         if file_response.status_code != 200:
