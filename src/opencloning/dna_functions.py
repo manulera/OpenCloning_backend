@@ -207,7 +207,7 @@ async def request_from_addgene(repository_id: str) -> Dseqrecord:
     # Find the link to either the addgene-full (preferred) or depositor-full (secondary)
     for addgene_sequence_type in ['depositor-full', 'addgene-full']:
         if bs.find(id=addgene_sequence_type) is not None:
-            sequence_links = bs.find(id=addgene_sequence_type).findAll(class_='genbank-file-download')
+            sequence_links = bs.find(id=addgene_sequence_type).find_all(class_='genbank-file-download')
             if len(sequence_links) == 0:
                 continue
             sequence_file_url = sequence_links[0].get('href')
