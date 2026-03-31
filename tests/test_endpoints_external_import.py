@@ -507,7 +507,7 @@ class AddgeneTest(unittest.TestCase):
 
     @respx.mock
     def test_addgene_down(self):
-        respx.get('https://www.addgene.org/users/login/').mock(side_effect=httpx.ConnectError('Connection error'))
+        respx.get('https://www.addgene.org/39282/sequences/').mock(side_effect=httpx.ConnectError('Connection error'))
         source = AddgeneIdSource(
             id=1,
             repository_id='39282',
@@ -516,12 +516,18 @@ class AddgeneTest(unittest.TestCase):
         self.assertEqual(response.status_code, 504)
         self.assertIn('Unable to connect to Addgene', response.json()['detail'])
 
+    @respx.mock
     def test_missing_addgene_credentials_error(self):
         monkeypatch = pytest.MonkeyPatch()
         monkeypatch.delenv('ADDGENE_USERNAME', raising=False)
         monkeypatch.delenv('ADDGENE_PASSWORD', raising=False)
         reload(app_settings)
         try:
+            respx.get('https://www.addgene.org/39282/sequences/').mock(
+                return_value=httpx.Response(
+                    200, text='<html><div class="anonymous-user-sequence-alert">login required</div></html>'
+                )
+            )
             source = AddgeneIdSource(
                 id=1,
                 repository_id='39282',
