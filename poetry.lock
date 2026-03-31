@@ -136,22 +136,47 @@ lxml = ["lxml"]
 
 [[package]]
 name = "biopython"
-version = "1.87.dev0"
+version = "1.87"
 description = "Freely available tools for computational molecular biology."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
-files = []
-develop = false
+files = [
+    {file = "biopython-1.87-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:35f13796188412f135acbed196bd6cfedc1257199d50b4883e289bbd96320efc"},
+    {file = "biopython-1.87-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:63978e1b3ae040c52369bc1bd3f4c668171f5f1f0808798eccd74b575cce455d"},
+    {file = "biopython-1.87-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:1e951f4862ffc1dccc28e1c25245059fa653d86028a88f5dfe1b7875875f3a4f"},
+    {file = "biopython-1.87-cp310-cp310-win32.whl", hash = "sha256:86596b05f39afbc5984ee6239c93fd75f6a97fffb9a630d74b45652c24aab964"},
+    {file = "biopython-1.87-cp310-cp310-win_amd64.whl", hash = "sha256:efc16dd8a9312eb655fa590821495b0d8ca25d19f7b4ef4fa4da9e71d59d33e5"},
+    {file = "biopython-1.87-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:58e36efa7eaa8813cffe440af4824afa20cc3c21b1b179a95cc0fb15c4b83c01"},
+    {file = "biopython-1.87-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:ccf00d15e698656796ab14ff3eb175e282da7a08eedd36a29b6cacec5a33e97f"},
+    {file = "biopython-1.87-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:bab39ec4108fb2542a9f1012db8269426fd6e86ed84ebc1b0bd11134ef443dd3"},
+    {file = "biopython-1.87-cp311-cp311-win32.whl", hash = "sha256:126e18ad44e959a1984560562fa4f295c075ce2e610e8ddbc9ec6f52e09f70d8"},
+    {file = "biopython-1.87-cp311-cp311-win_amd64.whl", hash = "sha256:d4ff5369ffb7a966bcf921cae6c8a6eab5070b5df1c9f2ae8c18ad40fdcb7ec5"},
+    {file = "biopython-1.87-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:77ccc634621904d4a8fa0a43b5e0f093fa9df8c9577ed3858af648bb3528f51e"},
+    {file = "biopython-1.87-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:a3428155c3e0abbed7aad5ff08e034d435b84dfe560c8ec58e7d43abda4b6a43"},
+    {file = "biopython-1.87-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:65ba69ef0273e983a9036c2a228142bc34266179a5f03660fc281d332d718630"},
+    {file = "biopython-1.87-cp312-cp312-win32.whl", hash = "sha256:b077777fd2c555434bdcee58743f6f860aa80e1e005d9671913aa73823c6a773"},
+    {file = "biopython-1.87-cp312-cp312-win_amd64.whl", hash = "sha256:856e3d64f1f27db493474ff84916ed8572731a525e001c7d0d8f41a0fd187000"},
+    {file = "biopython-1.87-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:e05ef5d632c319ab3ef77705c74061190d0792b07e1f2b9eee867401b2758e7e"},
+    {file = "biopython-1.87-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:772539297fa16a78f38651c793f53f8c11bd18317b111982e72cf30a6e57512a"},
+    {file = "biopython-1.87-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:6d221b2e08e7e89713fdbfb15c8ea6744e908d59f672cd2b6fcf9ed47910d05e"},
+    {file = "biopython-1.87-cp313-cp313-win32.whl", hash = "sha256:fab1b12f6bc4646b7f56b4c390ecff685f02b5b29e3a0c10477195bb49fe62f8"},
+    {file = "biopython-1.87-cp313-cp313-win_amd64.whl", hash = "sha256:01ee30203bd4b2145cdfe2878499e549a7087f897a6f4d1ebd9de30790123140"},
+    {file = "biopython-1.87-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:db73fe16aa2b20677ac86d1997612acb0aa1a3720bc899f65d2bce5583208e1b"},
+    {file = "biopython-1.87-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:89ffe272517478691439a59cccd3cc2929fc8f6bfb8cbc8cc5acc103660395a7"},
+    {file = "biopython-1.87-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:ff28a6f31630b3c9f52903478a2ed9dd894b07c1998e40eaeefbeefac20f2d0f"},
+    {file = "biopython-1.87-cp314-cp314-win32.whl", hash = "sha256:d740c75d4bc94f9dff51719a0deda37e5e885f06ee6dfbb5e9a21bbe9de35a9c"},
+    {file = "biopython-1.87-cp314-cp314-win_amd64.whl", hash = "sha256:98e397096336a49804b6aaaeac8c47ad82e3e4430862f0cde37be73037f1017e"},
+    {file = "biopython-1.87-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:e4878a9b56775480154c686f81e98f6d907b44d87605bdc2f53538ccdfde9624"},
+    {file = "biopython-1.87-cp314-cp314t-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:a6fcec2e3602ed52ced701f8f7851952383f84dbc4caeb4d202d088170e86b6d"},
+    {file = "biopython-1.87-cp314-cp314t-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:c8da2d44a4b912c7550a051a5ff4bb72a61decc9c4b19ea92cba4c02fffb143c"},
+    {file = "biopython-1.87-cp314-cp314t-win32.whl", hash = "sha256:3670d76759c6cb53ba617f9823d3a438c1aa5415abef6addd29cb81d61d7b312"},
+    {file = "biopython-1.87-cp314-cp314t-win_amd64.whl", hash = "sha256:331c4151608a1d8406eff0d3c52a0ff1fa3e82604fc85f11c696c562919fb161"},
+    {file = "biopython-1.87.tar.gz", hash = "sha256:8456c803459b679a9712422e5a7fd9809f2f089bf69bb085f3b077946ac9bdbf"},
+]
 
 [package.dependencies]
 numpy = "*"
-
-[package.source]
-type = "git"
-url = "https://github.com/manulera/biopython"
-reference = "2b4e11f0d48ef593f18cba9bf0fe8e99bb6e5bcf"
-resolved_reference = "2b4e11f0d48ef593f18cba9bf0fe8e99bb6e5bcf"
 
 [[package]]
 name = "black"
@@ -1747,59 +1772,32 @@ groups = ["main"]
 files = [
     {file = "pydivsufsort-0.0.20-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:a44c4e0605cdb787897e2936e96bd69d6d5e1c8d92fdf04fe70e32b382144d42"},
     {file = "pydivsufsort-0.0.20-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:e0f58f1c41c7136e7018e54171f155fd047bd28c87beb0b34a552bc38511ad2c"},
-    {file = "pydivsufsort-0.0.20-cp310-cp310-macosx_11_0_x86_64.whl", hash = "sha256:1e2885e3873fc65f65ef60a4e010b560dde4aac8bfd0b4864757e60dd82239aa"},
-    {file = "pydivsufsort-0.0.20-cp310-cp310-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:380215a1f03f6d32b64bfec318de485a35b3327c91338d5df29ed451d61cd49a"},
-    {file = "pydivsufsort-0.0.20-cp310-cp310-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:f9e7af1de4e6f46d64b0b4920c9927c9ece44778c947625f24480d5a972bf014"},
     {file = "pydivsufsort-0.0.20-cp310-cp310-win32.whl", hash = "sha256:a9a0aea7f44add04ca2e92a87006ca24ec854f24d3e8df473537dd955e528303"},
     {file = "pydivsufsort-0.0.20-cp310-cp310-win_amd64.whl", hash = "sha256:10835d3bcd6b1dde756778bafb95d7d94b723042284bad75761d5af77505d567"},
     {file = "pydivsufsort-0.0.20-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:68bca87ac285e1a4e0794e0e7d80da6c329a03b2245728a81376bd35a8bf96fa"},
     {file = "pydivsufsort-0.0.20-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:bba4e396acc5b079d0780a4f246dccddeafdcdcef189eacf1a24d345d9511e1e"},
-    {file = "pydivsufsort-0.0.20-cp311-cp311-macosx_11_0_x86_64.whl", hash = "sha256:6d1926d7e4e772f14579473c17d8befa1a9102274ef6bb6f88d34cfb933a9efe"},
-    {file = "pydivsufsort-0.0.20-cp311-cp311-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:43a269625deb0fa3596753e63525fa73e6f22691279f068a05b60deb0d61a6f8"},
-    {file = "pydivsufsort-0.0.20-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:16a0b43b5c928bd835affa66891fb62d8dd967f54834b613d9df2917195f9df2"},
     {file = "pydivsufsort-0.0.20-cp311-cp311-win32.whl", hash = "sha256:0f39719233f2cf4ec370208484445430efd40582c831ff9b7926063bcd8637f7"},
     {file = "pydivsufsort-0.0.20-cp311-cp311-win_amd64.whl", hash = "sha256:5fb06199b3a22dfcb494520cef90fe8be61dbe6741f1efbe9c1f96a82e125c7c"},
-    {file = "pydivsufsort-0.0.20-cp311-cp311-win_arm64.whl", hash = "sha256:b139bfdb9abbc4c6491e1f55039e2128892dad160e0455dc97e5ab6701755c28"},
     {file = "pydivsufsort-0.0.20-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:82a2fe8a2c74350ae99393d46314f49925d247bd0efd0cd1fb382c006f743d81"},
     {file = "pydivsufsort-0.0.20-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:d9d8617babc32983b19c60c6cf9244437bacea9ac4a68bf8e7d558b01d8139c7"},
-    {file = "pydivsufsort-0.0.20-cp312-cp312-macosx_11_0_x86_64.whl", hash = "sha256:4fc5f8e29972fdd25bd4051c6e251e482048ebfb450da86a40603718f96bf0d2"},
-    {file = "pydivsufsort-0.0.20-cp312-cp312-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:f3273681f55b27bde4c154ac2cda38cd3433f82adedf4e03c0ca89e01cf6ddb4"},
-    {file = "pydivsufsort-0.0.20-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:7fe44db4baf1d69b02b931e3babea50c01fa876829e65159e46742a51b1f5ec8"},
     {file = "pydivsufsort-0.0.20-cp312-cp312-win32.whl", hash = "sha256:f121fe36a0992594063a5fa57dc365f2cfad156638814b55a9bc8a628954386a"},
     {file = "pydivsufsort-0.0.20-cp312-cp312-win_amd64.whl", hash = "sha256:83242277a2ded2596f2c6e2bac7fa036f35e0eb4613794e8f600812691967889"},
-    {file = "pydivsufsort-0.0.20-cp312-cp312-win_arm64.whl", hash = "sha256:b9e976464b4c79735d87aaf9926ca60667420884d71d1a6467321da87387278a"},
     {file = "pydivsufsort-0.0.20-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:c453dba1f122554493e50f05b83d944f066cb990468ff8c428708db2b8b47c1b"},
     {file = "pydivsufsort-0.0.20-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:dd5480734ffd0c85b1d0f25624d13e8d54c1eacf8dd56173b1db24915ce2f2d1"},
-    {file = "pydivsufsort-0.0.20-cp313-cp313-macosx_11_0_x86_64.whl", hash = "sha256:074c5c0055302e49d6ca6b452dedcf30393ebb039cbdca8c55bf61df0e9eb4f5"},
-    {file = "pydivsufsort-0.0.20-cp313-cp313-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:fed7bf5d78084f5a9142878d3c4fa9f311b1d59ffe90df7ee08f98ef395bde2b"},
-    {file = "pydivsufsort-0.0.20-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:01a2b1c5c0d3ff264af23b86c32f68438bf163d03af42e611eefce21cf3d674a"},
     {file = "pydivsufsort-0.0.20-cp313-cp313-win32.whl", hash = "sha256:35253497bedf48f0f18a7a47e48a7e0eb901bea4e0b4035185e23e76f57855e2"},
     {file = "pydivsufsort-0.0.20-cp313-cp313-win_amd64.whl", hash = "sha256:44327ccb5478b4fcdb982eceee3b40cbd584ab851e8e94c473d4ad6c4f3744ae"},
-    {file = "pydivsufsort-0.0.20-cp313-cp313-win_arm64.whl", hash = "sha256:e2d88a4e74eb7a3efe98de773dc7d557ed8fcb4fcb930bf8d96e8be8d43245b1"},
     {file = "pydivsufsort-0.0.20-cp314-cp314-macosx_10_15_x86_64.whl", hash = "sha256:0133f830a90393427bd66fa0f51424d4da8f729edc2212e2b1734f689b6fbdf8"},
     {file = "pydivsufsort-0.0.20-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:a422d931459a430bbd885e69ff5301c13edccc57fd1bb85e53cfe85476c2ec2f"},
-    {file = "pydivsufsort-0.0.20-cp314-cp314-macosx_11_0_x86_64.whl", hash = "sha256:f3d0189e9c65b58b858e115e88b18784cd99dbed02552bfaa5b9ce3a093f8b10"},
-    {file = "pydivsufsort-0.0.20-cp314-cp314-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:2c4c9c3beff358a801eef7daa94c2e9302dfbe250a78a305c8d9b094639ed8ff"},
-    {file = "pydivsufsort-0.0.20-cp314-cp314-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:933de7981857a611ce496dff3e0b8bc5aa16b67ab36b575af258a7e93942e74c"},
     {file = "pydivsufsort-0.0.20-cp314-cp314-win32.whl", hash = "sha256:1b95233a3ab419c7207ff028316d8489db3d2788bd8c72872269081e7b77e883"},
     {file = "pydivsufsort-0.0.20-cp314-cp314-win_amd64.whl", hash = "sha256:5500ca4e12f17ebe7744943c5ee06c86be15b7deaa491a1fa51377346d42d0bf"},
-    {file = "pydivsufsort-0.0.20-cp314-cp314-win_arm64.whl", hash = "sha256:1ee40f902403fb8ad99b9ab7151ef0fb646f85e9974f02cd9cbbf01af8bfc90b"},
     {file = "pydivsufsort-0.0.20-cp314-cp314t-macosx_10_15_x86_64.whl", hash = "sha256:99783039388aab0bf6636bb75ffac8cd2f3f5f4408aed063e31f747695c6a655"},
     {file = "pydivsufsort-0.0.20-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:671fa5407750c3410ec561cf6e818f430714072c9316355e37376066d673c2d7"},
-    {file = "pydivsufsort-0.0.20-cp314-cp314t-macosx_11_0_x86_64.whl", hash = "sha256:187b47b7b4b4e49045ed0162160f76cced2ab99418ecfb5ba86c4ae5ba727988"},
-    {file = "pydivsufsort-0.0.20-cp314-cp314t-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:6f77e6f9ce05c240d7787113afe4d45fd15a2a9e0a14a8fb0e8e367bccac71ec"},
-    {file = "pydivsufsort-0.0.20-cp314-cp314t-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:54d6dcf55af658ce2f8ea7272f23ba34c0107af1fda1b6ee49863a358650b45e"},
     {file = "pydivsufsort-0.0.20-cp314-cp314t-win32.whl", hash = "sha256:2b87b57223f425ffd4a796925b6357db97571a137be560702a8d89a090d66e7e"},
     {file = "pydivsufsort-0.0.20-cp314-cp314t-win_amd64.whl", hash = "sha256:58c4db764c43a12c2f4d5f2550c0529d3d30d68822e08966e1041b46cfa46b71"},
-    {file = "pydivsufsort-0.0.20-cp314-cp314t-win_arm64.whl", hash = "sha256:a18f89f64d2af798dabcd953a417141fb86a233927996a732f7b3d26586264a4"},
     {file = "pydivsufsort-0.0.20-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:5ef940ece7d1f445edce2dcee07c36a52c502f2bb30ad1b1218339d2669d2f4d"},
     {file = "pydivsufsort-0.0.20-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:291d00a02b63449bcf86f8d99b261f64adb800fb63ff2c5fa9baefa8a7f04a92"},
-    {file = "pydivsufsort-0.0.20-cp39-cp39-macosx_11_0_x86_64.whl", hash = "sha256:5b3b180b4a8716560df379638750c1705fc569249ca66b3e93263e581eaa901c"},
-    {file = "pydivsufsort-0.0.20-cp39-cp39-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:3ce508d32b1f1abb554f7bc8d24de86c7538e3896065e4fdaa96f9039d841a69"},
-    {file = "pydivsufsort-0.0.20-cp39-cp39-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:f6f95fc8eb9bba6099863b0196b21e2f8d90934cfd154343cb83959eef82148f"},
     {file = "pydivsufsort-0.0.20-cp39-cp39-win32.whl", hash = "sha256:df4f20129ddf6465fdb70aa03225f2510362dd5238d00541232befd083a02076"},
     {file = "pydivsufsort-0.0.20-cp39-cp39-win_amd64.whl", hash = "sha256:95377e54a5038ce3e84a51a83bf57884929d7526573e4a592ab79c00f44d7674"},
-    {file = "pydivsufsort-0.0.20.tar.gz", hash = "sha256:685a5791fae5e200ce8b7a4e5d515b6153ffde7175331bd0df81a421108ad4df"},
 ]
 
 [package.dependencies]
@@ -1808,29 +1806,31 @@ wheel = "*"
 
 [[package]]
 name = "pydna"
-version = "5.5.8-post.8+cbe5cf17"
+version = "5.5.9"
 description = "Representing double stranded DNA and functions for simulating cloning and homologous recombination between DNA molecules."
 optional = false
-python-versions = ">=3.10,<4.0"
+python-versions = "<4.0,>=3.10"
 groups = ["main"]
-files = []
-develop = false
+files = [
+    {file = "pydna-5.5.9-py3-none-any.whl", hash = "sha256:456432c8c516e36b93bd6f8ec75244035cf90ffdd030e8d2cc96b69600666c66"},
+    {file = "pydna-5.5.9.tar.gz", hash = "sha256:62bb27a5698bcfac25a255852d0dc6bd4d7aa0f07f81d772e7b092e57c8e1a3d"},
+]
 
 [package.dependencies]
 appdirs = ">=1.4.4"
-biopython = "^1.86"
+biopython = ">=1.87,<2.0"
 networkx = ">=2.8.8"
 numpy = [
     {version = ">1.26", markers = "python_version < \"3.12\""},
     {version = ">=2.3.0", markers = "python_version >= \"3.12\""},
 ]
-opencloning-linkml = "^1"
+opencloning-linkml = ">=1,<2"
 prettytable = ">=3.5.0"
-pydivsufsort = ">=0.0.14"
+pydivsufsort = ">=0.0.20,<0.0.21"
 pyfiglet = "0.8.post1"
 regex = ">=2024.11.6,<2027.0.0"
 seguid = ">=0.0.5"
-sgffp = "^0.15.4"
+sgffp = ">=0.15.4,<0.16.0"
 
 [package.extras]
 clipboard = ["pyperclip (>=1.8.2)"]
@@ -1838,12 +1838,6 @@ download = ["pyparsing (>=2.4.7)", "requests (>=2.26.0)"]
 express = ["cai2 (>=1.0.5)"]
 gel = ["matplotlib (>=3.4.3)", "pillow (>=8.4.0)", "scipy (>=1.11.3) ; python_version >= \"3.12\"", "scipy (>=1.9.3) ; python_version < \"3.12\""]
 primer-screen = ["pyahocorasick (>=2.2.0)"]
-
-[package.source]
-type = "git"
-url = "https://github.com/pydna-group/pydna"
-reference = "cbe5cf17e9926631f3755640fa4de5c94bcd93e8"
-resolved_reference = "cbe5cf17e9926631f3755640fa4de5c94bcd93e8"
 
 [[package]]
 name = "pyfiglet"
@@ -2793,4 +2787,4 @@ test = ["pytest", "pytest-cov"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "3a9e4aba521bd093ca71b5759bdd908bdeaf3181a7d9775b29983035364862af"
+content-hash = "6bcec090e34a9c18fdb44c5199c6e3ac755c84e89412aa914fc340b5aab90fe0"

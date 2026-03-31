@@ -26,10 +26,9 @@ pandas = "^2.2.3"
 openpyxl = "^3.1.5"
 pyyaml = "^6.0.2"
 primer3-py = "^2.3"
-biopython = {git = "https://github.com/manulera/biopython", rev = "2b4e11f0d48ef593f18cba9bf0fe8e99bb6e5bcf"}
 packaging = "^25.0"
 pairwise-alignments-to-msa = "^0.1.1"
-pydna = {git = "https://github.com/pydna-group/pydna", rev = "cbe5cf17e9926631f3755640fa4de5c94bcd93e8"}
+pydna = "^5.5.9"
 
 [tool.poetry.group.dev.dependencies]
 autopep8 = "^2.0.4"
