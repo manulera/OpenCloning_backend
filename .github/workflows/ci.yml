@@ -98,7 +98,7 @@ jobs:
       - name: Create testing Dockerfile
         run: |
           sed '/## Docker-test-comment/,$d' docker/opencloning.Dockerfile > Dockerfile.test &&
-          echo "RUN uv sync --frozen --package opencloning --no-default-groups --no-editable --group test" >> Dockerfile.test &&
+          echo "RUN uv sync --frozen --no-default-groups --no-editable --group test" >> Dockerfile.test &&
           echo "ENV PATH=\"/usr/local/bin/mafft/bin:\$PATH\"" >> Dockerfile.test
 
       - name: Build test image
