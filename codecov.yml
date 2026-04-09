@@ -1,4 +1,3 @@
 ignore:
   - "packages/opencloning/tests/**"
   - "packages/opencloning/src/opencloning/batch_cloning/pombe"
-  - "packages/opencloning/src/opencloning/batch_cloning/EBIC"
