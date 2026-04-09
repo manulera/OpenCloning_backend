@@ -16,12 +16,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Run the tests with exact poetry dependencies and with
-        # The dependencies you would get if you pip install the package
+        # Run tests with locked resolution and with a freshly resolved lockfile
         mode: [lock, fresh]
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: install mafft
@@ -32,53 +31,54 @@ jobs:
           wget https://github.com/manulera/MARS/releases/download/v0.2/mars-Linux
           chmod +x mars-Linux
           sudo mv mars-Linux /usr/local/bin/mars
-      - name: Install Python
-        uses: actions/setup-python@v1
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: 3.12
-      - name: Install poetry
-        run: |
-          python -m pip install --upgrade pip
-          pip install poetry==2.3.2
-      - name: Load cached venv
-        if: ${{ matrix.mode == 'lock' }}
-        id: cached-poetry-dependencies
-        uses: actions/cache@v4
+          version: 0.11.5
+          enable-cache: true
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}-${{ hashFiles('**/pyproject.toml') }}
-      - name: Remove poetry.lock
+          python-version: "3.12"
+      - name: Remove uv.lock (fresh resolution)
         if: ${{ matrix.mode == 'fresh' }}
-        run: rm poetry.lock
+        run: rm -f uv.lock
+      - name: Lock dependencies
+        if: ${{ matrix.mode == 'fresh' }}
+        run: uv lock
       - name: Install dependencies
-        if: ${{ matrix.mode != 'lock' }} || steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry cache clear --all && poetry install
+        run: uv sync --frozen
       - name: Run tests
         env:
           PYTHONUNBUFFERED: "1"
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
           ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
           ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
-        run: poetry run python -u -m pytest --tb=short -v --capture=no --cov='.' --cov-report term --cov-report xml:coverage.xml
+        run: |
+          uv run pytest packages/opencloning/tests --tb=short -v --capture=no \
+            --cov=packages/opencloning/src/opencloning --cov-report term --cov-report xml:coverage.xml
 
       - name: Stop workflow if mode is fresh
         if: ${{ matrix.mode == 'fresh' }}
         run: exit 0
 
       - uses: actions/cache@v4
+        if: ${{ matrix.mode == 'lock' }}
         id: cache-precommit
         with:
           path: ~/.cache/pre-commit
           key: ${{ runner.os }}-precommit-hooks-v2-${{ hashFiles('**/.pre-commit-config.yaml') }}
 
       - name: Installing pre-commit hooks (cached)
-        if: steps.cache-precommit.outputs.cache-hit != 'true'
-        run: poetry run pre-commit install --install-hooks
+        if: ${{ matrix.mode == 'lock' && steps.cache-precommit.outputs.cache-hit != 'true' }}
+        run: uv run pre-commit install --install-hooks
 
       - name: Run style checking via pre-commit
-        run: poetry run pre-commit run --files ${{ steps.changed-files.outputs.all_changed_files }}
+        if: ${{ matrix.mode == 'lock' }}
+        run: uv run pre-commit run --all-files
 
       - name: 🔼 Upload coverage to Codecov
+        if: ${{ matrix.mode == 'lock' }}
         uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: true
@@ -93,12 +93,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Create testing Dockerfile
         run: |
-          sed '/## Docker-test-comment/,$d' Dockerfile > Dockerfile.test &&
-          echo "RUN poetry install --only main --only test" >> Dockerfile.test &&
+          sed '/## Docker-test-comment/,$d' docker/opencloning.Dockerfile > Dockerfile.test &&
+          echo "RUN uv sync --frozen --no-default-groups --no-editable --group test" >> Dockerfile.test &&
           echo "ENV PATH=\"/usr/local/bin/mafft/bin:\$PATH\"" >> Dockerfile.test
 
       - name: Build test image
@@ -114,9 +114,9 @@ jobs:
             -e NCBI_API_KEY="${{ secrets.NCBI_API_KEY }}" \
             -e ADDGENE_USERNAME="${{ secrets.ADDGENE_USERNAME }}" \
             -e ADDGENE_PASSWORD="${{ secrets.ADDGENE_PASSWORD }}" \
-            -v "${{ github.workspace }}/tests:/home/backend/tests" \
+            -v "${{ github.workspace }}/packages/opencloning/tests:/home/backend/packages/opencloning/tests" \
             manulera/opencloningbackend:test \
-            poetry run pytest -vs
+            uv run pytest packages/opencloning/tests -vs
 
   # Update docker image when committing to master branch
   push_to_registry:
@@ -125,10 +125,15 @@ jobs:
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Install Python
-        uses: actions/setup-python@v1
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: 3.12
 
@@ -140,7 +145,8 @@ jobs:
       - name: Get package version
         id: get-package-version
         run: |
-          echo "package-version=$(poetry version -s)" >> $GITHUB_OUTPUT
+          uv sync --frozen --package opencloning --no-default-groups --no-editable
+          echo "package-version=$(uv run python -c 'import importlib.metadata as m; print(m.version("opencloning"))')" >> "$GITHUB_OUTPUT"
 
       - name: Log in to Docker Hub
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
@@ -158,6 +164,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: docker/opencloning.Dockerfile
           push: true
           tags: manulera/opencloningbackend:latest
           labels: ${{ steps.meta.outputs.labels }}

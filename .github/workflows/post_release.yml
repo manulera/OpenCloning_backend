@@ -33,6 +33,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: docker/opencloning.Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
@@ -59,21 +60,23 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.12
-
-      - name: Install Poetry
-        run: |
-          pip install poetry
-          poetry self add "poetry-dynamic-versioning[plugin]"
+          python-version: "3.12"
 
       - name: Build source and wheel archives
-        run: |
-          poetry build
+        run: uv build --package opencloning
 
       - name: Publish distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/

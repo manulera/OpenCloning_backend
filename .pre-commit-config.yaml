@@ -23,7 +23,7 @@ repos:
           python -m nbstripout --keep-output $@
         language: system
         files: \.ipynb$
-        exclude: tests/
+        exclude: packages/opencloning/tests/
   # Hook to ensure that httpx is only imported in the httpClient.py file
   - repo: local
     hooks:
@@ -34,7 +34,7 @@ repos:
         files: \.py$
         exclude: |
             (?x)^(
-                tests/.*|
+                packages/opencloning/tests/.*|
                 scripts/.*|
             )$
   # Hook to ensure that primer3 is only imported in the primer3_functions.py file
@@ -46,4 +46,4 @@ repos:
         entry: python scripts/check_primer3_imports.py
         language: system
         files: \.py$
-        exclude: tests/
+        exclude: packages/opencloning/tests/

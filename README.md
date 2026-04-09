@@ -21,7 +21,7 @@ You can write python scripts to automate cloning using the python library [pydna
 
 * The data model changes, so the json files you created may not be compatible with the newest version of the library, which uses the latest data mode. You can easily fix this using `python -m opencloning_linkml.migrations.migrate file.json
 ` see [full documentation](https://github.com/OpenCloning/OpenCloning_LinkML?tab=readme-ov-file#migration-from-previous-versions-of-the-schema).
-* Before version 0.3, there was a bug for assembly fields that included locations spanning the origin. See the details and how to fix it in the documentation of [this file](./src/opencloning/bug_fixing/README.md).
+* Before version 0.3, there was a bug for assembly fields that included locations spanning the origin. See the details and how to fix it in the documentation of [this file](./packages/opencloning/src/opencloning/bug_fixing/README.md).
 
 ## Getting started
 
@@ -42,25 +42,35 @@ pip install opencloning
 uvicorn opencloning.main:app
 ```
 
-### Running locally if you want to contribute
+### Installing from GitHub (monorepo)
 
-For the management of the dependencies `poetry` is used, if you don't have it, visit https://python-poetry.org/.
-
-In the project directory:
+This repository is a uv workspace; the installable package lives in `packages/opencloning/`.
+When installing directly from GitHub, include the `subdirectory` fragment:
 
 ```bash
-# This should install the dependencies and create a virtual environment
-poetry install
+# uv
+uv add "opencloning @ git+https://github.com/manulera/OpenCloning_backend.git@master#subdirectory=packages/opencloning"
 
-# Install the pre-commit hooks
-pre-commit install
-
-# Activate the virtual environment (used to be `poetry shell`)
-poetry env activate
-
+# pip
+pip install "git+https://github.com/manulera/OpenCloning_backend.git@master#subdirectory=packages/opencloning"
 ```
 
-The virtual environment is installed in the project folder. This is convenient if you are using an IDE for development. For settings of vscode see the folder `.vscode`.
+### Running locally if you want to contribute
+
+This repository is a [uv](https://docs.astral.sh/uv/) workspace: the installable package lives under `packages/opencloning/`, and the repo root holds workspace metadata and shared dev dependencies. Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then from the repository root:
+
+```bash
+# Install the workspace (editable opencloning + dev/test dependency groups) into .venv
+uv sync
+
+# Install the pre-commit hooks
+uv run pre-commit install
+
+# Run tools via uv, or activate .venv and use them directly
+source .venv/bin/activate   # optional
+```
+
+The virtual environment is created at the repository root (`.venv`). For VS Code settings see the folder `.vscode`.
 
 Now you should be able to run the api by running:
 
@@ -75,10 +85,10 @@ Then you should be able to open the API docs at [http://127.0.0.1:8000/docs](htt
 
 If you want to serve the full site (backend and frontend) with docker, check [getting started in 5 minutes](https://github.com/manulera/OpenCloning#timer_clock-getting-started-in-5-minutes) in the main repository.
 
-If you want to serve only the backend from a docker container, an image is available at [manulera/opencloningbackend](https://hub.docker.com/r/manulera/opencloningbackend). The image is built from the Dockerfile in the root of this repository and exposes the port 3000. To run it:
+If you want to serve only the backend from a docker container, an image is available at [manulera/opencloningbackend](https://hub.docker.com/r/manulera/opencloningbackend). The image is built from [`docker/opencloning.Dockerfile`](docker/opencloning.Dockerfile) (repository root as build context) and exposes the port 3000. To run it:
 
 ```bash
-docker build -t manulera/opencloningbackend .
+docker build -f docker/opencloning.Dockerfile -t manulera/opencloningbackend .
 docker run -d --name backendcontainer -p 8000:8000 manulera/opencloningbackend
 
 ```
@@ -124,8 +134,10 @@ For more specific tasks:
 
 ## Running the tests locally
 
-```
-pytest -v -ks
+From the repository root (after `uv sync`):
+
+```bash
+uv run pytest packages/opencloning/tests -v -ks
 ```
 
 ## Addgene authenticated access
@@ -142,7 +154,7 @@ export ADDGENE_PASSWORD="your_addgene_password"
 For one-off local runs you can also prefix commands:
 
 ```bash
-ADDGENE_USERNAME="your_addgene_username" ADDGENE_PASSWORD="your_addgene_password" pytest -v -ks
+ADDGENE_USERNAME="your_addgene_username" ADDGENE_PASSWORD="your_addgene_password" uv run pytest packages/opencloning/tests -v -ks
 ```
 
 If these variables are not set, Addgene import endpoints return an informative error explaining that credentials are required.
@@ -153,17 +165,17 @@ For CI, configure repository secrets named `ADDGENE_USERNAME` and `ADDGENE_PASSW
 
 ## Notes
 
-### Ping a particular library version from github:
+### Pin a particular library version from GitHub
 
 ```
-poetry add git+https://github.com/pydna-group/pydna#4fd760d075f77cceeb27969e017e04b42f6d0aa3
+uv add git+https://github.com/pydna-group/pydna --branch main
+uv add git+https://github.com/pydna-group/pydna --rev 4fd760d075f77cceeb27969e017e04b42f6d0aa3
 ```
 
-When installing the last version, sometimes poetry may not be able to access the latest version
-and complain with `Could not find a matching version`, in that case you can do:
+If resolution seems stale, clear uv’s cache:
 
-```
-poetry cache clear pypi --all
+```bash
+uv cache clean
 ```
 
 ### Generating API stubs
@@ -180,10 +192,10 @@ This will record the stubs (requests and responses) in the `stubs` folder.
 
 ### Catalogs
 
-Catalogs are used to map ids to urls for several plasmid collections. They are stored in the `src/opencloning/catalogs` folder.
+Catalogs are used to map ids to urls for several plasmid collections. They are stored under `packages/opencloning/src/opencloning/catalogs/`.
 
-To update the catalogs, run the following command:
+To update the catalogs, run the following command from the repository root:
 
 ```bash
-poetry run python scripts/update_catalogs.py
+uv run python scripts/update_catalogs.py
 ```

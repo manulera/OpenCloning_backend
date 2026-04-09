@@ -100,7 +100,8 @@ async def update_iGEM2024_catalog(path: str):
             yaml.dump(reshaped_data, f)
 
 
-asyncio.run(update_seva_catalog('src/opencloning/catalogs/seva.tsv'))
-asyncio.run(update_snapgene_catalog('src/opencloning/catalogs/snapgene.yaml'))
-asyncio.run(update_openDNA_collections_catalog('src/opencloning/catalogs/openDNA_collections.yaml'))
-asyncio.run(update_iGEM2024_catalog('src/opencloning/catalogs/igem2024.yaml'))
+_catalogs = 'packages/opencloning/src/opencloning/catalogs'
+asyncio.run(update_seva_catalog(f'{_catalogs}/seva.tsv'))
+asyncio.run(update_snapgene_catalog(f'{_catalogs}/snapgene.yaml'))
+asyncio.run(update_openDNA_collections_catalog(f'{_catalogs}/openDNA_collections.yaml'))
+asyncio.run(update_iGEM2024_catalog(f'{_catalogs}/igem2024.yaml'))
