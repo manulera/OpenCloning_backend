@@ -1,64 +1,43 @@
 [project]
-name = "opencloning"
-dynamic = ["version"]
+name = "opencloning-workspace"
+version = "0.0.0"
+requires-python = ">=3.11,<4"
+dependencies = ["opencloning"]
 
+[tool.uv]
+package = false
+default-groups = ["dev", "test", "ipython"]
 
-[tool.poetry]
-authors = ["Manuel Lera-Ramirez <manulera14@gmail.com>"]
-description = "Backend of OpenCloning, a web application to generate molecular cloning strategies in json format, and share them with others."
-license = "MIT"
-name = "opencloning"
-version = "0.1.0"
-package-mode = true
-readme = "README.md"
-repository = "https://github.com/manulera/OpenCloning_backend"
+[tool.uv.sources]
+opencloning = { workspace = true }
 
-[tool.poetry.dependencies]
-beautifulsoup4 = "^4.11.1"
-fastapi = "*"
-httpx = "^0.28.1"
-python = "^3.11"
-python-multipart = "*"
-uvicorn = "*"
-regex = "^2024.11.6"
-pydantic = "^2.7.1"
-pandas = "^2.2.3"
-openpyxl = "^3.1.5"
-pyyaml = "^6.0.2"
-primer3-py = "^2.3"
-packaging = "^25.0"
-pairwise-alignments-to-msa = "^0.1.1"
-pydna = "^5.5.9"
+[tool.uv.workspace]
+members = ["packages/opencloning"]
 
-[tool.poetry.group.dev.dependencies]
-autopep8 = "^2.0.4"
-flake8-bugbear = "^24.2.6"
-black = "^24.2.0"
-pre-commit = "^3.6.2"
-watchfiles = "^0.21.0"
-nbstripout = "^0.8.1"
+[dependency-groups]
+dev = [
+    "autopep8>=2.0.4",
+    "flake8-bugbear>=24.2.6",
+    "black>=24.2.0",
+    "pre-commit>=3.6.2",
+    "watchfiles>=0.21.0",
+    "nbstripout>=0.8.1",
+    "flake8>=7.0.0",
+]
+test = [
+    "pytest==8.3.4",
+    "pytest-cov>=4.1.0",
+    "pytest-rerunfailures>=14.0",
+    "respx>=0.22.0",
+]
+ipython = [
+    "ipython>=8.20.0",
+    "ipykernel>=6.28.0",
+]
 
-[tool.poetry.group.test.dependencies]
-pytest = "8.3.4"
-pre-commit = "^3.6.2"
-pytest-cov = "^4.1.0"
-pytest-rerunfailures = "^14.0"
-respx = "^0.22.0"
-
-
-[tool.poetry.group.ipython.dependencies]
-ipython = "^8.20.0"
-ipykernel = "^6.28.0"
-
-[build-system]
-build-backend = "poetry_dynamic_versioning.backend"
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib"
 
 [tool.black]
 skip-string-normalization = true
 line-length = 119
-
-[tool.poetry-dynamic-versioning]
-enable = true
-style = "pep440"
-vcs = "git"

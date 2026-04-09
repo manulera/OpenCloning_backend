@@ -5,7 +5,8 @@ updates:
     schedule:
       interval: "daily"
 
+  # Container images (build context is repo root; Dockerfiles live under docker/)
   - package-ecosystem: "docker"
-    directory: "/"
+    directory: "/docker"
     schedule:
       interval: "weekly"

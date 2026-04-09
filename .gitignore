@@ -20,7 +20,7 @@ frontend/
 batch_cloning_output/
 .pytest_cache/
 
-# poetry build
+# build artifacts
 dist/
 
 bin/

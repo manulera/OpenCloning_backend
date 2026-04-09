@@ -50,7 +50,7 @@ FEATURES             Location/Qualifiers
                      /note="MCS"
      source          1..4611
                      /dnas_title="pSEVA427"
-ORIGIN      
+ORIGIN
         1 ttaattaaag cggataacaa tttcacacag gaggccgcct aggccgcggc cgcgcgaatt
        61 cgagctcggt acccggggat cctctagagt cgacctgcag gcatgcaAGC TTAGGAGGAA
       121 AAACATATGA GTAAAGGAGA AGAACTTTTC ACTGGAGTTG TCCCAATTCT TGTTGAATTA
@@ -129,4 +129,3 @@ ORIGIN
      4501 agctgtctag ggcggcggat ttgtcctact caggagagcg ttcaccgaca aacaacagat
      4561 aaaacgaaag gcccagtctt tcgactgagc ctttcgtttt atttgatgcc t
 //
-
