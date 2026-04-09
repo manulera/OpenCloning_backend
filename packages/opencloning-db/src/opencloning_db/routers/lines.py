@@ -6,11 +6,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import Column, Select, and_, exists, select
 from sqlalchemy.orm import selectinload
 
-from apimodels import LineCreate, LineRef, LineUpdateLinks, SequenceInLineRef, TagRead
+from opencloning_db.apimodels import LineCreate, LineRef, LineUpdateLinks, SequenceInLineRef, TagRead
 from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
-from models import Line, Sequence, SequenceInLine, SequenceType, Tag, WorkspaceRole
-from workspace_deps import (
+from opencloning_db.models import Line, Sequence, SequenceInLine, SequenceType, Tag, WorkspaceRole
+from opencloning_db.workspace_deps import (
     WorkspaceContext,
     get_editor_workspace_ctx,
     get_line_in_workspace_for_user,

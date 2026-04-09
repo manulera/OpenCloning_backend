@@ -7,10 +7,10 @@ from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from sqlalchemy.orm import Session
 
-from auth.security import decode_access_token
-from config import Config, get_config
-from db import get_engine
-from models import User
+from opencloning_db.auth.security import decode_access_token
+from opencloning_db.config import Config, get_config
+from opencloning_db.db import get_engine
+from opencloning_db.models import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/auth/token')
 

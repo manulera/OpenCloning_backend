@@ -1,5 +1,5 @@
-from utils import guess_sequence_type
-from models import SequenceType
+from opencloning_db.utils import guess_sequence_type
+from opencloning_db.models import SequenceType
 from pydna.opencloning_models import TextFileSequence
 from pydna.dseqrecord import Dseqrecord
 

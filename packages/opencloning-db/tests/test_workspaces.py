@@ -3,7 +3,7 @@
 import pytest
 from sqlalchemy.orm import Session
 
-from tests.helpers import (
+from .helpers import (
     attach_standard_tokens,
     bearer_headers,
     fetch_token,

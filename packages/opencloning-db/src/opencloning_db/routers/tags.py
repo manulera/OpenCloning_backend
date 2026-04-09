@@ -6,7 +6,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from apimodels import (
+from opencloning_db.apimodels import (
     DeletedResponse,
     EntityTagAttach,
     InputEntityRef,
@@ -14,8 +14,8 @@ from apimodels import (
     TagCreate,
     TagRead,
 )
-from models import Tag, User, WorkspaceRole
-from workspace_deps import (
+from opencloning_db.models import Tag, User, WorkspaceRole
+from opencloning_db.workspace_deps import (
     WorkspaceContext,
     get_editor_workspace_ctx,
     get_input_entity_in_workspace_for_user,

@@ -3,7 +3,7 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 import opencloning_linkml.datamodel.models as opencloning_models
-from models import SequenceType, Sequence
+from opencloning_db.models import SequenceType, Sequence
 
 
 # --- Auth (OAuth2 password + JWT) ---

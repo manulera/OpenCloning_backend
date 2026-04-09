@@ -4,18 +4,34 @@ description = "Database for OpenCloning, a web application to generate molecular
 license = "MIT"
 name = "opencloning-db"
 version = "0.1.0"
-package-mode = false
-readme = "README.md"
 repository = "https://github.com/manulera/OpenCloning_db"
+
+[project]
+name = "opencloning-db"
+version = "0.1.0"
+description = "Database for OpenCloning, a web application to generate molecular cloning strategies in json format, and share them with others."
+requires-python = ">=3.11,<4"
+dependencies = [
+    "opencloning",
+    "sqlalchemy>=2.0.41,<3",
+    "fastapi-pagination>=0.15.10,<0.16",
+    "PyJWT>=2.10.1,<3",
+    "pwdlib[argon2]>=0.2.1,<0.3",
+    "pydna>=5.5.9",
+    "email-validator>=2.3.0,<3",
+]
+
+[tool.uv.sources]
+opencloning = { workspace = true }
 
 [tool.poetry.dependencies]
 python = "^3.11"
-opencloning = {git = "https://github.com/manulera/OpenCloning_backend"}
+opencloning = {path = "../../opencloning", develop = true}
 sqlalchemy = "^2.0.41"
 fastapi-pagination = "^0.15.10"
 PyJWT = "^2.10.1"
 pwdlib = {version = "^0.2.1", extras = ["argon2"]}
-pydna = {git = "https://github.com/pydna-group/pydna", rev = "25772b76ac7dfff52b9f8bec4cc6e0279372afc0"}
+pydna = "^5.5.9"
 email-validator = "^2.3.0"
 
 [tool.poetry.group.dev.dependencies]

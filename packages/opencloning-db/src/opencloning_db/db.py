@@ -11,15 +11,15 @@ import pydna.opencloning_models as pydna_opencloning_models
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from config import Config, get_config
-from models import (
+from opencloning_db.config import Config, get_config
+from opencloning_db.models import (
     Primer,
     Sequence,
     Source,
     SequencingFile,
     generate_unique_filename,
 )
-from utils import guess_sequence_type
+from opencloning_db.utils import guess_sequence_type
 
 _engine = None
 _bound_database_url: str | None = None

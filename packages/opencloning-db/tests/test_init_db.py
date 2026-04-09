@@ -1,5 +1,5 @@
-from init_db import init_db
-from config import Config, set_config
+from opencloning_db.init_db import init_db
+from opencloning_db.config import Config, set_config
 import tempfile
 import os
 

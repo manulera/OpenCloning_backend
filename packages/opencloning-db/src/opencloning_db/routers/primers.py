@@ -7,12 +7,12 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import and_, select
 from sqlalchemy.orm import selectinload
 
-from apimodels import IdResponse, PrimerRef, SequenceRef, TagRead, sequence_ref, PrimerUpdate
+from opencloning_db.apimodels import IdResponse, PrimerRef, SequenceRef, TagRead, sequence_ref, PrimerUpdate
 from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
-from models import InputEntity, Primer, Sequence, Source, SourceInput, Tag, WorkspaceRole
+from opencloning_db.models import InputEntity, Primer, Sequence, Source, SourceInput, Tag, WorkspaceRole
 from pydantic import create_model
-from workspace_deps import (
+from opencloning_db.workspace_deps import (
     WorkspaceContext,
     get_editor_workspace_ctx,
     get_primer_in_workspace_for_user,

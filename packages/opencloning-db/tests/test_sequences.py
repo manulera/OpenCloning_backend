@@ -10,10 +10,10 @@ from pydna.opencloning_models import TextFileSequence
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from db import cloning_strategy_to_db, dseqrecord_to_db
-from models import Line, Sequence, SequenceInLine, SequenceSample, SequencingFile, Tag
+from opencloning_db.db import cloning_strategy_to_db, dseqrecord_to_db
+from opencloning_db.models import Line, Sequence, SequenceInLine, SequenceSample, SequencingFile, Tag
 from tests.cloning_strategy_examples import cs_gateway_BP, cs_pcr, pcr_product, pcr_template
-from tests.helpers import (
+from .helpers import (
     assert_get_invalid_workspace_id_422,
     assert_get_missing_workspace_header_422,
     assert_get_non_member_workspace_403,
@@ -25,7 +25,7 @@ from tests.helpers import (
     seed_standard_users,
     workspace_headers,
 )
-from routers.sequences import _search_rotation
+from opencloning_db.routers.sequences import _search_rotation
 
 
 def _sequence_in_workspace(session: Session, workspace_id: int, name: str) -> Sequence:

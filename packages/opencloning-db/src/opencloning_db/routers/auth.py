@@ -8,15 +8,15 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from apimodels import RegisterBody, Token, UserPublic
-from auth.security import (
+from opencloning_db.apimodels import RegisterBody, Token, UserPublic
+from opencloning_db.auth.security import (
     create_access_token,
     get_password_hash,
     verify_password,
 )
-from config import Config, get_config
-from deps import get_current_user, get_db
-from models import User, Workspace, WorkspaceMembership, WorkspaceRole
+from opencloning_db.config import Config, get_config
+from opencloning_db.deps import get_current_user, get_db
+from opencloning_db.models import User, Workspace, WorkspaceMembership, WorkspaceRole
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 

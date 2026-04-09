@@ -2,9 +2,9 @@
 
 import sys
 
-import config as config_module
-from config import set_config
-from auth.security import get_password_hash
+import opencloning_db.config as config_module
+from opencloning_db.config import set_config
+from opencloning_db.auth.security import get_password_hash
 
 _JWT_SECRET = 'test-jwt-secret-not-for-production'
 
@@ -155,6 +155,8 @@ def make_app_client(
     sequencing uploads without touching the repo default directories.
     """
     monkeypatch.setenv('OPENCLONING_JWT_SECRET', _JWT_SECRET)
+    if not extra_module.startswith('opencloning_db.'):
+        extra_module = f"opencloning_db.{extra_module}"
     db_path = tmp_path / 'test.db'
     cfg_kwargs: dict = {
         'database_url': f"sqlite:///{db_path}",
@@ -167,17 +169,23 @@ def make_app_client(
     set_config(config_module.Config(**cfg_kwargs))
 
     for name in list(sys.modules.keys()):
-        if name in ('api', 'deps', 'routers.auth', 'db', extra_module):
+        if name in (
+            'opencloning_db.api',
+            'opencloning_db.deps',
+            'opencloning_db.routers.auth',
+            'opencloning_db.db',
+            extra_module,
+        ):
             del sys.modules[name]
 
-    import db as db_module
+    import opencloning_db.db as db_module
     from fastapi.testclient import TestClient
-    from models import Base
+    from opencloning_db.models import Base
 
     engine = db_module.get_engine(config_module.get_config())
     Base.metadata.create_all(engine)
 
-    from api import app
+    from opencloning_db.api import app
 
     return engine, TestClient(app)
 
@@ -197,7 +205,7 @@ def seed_standard_users(session) -> dict:
     The session is flushed but **not** committed; callers should add their
     own resource rows and commit once.
     """
-    from models import User, Workspace, WorkspaceMembership, WorkspaceRole
+    from opencloning_db.models import User, Workspace, WorkspaceMembership, WorkspaceRole
 
     owner_w1 = User(
         email=_STANDARD_EMAILS['owner_w1'],

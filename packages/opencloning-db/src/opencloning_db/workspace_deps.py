@@ -5,8 +5,8 @@ from typing import Annotated, Tuple
 from fastapi import Depends, HTTPException, Header, status
 from sqlalchemy.orm import Session
 
-from deps import get_current_user, get_db
-from models import (
+from opencloning_db.deps import get_current_user, get_db
+from opencloning_db.models import (
     InputEntity,
     Line,
     Primer,
@@ -17,7 +17,7 @@ from models import (
     User,
     WorkspaceRole,
 )
-from workspace_auth import assert_workspace_access
+from opencloning_db.workspace_auth import assert_workspace_access
 
 WorkspaceContext = Tuple[User, Session, int]
 

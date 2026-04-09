@@ -6,14 +6,15 @@ Run this script manually when you need to (re)create the database.
 import json
 import os
 import glob
+from pathlib import Path
 import opencloning_linkml.datamodel.models as opencloning_models
 from sqlalchemy.orm import Session
 from sqlalchemy.schema import CreateTable
 from sqlalchemy.dialects import postgresql
 
-from auth.security import get_password_hash
-from config import Config, get_config
-from models import (
+from opencloning_db.auth.security import get_password_hash
+from opencloning_db.config import Config, get_config
+from opencloning_db.models import (
     Base,
     Line,
     Primer,
@@ -26,7 +27,7 @@ from models import (
     WorkspaceMembership,
     WorkspaceRole,
 )
-from db import cloning_strategy_to_db, create_sequencing_file, get_engine
+from opencloning_db.db import cloning_strategy_to_db, create_sequencing_file, get_engine
 
 
 def init_db(config: Config):
@@ -41,7 +42,8 @@ def init_db(config: Config):
 
     cloning_strategies = []
     file_names = []
-    for file in glob.glob('init_db/*.json'):
+    data_dir = Path(__file__).resolve().parent / 'init_db'
+    for file in glob.glob(str(data_dir / '*.json')):
         with open(file) as f:
             cloning_strategies.append(opencloning_models.CloningStrategy.model_validate(json.load(f)))
             file_names.append(os.path.basename(file))
@@ -101,7 +103,7 @@ def init_db(config: Config):
             primer.tags.append(tag)
             session.add(primer)
 
-        for file in glob.glob('init_db/sequencing_data/*'):
+        for file in glob.glob(str(data_dir / 'sequencing_data' / '*')):
             with open(file, 'rb') as f:
                 content = f.read()
             file_name = os.path.basename(file)

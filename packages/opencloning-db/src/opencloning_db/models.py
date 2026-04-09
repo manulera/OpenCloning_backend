@@ -32,7 +32,7 @@ from sqlalchemy.orm import (
 import opencloning_linkml.datamodel.models as opencloning_models
 from pydantic import BaseModel as PydanticBaseModel
 
-from config import get_config
+from opencloning_db.config import get_config
 
 # Source type union from CloningStrategy.sources (list[Union[Source, ...]])
 AnySource = get_args(opencloning_models.CloningStrategy.model_fields['sources'].annotation)[0]

@@ -8,13 +8,13 @@ import pytest
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from models import InputEntity, Line, Primer, Sequence, SequenceType, Tag, User, WorkspaceRole
-from workspace_deps import (
+from opencloning_db.models import InputEntity, Line, Primer, Sequence, SequenceType, Tag, User, WorkspaceRole
+from opencloning_db.workspace_deps import (
     get_resource_for_user,
     get_sequence_in_workspace_for_user,
     get_sequence_sample_in_workspace_for_user,
 )
-from tests.helpers import make_app_client, seed_standard_users
+from .helpers import make_app_client, seed_standard_users
 
 
 @pytest.fixture

@@ -4,7 +4,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from apimodels import (
+from opencloning_db.apimodels import (
     SequenceSampleCreate,
     SequenceSampleCreated,
     SequenceSampleRead,
@@ -12,8 +12,8 @@ from apimodels import (
     SequenceSampleWithSequence,
     sequence_ref,
 )
-from models import SequenceSample, WorkspaceRole
-from workspace_deps import (
+from opencloning_db.models import SequenceSample, WorkspaceRole
+from opencloning_db.workspace_deps import (
     WorkspaceContext,
     get_editor_workspace_ctx,
     get_sequence_in_workspace_for_user,

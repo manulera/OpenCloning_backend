@@ -6,7 +6,7 @@ from typing import Any
 import jwt
 from pwdlib import PasswordHash
 
-from config import Config, get_config
+from opencloning_db.config import Config, get_config
 
 password_hasher = PasswordHash.recommended()
 

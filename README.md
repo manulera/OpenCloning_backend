@@ -140,6 +140,29 @@ From the repository root (after `uv sync`):
 uv run pytest packages/opencloning/tests -v -ks
 ```
 
+## Running opencloning-db locally
+
+`opencloning-db` now lives in `packages/opencloning-db/src` and uses the local workspace `opencloning` package.
+
+From the repository root:
+
+```bash
+# Install/update workspace dependencies
+uv sync
+
+# Run opencloning-db tests
+uv run pytest packages/opencloning-db/tests -v
+
+# Recreate the opencloning-db local database seed
+./restart_db.sh
+```
+
+If you need to run the init script manually:
+
+```bash
+uv run --directory packages/opencloning-db/src python -m opencloning_db.init_db
+```
+
 ## Dependency guardrail (deptry)
 
 This repository uses a uv workspace. In a workspace, dependencies are resolved in one shared environment, so imports can appear to work even when a package does not declare them in its own `pyproject.toml`.

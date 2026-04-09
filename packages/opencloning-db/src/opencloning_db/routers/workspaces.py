@@ -6,10 +6,10 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from apimodels import WorkspaceCreate, WorkspaceRef, WorkspaceRename
-from deps import get_current_user, get_db
-from models import User, Workspace, WorkspaceMembership, WorkspaceRole
-from workspace_auth import assert_workspace_access
+from opencloning_db.apimodels import WorkspaceCreate, WorkspaceRef, WorkspaceRename
+from opencloning_db.deps import get_current_user, get_db
+from opencloning_db.models import User, Workspace, WorkspaceMembership, WorkspaceRole
+from opencloning_db.workspace_auth import assert_workspace_access
 
 router = APIRouter(tags=['workspaces'])
 

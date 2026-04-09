@@ -2,7 +2,10 @@
 name = "opencloning-workspace"
 version = "0.0.0"
 requires-python = ">=3.11,<4"
-dependencies = ["opencloning"]
+dependencies = [
+    "opencloning",
+    "opencloning-db",
+]
 
 [tool.uv]
 package = false
@@ -10,9 +13,13 @@ default-groups = ["dev", "test", "ipython"]
 
 [tool.uv.sources]
 opencloning = { workspace = true }
+opencloning-db = { workspace = true }
 
 [tool.uv.workspace]
-members = ["packages/opencloning"]
+members = [
+    "packages/opencloning",
+    "packages/opencloning-db",
+]
 
 [dependency-groups]
 dev = [

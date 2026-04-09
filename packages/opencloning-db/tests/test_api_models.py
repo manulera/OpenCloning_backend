@@ -1,4 +1,4 @@
-from apimodels import TagCreate
+from opencloning_db.apimodels import TagCreate
 from unittest import TestCase
 from pydantic import ValidationError
 

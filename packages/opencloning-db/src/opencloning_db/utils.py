@@ -1,5 +1,5 @@
 from opencloning_linkml.datamodel.models import TextFileSequence, Source
-from models import SequenceType
+from opencloning_db.models import SequenceType
 from opencloning.dna_functions import read_dsrecord_from_json
 
 

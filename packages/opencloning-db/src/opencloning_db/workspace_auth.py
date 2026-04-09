@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from fastapi import HTTPException, status
 
-from models import WorkspaceMembership, WorkspaceRole
+from opencloning_db.models import WorkspaceMembership, WorkspaceRole
 
 _ROLE_ORDER: dict[WorkspaceRole, int] = {
     WorkspaceRole.viewer: 0,

@@ -3,9 +3,9 @@
 import pytest
 from sqlalchemy.orm import Session
 
-from models import Sequence, SequenceSample, SequenceType
+from opencloning_db.models import Sequence, SequenceSample, SequenceType
 
-from tests.helpers import (
+from .helpers import (
     assert_get_invalid_workspace_id_422,
     assert_get_missing_workspace_header_422,
     assert_get_non_member_workspace_403,

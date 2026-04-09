@@ -14,7 +14,7 @@ from pathlib import Path
 
 from pydantic import create_model
 
-from apimodels import (
+from opencloning_db.apimodels import (
     CloningStrategyIdMapping,
     CloningStrategyResponse,
     SequenceRef,
@@ -25,9 +25,9 @@ from apimodels import (
     TagRead,
     sequence_ref,
 )
-from config import Config, get_config
-from db import cloning_strategy_to_db, create_sequencing_file
-from models import (
+from opencloning_db.config import Config, get_config
+from opencloning_db.db import cloning_strategy_to_db, create_sequencing_file
+from opencloning_db.models import (
     InputEntity,
     Primer,
     Sequence,
@@ -41,7 +41,7 @@ from models import (
 )
 from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
-from workspace_deps import (
+from opencloning_db.workspace_deps import (
     WorkspaceContext,
     get_editor_workspace_ctx,
     get_sequence_in_workspace_for_user,

@@ -13,10 +13,10 @@ import opencloning_linkml.datamodel.models as opencloning_models
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-import config as app_config
-from config import Config
-from db import cloning_strategy_to_db, dseqrecord_to_db
-from models import (
+import opencloning_db.config as app_config
+from opencloning_db.config import Config
+from opencloning_db.db import cloning_strategy_to_db, dseqrecord_to_db
+from opencloning_db.models import (
     AnySourceParser,
     AssemblyFragment,
     Base,

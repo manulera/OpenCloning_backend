@@ -11,9 +11,9 @@ from uuid import uuid4
 import jwt
 import pytest
 
-from auth.security import create_access_token
-from config import get_config
-from tests.helpers import make_app_client
+from opencloning_db.auth.security import create_access_token
+from opencloning_db.config import get_config
+from .helpers import make_app_client
 
 
 @pytest.fixture

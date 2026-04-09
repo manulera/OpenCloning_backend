@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_pagination import add_pagination
 
-from routers import (
+from opencloning_db.routers import (
     auth,
     lines,
     primers,
