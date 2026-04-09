@@ -1,0 +1,196 @@
+"""Workspace listing endpoint tests."""
+
+import pytest
+from sqlalchemy.orm import Session
+
+from tests.helpers import (
+    attach_standard_tokens,
+    bearer_headers,
+    fetch_token,
+    make_app_client,
+    seed_standard_users,
+)
+
+
+@pytest.fixture
+def workspaces_client(tmp_path, monkeypatch):
+    engine, client = make_app_client(
+        tmp_path,
+        monkeypatch,
+        'routers.workspaces',
+    )
+
+    with Session(engine) as session:
+        ctx = seed_standard_users(session)
+        session.commit()
+
+    attach_standard_tokens(ctx, client)
+    ctx['token_owner_w1_viewer_w2'] = fetch_token(
+        client,
+        ctx['owner_w1_viewer_w2_email'],
+        ctx['owner_w1_viewer_w2_pw'],
+    )
+    ctx['token'] = ctx['token_owner_w1_viewer_w2']
+    return ctx
+
+
+def test_get_workspaces_lists_only_user_accessible(workspaces_client):
+    """List workspaces returns only this user's memberships and roles."""
+    c = workspaces_client['client']
+    tok = workspaces_client['token']
+    response = c.get('/workspaces', headers=bearer_headers(tok))
+    assert response.status_code == 200
+
+    data = response.json()
+    assert len(data) == 2
+    assert data[0]['name'] == 'Workspace One'
+    assert data[0]['role'] == 'owner'
+    assert data[1]['name'] == 'Workspace Two'
+    assert data[1]['role'] == 'viewer'
+
+
+def test_get_workspace_by_id_member_ok(workspaces_client):
+    """Member can GET workspace by id from fixture (not hardcoded)."""
+    c = workspaces_client['client']
+    tok = workspaces_client['token']
+    wid = workspaces_client['w1']
+    response = c.get(
+        f"/workspaces/{wid}",
+        headers=bearer_headers(tok),
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body['id'] == wid
+    assert body['name'] == 'Workspace One'
+    assert body['role'] == 'owner'
+
+
+def test_get_workspace_by_id_forbidden_non_member(workspaces_client):
+    """User with no access to a workspace gets 403 when fetching it by id."""
+    c = workspaces_client['client']
+    tok = workspaces_client['token']
+    response = c.get(
+        f"/workspaces/{workspaces_client['w3']}",
+        headers=bearer_headers(tok),
+    )
+    assert response.status_code == 403
+    assert 'Not allowed' in response.json()['detail']
+
+
+def test_create_workspace_creates_owner_membership(workspaces_client):
+    """POST /workspaces creates workspace and caller becomes owner."""
+    c = workspaces_client['client']
+    tok = workspaces_client['token']
+    response = c.post(
+        '/workspaces',
+        headers=bearer_headers(tok),
+        json={'name': 'My Created Workspace'},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body['id'] > 0
+    assert body['name'] == 'My Created Workspace'
+    assert body['role'] == 'owner'
+
+    list_response = c.get(
+        '/workspaces',
+        headers=bearer_headers(tok),
+    )
+    assert list_response.status_code == 200
+    names = {workspace['name'] for workspace in list_response.json()}
+    assert names == {
+        'Workspace One',
+        'Workspace Two',
+        'My Created Workspace',
+    }
+
+
+def test_patch_workspace_owner_can_rename(workspaces_client):
+    """Workspace owner can PATCH the workspace name."""
+    c = workspaces_client['client']
+    tok = workspaces_client['token']
+    response = c.patch(
+        f"/workspaces/{workspaces_client['w1']}",
+        headers=bearer_headers(tok),
+        json={'name': 'Workspace One Renamed'},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body['id'] == workspaces_client['w1']
+    assert body['name'] == 'Workspace One Renamed'
+    assert body['role'] == 'owner'
+
+    get_response = c.get(
+        f"/workspaces/{workspaces_client['w1']}",
+        headers=bearer_headers(tok),
+    )
+    assert get_response.status_code == 200
+    assert get_response.json()['name'] == 'Workspace One Renamed'
+
+
+def test_patch_workspace_forbidden_for_viewer(workspaces_client):
+    """Workspace viewer cannot rename the workspace."""
+    c = workspaces_client['client']
+    tok = workspaces_client['token_viewer_w1']
+    response = c.patch(
+        f"/workspaces/{workspaces_client['w1']}",
+        headers=bearer_headers(tok),
+        json={'name': 'Should Not Work'},
+    )
+    assert response.status_code == 403
+    assert 'Not allowed' in response.json()['detail']
+
+
+def test_patch_workspace_forbidden_for_non_member(workspaces_client):
+    """User who is not a member cannot PATCH another workspace."""
+    c = workspaces_client['client']
+    tok = workspaces_client['token_owner_w2']
+    response = c.patch(
+        f"/workspaces/{workspaces_client['w1']}",
+        headers=bearer_headers(tok),
+        json={'name': 'Should Not Work'},
+    )
+    assert response.status_code == 403
+    assert 'Not allowed' in response.json()['detail']
+
+
+def test_get_workspaces_unauthenticated_401(workspaces_client):
+    """Listing workspaces without a bearer token is rejected."""
+    c = workspaces_client['client']
+    response = c.get('/workspaces')
+    assert response.status_code == 401
+    assert response.json()['detail'] == 'Not authenticated'
+
+
+def test_get_workspace_by_id_unauthenticated_401(workspaces_client):
+    """Fetching a workspace by id without a bearer token is rejected."""
+    c = workspaces_client['client']
+    response = c.get(f"/workspaces/{workspaces_client['w1']}")
+    assert response.status_code == 401
+    assert response.json()['detail'] == 'Not authenticated'
+
+
+def test_create_workspace_empty_name_422(workspaces_client):
+    """Workspace name must be non-empty (Pydantic min_length=1)."""
+    c = workspaces_client['client']
+    tok = workspaces_client['token']
+    response = c.post(
+        '/workspaces',
+        headers=bearer_headers(tok),
+        json={'name': ''},
+    )
+    assert response.status_code == 422
+    assert response.json()['detail']
+
+
+def test_patch_workspace_empty_name_422(workspaces_client):
+    """Workspace rename rejects an empty name."""
+    c = workspaces_client['client']
+    tok = workspaces_client['token']
+    response = c.patch(
+        f"/workspaces/{workspaces_client['w1']}",
+        headers=bearer_headers(tok),
+        json={'name': ''},
+    )
+    assert response.status_code == 422
+    assert response.json()['detail']
