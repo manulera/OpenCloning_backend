@@ -23,6 +23,7 @@ dev = [
     "watchfiles>=0.21.0",
     "nbstripout>=0.8.1",
     "flake8>=7.0.0",
+    "deptry>=0.25.1",
 ]
 test = [
     "pytest==8.3.4",

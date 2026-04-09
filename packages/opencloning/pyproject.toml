@@ -10,17 +10,21 @@ authors = [
 requires-python = ">=3.11,<4"
 dependencies = [
     "beautifulsoup4>=4.11.1,<5",
+    "biopython>=1.87",
+    "certifi>=2026.2.25",
     "fastapi>=0.135.3",
     "httpx>=0.28.1",
+    "networkx>=3.6.1",
+    "numpy>=2.4.4",
+    "opencloning-linkml>=1.0.0",
     "python-multipart>=0.0.24",
     "uvicorn>=0.44.0",
-    "regex>=2024.11.6",
     "pydantic>=2.7.1",
+    "pydantic-core>=2.41.5",
     "pandas>=2.2.3,<3",
     "openpyxl>=3.1.5",
     "pyyaml>=6.0.2",
     "primer3-py>=2.3",
-    "packaging>=25.0",
     "pairwise-alignments-to-msa>=0.1.1",
     "pydna>=5.5.9",
 ]
@@ -40,3 +44,7 @@ source = "vcs"
 
 [tool.hatch.version.raw-options]
 search_parent_directories = true
+
+[tool.deptry]
+known_first_party = ["opencloning"]
+per_rule_ignores = { DEP002 = ["python-multipart", "uvicorn", "openpyxl"] }
