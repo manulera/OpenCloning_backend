@@ -130,13 +130,13 @@ class TestSyntax(unittest.TestCase):
     def test_assign_plasmid_to_syntax_part(self):
 
         # Has a part that is specifically named
-        plasmid1 = pydna_parse('tests/test_files/syntax/pYTK002.gb')[0]
+        plasmid1 = pydna_parse(f'{test_files}/syntax/pYTK002.gb')[0]
         # Spans multiple parts
-        plasmid2 = pydna_parse('tests/test_files/syntax/pYTK095.gb')[0]
+        plasmid2 = pydna_parse(f'{test_files}/syntax/pYTK095.gb')[0]
         # Has 2 parts
-        plasmid3 = pydna_parse('tests/test_files/syntax/moclo_ytk_multi_part.gb')[0]
+        plasmid3 = pydna_parse(f'{test_files}/syntax/moclo_ytk_multi_part.gb')[0]
         # Has no parts that match the syntax
-        plasmid4 = pydna_parse('tests/test_files/pAG25.gb')[0]
+        plasmid4 = pydna_parse(f'{test_files}/pAG25.gb')[0]
 
         result = moclo_syntax.assign_plasmid_to_syntax_part(plasmid1)
         self.assertEqual(len(result), 1)
