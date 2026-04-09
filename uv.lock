@@ -925,7 +925,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.11.1,<5" },
-    { name = "fastapi" },
+    { name = "fastapi", specifier = ">=0.135.3" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "openpyxl", specifier = ">=3.1.5" },
     { name = "packaging", specifier = ">=25.0" },
@@ -934,10 +934,10 @@ requires-dist = [
     { name = "primer3-py", specifier = ">=2.3" },
     { name = "pydantic", specifier = ">=2.7.1" },
     { name = "pydna", specifier = ">=5.5.9" },
-    { name = "python-multipart" },
+    { name = "python-multipart", specifier = ">=0.0.24" },
     { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "regex", specifier = ">=2024.11.6" },
-    { name = "uvicorn" },
+    { name = "uvicorn", specifier = ">=0.44.0" },
 ]
 
 [[package]]
