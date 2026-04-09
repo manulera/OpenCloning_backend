@@ -5,7 +5,7 @@ import io
 import os
 import warnings
 import asyncio
-from starlette.responses import RedirectResponse
+from fastapi.responses import RedirectResponse
 from Bio import BiopythonParserWarning
 from typing import Annotated
 from pydna.utils import location_boundaries

@@ -47,3 +47,16 @@ repos:
         language: system
         files: \.py$
         exclude: packages/opencloning/tests/
+  - repo: local
+    hooks:
+      - id: deptry
+        name: deptry
+        entry: uv run deptry --config packages/opencloning/pyproject.toml packages/opencloning/src
+        language: system
+        pass_filenames: false
+        files: |
+            (?x)^(
+                packages/opencloning/src/.*|
+                packages/opencloning/pyproject.toml|
+                pyproject.toml
+            )$
