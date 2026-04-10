@@ -1,0 +1,847 @@
+"""Sequences routes: workspace scoping, filters, cloning strategy graph, and files."""
+
+from pathlib import Path
+
+import opencloning_linkml.datamodel.models as opencloning_models
+import pytest
+from pydna.dseqrecord import Dseqrecord
+from pydna.dseq import Dseq
+from pydna.opencloning_models import TextFileSequence
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from opencloning_db.db import cloning_strategy_to_db, dseqrecord_to_db
+from opencloning_db.models import Line, Sequence, SequenceInLine, SequenceSample, SequencingFile, Tag
+from tests.cloning_strategy_examples import cs_gateway_BP, cs_pcr, pcr_product, pcr_template
+from .helpers import (
+    assert_get_invalid_workspace_id_422,
+    assert_get_missing_workspace_header_422,
+    assert_get_non_member_workspace_403,
+    assert_get_unauthenticated_401,
+    attach_standard_tokens,
+    bearer_headers,
+    post_sequencing_file_upload,
+    seed_standard_users,
+    workspace_headers,
+)
+from opencloning_db.routers.sequences import _search_rotation
+
+
+def _sequence_in_workspace(session: Session, workspace_id: int, name: str) -> Sequence:
+    """Load a sequence by workspace id and record name (fixture / strategy lookups)."""
+    row = session.scalar(select(Sequence).where(Sequence.workspace_id == workspace_id, Sequence.name == name))
+    assert row is not None, f"No Sequence in workspace {workspace_id} with name {name!r}"
+    return row
+
+
+@pytest.fixture
+def sequences_client(engine_client_config):
+    """Fresh DB with tmp sequence/sequencing dirs, bare sequences, and example cloning strategies."""
+    engine, client, config = engine_client_config
+
+    with Session(engine) as session:
+        ctx = seed_standard_users(session)
+        w1, w2 = ctx['w1'], ctx['w2']
+
+        seq_w1 = dseqrecord_to_db(Dseqrecord('atgcag', name='seq-w1'), session, w1)
+        seq_w2 = dseqrecord_to_db(Dseqrecord('atgcagc', name='seq-w2'), session, w2)
+
+        sample_w1 = SequenceSample(
+            uid='UID-W1',
+            sequence_id=seq_w1.id,
+            uid_workspace_id=w1,
+        )
+        session.add(sample_w1)
+
+        cloning_strategy_to_db(cs_pcr, session, w1)
+        cloning_strategy_to_db(cs_gateway_BP, session, w1)
+        session.flush()
+
+        pcr_template = _sequence_in_workspace(session, w1, 'template')
+        pcr_product = _sequence_in_workspace(session, w1, 'pcr_product')
+        gw_product = _sequence_in_workspace(session, w1, 'product_gateway_BP')
+        attb = _sequence_in_workspace(session, w1, 'attB_input')
+        attp = _sequence_in_workspace(session, w1, 'attP_input')
+
+        tag = Tag(name='seq-filter-tag', workspace_id=w1)
+        session.add(tag)
+        session.flush()
+        pcr_product.tags.append(tag)
+
+        line = Line(workspace_id=w1, uid='line-for-seq-filter')
+        session.add(line)
+        session.flush()
+        session.add(SequenceInLine(sequence_id=pcr_template.id, line_id=line.id))
+
+        session.add(
+            SequenceSample(
+                uid='FILTER-UID-99',
+                sequence_id=pcr_product.id,
+                uid_workspace_id=w1,
+            )
+        )
+
+        seq_circ = dseqrecord_to_db(
+            Dseqrecord('atgcgatcgatac', circular=True, name='circ_plasmid'),
+            session,
+            w1,
+        )
+        seq_patch_linear = dseqrecord_to_db(
+            Dseqrecord('atgcag', name='patch-linear-target'),
+            session,
+            w1,
+        )
+
+        session.commit()
+
+        w1_ids = set(session.scalars(select(Sequence.id).where(Sequence.workspace_id == w1)).all())
+        w2_ids = set(session.scalars(select(Sequence.id).where(Sequence.workspace_id == w2)).all())
+
+        ctx.update(
+            {
+                'engine': engine,
+                'seq_w1_id': seq_w1.id,
+                'seq_w2_id': seq_w2.id,
+                'uid_w1': sample_w1.uid,
+                'w1_sequence_ids': w1_ids,
+                'w2_sequence_ids': w2_ids,
+                'sequencing_files_dir': config.sequencing_files_dir,
+                'pcr_template_id': pcr_template.id,
+                'pcr_product_id': pcr_product.id,
+                'pcr_product_seguid': pcr_product.seguid,
+                'gateway_product_id': gw_product.id,
+                'attb_input_id': attb.id,
+                'attp_input_id': attp.id,
+                'filter_tag_id': tag.id,
+                'seq_circ_id': seq_circ.id,
+                'seq_patch_linear_id': seq_patch_linear.id,
+            }
+        )
+
+    return attach_standard_tokens(ctx, client)
+
+
+def test_get_sequences_requires_workspace_id(sequences_client):
+    """GET /sequences without X-Workspace-Id fails validation (422)."""
+    assert_get_missing_workspace_header_422(
+        sequences_client['client'],
+        '/sequences',
+        sequences_client['token_owner_w1'],
+    )
+
+
+def test_get_sequences_scoped_to_workspace(sequences_client):
+    """Pagination list includes all sequences in the selected workspace."""
+    c = sequences_client['client']
+    tok = sequences_client['token_owner_w1']
+    response = c.get('/sequences', headers=workspace_headers(tok, sequences_client['w1']))
+    assert response.status_code == 200
+    ids = {item['id'] for item in response.json()['items']}
+    assert ids == sequences_client['w1_sequence_ids']
+
+
+def test_get_sequences_filter_by_tag(sequences_client):
+    c = sequences_client['client']
+    tid = sequences_client['filter_tag_id']
+    r = c.get(
+        '/sequences',
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+        params=[('tags', str(tid))],
+    )
+    assert r.status_code == 200
+    ids = {item['id'] for item in r.json()['items']}
+    assert ids == {sequences_client['pcr_product_id']}
+
+
+def test_get_sequences_filter_instantiated_true(sequences_client):
+    c = sequences_client['client']
+    r = c.get(
+        '/sequences',
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+        params={'instantiated': 'true'},
+    )
+    assert r.status_code == 200
+    ids = {item['id'] for item in r.json()['items']}
+    assert {
+        sequences_client['pcr_template_id'],
+        sequences_client['seq_w1_id'],
+        sequences_client['pcr_product_id'],
+    } == ids
+
+
+def test_get_sequences_filter_instantiated_false(sequences_client):
+    c = sequences_client['client']
+    r = c.get(
+        '/sequences',
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+        params={'instantiated': 'false'},
+    )
+    assert r.status_code == 200
+    ids = {item['id'] for item in r.json()['items']}
+    assert sequences_client['attp_input_id'] in ids
+    assert sequences_client['pcr_template_id'] not in ids
+    assert sequences_client['seq_w1_id'] not in ids
+
+
+def test_get_sequences_filter_sequence_types(sequences_client):
+    c = sequences_client['client']
+    r = c.get(
+        '/sequences',
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+        params=[('sequence_types', 'pcr_product')],
+    )
+    assert r.status_code == 200
+    ids = {item['id'] for item in r.json()['items']}
+    assert {sequences_client['pcr_product_id']} == ids
+
+
+def test_get_sequences_filter_name(sequences_client):
+    c = sequences_client['client']
+    r = c.get(
+        '/sequences',
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+        params={'name': 'seq-w'},
+    )
+    assert r.status_code == 200
+    ids = {item['id'] for item in r.json()['items']}
+    assert ids == {sequences_client['seq_w1_id']}
+
+
+def test_get_sequences_filter_uid_substring(sequences_client):
+    c = sequences_client['client']
+    r = c.get(
+        '/sequences',
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+        params={'uid': 'filter-UID'},
+    )
+    assert r.status_code == 200
+    ids = {item['id'] for item in r.json()['items']}
+    assert ids == {sequences_client['pcr_product_id']}
+
+
+def test_get_sequences_filter_has_uid(sequences_client):
+    c = sequences_client['client']
+    r = c.get(
+        '/sequences',
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+        params={'has_uid': 'true'},
+    )
+    assert r.status_code == 200
+    ids = {item['id'] for item in r.json()['items']}
+    assert {sequences_client['seq_w1_id'], sequences_client['pcr_product_id']} == ids
+
+
+def test_get_sequences_forbidden_non_member(sequences_client):
+    """Non-member cannot list sequences when passing another workspace id."""
+    c = sequences_client['client']
+    tok = sequences_client['token_owner_w2']
+    response = c.get('/sequences', headers=workspace_headers(tok, sequences_client['w1']))
+    assert response.status_code == 403
+    assert 'Not allowed' in response.json()['detail']
+
+
+def test_get_sequence_owner_ok(sequences_client):
+    c = sequences_client['client']
+    sid = sequences_client['pcr_product_id']
+    r = c.get(
+        f"/sequence/{sid}",
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+    )
+    assert r.status_code == 200
+    body = r.json()
+    assert body['id'] == sid
+    assert body['name'] == 'pcr_product'
+
+
+def test_get_sequence_forbidden_cross_workspace(sequences_client):
+    """User not in W1 cannot GET a W1 sequence even with W1 header."""
+    c = sequences_client['client']
+    tok = sequences_client['token_owner_w2']
+    response = c.get(
+        f"/sequence/{sequences_client['seq_w1_id']}", headers=workspace_headers(tok, sequences_client['w1'])
+    )
+    assert response.status_code == 403
+    assert 'Not allowed' in response.json()['detail']
+
+
+def test_get_sequence_workspace_mismatch_404(sequences_client):
+    """W2 sequence with W1 header returns 404."""
+    c = sequences_client['client']
+    tok = sequences_client['token_owner_both']
+    response = c.get(
+        f"/sequence/{sequences_client['seq_w2_id']}", headers=workspace_headers(tok, sequences_client['w1'])
+    )
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Sequence not found'
+
+
+def test_patch_sequence_owner_rename_ok(sequences_client):
+    c = sequences_client['client']
+    sid = sequences_client['seq_patch_linear_id']
+    r = c.patch(
+        f"/sequence/{sid}",
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+        json={'name': 'renamed-linear'},
+    )
+    assert r.status_code == 200
+    assert r.json()['name'] == 'renamed-linear'
+
+
+def test_patch_sequence_empty_name_400(sequences_client):
+    c = sequences_client['client']
+    r = c.patch(
+        f"/sequence/{sequences_client['seq_patch_linear_id']}",
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+        json={'name': ''},
+    )
+    assert r.status_code == 400
+    assert r.json()['detail'] == 'Name cannot be an empty string'
+
+
+def test_patch_sequence_type_linear_ok(sequences_client):
+    c = sequences_client['client']
+    sid = sequences_client['seq_patch_linear_id']
+    r = c.patch(
+        f"/sequence/{sid}",
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+        json={'sequence_type': 'pcr_product'},
+    )
+    assert r.status_code == 200
+    assert r.json()['sequence_type'] == 'pcr_product'
+
+
+def test_patch_sequence_circular_rejects_non_plasmid_type(sequences_client):
+    c = sequences_client['client']
+    r = c.patch(
+        f"/sequence/{sequences_client['seq_circ_id']}",
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+        json={'sequence_type': 'allele'},
+    )
+    assert r.status_code == 400
+    assert r.json()['detail'] == "Circular sequences can only have sequence_type 'plasmid'"
+
+
+def test_patch_sequence_viewer_forbidden(sequences_client):
+    """Viewer cannot PATCH a sequence."""
+    c = sequences_client['client']
+    tok = sequences_client['token_viewer_w1']
+    response = c.patch(
+        f"/sequence/{sequences_client['seq_w1_id']}",
+        headers=workspace_headers(tok, sequences_client['w1']),
+        json={'name': 'new-name'},
+    )
+    assert response.status_code == 403
+    assert 'Not allowed' in response.json()['detail']
+
+
+def test_get_sequence_by_uid_scoped_to_workspace(sequences_client):
+    """Resolve sequence by lab sample UID within the selected workspace."""
+    c = sequences_client['client']
+    tok = sequences_client['token_owner_w1']
+    response = c.get(
+        f"/sequence/by-uid/{sequences_client['uid_w1']}", headers=workspace_headers(tok, sequences_client['w1'])
+    )
+    assert response.status_code == 200
+    assert response.json()['id'] == sequences_client['seq_w1_id']
+
+
+def test_get_sequence_by_uid_not_found_404(sequences_client):
+    c = sequences_client['client']
+    r = c.get(
+        '/sequence/by-uid/no-such-uid-xyz',
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+    )
+    assert r.status_code == 404
+    assert r.json()['detail'] == 'Sequence not found for UID'
+
+
+def test_get_sequence_by_uid_forbidden_non_member(sequences_client):
+    """Non-member cannot use by-uid with another workspace header."""
+    c = sequences_client['client']
+    tok = sequences_client['token_owner_w2']
+    response = c.get(
+        f"/sequence/by-uid/{sequences_client['uid_w1']}", headers=workspace_headers(tok, sequences_client['w1'])
+    )
+    assert response.status_code == 403
+    assert 'Not allowed' in response.json()['detail']
+
+
+def test_get_sequences_by_seguid_known(sequences_client):
+    c = sequences_client['client']
+    r = c.get(
+        f"/sequences/by-seguid/{sequences_client['pcr_product_seguid']}",
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+    )
+    assert r.status_code == 200
+    ids = {item['id'] for item in r.json()}
+    assert sequences_client['pcr_product_id'] in ids
+
+
+def test_get_sequences_by_seguid_unknown_empty(sequences_client):
+    c = sequences_client['client']
+    r = c.get(
+        '/sequences/by-seguid/zzzznonexistentseguiddummy',
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+    )
+    assert r.status_code == 200
+    assert r.json() == []
+
+
+def test_get_text_file_sequence_ok(sequences_client):
+    c = sequences_client['client']
+    r = c.get(
+        f"/sequence/{sequences_client['pcr_product_id']}/text_file_sequence",
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+    )
+    assert r.status_code == 200
+    assert 'LOCUS' in r.json()['file_content']
+
+
+@pytest.mark.parametrize(
+    'query_sequence, expected_shift, expected_reverse_complemented, result_count',
+    [
+        (pcr_product, 0, False, 1),
+        (pcr_template, 0, False, 1),
+        (pcr_product.reverse_complement(), 0, True, 1),
+        (pcr_template.reverse_complement(), 0, True, 1),
+        (pcr_template.shifted(4), 4, False, 1),
+        (pcr_template.shifted(-4), len(pcr_template) - 4, False, 1),
+        (pcr_template.shifted(4).reverse_complement(), 4, True, 1),
+        (Dseqrecord('A'), None, None, 0),
+        (Dseqrecord(Dseq.from_full_sequence_and_overhangs(str(pcr_product.seq), -2, 0)), None, None, 0),
+        (Dseqrecord(Dseq.from_full_sequence_and_overhangs(str(pcr_product.seq), 0, 2)), None, None, 0),
+    ],
+)
+def test_post_sequence_search_finds_linear_and_circular_rotation(
+    sequences_client, query_sequence, expected_shift, expected_reverse_complemented, result_count
+):
+    c = sequences_client['client']
+    headers = workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1'])
+    linear_query = TextFileSequence.from_dseqrecord(query_sequence)
+    linear_r = c.post('/sequence/search', headers=headers, json=linear_query.model_dump(mode='json'))
+    assert linear_r.status_code == 200
+    matches = linear_r.json()
+    assert len(matches) == result_count
+    if result_count > 0:
+        match = matches[0]
+        assert match['shift'] == expected_shift
+        assert match['reverse_complemented'] == expected_reverse_complemented
+
+
+def test_get_cloning_strategy_pcr_product(sequences_client):
+    c = sequences_client['client']
+    r = c.get(
+        f"/sequence/{sequences_client['pcr_product_id']}/cloning_strategy",
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+    )
+    assert r.status_code == 200
+    data = r.json()
+    assert len(data['sequences']) == 2
+    assert len(data['sources']) == 2
+    assert len(data['primers']) == 2
+
+
+def test_get_sequence_children_template_to_product(sequences_client):
+    c = sequences_client['client']
+    r = c.get(
+        f"/sequence/{sequences_client['pcr_template_id']}/children",
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+    )
+    assert r.status_code == 200
+    ids = [item['id'] for item in r.json()]
+    assert ids == [sequences_client['pcr_product_id']]
+
+
+def test_get_sequence_primers_pcr_template_and_product(sequences_client):
+    """Template sequence is PCR input (template-side primers); product sequence lists output-side primers."""
+    c = sequences_client['client']
+    h = workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1'])
+    t_r = c.get(f"/sequence/{sequences_client['pcr_template_id']}/primers", headers=h)
+    assert t_r.status_code == 200
+    t_data = t_r.json()
+    assert len(t_data['templates']) == 2
+    assert t_data['products'] == []
+
+    p_r = c.get(f"/sequence/{sequences_client['pcr_product_id']}/primers", headers=h)
+    assert p_r.status_code == 200
+    p_data = p_r.json()
+    assert len(p_data['products']) == 2
+    assert p_data['templates'] == []
+
+
+def test_post_sequencing_files_owner_ok(sequences_client):
+    """Owner can upload sequencing files; GET lists them."""
+    c = sequences_client['client']
+    tok = sequences_client['token_owner_w1']
+    wid = sequences_client['w1']
+    sid = sequences_client['seq_w1_id']
+    up = post_sequencing_file_upload(c, sid, tok, wid, 'run.ab1', b'ABIFDATA')
+    assert up.status_code == 200
+    data = up.json()
+    assert len(data) == 1
+    assert data[0]['original_name'] == 'run.ab1'
+    assert set(data[0]) == {'id', 'original_name'}
+
+    listed = c.get(
+        f"/sequence/{sid}/sequencing_files",
+        headers=workspace_headers(tok, wid),
+    )
+    assert listed.status_code == 200
+    listed_body = listed.json()
+    assert len(listed_body) == 1
+    assert listed_body == data
+
+
+def test_post_sequencing_files_viewer_forbidden(sequences_client):
+    """Viewer cannot upload sequencing files."""
+    c = sequences_client['client']
+    r = post_sequencing_file_upload(
+        c,
+        sequences_client['seq_w1_id'],
+        sequences_client['token_viewer_w1'],
+        sequences_client['w1'],
+        'nope.ab1',
+        b'x',
+    )
+    assert r.status_code == 403
+    assert 'Not allowed' in r.json()['detail']
+
+
+def test_post_sequencing_files_non_member_forbidden(sequences_client):
+    """Non-member cannot upload to another workspace sequence."""
+    c = sequences_client['client']
+    r = post_sequencing_file_upload(
+        c,
+        sequences_client['seq_w1_id'],
+        sequences_client['token_owner_w2'],
+        sequences_client['w1'],
+        'nope.ab1',
+        b'x',
+    )
+    assert r.status_code == 403
+    assert 'Not allowed' in r.json()['detail']
+
+
+def test_post_sequencing_files_workspace_mismatch_404(sequences_client):
+    """W2 sequence id with W1 header returns 404 on upload."""
+    c = sequences_client['client']
+    r = post_sequencing_file_upload(
+        c,
+        sequences_client['seq_w2_id'],
+        sequences_client['token_owner_both'],
+        sequences_client['w1'],
+        'x.ab1',
+        b'x',
+    )
+    assert r.status_code == 404
+    assert r.json()['detail'] == 'Sequence not found'
+
+
+def test_get_sequence_sequencing_files_viewer_ok(sequences_client):
+    """Viewer can list sequencing files after owner uploads."""
+    c = sequences_client['client']
+    owner = sequences_client['token_owner_w1']
+    viewer = sequences_client['token_viewer_w1']
+    wid = sequences_client['w1']
+    sid = sequences_client['seq_w1_id']
+    up = post_sequencing_file_upload(
+        c,
+        sid,
+        owner,
+        wid,
+        'viewer-list.ab1',
+        b'AB1',
+    )
+    assert up.status_code == 200
+
+    listed = c.get(
+        f"/sequence/{sid}/sequencing_files",
+        headers=workspace_headers(viewer, wid),
+    )
+    assert listed.status_code == 200
+    assert listed.json() == up.json()
+
+
+def test_get_sequence_sequencing_files_non_member_forbidden(sequences_client):
+    """Non-member cannot list sequencing files for another workspace."""
+    c = sequences_client['client']
+    listed = c.get(
+        f"/sequence/{sequences_client['seq_w1_id']}/sequencing_files",
+        headers=workspace_headers(
+            sequences_client['token_owner_w2'],
+            sequences_client['w1'],
+        ),
+    )
+    assert listed.status_code == 403
+    assert 'Not allowed' in listed.json()['detail']
+
+
+def test_delete_sequencing_file_owner_204(sequences_client):
+    """Owner can delete a sequencing file (204)."""
+    c = sequences_client['client']
+    tok = sequences_client['token_owner_w1']
+    wid = sequences_client['w1']
+    sid = sequences_client['seq_w1_id']
+    up = post_sequencing_file_upload(c, sid, tok, wid, 'del.ab1', b'DEL')
+    assert up.status_code == 200
+    file_id = up.json()[0]['id']
+
+    r = c.delete(
+        f"/sequence/{sid}/sequencing_files/{file_id}",
+        headers=workspace_headers(tok, wid),
+    )
+    assert r.status_code == 204
+
+
+def test_delete_sequencing_file_viewer_forbidden(sequences_client):
+    """Viewer cannot delete sequencing files."""
+    c = sequences_client['client']
+    owner = sequences_client['token_owner_w1']
+    viewer = sequences_client['token_viewer_w1']
+    wid = sequences_client['w1']
+    sid = sequences_client['seq_w1_id']
+    up = post_sequencing_file_upload(c, sid, owner, wid, 'v-del.ab1', b'V')
+    assert up.status_code == 200
+    file_id = up.json()[0]['id']
+
+    r = c.delete(
+        f"/sequence/{sid}/sequencing_files/{file_id}",
+        headers=workspace_headers(viewer, wid),
+    )
+    assert r.status_code == 403
+    assert 'Not allowed' in r.json()['detail']
+
+
+def test_delete_sequencing_file_wrong_sequence_404(sequences_client):
+    """File belongs to W1 sequence; DELETE under W2 path returns 404."""
+    c = sequences_client['client']
+    tok_w1 = sequences_client['token_owner_w1']
+    both = sequences_client['token_owner_both']
+    w1 = sequences_client['w1']
+    w2 = sequences_client['w2']
+    sid1 = sequences_client['seq_w1_id']
+    sid2 = sequences_client['seq_w2_id']
+    up = post_sequencing_file_upload(c, sid1, tok_w1, w1, 'wrongseq.ab1', b'W')
+    assert up.status_code == 200
+    file_id = up.json()[0]['id']
+
+    r = c.delete(
+        f"/sequence/{sid2}/sequencing_files/{file_id}",
+        headers=workspace_headers(both, w2),
+    )
+    assert r.status_code == 404
+    assert r.json()['detail'] == 'Sequencing file not found'
+
+
+def test_download_sequencing_file_ok(sequences_client):
+    c = sequences_client['client']
+    payload = b'DOWNLOAD-BYTES-123'
+    up = post_sequencing_file_upload(
+        c,
+        sequences_client['seq_w1_id'],
+        sequences_client['token_owner_w1'],
+        sequences_client['w1'],
+        'dl.ab1',
+        payload,
+    )
+    assert up.status_code == 200
+    file_id = up.json()[0]['id']
+    r = c.get(
+        f"/sequencing_files/{file_id}/download",
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+    )
+    assert r.status_code == 200
+    assert r.content == payload
+
+
+def test_download_sequencing_file_ok_then_missing_on_disk_404(sequences_client):
+    """Happy download, then blob removed from disk → 404 (same client/session as upload)."""
+    c = sequences_client['client']
+    tok = sequences_client['token_owner_w1']
+    wid = sequences_client['w1']
+    payload = b'ROUNDTRIP'
+    up = post_sequencing_file_upload(
+        c,
+        sequences_client['seq_w1_id'],
+        tok,
+        wid,
+        'round.ab1',
+        payload,
+    )
+    assert up.status_code == 200
+    file_id = up.json()[0]['id']
+    ok = c.get(
+        f"/sequencing_files/{file_id}/download",
+        headers=workspace_headers(tok, wid),
+    )
+    assert ok.status_code == 200
+    assert ok.content == payload
+
+    with Session(sequences_client['engine']) as session:
+        sf = session.get(SequencingFile, file_id)
+        disk_path = Path(sequences_client['sequencing_files_dir']) / sf.storage_path
+    disk_path.unlink()
+    missing = c.get(
+        f"/sequencing_files/{file_id}/download",
+        headers=workspace_headers(tok, wid),
+    )
+    assert missing.status_code == 404
+    assert missing.json()['detail'] == 'File not found on disk'
+
+
+def test_download_sequencing_file_unknown_id_404(sequences_client):
+    c = sequences_client['client']
+    r = c.get(
+        '/sequencing_files/999999999/download',
+        headers=workspace_headers(sequences_client['token_owner_w1'], sequences_client['w1']),
+    )
+    assert r.status_code == 404
+    assert r.json()['detail'] == 'Sequencing file not found'
+
+
+def test_download_sequencing_file_zz_forbidden_cross_workspace(sequences_client):
+    """User without W1 access cannot download a file uploaded under W1.
+
+    Previous note: Runs after other download tests: a 403 download in the same TestClient session
+    can leave state that breaks a following successful download in some setups.
+    """
+    c = sequences_client['client']
+    tok = sequences_client['token_owner_w2']
+    uploaded = post_sequencing_file_upload(
+        c,
+        sequences_client['seq_w1_id'],
+        sequences_client['token_owner_w1'],
+        sequences_client['w1'],
+        'test.ab1',
+        b'ABIF',
+    )
+    assert uploaded.status_code == 200
+    file_id = uploaded.json()[0]['id']
+
+    download = c.get(
+        f"/sequencing_files/{file_id}/download",
+        headers=workspace_headers(tok, sequences_client['w1']),
+    )
+    assert download.status_code == 403
+    assert 'Not allowed' in download.json()['detail']
+
+
+def test_get_sequences_invalid_workspace_id_header_422(sequences_client):
+    """Non-integer X-Workspace-Id on GET /sequences yields 422."""
+    assert_get_invalid_workspace_id_422(
+        sequences_client['client'],
+        '/sequences',
+        sequences_client['token_owner_w1'],
+        invalid='bad',
+    )
+
+
+def test_get_sequences_non_member_workspace_w3_forbidden_403(sequences_client):
+    """Member of W1 only cannot use workspace W3 header."""
+    assert_get_non_member_workspace_403(
+        sequences_client['client'],
+        '/sequences',
+        sequences_client['token_owner_w1'],
+        sequences_client['w3'],
+    )
+
+
+def test_get_sequences_unauthenticated_401(sequences_client):
+    """GET /sequences without Authorization is rejected."""
+    assert_get_unauthenticated_401(
+        sequences_client['client'],
+        '/sequences',
+        sequences_client['w1'],
+    )
+
+
+def test_download_sequencing_file_no_workspace_header_422(sequences_client):
+    """Sequencing download requires X-Workspace-Id (422 if missing)."""
+    c = sequences_client['client']
+    uploaded = post_sequencing_file_upload(
+        c,
+        sequences_client['seq_w1_id'],
+        sequences_client['token_owner_w1'],
+        sequences_client['w1'],
+        'f.ab1',
+        b'ABIF',
+    )
+    assert uploaded.status_code == 200
+    file_id = uploaded.json()[0]['id']
+
+    tok_w1 = sequences_client['token_owner_w1']
+    download = c.get(
+        f"/sequencing_files/{file_id}/download",
+        headers=bearer_headers(tok_w1),
+    )
+    assert download.status_code == 422
+    assert download.json()['detail']
+
+
+def test_download_sequencing_file_wrong_workspace_404(sequences_client):
+    """W1 file id with W2 header: 404 (sequence not in selected workspace)."""
+    c = sequences_client['client']
+    uploaded = post_sequencing_file_upload(
+        c,
+        sequences_client['seq_w1_id'],
+        sequences_client['token_owner_w1'],
+        sequences_client['w1'],
+        'w.ab1',
+        b'ABIF',
+    )
+    assert uploaded.status_code == 200
+    file_id = uploaded.json()[0]['id']
+
+    download = c.get(
+        f"/sequencing_files/{file_id}/download",
+        headers=workspace_headers(
+            sequences_client['token_owner_both'],
+            sequences_client['w2'],
+        ),
+    )
+    assert download.status_code == 404
+    assert download.json()['detail'] == 'Sequence not found'
+
+
+def test_patch_sequence_cross_workspace_header_404(sequences_client):
+    """PATCH W2 sequence id with W1 header returns 404."""
+    c = sequences_client['client']
+    tok = sequences_client['token_owner_both']
+    response = c.patch(
+        f"/sequence/{sequences_client['seq_w2_id']}",
+        headers=workspace_headers(tok, sequences_client['w1']),
+        json={'name': 'should-not-apply'},
+    )
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Sequence not found'
+
+
+def test_post_cloning_strategy_from_example(sequences_client):
+    c = sequences_client['client']
+    body = opencloning_models.CloningStrategy.model_validate(cs_pcr.model_dump(mode='json')).model_dump(mode='json')
+    r = c.post(
+        '/sequence',
+        headers=workspace_headers(
+            sequences_client['token_owner_w1'],
+            sequences_client['w1'],
+            extra={'Content-Type': 'application/json'},
+        ),
+        json=body,
+    )
+    assert r.status_code == 200
+    out = r.json()
+    assert 'id' in out
+    assert isinstance(out['mappings'], list)
+
+
+def test_search_rotation_errors():
+    with pytest.raises(ValueError):
+        _search_rotation(Dseq('ATGC'), Dseq('ATG'))
+    with pytest.raises(ValueError):
+        _search_rotation(Dseq('ATGC'), Dseq('ATGC', circular=True))
+    with pytest.raises(ValueError):
+        _search_rotation(Dseq('ATGC', circular=True), Dseq('ATGC'))
+    with pytest.raises(ValueError):
+        _search_rotation(Dseq('ATGCA', circular=True), Dseq('ATGC', circular=True))
+    with pytest.raises(ValueError):
+        _search_rotation(Dseq('ATGCT', circular=True), Dseq('ATGCA', circular=True))

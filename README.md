@@ -140,16 +140,40 @@ From the repository root (after `uv sync`):
 uv run pytest packages/opencloning/tests -v -ks
 ```
 
+## Running opencloning-db locally
+
+`opencloning-db` now lives in `packages/opencloning-db/src` and uses the local workspace `opencloning` package.
+
+From the repository root:
+
+```bash
+# Install/update workspace dependencies
+uv sync
+
+# Run opencloning-db tests
+uv run pytest packages/opencloning-db/tests -v
+
+# Recreate the opencloning-db local database seed
+./restart_db.sh
+```
+
+If you need to run the init script manually:
+
+```bash
+uv run --directory packages/opencloning-db/src python -m opencloning_db.init_db
+```
+
 ## Dependency guardrail (deptry)
 
 This repository uses a uv workspace. In a workspace, dependencies are resolved in one shared environment, so imports can appear to work even when a package does not declare them in its own `pyproject.toml`.
 
-To catch that for `opencloning`, pre-commit runs `deptry` against `packages/opencloning/src` using `packages/opencloning/pyproject.toml` as the source of truth for declared dependencies.
+To catch that, pre-commit runs `deptry` separately for `opencloning` and `opencloning-db`, each using that package’s `pyproject.toml` as the source of truth for declared dependencies.
 
-Run it manually from the repository root:
+Run them manually from the repository root:
 
 ```bash
 uv run deptry --config packages/opencloning/pyproject.toml packages/opencloning/src
+uv run deptry --config packages/opencloning-db/pyproject.toml packages/opencloning-db/src
 ```
 
 Current rollout note: known undeclared imports such as `pydna` are temporarily ignored and should be removed from the ignore list once dependencies are declared.
