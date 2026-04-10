@@ -1,6 +1,7 @@
 from typing import Generator
 from sqlalchemy.orm import Session
-from opencloning_db.config import Config, set_config, get_config
+
+from opencloning_db.config import Config, get_config, set_config
 import opencloning_db.db as db_module
 from fastapi.testclient import TestClient
 from opencloning_db.api import app
@@ -15,7 +16,11 @@ _JWT_SECRET = 'test-jwt-secret-not-for-production'
 
 @pytest.fixture
 def engine_client_config() -> Generator[tuple[Engine, TestClient, Config], None, None]:
-    """Test engine and client."""
+    """Temp SQLite DB, upload dirs, ``get_db`` override, and ``TestClient``.
+
+    Also use via ``@pytest.mark.usefixtures("engine_client_config")`` when tests
+    only need ``get_config()`` paths (e.g. model tests with their own engine).
+    """
     default_config = get_config()
     with tempfile.TemporaryDirectory() as tmp_dir:
         test_config = Config(

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from copy import deepcopy
-import shutil
 import tempfile
 import unittest
 import uuid
@@ -11,6 +10,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import opencloning_linkml.datamodel.models as opencloning_models
+import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
@@ -168,26 +168,9 @@ class TestBaseRepr(unittest.TestCase):
         self.assertIn('sequence_instance_id: None', text)
 
 
+@pytest.mark.usefixtures('engine_client_config')
 class TestSequence(_MemoryDbTestCase):
     """Tests for ``Sequence``."""
-
-    def setUp(self):
-        super().setUp()
-        self._cfg_tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self._cfg_tmp.cleanup)
-        self._seq_root = Path(self._cfg_tmp.name) / 'sequence_files'
-        self._seq_root.mkdir()
-        self._config_patcher = patch.object(
-            app_config,
-            'config',
-            Config(
-                database_url=f"sqlite:///{self._cfg_tmp.name}/unused.db",
-                jwt_secret='test',
-                sequence_files_dir=str(self._seq_root),
-            ),
-        )
-        self._config_patcher.start()
-        self.addCleanup(self._config_patcher.stop)
 
     def test_sample_uids_only_sequence_samples(self):
         """``sample_uids`` lists UIDs from ``SequenceSample`` only."""
@@ -213,7 +196,8 @@ class TestSequence(_MemoryDbTestCase):
     def test_to_pydantic_sequence_reads_genbank_file(self):
         """Reads GenBank file text from configured sequence directory."""
         rel = 'sub/test.gb'
-        full = self._seq_root / rel
+        seq_root = Path(app_config.get_config().sequence_files_dir)
+        full = seq_root / rel
         full.parent.mkdir(parents=True)
         full.write_text('LOCUS       X\n//\n', encoding='utf-8')
 
@@ -423,27 +407,9 @@ class TestSourceInputAndAssemblyFragment(_MemoryDbTestCase):
         self.assertEqual(pyd.sequence, ent.id)
 
 
+@pytest.mark.usefixtures('engine_client_config')
 class TestCloningStrategyToDb(_MemoryDbTestCase):
     """Tests for ``cloning_strategy_to_db`` mappings."""
-
-    def setUp(self):
-        super().setUp()
-        self._config_backup = app_config.get_config().model_dump()
-        self._seq_dir = tempfile.mkdtemp()
-        self.addCleanup(lambda: shutil.rmtree(self._seq_dir, ignore_errors=True))
-        app_config.set_config(
-            Config(
-                **{
-                    **self._config_backup,
-                    'sequence_files_dir': self._seq_dir,
-                    'sequencing_files_dir': self._seq_dir,
-                }
-            )
-        )
-
-    def tearDown(self):
-        app_config.set_config(Config(**self._config_backup))
-        super().tearDown()
 
     def test_dseqrecord_to_db_raises_when_strategy_has_multiple_sequences(self):
         """``dseqrecord_to_db`` rejects strategies that produce more than one sequence."""
