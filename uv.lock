@@ -1101,7 +1101,7 @@ requires-dist = [
     { name = "primer3-py", specifier = ">=2.3" },
     { name = "pydantic", specifier = ">=2.7.1" },
     { name = "pydantic-core", specifier = ">=2.41.5" },
-    { name = "pydna", specifier = ">=5.5.9" },
+    { name = "pydna", specifier = ">=5.5.10" },
     { name = "python-multipart", specifier = ">=0.0.24" },
     { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "uvicorn", specifier = ">=0.44.0" },
@@ -1131,7 +1131,7 @@ requires-dist = [
     { name = "opencloning-linkml", specifier = ">=1.0.0" },
     { name = "pwdlib", extras = ["argon2"], specifier = ">=0.2.1,<0.3" },
     { name = "pydantic", extras = ["email"], specifier = ">=2.7.1" },
-    { name = "pydna", specifier = ">=5.5.9" },
+    { name = "pydna", specifier = ">=5.5.10" },
     { name = "pyjwt", specifier = ">=2.10.1,<3" },
     { name = "sqlalchemy", specifier = ">=2.0.41,<3" },
 ]
@@ -1652,7 +1652,7 @@ wheels = [
 
 [[package]]
 name = "pydna"
-version = "5.5.9"
+version = "5.5.10"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "appdirs" },
@@ -1667,9 +1667,9 @@ dependencies = [
     { name = "seguid" },
     { name = "sgffp" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b8/8b/c72823682b9f4cd1f66efd042cfd0c36d22150b18651b0d09742dc47ba59/pydna-5.5.9.tar.gz", hash = "sha256:62bb27a5698bcfac25a255852d0dc6bd4d7aa0f07f81d772e7b092e57c8e1a3d", size = 182382, upload-time = "2026-03-31T16:03:02.598Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f0/e4/829ddc35b18242699dacdcdae1423c9505404e70ea08934ecf6be60d9535/pydna-5.5.10.tar.gz", hash = "sha256:8e8b967db473bf12b477365f53446350728db1f912903d90d7ffa9709fb8a490", size = 182745, upload-time = "2026-04-10T08:41:35.107Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/86/a1/d2d38c07acc6ed20b20161f85da5eedd743a36dc4a4c14b2e263278b1ff3/pydna-5.5.9-py3-none-any.whl", hash = "sha256:456432c8c516e36b93bd6f8ec75244035cf90ffdd030e8d2cc96b69600666c66", size = 193457, upload-time = "2026-03-31T16:03:03.929Z" },
+    { url = "https://files.pythonhosted.org/packages/3c/14/f0a890c452d093db92b45fdda5cb941fe7d6825d88b1e877f4692236b2a0/pydna-5.5.10-py3-none-any.whl", hash = "sha256:f3dff46ab0df0ade2eeab102f5e7ae9ea1796b1822d29833b91c01e4b5eb1682", size = 193846, upload-time = "2026-04-10T08:41:36.521Z" },
 ]
 
 [[package]]
