@@ -1,8 +1,11 @@
 # Backend for OpenCloning
 # https://github.com/manulera/OpenCloning_backend
+#
+# Production: docker build -f docker/opencloning.Dockerfile .
+# CI tests:    docker build -f docker/opencloning.Dockerfile --target builder-test .
 
-# BUILDER IMAGE
-FROM manulera/opencloningbackend-base:python_3.12-alpine3.21 AS builder
+# BUILDER — shared setup
+FROM manulera/opencloningbackend-base:python_3.12-alpine3.21 AS base-setup
 
 RUN adduser -s /bin/bash -D backend
 USER backend
@@ -18,20 +21,38 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 RUN pip install --no-cache-dir uv
 
+# Workspace: opencloning only (enough for prod lock sync)
+FROM base-setup AS workspace-opencloning
+
 COPY pyproject.toml uv.lock ./
 COPY packages/opencloning/pyproject.toml packages/opencloning/README.md packages/opencloning/
 COPY packages/opencloning/src packages/opencloning/src
 
+# Production venv — only opencloning + runtime deps
+FROM workspace-opencloning AS builder-prod
+
 ARG PACKAGE_VERSION="0.1.0"
 ENV SETUPTOOLS_SCM_PRETEND_VERSION="${PACKAGE_VERSION}"
 
-## Docker-test-comment
-# The above comment is used to build another Dockerfile to run the tests in the container during CI.
-
 RUN uv sync --frozen --package opencloning --no-default-groups --no-editable
 
-# FINAL IMAGE
-FROM python:3.12-alpine3.21
+# Workspace + opencloning-db (for CI / full workspace test sync)
+FROM workspace-opencloning AS workspace-full
+
+COPY packages/opencloning-db/pyproject.toml packages/opencloning-db/
+COPY packages/opencloning-db/src packages/opencloning-db/src
+
+FROM workspace-full AS builder-test
+
+ARG PACKAGE_VERSION="0.1.0"
+ENV SETUPTOOLS_SCM_PRETEND_VERSION="${PACKAGE_VERSION}"
+
+RUN uv sync --frozen --no-default-groups --no-editable --group test
+
+ENV PATH="/usr/local/bin/mafft/bin:$VIRTUAL_ENV/bin:$PATH"
+
+# FINAL IMAGE (default build target)
+FROM python:3.12-alpine3.21 AS production
 
 # You need bash to run mafft and runtime libraries for MARS
 RUN apk update --no-cache && apk add --no-cache bash libstdc++ libgomp libgcc
@@ -42,9 +63,9 @@ USER backend
 WORKDIR /home/backend
 
 ENV VIRTUAL_ENV="/home/backend/venv"
-COPY --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
-COPY --from=builder /usr/local/bin/mars /usr/local/bin/mars
-COPY --from=builder /usr/local/bin/mafft /usr/local/bin/mafft
+COPY --from=builder-prod $VIRTUAL_ENV $VIRTUAL_ENV
+COPY --from=builder-prod /usr/local/bin/mars /usr/local/bin/mars
+COPY --from=builder-prod /usr/local/bin/mafft /usr/local/bin/mafft
 
 ENV PATH="/usr/local/bin/mafft/bin:$VIRTUAL_ENV/bin:$PATH"
 # For example, ROOT_PATH="/syc"

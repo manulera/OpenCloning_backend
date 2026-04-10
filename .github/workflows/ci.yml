@@ -95,17 +95,12 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Create testing Dockerfile
-        run: |
-          sed '/## Docker-test-comment/,$d' docker/opencloning.Dockerfile > Dockerfile.test &&
-          echo "RUN uv sync --frozen --no-default-groups --no-editable --group test" >> Dockerfile.test &&
-          echo "ENV PATH=\"/usr/local/bin/mafft/bin:\$PATH\"" >> Dockerfile.test
-
       - name: Build test image
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: Dockerfile.test
+          file: docker/opencloning.Dockerfile
+          target: builder-test
           tags: manulera/opencloningbackend:test
 
       - name: Run tests in container
