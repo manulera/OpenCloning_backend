@@ -55,7 +55,7 @@ jobs:
           ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
           ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
         run: |
-          uv run pytest --tb=short -v --capture=no --cov=packages/*/src --cov-report term --cov-report xml:coverage.xml
+          uv run pytest --tb=short -v --capture=no --cov=packages/opencloning/src --cov=packages/opencloning-db/src --cov-report term --cov-report xml:coverage.xml
 
       - name: Stop workflow if mode is fresh
         if: ${{ matrix.mode == 'fresh' }}
