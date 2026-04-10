@@ -55,8 +55,7 @@ jobs:
           ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
           ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
         run: |
-          uv run pytest packages/opencloning/tests --tb=short -v --capture=no \
-            --cov=packages/opencloning/src/opencloning --cov-report term --cov-report xml:coverage.xml
+          uv run pytest --tb=short -v --capture=no --cov=packages/*/src --cov-report term --cov-report xml:coverage.xml
 
       - name: Stop workflow if mode is fresh
         if: ${{ matrix.mode == 'fresh' }}
@@ -109,9 +108,9 @@ jobs:
             -e NCBI_API_KEY="${{ secrets.NCBI_API_KEY }}" \
             -e ADDGENE_USERNAME="${{ secrets.ADDGENE_USERNAME }}" \
             -e ADDGENE_PASSWORD="${{ secrets.ADDGENE_PASSWORD }}" \
-            -v "${{ github.workspace }}/packages/opencloning/tests:/home/backend/packages/opencloning/tests" \
+            -v "${{ github.workspace }}/packages/*/tests:/home/backend/packages/*/tests" \
             manulera/opencloningbackend:test \
-            uv run pytest packages/opencloning/tests -vs
+            uv run pytest -vs
 
   # Update docker image when committing to master branch
   push_to_registry:
