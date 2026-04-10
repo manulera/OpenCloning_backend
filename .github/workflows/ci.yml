@@ -108,7 +108,8 @@ jobs:
             -e NCBI_API_KEY="${{ secrets.NCBI_API_KEY }}" \
             -e ADDGENE_USERNAME="${{ secrets.ADDGENE_USERNAME }}" \
             -e ADDGENE_PASSWORD="${{ secrets.ADDGENE_PASSWORD }}" \
-            -v "${{ github.workspace }}/packages/*/tests:/home/backend/packages/*/tests" \
+            -v "${{ github.workspace }}/packages/opencloning/tests:/home/backend/packages/opencloning/tests" \
+            -v "${{ github.workspace }}/packages/opencloning-db/tests:/home/backend/packages/opencloning-db/tests" \
             manulera/opencloningbackend:test \
             uv run pytest -vs
 
