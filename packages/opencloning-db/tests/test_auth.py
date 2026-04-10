@@ -13,13 +13,11 @@ import pytest
 
 from opencloning_db.auth.security import create_access_token
 from opencloning_db.config import get_config
-from .helpers import make_app_client
 
 
 @pytest.fixture
-def auth_client(tmp_path, monkeypatch):
-    """Isolated SQLite DB and JWT secret; import api after config is set."""
-    _, client = make_app_client(tmp_path, monkeypatch, 'routers.auth')
+def auth_client(engine_client_config):
+    _, client, _ = engine_client_config
     return client
 
 
@@ -158,15 +156,14 @@ def test_me_malformed_authorization_401(auth_client):
     assert r.json()['detail'] == 'Could not validate credentials'
 
 
-def test_me_wrong_secret_jwt_401(auth_client, tmp_path, monkeypatch):
+def test_me_wrong_secret_jwt_401(auth_client):
     """JWT signed with a different key than the app config is rejected."""
-    _, client = make_app_client(tmp_path, monkeypatch, 'routers.auth')
     bad = jwt.encode(
         {'sub': '1', 'exp': datetime.now(timezone.utc) + timedelta(hours=1)},
         'wrong-secret-key-at-least-32bytes-long!!',
         algorithm='HS256',
     )
-    r = client.get(
+    r = auth_client.get(
         '/auth/me',
         headers={'Authorization': f"Bearer {bad}"},
     )

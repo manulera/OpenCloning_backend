@@ -12,16 +12,15 @@ from .helpers import (
     assert_get_unauthenticated_401,
     assert_post_unauthenticated_401,
     attach_standard_tokens,
-    make_app_client,
     seed_standard_users,
     workspace_headers,
 )
 
 
 @pytest.fixture
-def primers_client(tmp_path, monkeypatch):
+def primers_client(engine_client_config):
     """Fresh DB with W1/W2; seeded primer on W1."""
-    engine, client = make_app_client(tmp_path, monkeypatch, 'routers.primers')
+    engine, client, _ = engine_client_config
 
     with Session(engine) as session:
         ctx = seed_standard_users(session)

@@ -11,20 +11,15 @@ from .helpers import (
     assert_get_non_member_workspace_403,
     assert_get_unauthenticated_401,
     attach_standard_tokens,
-    make_app_client,
     seed_standard_users,
     workspace_headers,
 )
 
 
 @pytest.fixture
-def seq_samples_client(tmp_path, monkeypatch):
+def seq_samples_client(engine_client_config):
     """Fresh DB for sequence samples authorization tests."""
-    engine, client = make_app_client(
-        tmp_path,
-        monkeypatch,
-        'routers.sequence_samples',
-    )
+    engine, client, _ = engine_client_config
 
     with Session(engine) as session:
         ctx = seed_standard_users(session)

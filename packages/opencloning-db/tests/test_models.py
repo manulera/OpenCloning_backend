@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import shutil
 import tempfile
 import unittest
 import uuid
@@ -424,6 +425,25 @@ class TestSourceInputAndAssemblyFragment(_MemoryDbTestCase):
 
 class TestCloningStrategyToDb(_MemoryDbTestCase):
     """Tests for ``cloning_strategy_to_db`` mappings."""
+
+    def setUp(self):
+        super().setUp()
+        self._config_backup = app_config.get_config().model_dump()
+        self._seq_dir = tempfile.mkdtemp()
+        self.addCleanup(lambda: shutil.rmtree(self._seq_dir, ignore_errors=True))
+        app_config.set_config(
+            Config(
+                **{
+                    **self._config_backup,
+                    'sequence_files_dir': self._seq_dir,
+                    'sequencing_files_dir': self._seq_dir,
+                }
+            )
+        )
+
+    def tearDown(self):
+        app_config.set_config(Config(**self._config_backup))
+        super().tearDown()
 
     def test_dseqrecord_to_db_raises_when_strategy_has_multiple_sequences(self):
         """``dseqrecord_to_db`` rejects strategies that produce more than one sequence."""

@@ -20,7 +20,6 @@ from .helpers import (
     assert_get_unauthenticated_401,
     attach_standard_tokens,
     bearer_headers,
-    make_app_client,
     post_sequencing_file_upload,
     seed_standard_users,
     workspace_headers,
@@ -36,20 +35,9 @@ def _sequence_in_workspace(session: Session, workspace_id: int, name: str) -> Se
 
 
 @pytest.fixture
-def sequences_client(tmp_path: Path, monkeypatch):
+def sequences_client(engine_client_config):
     """Fresh DB with tmp sequence/sequencing dirs, bare sequences, and example cloning strategies."""
-    seq_dir = tmp_path / 'sequence_files'
-    seq_dir.mkdir(parents=True)
-    sf_dir = tmp_path / 'sequencing_files'
-    sf_dir.mkdir(parents=True)
-
-    engine, client = make_app_client(
-        tmp_path,
-        monkeypatch,
-        'routers.sequences',
-        sequence_files_dir=str(seq_dir),
-        sequencing_files_dir=str(sf_dir),
-    )
+    engine, client, config = engine_client_config
 
     with Session(engine) as session:
         ctx = seed_standard_users(session)
@@ -117,7 +105,7 @@ def sequences_client(tmp_path: Path, monkeypatch):
                 'uid_w1': sample_w1.uid,
                 'w1_sequence_ids': w1_ids,
                 'w2_sequence_ids': w2_ids,
-                'sequencing_files_dir': str(sf_dir),
+                'sequencing_files_dir': config.sequencing_files_dir,
                 'pcr_template_id': pcr_template.id,
                 'pcr_product_id': pcr_product.id,
                 'pcr_product_seguid': pcr_product.seguid,

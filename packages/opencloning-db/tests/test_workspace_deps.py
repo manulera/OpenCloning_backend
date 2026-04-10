@@ -14,14 +14,14 @@ from opencloning_db.workspace_deps import (
     get_sequence_in_workspace_for_user,
     get_sequence_sample_in_workspace_for_user,
 )
-from .helpers import make_app_client, seed_standard_users
+from .helpers import seed_standard_users
 
 
 @pytest.fixture
-def deps_session(tmp_path, monkeypatch):
+def deps_session(engine_client_config):
     """Small fixture to exercise workspace_deps access checks."""
 
-    engine, _ = make_app_client(tmp_path, monkeypatch, 'routers.auth')
+    engine, _, _ = engine_client_config
 
     with Session(engine) as session:
         ctx = seed_standard_users(session)

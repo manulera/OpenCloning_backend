@@ -1,12 +1,6 @@
 """Shared test utilities for workspace resource fixtures."""
 
-import sys
-
-import opencloning_db.config as config_module
-from opencloning_db.config import set_config
 from opencloning_db.auth.security import get_password_hash
-
-_JWT_SECRET = 'test-jwt-secret-not-for-production'
 
 _STANDARD_EMAILS = {
     'owner_w1': 'owner-w1@test.com',
@@ -135,59 +129,6 @@ def assert_patch_unauthenticated_401(
         json=json,
     )
     assert r.status_code == 401, r.text
-
-
-def make_app_client(
-    tmp_path,
-    monkeypatch,
-    extra_module: str,
-    *,
-    sequence_files_dir: str | None = None,
-    sequencing_files_dir: str | None = None,
-):
-    """Bootstrap a fresh SQLite DB and return ``(engine, TestClient)``.
-
-    Purges ``sys.modules`` for the standard set plus *extra_module* (the
-    router under test) so each fixture starts from a clean import state.
-
-    Optional *sequence_files_dir* and *sequencing_files_dir* override config
-    paths (e.g. under ``tmp_path``) so tests can control on-disk GenBank and
-    sequencing uploads without touching the repo default directories.
-    """
-    monkeypatch.setenv('OPENCLONING_JWT_SECRET', _JWT_SECRET)
-    if not extra_module.startswith('opencloning_db.'):
-        extra_module = f"opencloning_db.{extra_module}"
-    db_path = tmp_path / 'test.db'
-    cfg_kwargs: dict = {
-        'database_url': f"sqlite:///{db_path}",
-        'jwt_secret': _JWT_SECRET,
-    }
-    if sequence_files_dir is not None:
-        cfg_kwargs['sequence_files_dir'] = sequence_files_dir
-    if sequencing_files_dir is not None:
-        cfg_kwargs['sequencing_files_dir'] = sequencing_files_dir
-    set_config(config_module.Config(**cfg_kwargs))
-
-    for name in list(sys.modules.keys()):
-        if name in (
-            'opencloning_db.api',
-            'opencloning_db.deps',
-            'opencloning_db.routers.auth',
-            'opencloning_db.db',
-            extra_module,
-        ):
-            del sys.modules[name]
-
-    import opencloning_db.db as db_module
-    from fastapi.testclient import TestClient
-    from opencloning_db.models import Base
-
-    engine = db_module.get_engine(config_module.get_config())
-    Base.metadata.create_all(engine)
-
-    from opencloning_db.api import app
-
-    return engine, TestClient(app)
 
 
 def seed_standard_users(session) -> dict:

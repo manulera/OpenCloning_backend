@@ -7,18 +7,13 @@ from .helpers import (
     attach_standard_tokens,
     bearer_headers,
     fetch_token,
-    make_app_client,
     seed_standard_users,
 )
 
 
 @pytest.fixture
-def workspaces_client(tmp_path, monkeypatch):
-    engine, client = make_app_client(
-        tmp_path,
-        monkeypatch,
-        'routers.workspaces',
-    )
+def workspaces_client(engine_client_config):
+    engine, client, _ = engine_client_config
 
     with Session(engine) as session:
         ctx = seed_standard_users(session)

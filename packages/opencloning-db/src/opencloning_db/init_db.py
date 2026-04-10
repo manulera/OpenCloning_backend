@@ -9,8 +9,6 @@ import glob
 from pathlib import Path
 import opencloning_linkml.datamodel.models as opencloning_models
 from sqlalchemy.orm import Session
-from sqlalchemy.schema import CreateTable
-from sqlalchemy.dialects import postgresql
 
 from opencloning_db.auth.security import get_password_hash
 from opencloning_db.config import Config, get_config
@@ -112,14 +110,16 @@ def init_db(config: Config):
 
     print('Database initialized successfully.')
 
-    sql_file_content = ''
+    # from sqlalchemy.schema import CreateTable
+    # from sqlalchemy.dialects import postgresql
+    # sql_file_content = ''
 
-    # Print DDL for all tables in the database
-    for table in Base.metadata.tables.values():
-        sql_file_content += str(CreateTable(table).compile(dialect=postgresql.dialect()))
+    # # Print DDL for all tables in the database
+    # for table in Base.metadata.tables.values():
+    #     sql_file_content += str(CreateTable(table).compile(dialect=postgresql.dialect()))
 
-    with open('postgres_ddl.sql', 'w') as f:
-        f.write(sql_file_content)
+    # with open('postgres_ddl.sql', 'w') as f:
+    #     f.write(sql_file_content)
 
 
 if __name__ == '__main__':  # pragma: no cover

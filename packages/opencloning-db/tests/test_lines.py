@@ -13,20 +13,15 @@ from .helpers import (
     assert_patch_unauthenticated_401,
     assert_post_unauthenticated_401,
     attach_standard_tokens,
-    make_app_client,
     seed_standard_users,
     workspace_headers,
 )
 
 
 @pytest.fixture
-def lines_client(tmp_path, monkeypatch):
+def lines_client(engine_client_config):
     """Fresh DB for lines workspace authorization tests."""
-    engine, client = make_app_client(
-        tmp_path,
-        monkeypatch,
-        'routers.lines',
-    )
+    engine, client, _ = engine_client_config
 
     with Session(engine) as session:
         ctx = seed_standard_users(session)
