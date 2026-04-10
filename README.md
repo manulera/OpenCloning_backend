@@ -167,12 +167,13 @@ uv run --directory packages/opencloning-db/src python -m opencloning_db.init_db
 
 This repository uses a uv workspace. In a workspace, dependencies are resolved in one shared environment, so imports can appear to work even when a package does not declare them in its own `pyproject.toml`.
 
-To catch that for `opencloning`, pre-commit runs `deptry` against `packages/opencloning/src` using `packages/opencloning/pyproject.toml` as the source of truth for declared dependencies.
+To catch that, pre-commit runs `deptry` separately for `opencloning` and `opencloning-db`, each using that package’s `pyproject.toml` as the source of truth for declared dependencies.
 
-Run it manually from the repository root:
+Run them manually from the repository root:
 
 ```bash
 uv run deptry --config packages/opencloning/pyproject.toml packages/opencloning/src
+uv run deptry --config packages/opencloning-db/pyproject.toml packages/opencloning-db/src
 ```
 
 Current rollout note: known undeclared imports such as `pydna` are temporarily ignored and should be removed from the ignore list once dependencies are declared.

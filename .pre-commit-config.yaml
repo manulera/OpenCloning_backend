@@ -60,3 +60,16 @@ repos:
                 packages/opencloning/pyproject.toml|
                 pyproject.toml
             )$
+  - repo: local
+    hooks:
+      - id: deptry-opencloning-db
+        name: deptry (opencloning-db)
+        entry: uv run deptry --config packages/opencloning-db/pyproject.toml packages/opencloning-db/src
+        language: system
+        pass_filenames: false
+        files: |
+            (?x)^(
+                packages/opencloning-db/src/.*|
+                packages/opencloning-db/pyproject.toml|
+                pyproject.toml
+            )$
