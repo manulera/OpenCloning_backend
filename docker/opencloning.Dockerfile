@@ -41,6 +41,8 @@ FROM workspace-opencloning AS workspace-full
 
 COPY packages/opencloning-db/pyproject.toml packages/opencloning-db/
 COPY packages/opencloning-db/src packages/opencloning-db/src
+COPY packages/opencloning-db/tests packages/opencloning-db/tests
+COPY packages/opencloning/tests packages/opencloning/tests
 
 FROM workspace-full AS builder-test
 
