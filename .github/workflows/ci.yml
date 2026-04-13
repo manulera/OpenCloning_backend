@@ -112,7 +112,7 @@ jobs:
             -e ADDGENE_PASSWORD="${{ secrets.ADDGENE_PASSWORD }}" \
             -e TMPDIR="/tmp" \
             manulera/opencloningbackend-test \
-            uv run pytest -vs
+            python -m pytest -vs -o cache_dir=/tmp/pytest-cache
 
   # Update docker image when committing to master branch
   push_to_registry:
