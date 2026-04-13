@@ -41,8 +41,6 @@ FROM workspace-opencloning AS workspace-full
 
 COPY packages/opencloning-db/pyproject.toml packages/opencloning-db/
 COPY packages/opencloning-db/src packages/opencloning-db/src
-COPY packages/opencloning-db/tests packages/opencloning-db/tests
-COPY packages/opencloning/tests packages/opencloning/tests
 
 FROM workspace-full AS builder-test
 
@@ -52,6 +50,9 @@ ENV SETUPTOOLS_SCM_PRETEND_VERSION="${PACKAGE_VERSION}"
 RUN uv sync --frozen --no-default-groups --no-editable --group test
 
 ENV PATH="/usr/local/bin/mafft/bin:$VIRTUAL_ENV/bin:$PATH"
+
+COPY packages/opencloning-db/tests packages/opencloning-db/tests
+COPY packages/opencloning/tests packages/opencloning/tests
 
 # FINAL IMAGE (default build target)
 FROM python:3.12-alpine3.21 AS production

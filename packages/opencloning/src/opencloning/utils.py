@@ -1,6 +1,7 @@
 import tempfile
 import shutil
 import os
+import glob
 
 
 def move_all_contents(src_dir, dst_dir):
@@ -37,9 +38,16 @@ class TemporaryFolderOverride:
             os.mkdir(self.target_folder)
 
     def __exit__(self, exc_type, exc_value, traceback):
-        # Remove the temporary folder
-        shutil.rmtree(self.target_folder)
+        try:
+            # Empty the target folder
+            for path in glob.glob(os.path.join(self.target_folder, '*')):
+                shutil.rmtree(path) if os.path.isdir(path) and not os.path.islink(path) else os.unlink(path)
+            if self.target_folder_exists:
+                move_all_contents(self.backup_folder, self.target_folder)
+            # If the target folder is not a mount point and it did not exist before
+            elif self.target_folder_exists and not os.path.ismount(self.target_folder):
+                shutil.rmtree(self.target_folder)
 
-        if self.target_folder_exists:
-            os.mkdir(self.target_folder)
-            move_all_contents(self.backup_folder, self.target_folder)
+        finally:
+            if self.backup_folder is not None:
+                shutil.rmtree(self.backup_folder, ignore_errors=True)
