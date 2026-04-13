@@ -93,7 +93,7 @@ docker run -d --name backendcontainer -p 8000:8000 manulera/opencloningbackend
 
 ```
 
-To run with a read-only root filesystem while still allowing temporary files (required for tools like mafft), mount `/tmp` as tmpfs (RAM-backed writable storage):
+To run with a read-only root filesystem while still allowing temporary files (required for tools like mafft), mount `/tmp` as tmpfs (RAM-backed writable storage). This will not work with `RECORD_STUBS=1` (see [Generating API stubs](#generating-api-stubs)).
 
 ```bash
 docker run -d --name backendcontainer -p 8000:8000 \

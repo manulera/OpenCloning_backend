@@ -107,6 +107,8 @@ jobs:
           docker run --rm \
             --read-only \
             --tmpfs /tmp:rw,noexec,nosuid,size=256M \
+            --tmpfs /home/backend/frontend:rw,noexec,nosuid,size=64M \
+            --tmpfs /home/backend/stubs:rw,noexec,nosuid,size=64M \
             -e NCBI_API_KEY="${{ secrets.NCBI_API_KEY }}" \
             -e ADDGENE_USERNAME="${{ secrets.ADDGENE_USERNAME }}" \
             -e ADDGENE_PASSWORD="${{ secrets.ADDGENE_PASSWORD }}" \
