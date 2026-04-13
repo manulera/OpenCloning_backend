@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 import unittest
 import shutil
 import os
+import tempfile
 from opencloning_linkml.datamodel import ManuallyTypedSource, RestrictionEnzymeDigestionSource, ManuallyTypedSequence
 from pytest import MonkeyPatch
 from importlib import reload
@@ -16,9 +17,11 @@ import opencloning.app_settings as app_settings
 
 
 class StubRouteTest(unittest.TestCase):
-    # DO this before each test
     def setUp(self):
-        # Has to be imported here to get the right environment variable
+        self._prev_cwd = os.getcwd()
+        self._workdir = tempfile.mkdtemp()
+        os.chdir(self._workdir)
+
         MonkeyPatch().setenv('RECORD_STUBS', '1')
         reload(app_settings)
         reload(get_router)
@@ -26,21 +29,18 @@ class StubRouteTest(unittest.TestCase):
         reload(no_assembly_endpoints)
         reload(main)
 
-        client = TestClient(main._app)
-        self.client = client
-        # remove the stubs folder
-        shutil.rmtree('stubs', ignore_errors=True)
+        self.client = TestClient(main._app)
 
-    # Remove the stubs folder after each test
     def tearDown(self):
-        shutil.rmtree('stubs', ignore_errors=True)
         MonkeyPatch().setenv('RECORD_STUBS', '0')
-
         reload(app_settings)
         reload(get_router)
         reload(no_input_endpoints)
         reload(no_assembly_endpoints)
         reload(main)
+
+        os.chdir(self._prev_cwd)
+        shutil.rmtree(self._workdir, ignore_errors=True)
 
     def test_stub_route(self):
         source = ManuallyTypedSource(id=0)

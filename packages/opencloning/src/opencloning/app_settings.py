@@ -6,8 +6,8 @@ import os
 from pydantic import BaseModel
 
 
-def parse_bool(value: str) -> bool:
-    return value in {'1', 'TRUE', 'true', 'True'}
+def parse_bool(value: str | bool) -> bool:
+    return value in {'1', 'TRUE', 'true', 'True', True}
 
 
 # API settings ===============================================
@@ -92,4 +92,36 @@ settings = Settings(
     ADDGENE_USERNAME=ADDGENE_USERNAME,
     ADDGENE_PASSWORD=ADDGENE_PASSWORD,
     ALLOWED_EXTERNAL_URLS=ALLOWED_EXTERNAL_URLS,
+)
+
+
+class FrontendConfig(BaseModel):
+    """Configuration for the frontend"""
+
+    backendUrl: str
+    database: str | None
+    showAppBar: bool
+    noExternalRequests: bool
+    enableAssembler: bool
+    enablePlannotate: bool
+    staticContentPath: str | None
+
+
+BACKEND_URL = os.environ.get('BACKEND_URL', 'http://localhost:8000/')
+DATABASE = os.environ.get('DATABASE', None)
+SHOW_APP_BAR = parse_bool(os.environ.get('SHOW_APP_BAR', True))
+NO_EXTERNAL_REQUESTS = parse_bool(os.environ.get('NO_EXTERNAL_REQUESTS', False))
+ENABLE_ASSEMBLER = parse_bool(os.environ.get('ENABLE_ASSEMBLER', True))
+ENABLE_PLANNOTATE = parse_bool(os.environ.get('ENABLE_PLANNOTATE', True))
+STATIC_CONTENT_PATH = os.environ.get('STATIC_CONTENT_PATH', None)
+
+
+frontend_config = FrontendConfig(
+    backendUrl=BACKEND_URL,
+    database=DATABASE,
+    showAppBar=SHOW_APP_BAR,
+    noExternalRequests=NO_EXTERNAL_REQUESTS,
+    enableAssembler=ENABLE_ASSEMBLER,
+    enablePlannotate=ENABLE_PLANNOTATE,
+    staticContentPath=STATIC_CONTENT_PATH,
 )

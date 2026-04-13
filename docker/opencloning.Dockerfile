@@ -51,6 +51,9 @@ RUN uv sync --frozen --no-default-groups --no-editable --group test
 
 ENV PATH="/usr/local/bin/mafft/bin:$VIRTUAL_ENV/bin:$PATH"
 
+COPY packages/opencloning-db/tests packages/opencloning-db/tests
+COPY packages/opencloning/tests packages/opencloning/tests
+
 # FINAL IMAGE (default build target)
 FROM python:3.12-alpine3.21 AS production
 
