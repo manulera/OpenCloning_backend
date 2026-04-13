@@ -49,6 +49,8 @@ if not settings.SERVE_FRONTEND:
         return HTMLResponse(content=html_content, status_code=200)
 
 else:
+    from .app_settings import frontend_config, FrontendConfig
+
     _app.mount('/assets', StaticFiles(directory='frontend/assets'), name='assets')
     _app.mount('/examples', StaticFiles(directory='frontend/examples'), name='examples')
 
@@ -63,6 +65,11 @@ else:
         + glob.glob('frontend/*.txt')
     )
     frontend_files = [f.split('/')[-1] for f in frontend_files]
+
+    @router.get('/config.json', response_model=FrontendConfig)
+    async def get_config_json():
+        """Return frontend config file built from env vars"""
+        return frontend_config
 
     @router.get('/{name:path}')
     async def get_other_frontend_files(name: str):

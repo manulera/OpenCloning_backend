@@ -73,3 +73,30 @@ class TestAppSettings(unittest.TestCase):
         self.monkeypatch2.setenv('SERVE_FRONTEND', 'true')
         reload(app_settings)
         self.assertEqual(app_settings.settings.SERVE_FRONTEND, True)
+
+    def test_frontend_config_from_env(self):
+        self.assertEqual(app_settings.frontend_config.backendUrl, 'http://localhost:8000/')
+        self.assertEqual(app_settings.frontend_config.database, None)
+        self.assertEqual(app_settings.frontend_config.showAppBar, True)
+        self.assertEqual(app_settings.frontend_config.noExternalRequests, False)
+        self.assertEqual(app_settings.frontend_config.enableAssembler, True)
+        self.assertEqual(app_settings.frontend_config.enablePlannotate, True)
+        self.assertEqual(app_settings.frontend_config.staticContentPath, None)
+
+        self.monkeypatch2.setenv('BACKEND_URL', 'http://dummy-backend:8000/')
+        self.monkeypatch2.setenv('DATABASE', 'blah')
+        self.monkeypatch2.setenv('SHOW_APP_BAR', '0')
+        self.monkeypatch2.setenv('NO_EXTERNAL_REQUESTS', '1')
+        self.monkeypatch2.setenv('ENABLE_ASSEMBLER', 'False')
+        self.monkeypatch2.setenv('ENABLE_PLANNOTATE', 'false')
+        self.monkeypatch2.setenv('STATIC_CONTENT_PATH', '/tmp/static')
+
+        reload(app_settings)
+
+        self.assertEqual(app_settings.frontend_config.backendUrl, 'http://dummy-backend:8000/')
+        self.assertEqual(app_settings.frontend_config.database, 'blah')
+        self.assertEqual(app_settings.frontend_config.showAppBar, False)
+        self.assertEqual(app_settings.frontend_config.noExternalRequests, True)
+        self.assertEqual(app_settings.frontend_config.enableAssembler, False)
+        self.assertEqual(app_settings.frontend_config.enablePlannotate, False)
+        self.assertEqual(app_settings.frontend_config.staticContentPath, '/tmp/static')

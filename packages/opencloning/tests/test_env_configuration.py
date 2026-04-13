@@ -85,3 +85,32 @@ class TestServeFrontend(unittest.TestCase):
         # If requesting a file that does not exist, it should return a 404
         response = self.client.get('/dummy_file.json')
         self.assertEqual(response.status_code, 404)
+
+    def test_frontend_config_endpoint_uses_env_vars(self):
+        monkeypatch = MonkeyPatch()
+        monkeypatch.setenv('BACKEND_URL', 'https://api.example.org/')
+        monkeypatch.setenv('DATABASE', 'production')
+        monkeypatch.setenv('SHOW_APP_BAR', '0')
+        monkeypatch.setenv('NO_EXTERNAL_REQUESTS', '1')
+        monkeypatch.setenv('ENABLE_ASSEMBLER', 'False')
+        monkeypatch.setenv('ENABLE_PLANNOTATE', 'false')
+        monkeypatch.setenv('STATIC_CONTENT_PATH', '/srv/static')
+        reload(app_settings)
+        reload(main)
+        client = TestClient(main._app)
+
+        response = client.get('/config.json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                'backendUrl': 'https://api.example.org/',
+                'database': 'production',
+                'showAppBar': False,
+                'noExternalRequests': True,
+                'enableAssembler': False,
+                'enablePlannotate': False,
+                'staticContentPath': '/srv/static',
+            },
+        )
+        monkeypatch.undo()
