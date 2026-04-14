@@ -48,3 +48,6 @@ search_parent_directories = true
 [tool.deptry]
 known_first_party = ["opencloning"]
 per_rule_ignores = { DEP002 = ["python-multipart", "uvicorn", "openpyxl"] }
+
+[tool.uv.sources]
+pydna = { git = "https://github.com/pydna-group/pydna", rev = "0b725bba93732d8dbdac8354e36090416e211927" }

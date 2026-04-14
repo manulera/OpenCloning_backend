@@ -25,6 +25,7 @@ dependencies = [
 
 [tool.uv.sources]
 opencloning = { workspace = true }
+pydna = { git = "https://github.com/pydna-group/pydna", rev = "0b725bba93732d8dbdac8354e36090416e211927" }
 
 [tool.poetry.dependencies]
 python = "^3.11"
