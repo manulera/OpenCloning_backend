@@ -214,10 +214,21 @@ For CI, configure repository secrets named `ADDGENE_USERNAME` and `ADDGENE_PASSW
 
 ### Pin a particular library version from GitHub
 
+Do not do the default:
+
 ```
 uv add git+https://github.com/pydna-group/pydna --branch main
 uv add git+https://github.com/pydna-group/pydna --rev 4fd760d075f77cceeb27969e017e04b42f6d0aa3
 ```
+
+Instead, edit pyproject directly:
+
+```
+pydna @ git+https://github.com/pydna-group/pydna@fa00f2a1240bd2caae7a89c808a464f297209ecf
+```
+
+The reason for this is that otherwise you cannot install the package from pip from the repository,
+as the github version is not pinned.
 
 If resolution seems stale, clear uv’s cache:
 
