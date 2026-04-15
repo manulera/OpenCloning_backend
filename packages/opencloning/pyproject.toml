@@ -50,4 +50,4 @@ known_first_party = ["opencloning"]
 per_rule_ignores = { DEP002 = ["python-multipart", "uvicorn", "openpyxl"] }
 
 [tool.uv.sources]
-pydna = { git = "https://github.com/pydna-group/pydna", rev = "f1cf48719d564b413b83d62ffc2029ef7a608d07" }
+pydna = { git = "https://github.com/pydna-group/pydna", rev = "fa00f2a1240bd2caae7a89c808a464f297209ecf" }

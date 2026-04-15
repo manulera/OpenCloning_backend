@@ -838,8 +838,8 @@ class RestrictionAndLigationTest(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         payload = response.json()
-        self.assertEqual(len(payload['sequences']), 2)
-        self.assertEqual(len(payload['sources']), 2)
+        self.assertEqual(len(payload['sequences']), 3)
+        self.assertEqual(len(payload['sources']), 3)
 
         sequences = [read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']]
 
@@ -1468,6 +1468,13 @@ class RecombinaseTest(unittest.TestCase):
         payload = response.json()
         self.assertEqual(len(payload['sources']), 1)
 
+        # Response is identical independent of the order of the fragments input
+        data2 = {**data, 'sequences': [f.model_dump() for f in fragments[::-1]]}
+        response2 = client.post('/recombinase', json=data2)
+        self.assertEqual(response2.status_code, 200)
+        payload2 = response2.json()
+        self.assertEqual(payload2, payload)
+
         # We can do the reverse reaction
         data = {
             'source': source.model_dump(),
@@ -1520,6 +1527,18 @@ class RecombinaseTest(unittest.TestCase):
         self.assertEqual(source_recombinases[0], rec1)
         self.assertEqual(source_recombinases[1], rec2)
 
+        # Response is identical independently of the order of the fragments input
+        data2 = {**data, 'sequences': [f.model_dump() for f in fragments[::-1]]}
+        response2 = client.post('/recombinase', json=data2)
+        self.assertEqual(response2.status_code, 200)
+        payload2 = response2.json()
+        resulting_sequences2 = [
+            read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload2['sequences']
+        ]
+        self.assertEqual(
+            set(s.seq.seguid() for s in resulting_sequences2), set(s.seq.seguid() for s in resulting_sequences)
+        )
+
         # The same reaction again does not work
         data = {
             'source': source.model_dump(),
@@ -1566,3 +1585,51 @@ class RecombinaseTest(unittest.TestCase):
         }
         response = client.post('/recombinase', json=data)
         self.assertEqual(response.status_code, 422)
+
+    def test_recombinase_400_if_no_linear_fragment(self):
+        site1 = 'AAaaTTC'
+        site2 = 'CCaaGC'
+        rec = Recombinase(
+            site1=site1,
+            site2=site2,
+        )
+        source = RecombinaseSource(id=0, recombinases=[rec])
+        seq1 = Dseqrecord(f"ggg{site1}aaa", circular=True)
+        fragments = [format_sequence_genbank(seq1)]
+        fragments[0].id = 1
+        data = {
+            'source': source.model_dump(),
+            'sequences': [f.model_dump() for f in fragments],
+        }
+        response = client.post('/recombinase', json=data)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.json()['detail'], 'If input_contains_genome is True, there must be at least one linear fragment.'
+        )
+
+    def test_recombinase_assembly(self):
+        site1 = 'AAaaTTC'
+        site2 = 'CCaaGC'
+        rec = Recombinase(
+            site1=site1,
+            site2=site2,
+        )
+        source = RecombinaseSource(id=0, recombinases=[rec])
+        seq1 = Dseqrecord(f"ggg{site1}aaa", circular=False)
+        seq2 = Dseqrecord(f"ccc{site2}ttt", circular=False)
+        fragments = [format_sequence_genbank(seq1), format_sequence_genbank(seq2)]
+        fragments[0].id = 1
+        fragments[1].id = 2
+        data = {
+            'source': source.model_dump(),
+            'sequences': [f.model_dump() for f in fragments],
+        }
+        response = client.post('/recombinase', json=data, params={'input_contains_genome': False})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        resulting_sequences = [
+            read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']
+        ]
+        self.assertEqual(len(resulting_sequences), 2)
+        self.assertEqual(str(resulting_sequences[0].seq).upper(), 'gggAAaaGCttt'.upper())
+        self.assertEqual(str(resulting_sequences[1].seq).upper(), 'cccCCaaTTCaaa'.upper())
