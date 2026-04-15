@@ -41,9 +41,10 @@ from pydna.assembly2 import (
     gateway_assembly as _gateway_assembly,
     crispr_integration as _crispr_integration,
     cre_lox_integration as _cre_lox_integration,
-    cre_lox_excision as _cre_lox_excision,
+    cre_lox_excision_or_inversion as _cre_lox_excision_or_inversion,
     recombinase_integration as _recombinase_integration,
-    recombinase_excision as _recombinase_excision,
+    recombinase_excision_or_inversion as _recombinase_excision_or_inversion,
+    recombinase_assembly as _recombinase_assembly,
 )
 from pydna.cre_lox import annotate_loxP_sites
 
@@ -365,7 +366,7 @@ async def cre_lox_recombination(
     completed_source = source if is_assembly_complete(source) else None
 
     if len(fragments) == 1:
-        products = _cre_lox_excision(fragments[0])
+        products = _cre_lox_excision_or_inversion(fragments[0])
     else:
         products = []
         if not fragments[0].circular:
@@ -396,6 +397,9 @@ async def recombinase(
     source: RecombinaseSource,
     sequences: Annotated[list[TextFileSequence], Field(min_length=1)],
     reverse_recombinase: bool = Query(False, description='Whether to use the reverse reaction of the recombinase.'),
+    input_contains_genome: bool = Query(
+        True, description='Whether one of the input sequences represents a genome sequence.'
+    ),
 ):
     fragments = [read_dsrecord_from_json(seq) for seq in sequences]
     completed_source = source if is_assembly_complete(source) else None
@@ -409,14 +413,19 @@ async def recombinase(
     if reverse_recombinase:
         collection = reverse_collection
 
-    if len(fragments) == 1:
-        products = _recombinase_excision(fragments[0], collection)
+    products = []
+    if input_contains_genome:
+        if not any(not f.circular for f in fragments):
+            raise HTTPException(400, 'If input_contains_genome is True, there must be at least one linear fragment.')
+        if len(fragments) == 1:
+            products = _recombinase_excision_or_inversion(fragments[0], collection)
+        else:
+            linear_fragment_indexes = [i for i, f in enumerate(fragments) if not f.circular]
+            for i in linear_fragment_indexes:
+                inputs_without_linear_fragment = fragments[:i] + fragments[i + 1 :]
+                products.extend(_recombinase_integration(fragments[i], inputs_without_linear_fragment, collection))
     else:
-        products = []
-        if not fragments[0].circular:
-            products.extend(_recombinase_integration(fragments[0], fragments[1:], collection))
-        if not fragments[1].circular:
-            products.extend(_recombinase_integration(fragments[1], fragments[:1], collection))
+        products = _recombinase_assembly(fragments, collection)
 
     products = [reverse_collection.annotate(p) for p in products]
 
