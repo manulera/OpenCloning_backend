@@ -838,8 +838,8 @@ class RestrictionAndLigationTest(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         payload = response.json()
-        self.assertEqual(len(payload['sequences']), 2)
-        self.assertEqual(len(payload['sources']), 2)
+        self.assertEqual(len(payload['sequences']), 3)
+        self.assertEqual(len(payload['sources']), 3)
 
         sequences = [read_dsrecord_from_json(TextFileSequence.model_validate(s)) for s in payload['sequences']]
 
