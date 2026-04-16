@@ -228,7 +228,8 @@ pydna @ git+https://github.com/pydna-group/pydna@fa00f2a1240bd2caae7a89c808a464f
 ```
 
 The reason for this is that otherwise you cannot install the package from pip from the repository,
-as the github version is not pinned.
+as the github version is not pinned. For the same reasons, you don't want to publish this to pypi,
+and this will make the action fail.
 
 If resolution seems stale, clear uv’s cache:
 
