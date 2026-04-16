@@ -26,7 +26,7 @@ dependencies = [
     "pyyaml>=6.0.2",
     "primer3-py>=2.3",
     "pairwise-alignments-to-msa>=0.1.1",
-    "pydna @ git+https://github.com/pydna-group/pydna@c6d04f3db1f6e21d8bc68e05d7888fa774a925a1",
+    "pydna @ git+https://github.com/pydna-group/pydna@cc529f19e297952dffd1af3129d6075fc5d26617",
 ]
 
 [project.urls]
