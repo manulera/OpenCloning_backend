@@ -859,6 +859,43 @@ class RestrictionAndLigationTest(unittest.TestCase):
             read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0])), sequences[0]
         )
 
+    def test_warning_if_partial_digestion(self):
+        fragments = [Dseqrecord('aaGAATTCaaGATATCaaGAATTCaaGAATTCaa'), Dseqrecord('CCCCGAATTCCCC', circular=True)]
+        json_fragments = [format_sequence_genbank(f) for f in fragments]
+        for i, f in enumerate(json_fragments):
+            f.id = i + 1
+
+        source = RestrictionAndLigationSource(
+            id=0,
+            restriction_enzymes=['EcoRI', 'EcoRV'],
+        )
+        data = {'source': source.model_dump(), 'sequences': [f.model_dump() for f in json_fragments]}
+
+        response = client.post('/restriction_and_ligation', json=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('x-warning', response.headers)
+        self.assertIn('partially digested products', response.headers['x-warning'])
+
+        # Warnings are also returned on error
+        # Internal EcoRV cutsite
+        # because the cutsite is not part of an edge)
+
+        f1 = Dseqrecord('aaGAATTCaaGATATCaaGAATTCaa')
+        f2 = Dseqrecord('cccGAATTCccc', circular=True)
+        json_fragments = [format_sequence_genbank(f) for f in [f1, f2]]
+        for i, f in enumerate(json_fragments):
+            f.id = i + 1
+
+        source = RestrictionAndLigationSource(
+            id=0,
+            restriction_enzymes=['EcoRI', 'EcoRV'],
+        )
+        data = {'source': source.model_dump(), 'sequences': [f.model_dump() for f in json_fragments]}
+        response = client.post('/restriction_and_ligation', json=data)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('x-warning', response.headers)
+        self.assertIn('partially digested products', response.headers['x-warning'])
+
     def test_errors(self):
         fragments = [Dseqrecord('AAAGAATTCAAAGAATTCAAAA')]
         json_fragments = [format_sequence_genbank(f) for f in fragments]

@@ -1,6 +1,7 @@
-from fastapi import Query, HTTPException
+from fastapi import Query, HTTPException, Response
 from typing import Union
 import copy
+import warnings
 from pydna.dseqrecord import Dseqrecord
 from pydna.primer import Primer as PydnaPrimer
 from pydantic import create_model, Field
@@ -280,8 +281,29 @@ async def gibson_assembly(
         sequences=(list[TextFileSequence], ...),
     ),
     summary='Restriction and ligation in a single step. Can also be used for Golden Gate assembly.',
+    responses={
+        200: {
+            'description': 'Restriction and ligation completed successfully',
+            'headers': {
+                'x-warning': {
+                    'description': 'A warning if partially restricted sequences were removed from the returned products',
+                    'schema': {'type': 'string'},
+                },
+            },
+        },
+        400: {
+            'description': 'Restriction and ligation failed',
+            'headers': {
+                'x-warning': {
+                    'description': 'A warning if partially restricted sequences were removed from the returned products',
+                    'schema': {'type': 'string'},
+                },
+            },
+        },
+    },
 )
 async def restriction_and_ligation(
+    response: Response,
     source: RestrictionAndLigationSource,
     sequences: Annotated[list[TextFileSequence], Field(min_length=1)],
     circular_only: bool = Query(False, description='Only return circular assemblies.'),
@@ -300,21 +322,34 @@ async def restriction_and_ligation(
     completed_source = source if is_assembly_complete(source) else None
 
     try:
-        products = _restriction_ligation_assembly(fragments, enzymes, circular_only=circular_only)
+        with warnings.catch_warnings(record=True) as warnings_captured:
+            # warnings.simplefilter('always', UserWarning)
+            products = _restriction_ligation_assembly(fragments, enzymes, circular_only=circular_only)
     except ValueError as e:
         raise HTTPException(400, *e.args)
+
+    warning_header = None
+    if warnings_captured:
+        warning_header = '; '.join(str(w.message) for w in warnings_captured)
+        response.headers['x-warning'] = warning_header
 
     if len(enzymes) > 0 and sort_by_recognition_sites:
         enzyme = parse_restriction_enzymes([source.restriction_enzymes[0]])
         products.sort(key=lambda x: len(x.seq.get_cutsites(enzyme)))
 
-    return format_products(
-        source.id,
-        products,
-        completed_source,
-        source.output_name,
-        no_products_error_message=f'No compatible restriction-ligation was found with {", ".join(source.restriction_enzymes)}.',
-    )
+    try:
+        return format_products(
+            source.id,
+            products,
+            completed_source,
+            source.output_name,
+            no_products_error_message=f'No compatible restriction-ligation was found with {", ".join(source.restriction_enzymes)}.',
+        )
+    # We want to include the header in the response, even if raising an HTTPException
+    except HTTPException as exc:
+        if warning_header is not None:
+            exc.headers = {**(exc.headers or {}), 'x-warning': warning_header}
+        raise
 
 
 @router.post(

@@ -3,7 +3,7 @@ import json
 from Bio.Seq import reverse_complement
 from fastapi.responses import FileResponse
 from typing import Annotated
-from fastapi import Body, Query, HTTPException
+from fastapi import Body, Query, HTTPException, Response
 
 from ...get_router import get_router
 from ...pydantic_models import BaseCloningStrategy
@@ -117,7 +117,8 @@ async def ziqiang_et_al2024_post(
 
     # Make them
     input_sequences = [next(s for s in cloning_strategy.sequences if s.id == p) for p in pcr_product_ids]
-    resp = await restriction_and_ligation(golden_gate_source, input_sequences, False)
+    response = Response()
+    resp = await restriction_and_ligation(response, golden_gate_source, input_sequences, False)
     golden_gate_product: TextFileSequence = TextFileSequence.model_validate(resp['sequences'][0])
     golden_gate_source: RestrictionAndLigationSource = RestrictionAndLigationSource.model_validate(resp['sources'][0])
     cloning_strategy.add_source_and_sequence(golden_gate_source, golden_gate_product)
