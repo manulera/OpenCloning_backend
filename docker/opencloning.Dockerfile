@@ -40,6 +40,7 @@ RUN uv sync --frozen --package opencloning --no-default-groups --no-editable
 FROM workspace-opencloning AS workspace-full
 
 COPY packages/opencloning-db/pyproject.toml packages/opencloning-db/
+COPY packages/opencloning-db/README.md packages/opencloning-db/
 COPY packages/opencloning-db/src packages/opencloning-db/src
 
 FROM workspace-full AS builder-test
