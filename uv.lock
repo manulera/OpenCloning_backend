@@ -1101,7 +1101,7 @@ requires-dist = [
     { name = "primer3-py", specifier = ">=2.3" },
     { name = "pydantic", specifier = ">=2.7.1" },
     { name = "pydantic-core", specifier = ">=2.41.5" },
-    { name = "pydna", git = "https://github.com/pydna-group/pydna?rev=cc529f19e297952dffd1af3129d6075fc5d26617" },
+    { name = "pydna", specifier = ">=5.5.11" },
     { name = "python-multipart", specifier = ">=0.0.26" },
     { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "uvicorn", specifier = ">=0.44.0" },
@@ -1131,7 +1131,7 @@ requires-dist = [
     { name = "opencloning-linkml", specifier = ">=1.0.0" },
     { name = "pwdlib", extras = ["argon2"], specifier = ">=0.2.1,<0.3" },
     { name = "pydantic", extras = ["email"], specifier = ">=2.7.1" },
-    { name = "pydna", git = "https://github.com/pydna-group/pydna?rev=cc529f19e297952dffd1af3129d6075fc5d26617" },
+    { name = "pydna", specifier = ">=5.5.11" },
     { name = "pyjwt", specifier = ">=2.10.1,<3" },
     { name = "sqlalchemy", specifier = ">=2.0.41,<3" },
 ]
@@ -1654,8 +1654,8 @@ wheels = [
 
 [[package]]
 name = "pydna"
-version = "5.5.10.post18+cc529f1"
-source = { git = "https://github.com/pydna-group/pydna?rev=cc529f19e297952dffd1af3129d6075fc5d26617#cc529f19e297952dffd1af3129d6075fc5d26617" }
+version = "5.5.11"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "appdirs" },
     { name = "biopython" },
@@ -1668,6 +1668,10 @@ dependencies = [
     { name = "regex" },
     { name = "seguid" },
     { name = "sgffp" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f0/90/f47ae3eeda051c6ddaf5cdb3de62c91032004557bc2cd8de958d56634879/pydna-5.5.11.tar.gz", hash = "sha256:c29f3ce6595126816d2ae0e45afefc0d5c06a691d650e125e9768a84f9f58ee1", size = 184422, upload-time = "2026-04-20T07:25:48.96Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/de/17/63ce00791fc14e1e94b5b9a59c55ee4220773c7406bb367647ddefa19127/pydna-5.5.11-py3-none-any.whl", hash = "sha256:80164c14e82a026afa85185ea7e1a27521834cde3bbd06d95ac97fff30e5b5f4", size = 195545, upload-time = "2026-04-20T07:25:50.583Z" },
 ]
 
 [[package]]
