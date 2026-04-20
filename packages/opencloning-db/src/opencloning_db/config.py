@@ -18,19 +18,24 @@ def _default_jwt_secret() -> str:
     )
 
 
+DATABASE_DIR = os.getenv(
+    'DATABASE_DIR', os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'dev_database')
+)
+
+
 class Config(BaseModel):
     """OpenCloning database configuration with sensible defaults."""
 
     database_url: str = Field(
-        default='sqlite:///example.db',
+        default=f'sqlite:///{DATABASE_DIR}/example.db',
         description='SQLAlchemy database URL (sqlite or postgresql)',
     )
     sequence_files_dir: str = Field(
-        default='sequence_files',
+        default=f'{DATABASE_DIR}/sequence_files',
         description='Directory for storing sequence GenBank files',
     )
     sequencing_files_dir: str = Field(
-        default='sequencing_files',
+        default=f'{DATABASE_DIR}/sequencing_files',
         description='Directory for storing uploaded sequencing files (ab1, fasta, etc.)',
     )
     jwt_secret: str = Field(

@@ -27,3 +27,6 @@ bin/
 
 # dummy certs for testing
 certs/
+
+# development database
+dev_database/
