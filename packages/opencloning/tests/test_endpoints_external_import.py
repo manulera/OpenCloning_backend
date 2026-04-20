@@ -299,6 +299,7 @@ class ReadFileTest(unittest.TestCase):
 class GenBankTest(unittest.TestCase):
 
     # TODO these tests will not work off-line, so the case where connection cannot be established should be handled in some way
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_request_gene(self):
         """Test whether the gene is requested from GenBank"""
         source = NCBISequenceSource(
@@ -311,6 +312,7 @@ class GenBankTest(unittest.TestCase):
         sequence = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
         self.assertIn('Ase1', sequence.description)
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_request_wrong_id(self):
         """Test a wrong Genbank id"""
         source = NCBISequenceSource(
@@ -361,6 +363,7 @@ class GenBankTest(unittest.TestCase):
         response = client.post('/repository_id/genbank', json=source.model_dump())
         self.assertEqual(response.status_code, 504)
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_redirect(self):
         """The repository_id endpoint should redirect based on repository_name value"""
         source = NCBISequenceSource(
@@ -373,6 +376,7 @@ class GenBankTest(unittest.TestCase):
         sequence: Dseqrecord = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
         self.assertIn('Ase1', sequence.description)
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_rename(self):
         """If passing output_name, it renames the output"""
         source = NCBISequenceSource(
