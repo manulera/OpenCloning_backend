@@ -151,7 +151,9 @@ uv run pytest packages/opencloning/tests -v -ks
 
 ## Running opencloning-db locally
 
-`opencloning-db` now lives in `packages/opencloning-db/src` and uses the local workspace `opencloning` package.
+`opencloning-db` is a companion API/database service for OpenCloning data workflows. It now lives in `packages/opencloning-db/src` and uses the local workspace `opencloning` package.
+This is currently an experimental feature, so behavior and interfaces may change.
+For a package-specific quickstart (what it is and how to run it), see [`packages/opencloning-db/README.md`](./packages/opencloning-db/README.md).
 
 From the repository root:
 

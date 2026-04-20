@@ -79,6 +79,7 @@ class NcbiAsyncRequestsTest(unittest.IsolatedAsyncioTestCase):
         assert e.value.status_code == 400
         assert e.value.detail == 'multiple matches for locus_tag'
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     async def test_empty_get_assembly_accession_from_sequence_accession(self):
         # For accessions that are not linked to assemblies
         self.assertEqual([], await ncbi_requests.get_assembly_accession_from_sequence_accession('DQ208311.2'))
@@ -91,6 +92,7 @@ class NcbiAsyncRequestsTest(unittest.IsolatedAsyncioTestCase):
             await ncbi_requests.get_assembly_accession_from_sequence_accession('NC_003424.3'),
         )
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     async def test_get_genome_region_from_annotation(self):
         annotations = await ncbi_requests.get_annotations_from_query('aldolase', 'GCF_000146045.2')
         annotation = next(a for a in annotations if a['locus_tag'] == 'YDR294C')
@@ -102,6 +104,7 @@ class NcbiAsyncRequestsTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(seq.source.coordinates, SimpleLocation(1049458, 1053228, -1))
         self.assertEqual(len(seq), 3770)
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     async def test_get_info_from_annotation(self):
         example_annotation = {
             'gene_id': '851888',

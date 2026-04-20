@@ -299,6 +299,7 @@ class ReadFileTest(unittest.TestCase):
 class GenBankTest(unittest.TestCase):
 
     # TODO these tests will not work off-line, so the case where connection cannot be established should be handled in some way
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_request_gene(self):
         """Test whether the gene is requested from GenBank"""
         source = NCBISequenceSource(
@@ -311,6 +312,7 @@ class GenBankTest(unittest.TestCase):
         sequence = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
         self.assertIn('Ase1', sequence.description)
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_request_wrong_id(self):
         """Test a wrong Genbank id"""
         source = NCBISequenceSource(
@@ -361,6 +363,7 @@ class GenBankTest(unittest.TestCase):
         response = client.post('/repository_id/genbank', json=source.model_dump())
         self.assertEqual(response.status_code, 504)
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_redirect(self):
         """The repository_id endpoint should redirect based on repository_name value"""
         source = NCBISequenceSource(
@@ -373,6 +376,7 @@ class GenBankTest(unittest.TestCase):
         sequence: Dseqrecord = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
         self.assertIn('Ase1', sequence.description)
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_rename(self):
         """If passing output_name, it renames the output"""
         source = NCBISequenceSource(
@@ -544,6 +548,7 @@ class AddgeneTest(unittest.TestCase):
 
 class WekWikGeneSourceTest(unittest.TestCase):
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_valid_id(self):
         source = WekWikGeneIdSource(
             id=1,
@@ -558,6 +563,7 @@ class WekWikGeneSourceTest(unittest.TestCase):
         self.assertTrue(sequence.circular)
         self.assertIn('RPL15', sequence.name)
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_invalid_id(self):
         source = WekWikGeneIdSource(
             id=1,
@@ -581,6 +587,7 @@ class WekWikGeneSourceTest(unittest.TestCase):
         self.assertEqual(response.status_code, 504)
         self.assertIn('Unable to connect to WeKwikGene', response.json()['detail'])
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_redirect(self):
         source = WekWikGeneIdSource(
             id=1,
@@ -684,6 +691,7 @@ class SnapGenePlasmidSourceTest(unittest.TestCase):
 
 class EuroscarfSourceTest(unittest.TestCase):
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_valid_url(self):
         source = EuroscarfSource(id=0, repository_id='P30174')
         response = client.post('/repository_id/euroscarf', json=source.model_dump())
@@ -707,6 +715,7 @@ class EuroscarfSourceTest(unittest.TestCase):
         sequence = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
         self.assertTrue(sequence.circular)
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_invalid_url(self):
         # Compatible with regex, but does not exist
         source = EuroscarfSource(id=0, repository_id='P99999999999999')

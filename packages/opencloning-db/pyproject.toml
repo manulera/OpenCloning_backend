@@ -1,15 +1,12 @@
-[tool.poetry]
-authors = ["Manuel Lera-Ramirez <manulera14@gmail.com>"]
-description = "Database for OpenCloning, a web application to generate molecular cloning strategies in json format, and share them with others."
-license = "MIT"
-name = "opencloning-db"
-version = "0.1.0"
-repository = "https://github.com/manulera/OpenCloning_db"
-
 [project]
 name = "opencloning-db"
 version = "0.1.0"
 description = "Database for OpenCloning, a web application to generate molecular cloning strategies in json format, and share them with others."
+readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "Manuel Lera-Ramirez", email = "manulera14@gmail.com" },
+]
 requires-python = ">=3.11,<4"
 dependencies = [
     "opencloning",
@@ -20,47 +17,21 @@ dependencies = [
     "sqlalchemy>=2.0.41,<3",
     "PyJWT>=2.10.1,<3",
     "pwdlib[argon2]>=0.2.1,<0.3",
-    "pydna @ git+https://github.com/pydna-group/pydna@cc529f19e297952dffd1af3129d6075fc5d26617",
+    "pydna>=5.5.11",
 ]
+
+[project.urls]
+Repository = "https://github.com/manulera/OpenCloning_backend"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/opencloning_db"]
 
 [tool.uv.sources]
 opencloning = { workspace = true }
-
-[tool.poetry.dependencies]
-python = "^3.11"
-opencloning = {path = "../../opencloning", develop = true}
-fastapi = "^0.135.3"
-fastapi-pagination = "^0.15.10"
-opencloning-linkml = "^1.0.0"
-pydantic = {version = "^2.7.1", extras = ["email"]}
-sqlalchemy = "^2.0.41"
-PyJWT = "^2.10.1"
-pwdlib = {version = "^0.2.1", extras = ["argon2"]}
-pydna = "^5.5.9"
-
-[tool.poetry.group.dev.dependencies]
-autopep8 = "^2.0.4"
-flake8-bugbear = "^24.2.6"
-black = "^24.2.0"
-pre-commit = "^3.6.2"
-watchfiles = "^0.21.0"
-nbstripout = "^0.8.1"
-
-[tool.poetry.group.test.dependencies]
-pytest = "8.3.4"
-pre-commit = "^3.6.2"
-pytest-cov = "^4.1.0"
-pytest-rerunfailures = "^14.0"
-respx = "^0.21.1"
-
-
-[tool.poetry.group.ipython.dependencies]
-ipython = "^8.20.0"
-ipykernel = "^6.28.0"
-
-[build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core>=1.0.0"]
 
 [tool.black]
 skip-string-normalization = true
