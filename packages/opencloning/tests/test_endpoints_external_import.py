@@ -544,6 +544,7 @@ class AddgeneTest(unittest.TestCase):
 
 class WekWikGeneSourceTest(unittest.TestCase):
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_valid_id(self):
         source = WekWikGeneIdSource(
             id=1,
@@ -558,6 +559,7 @@ class WekWikGeneSourceTest(unittest.TestCase):
         self.assertTrue(sequence.circular)
         self.assertIn('RPL15', sequence.name)
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_invalid_id(self):
         source = WekWikGeneIdSource(
             id=1,
@@ -581,6 +583,7 @@ class WekWikGeneSourceTest(unittest.TestCase):
         self.assertEqual(response.status_code, 504)
         self.assertIn('Unable to connect to WeKwikGene', response.json()['detail'])
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_redirect(self):
         source = WekWikGeneIdSource(
             id=1,
@@ -684,6 +687,7 @@ class SnapGenePlasmidSourceTest(unittest.TestCase):
 
 class EuroscarfSourceTest(unittest.TestCase):
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_valid_url(self):
         source = EuroscarfSource(id=0, repository_id='P30174')
         response = client.post('/repository_id/euroscarf', json=source.model_dump())
@@ -707,6 +711,7 @@ class EuroscarfSourceTest(unittest.TestCase):
         sequence = read_dsrecord_from_json(TextFileSequence.model_validate(payload['sequences'][0]))
         self.assertTrue(sequence.circular)
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=2)
     def test_invalid_url(self):
         # Compatible with regex, but does not exist
         source = EuroscarfSource(id=0, repository_id='P99999999999999')
