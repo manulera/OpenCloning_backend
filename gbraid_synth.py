@@ -121,12 +121,6 @@ def main() -> None:
             )
             print(f"Protocol POST status: {protocol_response.status_code}")
             print(f"Protocol Content-Type: {protocol_response.headers.get('content-type', '')}")
-            protocol_soup = BeautifulSoup(protocol_response.text, 'html.parser')
-            protocol_errors = extract_unique_error_messages(protocol_soup)
-            if protocol_errors:
-                print(f"Protocol errors ({len(protocol_errors)} unique):")
-                for err in protocol_errors:
-                    print(f"- {err}")
 
             with open('domestication_protocol_response.html', 'w', encoding='utf-8') as f:
                 f.write(protocol_response.text)
