@@ -49,6 +49,23 @@ def init_db(config: Config):
     with Session(engine) as session:
         last_seq = None
         sequencing_sequence = None
+        # Dummy user and workspace for development purposes (without access)
+        other_workspace_user = User(
+            email='other-workspace-user@example.com',
+            display_name='Other Workspace User',
+            password_hash=get_password_hash('password'),
+            is_instance_admin=False,
+        )
+        other_workspace = Workspace(name='Other Workspace')
+
+        # Dummy view-only user
+        view_only_user = User(
+            email='view-only-user@example.com',
+            display_name='View Only User',
+            password_hash=get_password_hash('password'),
+            is_instance_admin=False,
+        )
+
         # Dev-only: replace with env-driven or unset password before production.
         bootstrap_user = User(
             email='bootstrap@example.com',
@@ -57,13 +74,29 @@ def init_db(config: Config):
             is_instance_admin=True,
         )
         workspace = Workspace(name='Bootstrap Workspace')
-        session.add_all([bootstrap_user, workspace])
+        session.add_all([bootstrap_user, workspace, other_workspace_user, other_workspace, view_only_user])
         session.flush()
         session.add(
             WorkspaceMembership(
                 user_id=bootstrap_user.id,
                 workspace_id=workspace.id,
                 role=WorkspaceRole.owner,
+            )
+        )
+
+        session.add(
+            WorkspaceMembership(
+                user_id=other_workspace_user.id,
+                workspace_id=other_workspace.id,
+                role=WorkspaceRole.owner,
+            )
+        )
+
+        session.add(
+            WorkspaceMembership(
+                user_id=view_only_user.id,
+                workspace_id=workspace.id,
+                role=WorkspaceRole.viewer,
             )
         )
 
