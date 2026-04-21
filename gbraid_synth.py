@@ -25,11 +25,24 @@ CLONING_TYPE = 'domestication'
 
 URL = f'https://goldenbraidpro.com/do/{CLONING_TYPE}/'
 SEQ_FILE_PATH = 'ase1_cerevisiae.fasta'
+SEQ_FILE_PATH = 'packages/opencloning/tests/test_files/dummy_EcoRI.fasta'
 
 
 def extract_csrf_token(html: str) -> str | None:
     match = re.search(r'name="csrfmiddlewaretoken"\s+value="([^"]+)"', html)
     return match.group(1) if match else None
+
+
+def extract_unique_error_messages(soup: BeautifulSoup) -> list[str]:
+    unique_errors: list[str] = []
+    seen: set[str] = set()
+    for error_list in soup.find_all('ul', class_='errorlist'):
+        for li in error_list.find_all('li'):
+            message = li.get_text(strip=True)
+            if message and message not in seen:
+                seen.add(message)
+                unique_errors.append(message)
+    return unique_errors
 
 
 def main() -> None:
@@ -67,6 +80,10 @@ def main() -> None:
         print(f"Content-Type: {response.headers.get('content-type', '')}")
 
         soup = BeautifulSoup(response.text, 'html.parser')
+        response_errors = extract_unique_error_messages(soup)
+        if response_errors:
+            raise ValueError('; '.join(response_errors))
+
         if CLONING_TYPE == 'synthesis':
             record_input = soup.find('input', attrs={'name': 'record'})
             if record_input is None or record_input.get('value') is None:
@@ -104,6 +121,12 @@ def main() -> None:
             )
             print(f"Protocol POST status: {protocol_response.status_code}")
             print(f"Protocol Content-Type: {protocol_response.headers.get('content-type', '')}")
+            protocol_soup = BeautifulSoup(protocol_response.text, 'html.parser')
+            protocol_errors = extract_unique_error_messages(protocol_soup)
+            if protocol_errors:
+                print(f"Protocol errors ({len(protocol_errors)} unique):")
+                for err in protocol_errors:
+                    print(f"- {err}")
 
             with open('domestication_protocol_response.html', 'w', encoding='utf-8') as f:
                 f.write(protocol_response.text)
