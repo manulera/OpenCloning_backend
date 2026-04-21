@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 import unittest
 import os
+from unittest.mock import AsyncMock, patch
 
 from opencloning.dna_functions import read_dsrecord_from_json
 import opencloning.main as _main
@@ -133,17 +134,62 @@ class BatchDomesticateTest(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['detail'], 'Given seq must be at least 70 base pairs')
 
-    # def test_validation_errors(self):
+    def test_validation_errors(self):
 
-    #     seqr = pydna_parse(f'{test_files}/dummy_EcoRI.fasta')
-    #     pydna_seq = PydnaTextFileSequence.from_dseqrecord(seqr[0])
-    #     _root_payload = {
-    #         'sequence': pydna_seq.model_dump(),
-    #         'location': '1..18',
-    #         'part_name': 'dummy_EcoRI',
-    #         'prefix': '',
-    #         'suffix': '',
-    #         'category': 'CDS (B3-B4-B5)',
-    #         'enzymes': ['BsmBI', 'BsaI'],
-    #         'cloning_type': 'domestication',
-    #     }
+        seqr = pydna_parse(f'{test_files}/dummy_EcoRI.fasta')
+        pydna_seq = PydnaTextFileSequence.from_dseqrecord(seqr[0])
+        root_payload = {
+            'sequence': pydna_seq.model_dump(),
+            'location': '1..18',
+            'part_name': 'dummy_EcoRI',
+            'prefix': '',
+            'suffix': '',
+            'category': 'CDS (B3-B4-B5)',
+            'enzymes': ['BsmBI', 'BsaI'],
+            'cloning_type': 'domestication',
+        }
+        dummy_strategy = {
+            'sequences': [],
+            'sources': [],
+            'primers': [],
+            'description': '',
+            'files': None,
+            'schema_version': '1.0.0',
+            'backend_version': None,
+            'frontend_version': None,
+        }
+
+        with patch(
+            'opencloning.batch_cloning.domesticate._run_cloning_workflow',
+            new=AsyncMock(return_value=dummy_strategy),
+        ) as mocked_workflow:
+            # Invalid category should fail before workflow/network is called
+            payload = root_payload | {'category': 'NOT_A_CATEGORY'}
+            response = client.post('/batch_cloning/domesticate', json=payload)
+            self.assertEqual(response.status_code, 422)
+            mocked_workflow.assert_not_awaited()
+
+            # Invalid enzyme should fail before workflow/network is called
+            payload = root_payload | {'enzymes': ['EcoRI']}
+            response = client.post('/batch_cloning/domesticate', json=payload)
+            self.assertEqual(response.status_code, 422)
+            mocked_workflow.assert_not_awaited()
+
+            # Empty enzyme list should fail before workflow/network is called
+            payload = root_payload | {'enzymes': []}
+            response = client.post('/batch_cloning/domesticate', json=payload)
+            self.assertEqual(response.status_code, 422)
+            mocked_workflow.assert_not_awaited()
+
+            # Empty category requires prefix/suffix to be valid 4bp ACGT strings
+            payload = root_payload | {'category': None, 'prefix': 'AAT', 'suffix': 'GCTX'}
+            response = client.post('/batch_cloning/domesticate', json=payload)
+            self.assertEqual(response.status_code, 400)
+            self.assertIn('prefix and suffix must be exactly 4 bp', response.json()['detail'])
+            mocked_workflow.assert_not_awaited()
+
+            # A valid payload should pass validation and call workflow
+            payload = root_payload | {'category': None, 'prefix': 'aatg', 'suffix': 'gctt'}
+            response = client.post('/batch_cloning/domesticate', json=payload)
+            self.assertEqual(response.status_code, 200)
+            mocked_workflow.assert_awaited_once()

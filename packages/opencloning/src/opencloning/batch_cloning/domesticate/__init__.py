@@ -28,10 +28,10 @@ router = get_router()
 
 
 class AllowedEnzyme(str, Enum):
-    BSMBI = 'BsmBI'
-    BSAI = 'BsaI'
-    BTGZI = 'BtgZI'
-    BPII = 'BpiI'
+    BsmBI = 'BsmBI'
+    BsaI = 'BsaI'
+    BtgZI = 'BtgZI'
+    BpiI = 'BpiI'
 
 
 class AllowedCategory(str, Enum):
@@ -78,8 +78,8 @@ class BatchDomesticateRequest(BaseModel):
     part_name: str
     prefix: str = Field(default='')
     suffix: str = Field(default='')
-    category: str | None = Field(default=None)
-    enzymes: list[str] = Field(default_factory=lambda: ['BsmBI', 'BsaI'])
+    category: AllowedCategory | None = Field(default=None)
+    enzymes: list[AllowedEnzyme] = Field(min_length=1)
 
     @field_validator('location', mode='before')
     @classmethod
@@ -135,6 +135,9 @@ def _validate_request(req: BatchDomesticateRequest) -> tuple[str, str, str | Non
     if category is None:
         if not re.fullmatch(r'[ACGT]{4}', prefix) or not re.fullmatch(r'[ACGT]{4}', suffix):
             raise ValueError('If category is empty, prefix and suffix must be exactly 4 bp and contain only A/T/C/G')
+    else:
+        if not prefix == suffix == '':
+            raise ValueError('If category is provided, prefix and suffix must be empty')
 
     return prefix, suffix, category
 
@@ -153,10 +156,10 @@ async def _run_cloning_workflow(
     sequence: TextFileSequence,
     location: Location,
     cloning_type: CloningType,
-    category: str | None,
+    category: AllowedCategory | None,
     prefix: str,
     suffix: str,
-    enzymes: list[str],
+    enzymes: list[AllowedEnzyme],
     part_name: str,
 ) -> BaseCloningStrategy:
     template = read_dsrecord_from_json(sequence)
@@ -182,10 +185,10 @@ async def _run_cloning_workflow(
             gb_url,
             data={
                 'csrfmiddlewaretoken': csrf_token,
-                'category': category or '',
+                'category': category.value if category is not None else '',
                 'prefix': prefix,
                 'suffix': suffix,
-                'enzymes': enzymes,
+                'enzymes': [enzyme.value for enzyme in enzymes],
             },
             files={'seq': ('sequence.fasta', seq_bytes, 'application/octet-stream')},
             headers={'Referer': gb_url},
