@@ -89,10 +89,12 @@ _app.include_router(annotation_router, tags=['Annotation'])
 
 if settings.BATCH_CLONING:
     from .batch_cloning import router as batch_cloning_router
+    from .batch_cloning.domesticate import router as domesticate_router
     from .batch_cloning.ziqiang_et_al2024 import router as ziqiang_et_al2024_router
     from .batch_cloning.pombe import router as pombe_router
 
     _app.include_router(batch_cloning_router, tags=['Batch Cloning'])
+    _app.include_router(domesticate_router, tags=['Batch Cloning'])
     _app.include_router(ziqiang_et_al2024_router, tags=['Batch Cloning'])
     _app.include_router(pombe_router, tags=['Batch Cloning'])
 

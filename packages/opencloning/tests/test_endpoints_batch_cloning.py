@@ -7,7 +7,8 @@ import opencloning.main as _main
 from opencloning_linkml.datamodel import (
     TextFileSequence,
 )
-
+from pydna.parsers import parse as pydna_parse
+from pydna.opencloning_models import TextFileSequence as PydnaTextFileSequence
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
@@ -79,3 +80,70 @@ class ZiqiangEtAl2024Test(unittest.TestCase):
             '/batch_cloning/ziqiang_et_al2024', json=['A' * 8 + 'ACCA' + 'A' * 8, 'T' * 8 + 'ACCA' + 'T' * 8]
         )
         self.assertEqual(response.status_code, 400)
+
+
+class BatchDomesticateTest(unittest.TestCase):
+
+    def test_full_length_fasta_runs_and_writes_strategy_json(self):
+        with open(f'{test_files}/ase1_cerevisiae.fasta', 'r', encoding='utf-8') as f:
+            file_content = f.read()
+        payload = {
+            'sequence': {
+                'id': 1,
+                'file_content': file_content,
+                'sequence_file_format': 'fasta',
+                'overhang_crick_3prime': 0,
+                'overhang_watson_3prime': 0,
+            },
+            'location': '1..2724',
+            'part_name': 'ase1_cerevisiae',
+            'prefix': '',
+            'suffix': '',
+            'category': 'CDS (B3-B4-B5)',
+            'enzymes': ['BsmBI', 'BsaI'],
+            'cloning_type': 'domestication',
+        }
+
+        response = client.post('/batch_cloning/domesticate', json=payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()['primers']), 4)
+        self.assertEqual(len(response.json()['sequences']), 5)
+
+        payload['cloning_type'] = 'synthesis'
+        response = client.post('/batch_cloning/domesticate', json=payload)
+        self.assertEqual(len(response.json()['primers']), 0)
+        self.assertEqual(len(response.json()['sequences']), 4)
+
+    def test_page_error(self):
+
+        seqr = pydna_parse(f'{test_files}/dummy_EcoRI.fasta')
+        pydna_seq = PydnaTextFileSequence.from_dseqrecord(seqr[0])
+        payload = {
+            'sequence': pydna_seq.model_dump(),
+            'location': '1..18',
+            'part_name': 'dummy_EcoRI',
+            'prefix': '',
+            'suffix': '',
+            'category': 'CDS (B3-B4-B5)',
+            'enzymes': ['BsmBI', 'BsaI'],
+            'cloning_type': 'domestication',
+        }
+        response = client.post('/batch_cloning/domesticate', json=payload)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['detail'], 'Given seq must be at least 70 base pairs')
+
+    # def test_validation_errors(self):
+
+    #     seqr = pydna_parse(f'{test_files}/dummy_EcoRI.fasta')
+    #     pydna_seq = PydnaTextFileSequence.from_dseqrecord(seqr[0])
+    #     _root_payload = {
+    #         'sequence': pydna_seq.model_dump(),
+    #         'location': '1..18',
+    #         'part_name': 'dummy_EcoRI',
+    #         'prefix': '',
+    #         'suffix': '',
+    #         'category': 'CDS (B3-B4-B5)',
+    #         'enzymes': ['BsmBI', 'BsaI'],
+    #         'cloning_type': 'domestication',
+    #     }

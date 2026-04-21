@@ -52,6 +52,7 @@ default_allowed_urls = [
     'https://wekwikgene.wllsb.edu.cn',
     'http://bahlerweb.cs.ucl.ac.uk',
     'https://assets.opencloning.org/open-dna-collections',
+    'https://goldenbraidpro.com/do/',
 ]
 
 if os.environ.get('ALLOWED_EXTERNAL_URLS') is not None:
