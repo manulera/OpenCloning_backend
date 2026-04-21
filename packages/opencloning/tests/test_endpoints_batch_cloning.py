@@ -10,6 +10,7 @@ from opencloning_linkml.datamodel import (
 )
 from pydna.parsers import parse as pydna_parse
 from pydna.opencloning_models import TextFileSequence as PydnaTextFileSequence
+from pydna.opencloning_models import SequenceLocationStr
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
@@ -193,3 +194,29 @@ class BatchDomesticateTest(unittest.TestCase):
             response = client.post('/batch_cloning/domesticate', json=payload)
             self.assertEqual(response.status_code, 200)
             mocked_workflow.assert_awaited_once()
+
+    def test_compound_location(self):
+        seq = pydna_parse('packages/opencloning/tests/test_files/ase1.gb')[0]
+        feat = next(f for f in seq.features if f.type == 'CDS')
+        payload = {
+            'sequence': PydnaTextFileSequence.from_dseqrecord(seq).model_dump(),
+            'location': SequenceLocationStr.from_biopython_location(feat.location),
+            'part_name': 'ase1_cds',
+            'prefix': '',
+            'suffix': '',
+            'category': 'CDS (B3-B4-B5)',
+            'enzymes': ['BsmBI', 'BsaI'],
+            'cloning_type': 'domestication',
+        }
+        response = client.post('/batch_cloning/domesticate', json=payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()['primers']), 4)
+        with open('ase1.json', 'w') as f:
+            f.write(response.text)
+
+        payload['cloning_type'] = 'synthesis'
+        response = client.post('/batch_cloning/domesticate', json=payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()['primers']), 0)
+        with open('ase1_synthesis.json', 'w') as f:
+            f.write(response.text)

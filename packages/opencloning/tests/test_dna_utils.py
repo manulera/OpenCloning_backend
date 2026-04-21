@@ -1,12 +1,20 @@
 import os
 import unittest
 from unittest.mock import patch
-from opencloning.dna_utils import sum_is_sticky, align_sanger_traces, permutate_trace, remove_padding
+from Bio.SeqFeature import SeqFeature
+from opencloning.dna_utils import (
+    sum_is_sticky,
+    align_sanger_traces,
+    permutate_trace,
+    remove_padding,
+    compound_location_to_capitalized_str,
+)
 from pydna.dseq import Dseq
 from pydna.parsers import parse
 from pydna.dseqrecord import Dseqrecord
 from Bio.Seq import reverse_complement
 from Bio.Align import Alignment
+from Bio.SeqFeature import Location
 
 test_files = os.path.join(os.path.dirname(__file__), 'test_files')
 
@@ -202,3 +210,30 @@ class AlignSangerTrackTest(unittest.TestCase):
             with self.assertRaises(RuntimeError) as cm:
                 align_sanger_traces(seq, ['ACGT'])
             self.assertEqual(str(cm.exception), "'mafft' executable not found in PATH")
+
+
+class CompoundLocationToCapitalizedStrTest(unittest.TestCase):
+    def test_compound_location_to_capitalized_str(self):
+        a = Dseqrecord('ACCGGGTTTT')
+        loc = Location.fromstring('join(1..2,6..10)')
+        loc2 = Location.fromstring('complement(join(1..2,6..10))')
+        self.assertEqual(compound_location_to_capitalized_str(a, loc), 'ACcggGTTTT')
+        self.assertEqual(compound_location_to_capitalized_str(a, loc2), reverse_complement('ACcggGTTTT'))
+
+        b = Dseqrecord('ACCGGGTTTT', circular=True)
+        b.features.append(SeqFeature(type='misc_feature', location=loc, qualifiers={'label': ['test']}))
+        b.features.append(SeqFeature(type='misc_feature', location=loc2, qualifiers={'label': ['test2']}))
+        for shift in range(len(b)):
+            b_shifted = b.shifted(shift)
+            loc1_shifted = next(f for f in b_shifted.features if f.qualifiers['label'] == ['test'])
+            loc2_shifted = next(f for f in b_shifted.features if f.qualifiers['label'] == ['test2'])
+            self.assertEqual(compound_location_to_capitalized_str(b_shifted, loc1_shifted.location), 'ACcggGTTTT')
+            self.assertEqual(
+                compound_location_to_capitalized_str(b_shifted, loc2_shifted.location),
+                reverse_complement('ACcggGTTTT'),
+            )
+
+    def test_error(self):
+        a = Dseqrecord('ACCGGGTTTT')
+        with self.assertRaises(ValueError):
+            compound_location_to_capitalized_str(a, Location.fromstring('1..2'))

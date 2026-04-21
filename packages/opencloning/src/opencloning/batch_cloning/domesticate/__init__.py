@@ -2,10 +2,11 @@ import re
 import io
 from enum import Enum
 
-from Bio.SeqFeature import SeqFeature, Location, SimpleLocation, CompoundLocation
+from Bio.SeqFeature import CompoundLocation, Location
 from Bio.Restriction.Restriction import RestrictionBatch
 from bs4 import BeautifulSoup
 from fastapi import HTTPException
+from opencloning.dna_utils import compound_location_to_capitalized_str
 from pydantic import BaseModel, Field, field_validator
 from pydna.assembly2 import pcr_assembly, restriction_ligation_assembly
 from pydna.dseqrecord import Dseqrecord
@@ -14,8 +15,6 @@ from pydna.opencloning_models import CloningStrategy as PydnaCloningStrategy, So
 from pydna.opencloning_models import AddgeneIdSource
 from pydna.opencloning_models import SequenceLocationStr
 from pydna.primer import Primer
-from pydna.sequence_regex import dseqrecord_finditer
-from pydna.utils import shift_location, location_boundaries
 
 from opencloning_linkml.datamodel import TextFileSequence, SequenceFileFormat
 
@@ -27,7 +26,7 @@ from ...pydantic_models import BaseCloningStrategy
 router = get_router()
 
 
-class AllowedEnzyme(str, Enum):
+class EnzymeToRemove(str, Enum):
     BsmBI = 'BsmBI'
     BsaI = 'BsaI'
     BtgZI = 'BtgZI'
@@ -79,7 +78,7 @@ class BatchDomesticateRequest(BaseModel):
     prefix: str = Field(default='')
     suffix: str = Field(default='')
     category: AllowedCategory | None = Field(default=None)
-    enzymes: list[AllowedEnzyme] = Field(min_length=1)
+    enzymes: list[EnzymeToRemove] = Field(min_length=1)
 
     @field_validator('location', mode='before')
     @classmethod
@@ -102,26 +101,6 @@ def _extract_unique_error_messages(soup: BeautifulSoup) -> list[str]:
                 seen.add(message)
                 unique_errors.append(message)
     return unique_errors
-
-
-def get_location_of_sequence(dseqrecord: Dseqrecord, seq: str) -> Location | None:
-    results = list(dseqrecord_finditer(re.compile(seq, re.IGNORECASE), dseqrecord))
-    if len(results) != 1:
-        return None
-    match = results[0]
-    loc = SimpleLocation(match.start(), match.end(), 1)
-    return shift_location(loc, 0, len(dseqrecord))
-
-
-def add_seqfeature(
-    dseqrecord: Dseqrecord, expected_product_part_seq: str | None, category: str | None, name: str
-) -> None:
-    if expected_product_part_seq is None:
-        return
-    feat_type = 'CDS' if category is not None and 'CDS' in category.upper() else 'misc_feature'
-    loc = get_location_of_sequence(dseqrecord, expected_product_part_seq)
-    if loc is not None:
-        dseqrecord.features.append(SeqFeature(type=feat_type, location=loc, qualifiers={'label': [name]}))
 
 
 def _validate_request(req: BatchDomesticateRequest) -> tuple[str, str, str | None]:
@@ -159,17 +138,16 @@ async def _run_cloning_workflow(
     category: AllowedCategory | None,
     prefix: str,
     suffix: str,
-    enzymes: list[AllowedEnzyme],
+    enzymes: list[EnzymeToRemove],
     part_name: str,
 ) -> BaseCloningStrategy:
     template = read_dsrecord_from_json(sequence)
-    start, end = location_boundaries(location)
-    part = template[start:end]
-    shifted_location = shift_location(location, -start, None)
-    if isinstance(shifted_location, CompoundLocation):
-        for sublocation in location.parts:
-            print(sublocation)
-        exit(0)
+    is_compound_location = isinstance(location, CompoundLocation)
+    if is_compound_location and cloning_type == CloningType.DOMESTICATION:
+        part = Dseqrecord(compound_location_to_capitalized_str(template, location))
+    else:
+        part = location.extract(template)
+
     seq_bytes = part.format('fasta').encode('utf-8')
     gb_action = cloning_type.value
     gb_url = f'https://goldenbraidpro.com/do/{gb_action}/'
@@ -181,15 +159,19 @@ async def _run_cloning_workflow(
         if csrf_token is None:
             raise ValueError(f'Could not extract csrf token from GoldenBraid {gb_action} page')
 
+        request_data = {
+            'csrfmiddlewaretoken': csrf_token,
+            'category': category.value if category is not None else '',
+            'prefix': prefix,
+            'suffix': suffix,
+            'enzymes': [enzyme.value for enzyme in enzymes],
+        }
+        if is_compound_location and cloning_type == CloningType.DOMESTICATION:
+            request_data['with_intron'] = 'on'
+
         response = await client.post(
             gb_url,
-            data={
-                'csrfmiddlewaretoken': csrf_token,
-                'category': category.value if category is not None else '',
-                'prefix': prefix,
-                'suffix': suffix,
-                'enzymes': [enzyme.value for enzyme in enzymes],
-            },
+            data=request_data,
             files={'seq': ('sequence.fasta', seq_bytes, 'application/octet-stream')},
             headers={'Referer': gb_url},
             follow_redirects=True,
@@ -204,9 +186,6 @@ async def _run_cloning_workflow(
             raise ValueError('Could not find GenBank record input in response HTML')
         expected_product = custom_file_parser(io.StringIO(record_input['value']), SequenceFileFormat('genbank'))[0]
         expected_product.seq.circular = True
-        expected_product_part_seq = None
-        if len(expected_product.features) == 1:
-            expected_product_part_seq = str(expected_product.features[0].extract(expected_product).seq)
 
         assembly_inputs = []
         if cloning_type == CloningType.DOMESTICATION:
@@ -264,11 +243,10 @@ async def _run_cloning_workflow(
                 raise ValueError('Synthesis sequence <pre> is empty or contains invalid characters')
             synthesized_sequence = Dseqrecord(synthesis_sequence, circular=False)
             synthesized_sequence.source = Source(input=[SourceInput(sequence=template)])
-            add_seqfeature(synthesized_sequence, expected_product_part_seq, category, part_name)
             assembly_inputs.append(synthesized_sequence)
 
     p_upd2 = _get_pupd2()
-    enzymes_batch = RestrictionBatch(first=[req_enzyme for req_enzyme in enzymes])
+    enzymes_batch = RestrictionBatch(first=[req_enzyme.value for req_enzyme in enzymes])
     assemblies = restriction_ligation_assembly(assembly_inputs + [p_upd2], enzymes_batch, circular_only=True)
     if len(assemblies) != 1:
         raise ValueError(f'Expected exactly one assembly, got {len(assemblies)}')
@@ -277,7 +255,14 @@ async def _run_cloning_workflow(
     if expected_product.seguid() != assembly.seguid():
         raise ValueError(f'Expected product {expected_product.seguid()} != assembly {assembly.seguid()}')
     assembly.name = 'domesticated_part'
-    add_seqfeature(assembly, expected_product_part_seq, category, part_name)
+    # Add the annotations from the expected product to the assembly
+    shifted_expected = expected_product.synced(assembly)
+    if len(shifted_expected.features) > 0 and cloning_type == CloningType.SYNTHESIS:
+        feat1 = shifted_expected.features[0]
+        if 'label' in feat1.qualifiers and 'CDS' in feat1.qualifiers['label'][0]:
+            feat1.type = 'CDS'
+
+    assembly.features.extend(shifted_expected.features)
     pydna_strategy = PydnaCloningStrategy.from_dseqrecords([assembly])
     return BaseCloningStrategy.model_validate(pydna_strategy.model_dump())
 

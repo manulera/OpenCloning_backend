@@ -14,6 +14,8 @@ from Bio.Data.IUPACData import ambiguous_dna_values as _ambiguous_dna_values
 from pairwise_alignments_to_msa.alignment import aligned_tuples_to_MSA
 from copy import deepcopy
 import numpy as np
+from Bio.SeqFeature import CompoundLocation
+from pydna.utils import location_boundaries, shift_location
 
 aligner = PairwiseAligner(scoring='blastn')
 
@@ -168,3 +170,29 @@ def align_sanger_traces(dseqr: Dseqrecord, sanger_traces: list[str]) -> list[str
         aligned_pairs.append(formatted_alignment)
 
     return aligned_tuples_to_MSA(aligned_pairs)
+
+
+def compound_location_to_capitalized_str(sequence: Dseqrecord, location: CompoundLocation) -> str:
+    if not isinstance(location, CompoundLocation):
+        raise ValueError('Location must be a CompoundLocation')
+    start, end = location_boundaries(location)
+    subseq = sequence[start:end]
+    shifted_location = shift_location(location, -start, len(subseq))
+    edges = []
+    parts = shifted_location.parts if location.strand != -1 else reversed(shifted_location.parts)
+    for sublocation in parts:
+        edges.append(sublocation.start)
+        edges.append(sublocation.end)
+
+    result = ''
+    for i in range(len(edges) - 1):
+        part = subseq[edges[i] : edges[i + 1]]
+        if i % 2 == 0:
+            part = str(part.seq).upper()
+        else:
+            part = str(part.seq).lower()
+        result += part
+
+    if location.strand == -1:
+        result = reverse_complement(result)
+    return result
