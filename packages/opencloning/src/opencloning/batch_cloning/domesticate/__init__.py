@@ -243,6 +243,7 @@ async def _run_cloning_workflow(
                 raise ValueError('Synthesis sequence <pre> is empty or contains invalid characters')
             synthesized_sequence = Dseqrecord(synthesis_sequence, circular=False)
             synthesized_sequence.source = Source(input=[SourceInput(sequence=template)])
+            synthesized_sequence.name = f'{part_name}_synthesized'
             assembly_inputs.append(synthesized_sequence)
 
     p_upd2 = _get_pupd2()
@@ -261,6 +262,10 @@ async def _run_cloning_workflow(
         feat1 = shifted_expected.features[0]
         if 'label' in feat1.qualifiers and 'CDS' in feat1.qualifiers['label'][0]:
             feat1.type = 'CDS'
+
+    for feat in shifted_expected.features:
+        if 'label' not in feat.qualifiers or not feat.qualifiers['label']:
+            feat.qualifiers['label'] = [part_name]
 
     assembly.features.extend(shifted_expected.features)
     pydna_strategy = PydnaCloningStrategy.from_dseqrecords([assembly])
