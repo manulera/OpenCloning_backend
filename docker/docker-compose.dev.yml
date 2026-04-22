@@ -1,0 +1,22 @@
+# Docker compose file to run the backend in development mode in a container
+# To run: docker-compose -f docker/docker-compose.dev.yml up
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/opencloning.Dockerfile
+    image: opencloning-backend-dev
+    container_name: opencloning-backend-dev
+    ports:
+      - "8000:8000"
+    environment:
+      ROOT_PATH: ""
+      USE_HTTPS: "false"
+    command: >
+      uvicorn opencloning.main:app
+      --host 0.0.0.0
+      --port 8000
+      --reload
+      --reload-exclude=.venv
+    volumes:
+      - ./packages/opencloning/src/opencloning:/home/backend/venv/lib/python3.12/site-packages/opencloning

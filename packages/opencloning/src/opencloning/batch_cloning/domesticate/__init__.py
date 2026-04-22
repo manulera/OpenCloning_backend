@@ -1,5 +1,6 @@
 import re
 import io
+import os
 from enum import Enum
 
 from Bio.SeqFeature import CompoundLocation, Location
@@ -122,7 +123,7 @@ def _validate_request(req: BatchDomesticateRequest) -> tuple[str, str, str | Non
 
 
 def _get_pupd2() -> Dseqrecord:
-    p_upd2 = pydna_parse('pUPD2.gb')[0]
+    p_upd2 = pydna_parse(os.path.join(os.path.dirname(__file__), 'pUPD2.gb'))[0]
     p_upd2.source = AddgeneIdSource(
         repository_id='68161',
         addgene_sequence_type='depositor-full',
