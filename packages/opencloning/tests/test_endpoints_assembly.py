@@ -687,7 +687,10 @@ class GibsonAssemblyTest(unittest.TestCase):
 
     def test_circular_constrain(self):
         # A circular one
-        fragments = [Dseqrecord('TTTTacgatAAtgctccCCCC', circular=False), Dseqrecord('CCCCtcatGGGG', circular=False)]
+        fragments = [
+            Dseqrecord('TTTTTacgatAAtgctccCCCCC', circular=False),
+            Dseqrecord('CCCCCtcatGGGGG', circular=False),
+        ]
         json_fragments = [format_sequence_genbank(f) for f in fragments]
         for i, f in enumerate(json_fragments):
             f.id = i + 1
@@ -695,9 +698,9 @@ class GibsonAssemblyTest(unittest.TestCase):
         source = GibsonAssemblySource(id=0)
 
         data = {'source': source.model_dump(), 'sequences': [f.model_dump() for f in json_fragments]}
-        response = client.post('/gibson_assembly', json=data, params={'minimal_homology': 4, 'circular_only': True})
+        response = client.post('/gibson_assembly', json=data, params={'minimal_homology': 5, 'circular_only': True})
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['detail'], 'No circular assembly with at least 4 bps of homology was found.')
+        self.assertEqual(response.json()['detail'], 'No circular assembly with at least 5 bps of homology was found.')
 
     def test_too_many_assemblies(self):
         homology = 'ATGCAAACAGTAATGATGGATGACATTCAAAGCACTGATT'
