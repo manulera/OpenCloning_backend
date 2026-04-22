@@ -211,12 +211,8 @@ class BatchDomesticateTest(unittest.TestCase):
         response = client.post('/batch_cloning/domesticate', json=payload)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()['primers']), 4)
-        with open('ase1.json', 'w') as f:
-            f.write(response.text)
 
         payload['cloning_type'] = 'synthesis'
         response = client.post('/batch_cloning/domesticate', json=payload)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()['primers']), 0)
-        with open('ase1_synthesis.json', 'w') as f:
-            f.write(response.text)
