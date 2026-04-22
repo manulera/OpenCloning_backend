@@ -206,9 +206,6 @@ async def _run_cloning_workflow(
                 headers={'Referer': gb_url},
                 follow_redirects=True,
             )
-            protocol_errors = _extract_unique_error_messages(BeautifulSoup(protocol_response.text, 'html.parser'))
-            if protocol_errors:
-                raise ValueError('; '.join(protocol_errors))
 
             pair_pattern = re.compile(
                 r'Oligo forward:\s*([ACGTacgt]+)\s*\n\s*Oligo reverse:\s*([ACGTacgt]+)',
@@ -287,7 +284,5 @@ async def domesticate(request: BatchDomesticateRequest):
             request.enzymes,
             request.part_name,
         )
-    except HTTPException:
-        raise
     except Exception as e:
         raise HTTPException(400, str(e)) from e
