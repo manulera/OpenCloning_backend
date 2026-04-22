@@ -47,6 +47,14 @@ SnapshotDirOption = Annotated[
     ),
 ]
 
+StubOutputDirOption = Annotated[
+    Path,
+    typer.Option(
+        '--output-dir',
+        help='Override generated stubs directory (default: ./stubs/db).',
+    ),
+]
+
 
 @db_test_app.command('seed')
 def seed_command() -> None:
@@ -83,6 +91,14 @@ def reset_command(
     config = get_config()
     target = lifecycle.resolve_snapshot_dir(config, snapshot_dir)
     lifecycle.reset(config, target)
+
+
+@db_app.command('stubs')
+def stubs_command(
+    output_dir: StubOutputDirOption = Path('stubs/db'),
+) -> None:
+    """Generate a single JSON stub for DB/frontend testing."""
+    lifecycle.write_single_stub(output_dir)
 
 
 __all__ = ['db_app']

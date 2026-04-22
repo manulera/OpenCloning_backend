@@ -8,12 +8,14 @@ workspace.
 from __future__ import annotations
 
 import io
+import json
 import shutil
 from contextlib import redirect_stdout
 from pathlib import Path
+from typing import Any
 
 import opencloning_db.db as _db_module
-from opencloning_db.config import Config
+from opencloning_db.config import Config, get_config
 from opencloning_db.init_db import init_db as _init_db
 
 # Subdirectory names inside a snapshot directory.
@@ -182,3 +184,114 @@ def reset(config: Config, snapshot_dir: Path) -> None:
     except SnapshotMissingError:
         seed(config)
         snapshot_create(config, snapshot_dir)
+
+
+def _sanitize_headers(headers: dict[str, str] | None) -> dict[str, str]:
+    """Drop noisy values and replace auth tokens with placeholders."""
+    if not headers:
+        return {}
+
+    sanitized: dict[str, str] = {}
+    for key, value in headers.items():
+        normalized = key.lower()
+        if normalized in {'authorization'}:
+            sanitized[key] = 'Bearer __TEST_TOKEN__'
+            continue
+        if normalized in {'x-workspace-id', 'content-type'}:
+            sanitized[key] = value
+    return sanitized
+
+
+def create_stub(
+    test_client: Any,
+    endpoint: str,
+    method: str,
+    reset_db: bool,
+    params: dict[str, Any] | None = None,
+    body: dict[str, Any] | list[Any] | None = None,
+    headers: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    """Perform one request through *test_client* and return a stub payload."""
+    if reset_db:
+        config = get_config()
+        reset(config, resolve_snapshot_dir(config, None))
+
+    method_name = method.lower()
+    requester = getattr(test_client, method_name)
+    request_headers = headers or {}
+
+    request_kwargs: dict[str, Any] = {'params': params, 'headers': request_headers}
+    if body is not None:
+        request_kwargs['json'] = body
+
+    response = requester(endpoint, **request_kwargs)
+    try:
+        response_body: Any = response.json()
+    except ValueError:
+        response_body = response.text
+
+    return {
+        'method': method.upper(),
+        'endpoint': endpoint,
+        'params': params,
+        'headers': _sanitize_headers(request_headers),
+        'body': body,
+        'response': {
+            'status_code': response.status_code,
+            'headers': _sanitize_headers(dict(response.headers)),
+            'body': response_body,
+        },
+    }
+
+
+def _default_auth_headers(test_client: Any) -> dict[str, str]:
+    token_response = test_client.post(
+        '/auth/token',
+        data={'username': 'bootstrap@example.com', 'password': 'password'},
+    )
+    token_response.raise_for_status()
+    token = token_response.json()['access_token']
+
+    workspaces_response = test_client.get(
+        '/workspaces',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    workspaces_response.raise_for_status()
+    workspace_id = workspaces_response.json()[0]['id']
+
+    return {
+        'Authorization': f'Bearer {token}',
+        'X-Workspace-Id': str(workspace_id),
+    }
+
+
+def write_single_stub(output_dir: Path) -> Path:
+    """Generate and persist one predefined DB test stub JSON."""
+    try:
+        from fastapi.testclient import TestClient
+        from opencloning_db.api import app
+    except ImportError as exc:  # pragma: no cover - environment dependent
+        raise RuntimeError(
+            'Generating stubs requires opencloning-db and fastapi test dependencies installed.'
+        ) from exc
+
+    config = get_config()
+    reset(config, resolve_snapshot_dir(config, None))
+
+    target_dir = Path(output_dir)
+    target_dir.mkdir(parents=True, exist_ok=True)
+    output_file = target_dir / 'single_stub.json'
+
+    client = TestClient(app)
+    headers = _default_auth_headers(client)
+    payload = create_stub(
+        client,
+        endpoint='/primers',
+        method='GET',
+        reset_db=True,
+        headers=headers,
+    )
+    with output_file.open('w', encoding='utf-8') as handle:
+        json.dump(payload, handle, indent=2, sort_keys=True)
+        handle.write('\n')
+    return output_file

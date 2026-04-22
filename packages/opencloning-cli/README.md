@@ -12,3 +12,18 @@ The CLI is intentionally narrow. It does not talk to the API. It does not manage
 uv sync
 uv run opencloning-cli --help
 ```
+
+## Generate DB Stubs
+
+Use `db stubs` to generate a single JSON stub for frontend testing. By default it writes to `./stubs/db/single_stub.json`.
+The command resets the database to the default baseline and records a primer-list request (`GET /primers`).
+
+```bash
+uv run opencloning-cli db stubs
+```
+
+Use `--output-dir` to override the destination folder:
+
+```bash
+uv run opencloning-cli db stubs --output-dir ./tmp/stubs
+```

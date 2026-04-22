@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from typer.testing import CliRunner
@@ -88,3 +89,22 @@ class TestResetCommand:
         second = _invoke('db', 'test', 'reset')
         assert second.exit_code == 0
         assert second.output.strip() == ''
+
+
+class TestStubCommand:
+    def test_writes_single_stub_json(self, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        result = _invoke('db', 'stubs')
+
+        assert result.exit_code == 0, result.output
+        out_dir = tmp_path / 'stubs' / 'db'
+        files = sorted(out_dir.glob('*.json'))
+        assert len(files) == 1
+
+        data = json.loads(files[0].read_text(encoding='utf-8'))
+        assert data['method'] == 'GET'
+        assert data['endpoint'] == '/primers'
+        assert set(data.keys()) == {'method', 'endpoint', 'params', 'headers', 'body', 'response'}
+        assert data['headers']['Authorization'] == 'Bearer __TEST_TOKEN__'
+        assert 'X-Workspace-Id' in data['headers']
+        assert data['response']['status_code'] == 200
