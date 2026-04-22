@@ -68,7 +68,7 @@ async def crispr(
     source: CRISPRSource,
     guides: Annotated[list[PrimerModel], Field(min_length=1)],
     sequences: Annotated[list[TextFileSequence], Field(min_length=2, max_length=2)],
-    minimal_homology: int = Query(40, description='The minimum homology between the template and the insert.'),
+    minimal_homology: int = Query(40, description='The minimum homology between the template and the insert.', ge=5),
 ):
     """Return the sequence after performing CRISPR editing by Homology directed repair
     TODO: Support repair through NHEJ
@@ -197,7 +197,7 @@ async def pcr(
 async def homologous_recombination(
     source: HomologousRecombinationSource,
     sequences: Annotated[list[TextFileSequence], Field(min_length=2, max_length=2)],
-    minimal_homology: int = Query(40, description='The minimum homology between the template and the insert.'),
+    minimal_homology: int = Query(40, description='The minimum homology between the template and the insert.', ge=5),
 ):
 
     template, insert = [read_dsrecord_from_json(seq) for seq in sequences]
@@ -239,7 +239,7 @@ async def gibson_assembly(
     sequences: Annotated[list[TextFileSequence], Field(min_length=1)],
     source: Union[GibsonAssemblySource, OverlapExtensionPCRLigationSource, InFusionSource, InVivoAssemblySource],
     minimal_homology: int = Query(
-        40, description='The minimum homology between consecutive fragments in the assembly.'
+        40, description='The minimum homology between consecutive fragments in the assembly.', ge=5
     ),
     circular_only: bool = Query(False, description='Only return circular assemblies.'),
 ):
