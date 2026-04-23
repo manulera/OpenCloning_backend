@@ -98,7 +98,7 @@ def stubs_command(
     output_dir: StubOutputDirOption = Path('stubs/db'),
 ) -> None:
     """Generate a single JSON stub for DB/frontend testing."""
-    lifecycle.write_single_stub(output_dir)
+    lifecycle.write_stubs(output_dir)
 
 
 __all__ = ['db_app']

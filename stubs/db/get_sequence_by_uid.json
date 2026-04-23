@@ -1,0 +1,31 @@
+{
+  "body": null,
+  "endpoint": "/sequence/by-uid/example_sequencing-sample",
+  "headers": {
+    "Authorization": "Bearer __TEST_TOKEN__",
+    "X-Workspace-Id": "1"
+  },
+  "method": "GET",
+  "params": null,
+  "response": {
+    "body": {
+      "id": 1,
+      "name": "pREX0008",
+      "sample_uids": [
+        "example_sequencing-sample"
+      ],
+      "seguid": "cdseguid=B1Hf10-i7VRt7sgFiDRwUj6K8xQ",
+      "sequence_type": "plasmid",
+      "tags": [
+        {
+          "id": 1,
+          "name": "example_sequencing"
+        }
+      ]
+    },
+    "headers": {
+      "content-type": "application/json"
+    },
+    "status_code": 200
+  }
+}

@@ -17,6 +17,7 @@ from typing import Any
 import opencloning_db.db as _db_module
 from opencloning_db.config import Config, get_config
 from opencloning_db.init_db import init_db as _init_db
+from .stubs import stubs
 
 # Subdirectory names inside a snapshot directory.
 _DB_SUBDIR = 'db'
@@ -206,15 +207,11 @@ def create_stub(
     test_client: Any,
     endpoint: str,
     method: str,
-    reset_db: bool,
     params: dict[str, Any] | None = None,
     body: dict[str, Any] | list[Any] | None = None,
     headers: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """Perform one request through *test_client* and return a stub payload."""
-    if reset_db:
-        config = get_config()
-        reset(config, resolve_snapshot_dir(config, None))
 
     method_name = method.lower()
     requester = getattr(test_client, method_name)
@@ -265,7 +262,7 @@ def _default_auth_headers(test_client: Any) -> dict[str, str]:
     }
 
 
-def write_single_stub(output_dir: Path) -> Path:
+def write_stubs(output_dir: Path):
     """Generate and persist one predefined DB test stub JSON."""
     try:
         from fastapi.testclient import TestClient
@@ -280,18 +277,23 @@ def write_single_stub(output_dir: Path) -> Path:
 
     target_dir = Path(output_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
-    output_file = target_dir / 'single_stub.json'
 
     client = TestClient(app)
     headers = _default_auth_headers(client)
-    payload = create_stub(
-        client,
-        endpoint='/primers',
-        method='GET',
-        reset_db=True,
-        headers=headers,
-    )
-    with output_file.open('w', encoding='utf-8') as handle:
-        json.dump(payload, handle, indent=2, sort_keys=True)
-        handle.write('\n')
-    return output_file
+    for stub in stubs:
+        output_file = target_dir / f'{stub.name}.json'
+        try:
+            payload = create_stub(
+                client,
+                endpoint=stub.endpoint,
+                method=stub.method,
+                headers=headers,
+                params=stub.params,
+                body=stub.body,
+            )
+            with output_file.open('w', encoding='utf-8') as handle:
+                json.dump(payload, handle, indent=2, sort_keys=True)
+                handle.write('\n')
+        finally:
+            if stub.reset_db:
+                reset(config, resolve_snapshot_dir(config, None))

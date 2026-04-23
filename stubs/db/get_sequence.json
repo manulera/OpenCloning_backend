@@ -1,0 +1,29 @@
+{
+  "body": null,
+  "endpoint": "/sequence/10",
+  "headers": {
+    "Authorization": "Bearer __TEST_TOKEN__",
+    "X-Workspace-Id": "1"
+  },
+  "method": "GET",
+  "params": null,
+  "response": {
+    "body": {
+      "id": 10,
+      "name": "ase1_CDS_PCR",
+      "sample_uids": [],
+      "seguid": "ldseguid=oMGruVpBiElY0ffP28XC_BlHXv8",
+      "sequence_type": "pcr_product",
+      "tags": [
+        {
+          "id": 3,
+          "name": "restriction_then_ligation"
+        }
+      ]
+    },
+    "headers": {
+      "content-type": "application/json"
+    },
+    "status_code": 200
+  }
+}

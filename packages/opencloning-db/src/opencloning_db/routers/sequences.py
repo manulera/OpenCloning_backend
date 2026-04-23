@@ -312,7 +312,7 @@ def get_sequence_primers(
     workspace_id = db_sequence.workspace_id
 
     # Sources where this sequence was an input (i.e. this sequence acted as a "template")
-    template_source_ids = select(SourceInput.source_id).where(SourceInput.input_entity_id == sequence_id).subquery()
+    template_source_ids = select(SourceInput.source_id).where(SourceInput.input_entity_id == sequence_id)
     template_primers_stmt = (
         select(Primer)
         .options(selectinload(InputEntity.tags))
@@ -325,7 +325,7 @@ def get_sequence_primers(
     )
 
     # Sources where this sequence was the output (i.e. this sequence acted as a "product")
-    product_source_ids = select(Source.id).where(Source.id == sequence_id).subquery()
+    product_source_ids = select(Source.id).where(Source.id == sequence_id)
     product_primers_stmt = (
         select(Primer)
         .options(selectinload(InputEntity.tags))

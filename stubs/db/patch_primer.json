@@ -1,0 +1,30 @@
+{
+  "body": {
+    "name": "fwd_renamed"
+  },
+  "endpoint": "/primer/7",
+  "headers": {
+    "Authorization": "Bearer __TEST_TOKEN__",
+    "X-Workspace-Id": "1"
+  },
+  "method": "PATCH",
+  "params": null,
+  "response": {
+    "body": {
+      "id": 7,
+      "name": "fwd_renamed",
+      "sequence": "TAAGCAGTCGACatgcaaacagtaatgatggatg",
+      "tags": [
+        {
+          "id": 10,
+          "name": "templateless_PCR"
+        }
+      ],
+      "uid": "ML7"
+    },
+    "headers": {
+      "content-type": "application/json"
+    },
+    "status_code": 200
+  }
+}

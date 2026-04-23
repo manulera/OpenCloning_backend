@@ -1,0 +1,44 @@
+{
+  "body": null,
+  "endpoint": "/sequences/by-seguid/ldseguid=oMGruVpBiElY0ffP28XC_BlHXv8",
+  "headers": {
+    "Authorization": "Bearer __TEST_TOKEN__",
+    "X-Workspace-Id": "1"
+  },
+  "method": "GET",
+  "params": null,
+  "response": {
+    "body": [
+      {
+        "id": 10,
+        "name": "ase1_CDS_PCR",
+        "sample_uids": [],
+        "seguid": "ldseguid=oMGruVpBiElY0ffP28XC_BlHXv8",
+        "sequence_type": "pcr_product",
+        "tags": [
+          {
+            "id": 3,
+            "name": "restriction_then_ligation"
+          }
+        ]
+      },
+      {
+        "id": 63,
+        "name": "name",
+        "sample_uids": [],
+        "seguid": "ldseguid=oMGruVpBiElY0ffP28XC_BlHXv8",
+        "sequence_type": "pcr_product",
+        "tags": [
+          {
+            "id": 9,
+            "name": "restriction_ligation_assembly"
+          }
+        ]
+      }
+    ],
+    "headers": {
+      "content-type": "application/json"
+    },
+    "status_code": 200
+  }
+}

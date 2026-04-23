@@ -1,0 +1,191 @@
+{
+  "body": null,
+  "endpoint": "/primers",
+  "headers": {
+    "Authorization": "Bearer __TEST_TOKEN__",
+    "X-Workspace-Id": "1"
+  },
+  "method": "GET",
+  "params": null,
+  "response": {
+    "body": {
+      "items": [
+        {
+          "id": 7,
+          "name": "fwd",
+          "sequence": "TAAGCAGTCGACatgcaaacagtaatgatggatg",
+          "tags": [
+            {
+              "id": 10,
+              "name": "templateless_PCR"
+            }
+          ],
+          "uid": "ML7"
+        },
+        {
+          "id": 8,
+          "name": "rvs",
+          "sequence": "TAAGCAGGCGCGCCttaaaagccttcttctccccatt",
+          "tags": [
+            {
+              "id": 10,
+              "name": "templateless_PCR"
+            }
+          ],
+          "uid": "ML8"
+        },
+        {
+          "id": 15,
+          "name": "ase1_sgRNA",
+          "sequence": "CATTACTGTTTGCATTGAAC",
+          "tags": [
+            {
+              "id": 10,
+              "name": "templateless_PCR"
+            }
+          ],
+          "uid": "ML15"
+        },
+        {
+          "id": 16,
+          "name": "ase1_fwd",
+          "sequence": "TTTCATATCTTCCTTTATATTCTATTAATTGAATTTCAAACATCGTTTTATTGAGCTCATTTACATCAACCGGTTCAATGtacccatacgatgttcctga",
+          "tags": [
+            {
+              "id": 10,
+              "name": "templateless_PCR"
+            }
+          ],
+          "uid": "ML16"
+        },
+        {
+          "id": 17,
+          "name": "ase1_rvs",
+          "sequence": "AAGTTAGATTCATTATTAGAGTGATTATCTTTTTCAGCAATAGAATCAGTGCTTTGAATGTCATCCATCATTACTGTTTGagcgtaatctggaacgtcat",
+          "tags": [],
+          "uid": null
+        },
+        {
+          "id": 22,
+          "name": "fwd",
+          "sequence": "aaGGTCTCATTCTatggtaattgaggtaagaggt",
+          "tags": [],
+          "uid": null
+        },
+        {
+          "id": 23,
+          "name": "rvs",
+          "sequence": "aaGGTCTCAGGATttaacgtttataatgtttaata",
+          "tags": [],
+          "uid": null
+        },
+        {
+          "id": 35,
+          "name": "fwd",
+          "sequence": "gatctcgccataaaagacag",
+          "tags": [],
+          "uid": null
+        },
+        {
+          "id": 36,
+          "name": "rvs",
+          "sequence": "ttaacaaagcgactataagt",
+          "tags": [],
+          "uid": null
+        },
+        {
+          "id": 37,
+          "name": "lacZ_attB1_fwd",
+          "sequence": "GGGGACAAGTTTGTACAAAAAAGCAGGCTTAATGACCATGATTACGGATTC",
+          "tags": [],
+          "uid": null
+        },
+        {
+          "id": 38,
+          "name": "lacZ_attB2_rvs",
+          "sequence": "GGGGACCACTTTGTACAAGAAAGCTGGGTTTTTTTGACACCAGACCAACT",
+          "tags": [],
+          "uid": null
+        },
+        {
+          "id": 45,
+          "name": "vector_fwd",
+          "sequence": "GGAGAAGAAGGCTTTTAATATGCTCGAGAGATCTGT",
+          "tags": [],
+          "uid": null
+        },
+        {
+          "id": 46,
+          "name": "vector_rvs",
+          "sequence": "CATCATTACTGTTTGCATTGATTTAACAAAGCGACTATAAG",
+          "tags": [],
+          "uid": null
+        },
+        {
+          "id": 47,
+          "name": "ase1_fwd",
+          "sequence": "AGTCGCTTTGTTAAATCAATGCAAACAGTAATGATGGA",
+          "tags": [],
+          "uid": null
+        },
+        {
+          "id": 48,
+          "name": "ase1_rvs",
+          "sequence": "ACAGATCTCTCGAGCATATTAAAAGCCTTCTTCTCCC",
+          "tags": [],
+          "uid": null
+        },
+        {
+          "id": 54,
+          "name": "fwd",
+          "sequence": "AGTTTTCATATCTTCCTTTATATTCTATTAATTGAATTTCAAACATCGTTTTATTGAGCTCATTTACATCAACCGGTTCACGGATCCCCGGGTTAATTAA",
+          "tags": [],
+          "uid": null
+        },
+        {
+          "id": 55,
+          "name": "rvs",
+          "sequence": "CTTTTATGAATTATCTATATGCTGTATTCATATGCAAAAATATGTATATTTAAATTTGATCGATTAGGTAAATAAGAAGCGAATTCGAGCTCGTTTAAAC",
+          "tags": [],
+          "uid": null
+        },
+        {
+          "id": 60,
+          "name": "fwd",
+          "sequence": "TAAGCAGTCGACatgcaaacagtaatgatggatg",
+          "tags": [],
+          "uid": null
+        },
+        {
+          "id": 61,
+          "name": "rvs",
+          "sequence": "TAAGCAGGCGCGCCttaaaagccttcttctccccatt",
+          "tags": [],
+          "uid": null
+        },
+        {
+          "id": 66,
+          "name": "fwd_hyb",
+          "sequence": "agaactcaaccattacgggtttgacgaatatagacgagattcgcaattacttgtctgatggattaccaagatgatgggct",
+          "tags": [],
+          "uid": null
+        },
+        {
+          "id": 67,
+          "name": "rvs_hyb",
+          "sequence": "ttacgagatatttgagttaaacttcatgcataccctccaaaaactcaatcatttcaccaagcccatcatcttggtaatcc",
+          "tags": [],
+          "uid": null
+        }
+      ],
+      "page": 1,
+      "pages": 1,
+      "size": 50,
+      "total": 21
+    },
+    "headers": {
+      "content-type": "application/json"
+    },
+    "status_code": 200
+  }
+}

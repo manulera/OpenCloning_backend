@@ -1,0 +1,45 @@
+{
+  "body": null,
+  "endpoint": "/sequence/10/primers",
+  "headers": {
+    "Authorization": "Bearer __TEST_TOKEN__",
+    "X-Workspace-Id": "1"
+  },
+  "method": "GET",
+  "params": null,
+  "response": {
+    "body": {
+      "products": [
+        {
+          "id": 7,
+          "name": "fwd",
+          "sequence": "TAAGCAGTCGACatgcaaacagtaatgatggatg",
+          "tags": [
+            {
+              "id": 10,
+              "name": "templateless_PCR"
+            }
+          ],
+          "uid": "ML7"
+        },
+        {
+          "id": 8,
+          "name": "rvs",
+          "sequence": "TAAGCAGGCGCGCCttaaaagccttcttctccccatt",
+          "tags": [
+            {
+              "id": 10,
+              "name": "templateless_PCR"
+            }
+          ],
+          "uid": "ML8"
+        }
+      ],
+      "templates": []
+    },
+    "headers": {
+      "content-type": "application/json"
+    },
+    "status_code": 200
+  }
+}

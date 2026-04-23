@@ -1,0 +1,25 @@
+{
+  "body": {
+    "database_id": null,
+    "id": 0,
+    "name": "new",
+    "sequence": "GGCC",
+    "type": "Primer"
+  },
+  "endpoint": "/primer",
+  "headers": {
+    "Authorization": "Bearer __TEST_TOKEN__",
+    "X-Workspace-Id": "1"
+  },
+  "method": "POST",
+  "params": null,
+  "response": {
+    "body": {
+      "id": 70
+    },
+    "headers": {
+      "content-type": "application/json"
+    },
+    "status_code": 200
+  }
+}
