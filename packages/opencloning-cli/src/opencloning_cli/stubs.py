@@ -6,8 +6,12 @@ class StubRequest(BaseModel):
     method: str
     name: str
     params: dict | None = None
-    body: dict | None = None
+    body: dict | list | None = None
     headers: dict | None = None
+    body_from_stub: str | None = None
+    body_from_example: str | None = None
+    multipart_files: list[dict[str, str]] | None = None
+    binary_response: bool = False
     reset_db: bool = False
 
 
@@ -77,5 +81,42 @@ stubs = [
         name='get_sequence_primers',
         endpoint='/sequence/10/primers',
         method='GET',
+    ),
+    StubRequest(
+        name='post_sequence',
+        endpoint='/sequence',
+        method='POST',
+        body_from_example='cs_pcr',
+        reset_db=True,
+    ),
+    StubRequest(
+        name='post_sequence_search',
+        endpoint='/sequence/search',
+        method='POST',
+        body_from_stub='get_text_file_sequence',
+    ),
+    StubRequest(
+        name='post_sequence_sequencing_files',
+        endpoint='/sequence/10/sequencing_files',
+        method='POST',
+        multipart_files=[
+            {
+                'filename': 'run.ab1',
+                'content': 'SEQUENCING-RUN-1',
+                'content_type': 'application/octet-stream',
+            }
+        ],
+    ),
+    StubRequest(
+        name='get_sequence_sequencing_files',
+        endpoint='/sequence/10/sequencing_files',
+        method='GET',
+    ),
+    StubRequest(
+        name='download_sequencing_file',
+        endpoint='/sequencing_files/{last_file_id}/download',
+        method='GET',
+        binary_response=True,
+        reset_db=True,
     ),
 ]
