@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from opencloning_linkml.datamodel import Primer
 
 
 class StubRequest(BaseModel):
@@ -27,11 +26,7 @@ stubs = [
         name='post_primer',
         endpoint='/primer',
         method='POST',
-        body=Primer(
-            id=0,
-            name='new',
-            sequence='GGCC',
-        ).model_dump(),
+        body={'id': 0, 'name': 'new', 'sequence': 'GGCC'},
         reset_db=True,
     ),
     StubRequest(
