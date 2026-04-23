@@ -1,10 +1,8 @@
 {
   "body": {
-    "database_id": null,
     "id": 0,
     "name": "new",
-    "sequence": "GGCC",
-    "type": "Primer"
+    "sequence": "GGCC"
   },
   "endpoint": "/primer",
   "headers": {
