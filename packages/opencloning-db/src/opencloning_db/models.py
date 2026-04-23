@@ -31,6 +31,7 @@ from sqlalchemy.orm import (
 
 import opencloning_linkml.datamodel.models as opencloning_models
 from pydantic import BaseModel as PydanticBaseModel
+from pydna.readers import read
 
 from opencloning_db.config import get_config
 
@@ -42,6 +43,10 @@ SourceType = enum.Enum(
     'SourceType',
     [(cls.__name__, cls.__name__) for cls in get_args(AnySource)],
 )
+
+
+def sanitize_sequence_name(name: str) -> str:
+    return name.strip().replace(' ', '_')
 
 
 class SequenceType(enum.Enum):
@@ -234,9 +239,14 @@ class Sequence(InputEntity):
         path = os.path.join(get_config().sequence_files_dir, self.file_path)
         with open(path, 'r', encoding='utf-8') as f:
             file_content = f.read()
+
+        # We do the renaming here when returning the sequence to prevent editing the original sequence file.
+        seqrecord = read(file_content)
+        seqrecord.name = sanitize_sequence_name(self.name)
+
         return opencloning_models.TextFileSequence(
             id=self.id,
-            file_content=file_content,
+            file_content=seqrecord.format('genbank'),
             overhang_crick_3prime=self.overhang_crick_3prime,
             overhang_watson_3prime=self.overhang_watson_3prime,
             sequence_file_format='genbank',

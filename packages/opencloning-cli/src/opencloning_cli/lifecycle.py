@@ -199,7 +199,7 @@ def _sanitize_headers(headers: dict[str, str] | None) -> dict[str, str]:
         if normalized in {'authorization'}:
             sanitized[normalized] = 'Bearer __TEST_TOKEN__'
             continue
-        if normalized in {'x-workspace-id', 'content-type'}:
+        if normalized in {'x-workspace-id', 'content-type', 'content-disposition'}:
             sanitized[normalized] = value
     return sanitized
 
