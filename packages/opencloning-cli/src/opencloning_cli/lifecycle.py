@@ -196,10 +196,10 @@ def _sanitize_headers(headers: dict[str, str] | None) -> dict[str, str]:
     for key, value in headers.items():
         normalized = key.lower()
         if normalized in {'authorization'}:
-            sanitized[key] = 'Bearer __TEST_TOKEN__'
+            sanitized[normalized] = 'Bearer __TEST_TOKEN__'
             continue
         if normalized in {'x-workspace-id', 'content-type'}:
-            sanitized[key] = value
+            sanitized[normalized] = value
     return sanitized
 
 

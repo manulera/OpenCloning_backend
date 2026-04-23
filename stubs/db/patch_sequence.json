@@ -4,8 +4,8 @@
   },
   "endpoint": "/sequence/10",
   "headers": {
-    "Authorization": "Bearer __TEST_TOKEN__",
-    "X-Workspace-Id": "1"
+    "authorization": "Bearer __TEST_TOKEN__",
+    "x-workspace-id": "1"
   },
   "method": "PATCH",
   "params": null,
