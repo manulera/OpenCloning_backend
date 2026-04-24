@@ -18,7 +18,9 @@ from typing import Any
 import opencloning_db.db as _db_module
 from opencloning_db.config import Config, get_config
 from opencloning_db.init_db import init_db as _init_db
-from .stubs import stubs
+from opencloning_db.api import app
+from fastapi.testclient import TestClient
+from .stubs import stubs, RecordedStub, StubRequest, StubResponse
 
 # Subdirectory names inside a snapshot directory.
 _DB_SUBDIR = 'db'
@@ -206,26 +208,18 @@ def _sanitize_headers(headers: dict[str, str] | None) -> dict[str, str]:
 
 def create_stub(
     test_client: Any,
-    endpoint: str,
-    method: str,
-    params: dict[str, Any] | None = None,
-    body: dict[str, Any] | list[Any] | None = None,
-    headers: dict[str, str] | None = None,
-    multipart_files: list[dict[str, str]] | None = None,
-    binary_response: bool = False,
-) -> dict[str, Any]:
+    stub: StubRequest,
+) -> RecordedStub:
     """Perform one request through *test_client* and return a stub payload."""
 
-    method_name = method.lower()
+    method_name = stub.method.lower()
     requester = getattr(test_client, method_name)
-    request_headers = headers or {}
-
-    request_kwargs: dict[str, Any] = {'params': params, 'headers': request_headers}
-    if body is not None:
-        request_kwargs['json'] = body
-    if multipart_files:
+    request_kwargs: dict[str, Any] = {'params': stub.params, 'headers': stub.headers}
+    if stub.body is not None:
+        request_kwargs['json'] = stub.body
+    if stub.multipart_files:
         files: list[tuple[str, tuple[str, bytes, str]]] = []
-        for file_spec in multipart_files:
+        for file_spec in stub.multipart_files:
             files.append(
                 (
                     'files',
@@ -238,9 +232,9 @@ def create_stub(
             )
         request_kwargs['files'] = files
 
-    response = requester(endpoint, **request_kwargs)
+    response = requester(stub.endpoint, **request_kwargs)
 
-    if binary_response:
+    if stub.binary_response:
         response_body = base64.b64encode(response.content).decode('ascii')
     else:
         try:
@@ -248,34 +242,32 @@ def create_stub(
         except ValueError:
             response_body = response.text
 
-    request_body: Any = body
-    if multipart_files:
-        request_body = {
+    if stub.multipart_files:
+        stub.body = {
             'multipart_files': [
                 {
                     'filename': file_spec['filename'],
                     'content_type': file_spec.get('content_type', 'application/octet-stream'),
                     'content': file_spec['content'],
                 }
-                for file_spec in multipart_files
+                for file_spec in stub.multipart_files
             ]
         }
 
-    payload = {
-        'method': method.upper(),
-        'endpoint': endpoint,
-        'params': params,
-        'headers': _sanitize_headers(request_headers),
-        'body': request_body,
-        'response': {
-            'status_code': response.status_code,
-            'headers': _sanitize_headers(dict(response.headers)),
-            'body': response_body,
-        },
-    }
-    if binary_response:
-        payload['response']['body_encoding'] = 'base64'
-    return payload
+    return RecordedStub(
+        name=stub.name,
+        endpoint=stub.endpoint,
+        method=stub.method,
+        params=stub.params,
+        body=stub.body,
+        headers=_sanitize_headers(stub.headers),
+        multipart_files=stub.multipart_files,
+        response=StubResponse(
+            body=response_body,
+            status_code=response.status_code,
+            headers=_sanitize_headers(dict(response.headers)),
+        ),
+    )
 
 
 def _default_auth_headers(test_client: Any) -> dict[str, str]:
@@ -320,13 +312,6 @@ def _example_body(name: str) -> dict[str, Any]:
 
 def write_stubs(output_dir: Path):
     """Generate and persist one predefined DB test stub JSON."""
-    try:
-        from fastapi.testclient import TestClient
-        from opencloning_db.api import app
-    except ImportError as exc:  # pragma: no cover - environment dependent
-        raise RuntimeError(
-            'Generating stubs requires opencloning-db and fastapi test dependencies installed.'
-        ) from exc
 
     config = get_config()
     reset(config, resolve_snapshot_dir(config, None))
@@ -337,43 +322,25 @@ def write_stubs(output_dir: Path):
     client = TestClient(app)
     headers = _default_auth_headers(client)
     generated_payloads: dict[str, dict[str, Any]] = {}
-    runtime_vars: dict[str, Any] = {}
-    for stub in stubs:
+    for stub in stubs(target_dir):
+
+        stub.headers = headers
         output_file = target_dir / f'{stub.name}.json'
         try:
-            endpoint = stub.endpoint.format(**runtime_vars)
-            body = stub.body
             if stub.body_from_stub:
                 source_payload = generated_payloads.get(stub.body_from_stub)
                 if source_payload is None:
                     raise ValueError(f'Unknown body source stub "{stub.body_from_stub}" for "{stub.name}".')
-                body = source_payload['response']['body']
+                stub.body = source_payload['response']['body']
             if stub.body_from_example:
-                body = _example_body(stub.body_from_example)
+                stub.body = _example_body(stub.body_from_example)
 
-            payload = create_stub(
-                client,
-                endpoint=endpoint,
-                method=stub.method,
-                headers=headers,
-                params=stub.params,
-                body=body,
-                multipart_files=stub.multipart_files,
-                binary_response=stub.binary_response,
-            )
-            generated_payloads[stub.name] = payload
-
-            response_body = payload.get('response', {}).get('body')
-            if isinstance(response_body, dict) and 'id' in response_body:
-                runtime_vars['last_id'] = response_body['id']
-            if isinstance(response_body, list) and response_body and isinstance(response_body[0], dict):
-                first_id = response_body[0].get('id')
-                if first_id is not None:
-                    runtime_vars['last_file_id'] = first_id
+            recorded_stub = create_stub(client, stub)
 
             with output_file.open('w', encoding='utf-8') as handle:
-                json.dump(payload, handle, indent=2, sort_keys=True)
+                json.dump(recorded_stub.model_dump(), handle, indent=2, sort_keys=True)
                 handle.write('\n')
+            print('Stub written to', output_file)
         finally:
             if stub.reset_db:
                 reset(config, resolve_snapshot_dir(config, None))

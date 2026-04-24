@@ -6,6 +6,7 @@
     "x-workspace-id": "1"
   },
   "method": "GET",
+  "name": "get_text_file_sequence",
   "params": null,
   "response": {
     "body": {

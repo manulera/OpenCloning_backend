@@ -1,6 +1,6 @@
 {
   "body": {
-    "name": "pcr_product_renamed"
+    "name": "ase1_renamed"
   },
   "endpoint": "/sequence/10",
   "headers": {
@@ -8,11 +8,12 @@
     "x-workspace-id": "1"
   },
   "method": "PATCH",
+  "name": "patch_sequence",
   "params": null,
   "response": {
     "body": {
       "id": 10,
-      "name": "pcr_product_renamed",
+      "name": "ase1_renamed",
       "sample_uids": [],
       "seguid": "ldseguid=oMGruVpBiElY0ffP28XC_BlHXv8",
       "sequence_type": "pcr_product",

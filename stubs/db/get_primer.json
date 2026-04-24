@@ -1,24 +1,20 @@
 {
   "body": null,
-  "endpoint": "/primer/7",
+  "endpoint": "/primer/37",
   "headers": {
     "authorization": "Bearer __TEST_TOKEN__",
     "x-workspace-id": "1"
   },
   "method": "GET",
+  "name": "get_primer",
   "params": null,
   "response": {
     "body": {
-      "id": 7,
-      "name": "fwd",
-      "sequence": "TAAGCAGTCGACatgcaaacagtaatgatggatg",
-      "tags": [
-        {
-          "id": 10,
-          "name": "templateless_PCR"
-        }
-      ],
-      "uid": "ML7"
+      "id": 37,
+      "name": "lacZ_attB1_fwd",
+      "sequence": "GGGGACAAGTTTGTACAAAAAAGCAGGCTTAATGACCATGATTACGGATTC",
+      "tags": [],
+      "uid": null
     },
     "headers": {
       "content-type": "application/json"

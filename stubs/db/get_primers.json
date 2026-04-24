@@ -6,6 +6,7 @@
     "x-workspace-id": "1"
   },
   "method": "GET",
+  "name": "get_primers",
   "params": null,
   "response": {
     "body": {

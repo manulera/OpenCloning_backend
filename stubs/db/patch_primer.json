@@ -1,26 +1,22 @@
 {
   "body": {
-    "name": "fwd_renamed"
+    "name": "lacZ_renamed"
   },
-  "endpoint": "/primer/7",
+  "endpoint": "/primer/37",
   "headers": {
     "authorization": "Bearer __TEST_TOKEN__",
     "x-workspace-id": "1"
   },
   "method": "PATCH",
+  "name": "patch_primer",
   "params": null,
   "response": {
     "body": {
-      "id": 7,
-      "name": "fwd_renamed",
-      "sequence": "TAAGCAGTCGACatgcaaacagtaatgatggatg",
-      "tags": [
-        {
-          "id": 10,
-          "name": "templateless_PCR"
-        }
-      ],
-      "uid": "ML7"
+      "id": 37,
+      "name": "lacZ_renamed",
+      "sequence": "GGGGACAAGTTTGTACAAAAAAGCAGGCTTAATGACCATGATTACGGATTC",
+      "tags": [],
+      "uid": null
     },
     "headers": {
       "content-type": "application/json"

@@ -86,6 +86,7 @@
     "x-workspace-id": "1"
   },
   "method": "POST",
+  "name": "post_sequence",
   "params": null,
   "response": {
     "body": {
