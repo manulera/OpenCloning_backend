@@ -84,6 +84,12 @@ def stubs(dirname):
         method='GET',
     )
     yield StubRequest(
+        name='get_sequences_search_by_name',
+        endpoint='/sequences',
+        method='GET',
+        params={'name': 'ase1_CDS_PCR'},
+    )
+    yield StubRequest(
         name='get_sequence',
         endpoint=f'/sequence/{get_selected_sequence_id(dirname, "get_sequences")}',
         method='GET',

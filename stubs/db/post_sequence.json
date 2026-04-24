@@ -7,14 +7,14 @@
     "primers": [
       {
         "database_id": null,
-        "id": 1,
+        "id": 2,
         "name": "name",
         "sequence": "ACGTACGT",
         "type": "Primer"
       },
       {
         "database_id": null,
-        "id": 2,
+        "id": 1,
         "name": "name",
         "sequence": "GCGCGCGC",
         "type": "Primer"
@@ -50,7 +50,7 @@
             "left_location": null,
             "reverse_complemented": false,
             "right_location": "1..8",
-            "sequence": 1,
+            "sequence": 2,
             "type": "AssemblyFragment"
           },
           {
@@ -64,7 +64,7 @@
             "left_location": "1..8",
             "reverse_complemented": true,
             "right_location": null,
-            "sequence": 2,
+            "sequence": 1,
             "type": "AssemblyFragment"
           }
         ],
@@ -102,11 +102,11 @@
         },
         {
           "databaseId": 70,
-          "localId": 1
+          "localId": 2
         },
         {
           "databaseId": 71,
-          "localId": 2
+          "localId": 1
         }
       ]
     },
