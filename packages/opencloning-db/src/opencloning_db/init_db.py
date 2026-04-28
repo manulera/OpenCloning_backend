@@ -139,6 +139,13 @@ def init_db(config: Config):
                 content = f.read()
             file_name = os.path.basename(file)
             session.add(create_sequencing_file(sequencing_sequence, content, file_name))
+
+        # seq: Sequence = session.scalar(select(Sequence).where(Sequence.name == 'entry_clone_lacZ'))
+        # pydantic_seq = seq.to_pydantic_sequence()
+        # # Add itself as sequencing data twice, and sample id to the sequence
+        # session.add(create_sequencing_file(seq, pydantic_seq.file_content.encode('utf-8'), 'entry_clone_lacZ.gb'))
+        # session.add(create_sequencing_file(seq, pydantic_seq.file_content.encode('utf-8'), 'entry_clone_lacZ2.gb'))
+        # session.add(SequenceSample(uid='entry_clone_lacZ-sample', sequence_id=seq.id, uid_workspace_id=workspace.id))
         session.commit()
 
     print('Database initialized successfully.')
