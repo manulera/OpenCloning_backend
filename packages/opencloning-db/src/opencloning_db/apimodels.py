@@ -178,7 +178,8 @@ class LineCreate(BaseModel):
     parent_ids: list[int] = []
 
 
-class LineUpdateLinks(BaseModel):
+class LineUpdate(BaseModel):
+    uid: str | None = None
     allele_ids: list[int] | None = None
     plasmid_ids: list[int] | None = None
     parent_ids: list[int] | None = None

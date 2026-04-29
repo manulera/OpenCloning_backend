@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import Column, Select, and_, exists, select
 from sqlalchemy.orm import selectinload
 
-from opencloning_db.apimodels import DeletedResponse, LineCreate, LineRef, LineUpdateLinks, SequenceInLineRef, TagRead
+from opencloning_db.apimodels import DeletedResponse, LineCreate, LineRef, LineUpdate, SequenceInLineRef, TagRead
 from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 from opencloning_db.models import Line, Sequence, SequenceInLine, SequenceType, Tag, WorkspaceRole
@@ -171,13 +171,19 @@ def post_line(
 @router.patch('/line/{line_id}', response_model=LineRef)
 def patch_line_links(
     line_id: int,
-    body: LineUpdateLinks,
+    body: LineUpdate,
     ctx: Annotated[WorkspaceContext, Depends(get_editor_workspace_ctx)],
 ):
-    """Update alleles and/or plasmids linked to a line (replaces the lists)."""
+    """Update a line uid, parents, and/or linked alleles/plasmids."""
     current_user, session, workspace_id = ctx
     line = get_line_in_workspace_for_user(session, current_user, workspace_id, line_id, WorkspaceRole.editor)
     workspace_id = line.workspace_id
+
+    if body.uid is not None and body.uid != line.uid:
+        existing = session.query(Line).filter_by(uid=body.uid, workspace_id=workspace_id).first()
+        if existing:
+            raise HTTPException(status_code=409, detail=f"Line UID '{body.uid}' already exists")
+        line.uid = body.uid
 
     if body.allele_ids is not None:
         for sil in list(line.alleles):

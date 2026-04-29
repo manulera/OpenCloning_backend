@@ -318,7 +318,7 @@ def test_post_line_with_parent_ids_ok(lines_client):
 
 
 def test_patch_line_viewer_forbidden(lines_client):
-    """Viewer cannot PATCH line links."""
+    """Viewer cannot PATCH line fields."""
     c = lines_client['client']
     token = lines_client['token_viewer_w1']
     response = c.patch(
@@ -440,6 +440,35 @@ def test_patch_line_parent_ids_success(lines_client):
     )
     assert response.status_code == 200
     assert response.json()['parent_ids'] == [lines_client['line_w1_id']]
+
+
+def test_patch_line_uid_success(lines_client):
+    c = lines_client['client']
+    response = c.patch(
+        f"/line/{lines_client['line_w1_id']}",
+        headers=workspace_headers(lines_client['token_owner_w1'], lines_client['w1']),
+        json={'uid': 'L-W1-RENAMED'},
+    )
+    assert response.status_code == 200
+    assert response.json()['uid'] == 'L-W1-RENAMED'
+
+    response = c.get(
+        f"/line/{lines_client['line_w1_id']}",
+        headers=workspace_headers(lines_client['token_owner_w1'], lines_client['w1']),
+    )
+    assert response.status_code == 200
+    assert response.json()['uid'] == 'L-W1-RENAMED'
+
+
+def test_patch_line_uid_duplicate_409(lines_client):
+    c = lines_client['client']
+    response = c.patch(
+        f"/line/{lines_client['line_w1_id']}",
+        headers=workspace_headers(lines_client['token_owner_w1'], lines_client['w1']),
+        json={'uid': 'L-FILTER'},
+    )
+    assert response.status_code == 409
+    assert 'already exists' in response.json()['detail']
 
 
 def test_post_line_unauthenticated_401(lines_client):
