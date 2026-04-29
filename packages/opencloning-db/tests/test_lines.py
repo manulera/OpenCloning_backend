@@ -479,3 +479,40 @@ def test_patch_line_self_parent_returns_400(lines_client):
     )
     assert response.status_code == 400
     assert 'cannot be its own parent' in response.json()['detail']
+
+
+def test_delete_line_with_children_returns_409(lines_client):
+    c = lines_client['client']
+    response = c.delete(
+        f"/line/{lines_client['line_w1_id']}",
+        headers=workspace_headers(lines_client['token_owner_w1'], lines_client['w1']),
+    )
+    assert response.status_code == 409
+    assert 'has children' in response.json()['detail']
+
+
+def test_delete_line_without_children_deletes(lines_client):
+    c = lines_client['client']
+    line_id = lines_client['line_child_id']
+    response = c.delete(
+        f"/line/{line_id}",
+        headers=workspace_headers(lines_client['token_owner_w1'], lines_client['w1']),
+    )
+    assert response.status_code == 200
+    assert response.json() == {'deleted': line_id}
+
+    get_response = c.get(
+        f"/line/{line_id}",
+        headers=workspace_headers(lines_client['token_owner_w1'], lines_client['w1']),
+    )
+    assert get_response.status_code == 404
+
+
+def test_delete_line_does_not_exist_returns_404(lines_client):
+    c = lines_client['client']
+    response = c.delete(
+        '/line/999999',
+        headers=workspace_headers(lines_client['token_owner_w1'], lines_client['w1']),
+    )
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Line not found'

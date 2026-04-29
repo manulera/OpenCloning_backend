@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import Column, Select, and_, exists, select
 from sqlalchemy.orm import selectinload
 
-from opencloning_db.apimodels import LineCreate, LineRef, LineUpdateLinks, SequenceInLineRef, TagRead
+from opencloning_db.apimodels import DeletedResponse, LineCreate, LineRef, LineUpdateLinks, SequenceInLineRef, TagRead
 from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 from opencloning_db.models import Line, Sequence, SequenceInLine, SequenceType, Tag, WorkspaceRole
@@ -228,3 +228,21 @@ def patch_line_links(
     session.commit()
     session.refresh(line)
     return _line_ref(line)
+
+
+@router.delete('/line/{line_id}', response_model=DeletedResponse)
+def delete_line(
+    line_id: int,
+    ctx: Annotated[WorkspaceContext, Depends(get_editor_workspace_ctx)],
+):
+    """Delete a line when it has no children."""
+    current_user, session, workspace_id = ctx
+    line = get_line_in_workspace_for_user(session, current_user, workspace_id, line_id, WorkspaceRole.editor)
+    if line.children:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cannot delete line '{line.uid}' because it has children",
+        )
+    session.delete(line)
+    session.commit()
+    return DeletedResponse(deleted=line_id)
