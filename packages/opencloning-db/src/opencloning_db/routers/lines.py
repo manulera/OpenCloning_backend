@@ -109,6 +109,17 @@ def get_line(
     return _line_ref(line)
 
 
+@router.get('/line/{line_id}/children', response_model=list[LineRef])
+def get_line_children(
+    line_id: int,
+    ctx: Annotated[WorkspaceContext, Depends(get_viewer_workspace_ctx)],
+):
+    """List direct children of a line."""
+    current_user, session, workspace_id = ctx
+    line = get_line_in_workspace_for_user(session, current_user, workspace_id, line_id, WorkspaceRole.viewer)
+    return [_line_ref(child) for child in line.children]
+
+
 @router.post('/line', response_model=LineRef)
 def post_line(
     ctx: Annotated[WorkspaceContext, Depends(get_editor_workspace_ctx)],
@@ -249,6 +260,9 @@ def delete_line(
             status_code=409,
             detail=f"Cannot delete line '{line.uid}' because it has children",
         )
+    for sil in list(line.sequences_in_line):
+        session.delete(sil)
+
     session.delete(line)
     session.commit()
     return DeletedResponse(deleted=line_id)

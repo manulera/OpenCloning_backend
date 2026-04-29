@@ -89,20 +89,26 @@ def lines_client(engine_client_config):
             SequenceInLine(sequence=allele_filter),
             SequenceInLine(sequence=plasmid_filter),
         ]
-        line_child = Line(workspace_id=ctx['w1'], uid='L-CHILD')
+        line_parent_to_be_added = Line(workspace_id=ctx['w1'], uid='L-PARENT-TO-BE-ADDED')
         line_seeded_parented = Line(workspace_id=ctx['w1'], uid='L-SEEDED-PARENTED')
         line_seeded_parented.parents = [line_w1]
+        line_seeded_parented.sequences_in_line = [
+            SequenceInLine(sequence=allele_w1),
+            SequenceInLine(sequence=plasmid_w1),
+        ]
         line_tagged = Line(workspace_id=ctx['w1'], uid='L-TAGGED')
         tag_filter = Tag(name='line-filter-tag', workspace_id=ctx['w1'])
         line_tagged.tags.append(tag_filter)
-        session.add_all([line_w1, line_w2, line_filter, line_child, line_seeded_parented, line_tagged, tag_filter])
+        session.add_all(
+            [line_w1, line_w2, line_filter, line_parent_to_be_added, line_seeded_parented, line_tagged, tag_filter]
+        )
         session.commit()
 
         ctx.update(
             {
                 'line_w1_id': line_w1.id,
                 'line_filter_id': line_filter.id,
-                'line_child_id': line_child.id,
+                'line_with_parent_to_be_added': line_parent_to_be_added.id,
                 'line_seeded_parented_id': line_seeded_parented.id,
                 'line_tagged_id': line_tagged.id,
                 'tag_filter_id': tag_filter.id,
@@ -138,7 +144,7 @@ def test_get_lines_scoped_to_workspace(lines_client):
     assert ids == {
         lines_client['line_w1_id'],
         lines_client['line_filter_id'],
-        lines_client['line_child_id'],
+        lines_client['line_with_parent_to_be_added'],
         lines_client['line_seeded_parented_id'],
         lines_client['line_tagged_id'],
     }
@@ -247,6 +253,27 @@ def test_get_line_seeded_parent_ids_ok(lines_client):
     )
     assert response.status_code == 200
     assert response.json()['parent_ids'] == [lines_client['line_w1_id']]
+
+
+def test_get_line_children_ok(lines_client):
+    c = lines_client['client']
+    response = c.get(
+        f"/line/{lines_client['line_w1_id']}/children",
+        headers=workspace_headers(lines_client['token_owner_w1'], lines_client['w1']),
+    )
+    assert response.status_code == 200
+    ids = {item['id'] for item in response.json()}
+    assert ids == {lines_client['line_seeded_parented_id']}
+
+
+def test_get_line_children_empty_ok(lines_client):
+    c = lines_client['client']
+    response = c.get(
+        f"/line/{lines_client['line_with_parent_to_be_added']}/children",
+        headers=workspace_headers(lines_client['token_owner_w1'], lines_client['w1']),
+    )
+    assert response.status_code == 200
+    assert response.json() == []
 
 
 def test_post_line_viewer_forbidden(lines_client):
@@ -434,7 +461,7 @@ def test_patch_line_plasmids_success(lines_client):
 def test_patch_line_parent_ids_success(lines_client):
     c = lines_client['client']
     response = c.patch(
-        f"/line/{lines_client['line_child_id']}",
+        f"/line/{lines_client['line_with_parent_to_be_added']}",
         headers=workspace_headers(lines_client['token_owner_w1'], lines_client['w1']),
         json={'parent_ids': [lines_client['line_w1_id']]},
     )
@@ -522,7 +549,7 @@ def test_delete_line_with_children_returns_409(lines_client):
 
 def test_delete_line_without_children_deletes(lines_client):
     c = lines_client['client']
-    line_id = lines_client['line_child_id']
+    line_id = lines_client['line_seeded_parented_id']
     response = c.delete(
         f"/line/{line_id}",
         headers=workspace_headers(lines_client['token_owner_w1'], lines_client['w1']),
