@@ -6,7 +6,15 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import Column, Select, and_, exists, select
 from sqlalchemy.orm import selectinload
 
-from opencloning_db.apimodels import DeletedResponse, LineCreate, LineRef, LineUpdate, SequenceInLineRef, TagRead
+from opencloning_db.apimodels import (
+    DeletedResponse,
+    LineCreate,
+    LineRef,
+    LineUpdate,
+    SequenceInLineRef,
+    TagRead,
+    sequence_ref,
+)
 from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 from opencloning_db.models import Line, Sequence, SequenceInLine, SequenceType, Tag, WorkspaceRole
@@ -26,10 +34,7 @@ def _sil_ref(sil: SequenceInLine) -> SequenceInLineRef:
     seq = sil.sequence
     return SequenceInLineRef(
         id=sil.id,
-        sequence_id=seq.id,
-        name=seq.name,
-        sequence_type=seq.sequence_type,
-        tags=[TagRead(id=t.id, name=t.name) for t in seq.tags],
+        sequence=sequence_ref(seq),
     )
 
 

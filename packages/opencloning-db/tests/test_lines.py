@@ -241,7 +241,7 @@ def test_get_line_ok(lines_client):
     assert response.status_code == 200
     body = response.json()
     assert body['uid'] == 'L-FILTER'
-    names = {item['name'] for item in body['sequences_in_line']}
+    names = {item['sequence']['name'] for item in body['sequences_in_line']}
     assert names == {'alpha beta', 'gamma delta'}
 
 
@@ -440,7 +440,11 @@ def test_patch_line_alleles_success(lines_client):
         json={'allele_ids': [lines_client['allele_w1_aux_id']]},
     )
     assert response.status_code == 200
-    allele_names = {item['name'] for item in response.json()['sequences_in_line'] if item['sequence_type'] == 'allele'}
+    allele_names = {
+        item['sequence']['name']
+        for item in response.json()['sequences_in_line']
+        if item['sequence']['sequence_type'] == 'allele'
+    }
     assert allele_names == {'allele-aux'}
 
 
@@ -453,7 +457,9 @@ def test_patch_line_plasmids_success(lines_client):
     )
     assert response.status_code == 200
     plasmid_names = {
-        item['name'] for item in response.json()['sequences_in_line'] if item['sequence_type'] == 'plasmid'
+        item['sequence']['name']
+        for item in response.json()['sequences_in_line']
+        if item['sequence']['sequence_type'] == 'plasmid'
     }
     assert plasmid_names == {'plasmid-w1'}
 

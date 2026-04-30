@@ -157,10 +157,7 @@ class SequenceInLineRef(BaseModel):
     """Sequence in a line, including the SequenceInLine instance id."""
 
     id: int
-    sequence_id: int
-    name: str | None
-    sequence_type: SequenceType
-    tags: list[TagRead]
+    sequence: SequenceRef
 
 
 class LineRef(BaseModel):
