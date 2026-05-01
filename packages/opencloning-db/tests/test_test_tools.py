@@ -23,6 +23,12 @@ def test_reset_endpoint_disabled_returns_404():
     assert response.status_code == 404
 
 
+def test_reset_endpoint_requires_token(testing_app_client):
+    response = testing_app_client.post('/__test/reset-db')
+    assert response.status_code == 403
+    assert response.json()['detail'] == 'Forbidden'
+
+
 def test_reset_endpoint_calls_cli(testing_app_client, monkeypatch):
 
     calls = []
@@ -33,7 +39,7 @@ def test_reset_endpoint_calls_cli(testing_app_client, monkeypatch):
 
     monkeypatch.setattr('opencloning_db.routers.test_tools.subprocess.run', fake_run)
 
-    response = testing_app_client.post('/__test/reset-db')
+    response = testing_app_client.post('/__test/reset-db', headers={'X-Test-Reset-Token': 'RESET-TOKEN'})
     assert response.status_code == 204
     assert calls
     cmd, capture_output, text, check = calls[0]
@@ -50,6 +56,6 @@ def test_reset_endpoint_returns_500_on_cli_failure(testing_app_client, monkeypat
 
     monkeypatch.setattr('opencloning_db.routers.test_tools.subprocess.run', fake_run)
 
-    response = testing_app_client.post('/__test/reset-db')
+    response = testing_app_client.post('/__test/reset-db', headers={'X-Test-Reset-Token': 'RESET-TOKEN'})
     assert response.status_code == 500
     assert response.json()['detail'] == 'boom'
