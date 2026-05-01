@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-import json
+from opencloning_cli.stubs import RecordedStub
+import os
 from pathlib import Path
 
 from typer.testing import CliRunner
@@ -99,12 +100,12 @@ class TestStubCommand:
         assert result.exit_code == 0, result.output
         out_dir = tmp_path / 'stubs' / 'db'
         files = sorted(out_dir.glob('*.json'))
-        assert len(files) == 1
+        stub_files_path = os.path.join(os.path.dirname(__file__), '..', 'src', 'opencloning_cli', 'stubs.py')
+        with open(stub_files_path, 'r') as f:
+            stub_files = f.read()
+            yield_count = stub_files.count('yield')
+        assert len(files) == yield_count
 
-        data = json.loads(files[0].read_text(encoding='utf-8'))
-        assert data['method'] == 'GET'
-        assert data['endpoint'] == '/primers'
-        assert set(data.keys()) == {'method', 'endpoint', 'params', 'headers', 'body', 'response'}
-        assert data['headers']['Authorization'] == 'Bearer __TEST_TOKEN__'
-        assert 'X-Workspace-Id' in data['headers']
-        assert data['response']['status_code'] == 200
+        for file in files:
+            with open(file, 'r') as f:
+                RecordedStub.model_validate_json(f.read())

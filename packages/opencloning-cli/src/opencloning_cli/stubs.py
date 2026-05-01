@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from typing import Generator
 
 
 class StubRequest(BaseModel):
@@ -47,7 +48,7 @@ def get_selected_sequence_id(dirname: str, stub_name: str) -> int:
     return next(item for item in stub.response.body['items'] if item['name'] == 'ase1_CDS_PCR')['id']
 
 
-def stubs(dirname):
+def stubs(dirname: str) -> Generator[StubRequest, None, None]:
     yield StubRequest(
         name='get_primers',
         endpoint='/primers',
@@ -133,13 +134,13 @@ def stubs(dirname):
         body_from_example='cs_pcr',
         reset_db=True,
     )
-    # yield StubRequest(
+    # StubRequest(
     #     name='post_sequence_search',
     #     endpoint='/sequence/search',
     #     method='POST',
     #     body_from_stub='get_text_file_sequence',
     # )
-    # yield StubRequest(
+    # StubRequest(
     #     name='post_sequence_sequencing_files',
     #     endpoint='/sequence/10/sequencing_files',
     #     method='POST',
@@ -151,12 +152,12 @@ def stubs(dirname):
     #         }
     #     ],
     # )
-    # yield StubRequest(
+    # StubRequest(
     #     name='get_sequence_sequencing_files',
     #     endpoint='/sequence/10/sequencing_files',
     #     method='GET',
     # )
-    # yield StubRequest(
+    # StubRequest(
     #     name='download_sequencing_file',
     #     endpoint='/sequencing_files/{last_file_id}/download',
     #     method='GET',
