@@ -18,14 +18,14 @@
         {
           "database_id": 7,
           "id": 7,
-          "name": "fwd",
+          "name": "fwd_restriction_then_ligation",
           "sequence": "TAAGCAGTCGACatgcaaacagtaatgatggatg",
           "type": "Primer"
         },
         {
           "database_id": 8,
           "id": 8,
-          "name": "rvs",
+          "name": "rvs_restriction_then_ligation",
           "sequence": "TAAGCAGGCGCGCCttaaaagccttcttctccccatt",
           "type": "Primer"
         }

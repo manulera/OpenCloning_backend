@@ -9,7 +9,7 @@ import glob
 from pathlib import Path
 import opencloning_linkml.datamodel.models as opencloning_models
 from sqlalchemy.orm import Session
-
+from sqlalchemy import select
 from opencloning_db.auth.security import get_password_hash
 from opencloning_db.config import Config, get_config
 from opencloning_db.models import (
@@ -127,12 +127,13 @@ def init_db(config: Config):
                 )
             )
 
-        # Take the last 4 primers and give them a uid
-        for primer in session.query(Primer).order_by(Primer.id).limit(4).all():
-            primer.uid = f"ML{primer.id}"
-            primer.uid_workspace_id = workspace.id
-            primer.tags.append(tag)
-            session.add(primer)
+        # Find the primer that is used for testing, and add a uid to it
+        test_primer = session.scalar(select(Primer).where(Primer.name == 'fwd_restriction_then_ligation'))
+        test_primer.uid = 'ML7'
+        test_primer.uid_workspace_id = workspace.id
+        tag = session.scalar(select(Tag).where(Tag.name == 'restriction_then_ligation'))
+        test_primer.tags.append(tag)
+        session.add(test_primer)
 
         for file in glob.glob(str(data_dir / 'sequencing_data' / '*')):
             with open(file, 'rb') as f:

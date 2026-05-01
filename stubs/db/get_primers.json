@@ -13,83 +13,68 @@
       "items": [
         {
           "id": 7,
-          "name": "fwd",
+          "name": "fwd_restriction_then_ligation",
           "sequence": "TAAGCAGTCGACatgcaaacagtaatgatggatg",
           "tags": [
             {
-              "id": 10,
-              "name": "templateless_PCR"
+              "id": 3,
+              "name": "restriction_then_ligation"
             }
           ],
           "uid": "ML7"
         },
         {
           "id": 8,
-          "name": "rvs",
+          "name": "rvs_restriction_then_ligation",
           "sequence": "TAAGCAGGCGCGCCttaaaagccttcttctccccatt",
-          "tags": [
-            {
-              "id": 10,
-              "name": "templateless_PCR"
-            }
-          ],
-          "uid": "ML8"
+          "tags": [],
+          "uid": null
         },
         {
           "id": 15,
           "name": "ase1_sgRNA",
           "sequence": "CATTACTGTTTGCATTGAAC",
-          "tags": [
-            {
-              "id": 10,
-              "name": "templateless_PCR"
-            }
-          ],
-          "uid": "ML15"
+          "tags": [],
+          "uid": null
         },
         {
           "id": 16,
-          "name": "ase1_fwd",
+          "name": "ase1_fwd_crispr_hdr",
           "sequence": "TTTCATATCTTCCTTTATATTCTATTAATTGAATTTCAAACATCGTTTTATTGAGCTCATTTACATCAACCGGTTCAATGtacccatacgatgttcctga",
-          "tags": [
-            {
-              "id": 10,
-              "name": "templateless_PCR"
-            }
-          ],
-          "uid": "ML16"
+          "tags": [],
+          "uid": null
         },
         {
           "id": 17,
-          "name": "ase1_rvs",
+          "name": "ase1_rvs_crispr_hdr",
           "sequence": "AAGTTAGATTCATTATTAGAGTGATTATCTTTTTCAGCAATAGAATCAGTGCTTTGAATGTCATCCATCATTACTGTTTGagcgtaatctggaacgtcat",
           "tags": [],
           "uid": null
         },
         {
           "id": 22,
-          "name": "fwd",
+          "name": "fwd_golden_gate",
           "sequence": "aaGGTCTCATTCTatggtaattgaggtaagaggt",
           "tags": [],
           "uid": null
         },
         {
           "id": 23,
-          "name": "rvs",
+          "name": "rvs_golden_gate",
           "sequence": "aaGGTCTCAGGATttaacgtttataatgtttaata",
           "tags": [],
           "uid": null
         },
         {
           "id": 35,
-          "name": "fwd",
+          "name": "fwd_gateway",
           "sequence": "gatctcgccataaaagacag",
           "tags": [],
           "uid": null
         },
         {
           "id": 36,
-          "name": "rvs",
+          "name": "rvs_gateway",
           "sequence": "ttaacaaagcgactataagt",
           "tags": [],
           "uid": null
@@ -124,42 +109,42 @@
         },
         {
           "id": 47,
-          "name": "ase1_fwd",
+          "name": "ase1_fwd_gibson_assembly",
           "sequence": "AGTCGCTTTGTTAAATCAATGCAAACAGTAATGATGGA",
           "tags": [],
           "uid": null
         },
         {
           "id": 48,
-          "name": "ase1_rvs",
+          "name": "ase1_rvs_gibson_assembly",
           "sequence": "ACAGATCTCTCGAGCATATTAAAAGCCTTCTTCTCCC",
           "tags": [],
           "uid": null
         },
         {
           "id": 54,
-          "name": "fwd",
+          "name": "fwd_homologous_recombination",
           "sequence": "AGTTTTCATATCTTCCTTTATATTCTATTAATTGAATTTCAAACATCGTTTTATTGAGCTCATTTACATCAACCGGTTCACGGATCCCCGGGTTAATTAA",
           "tags": [],
           "uid": null
         },
         {
           "id": 55,
-          "name": "rvs",
+          "name": "rvs_homologous_recombination",
           "sequence": "CTTTTATGAATTATCTATATGCTGTATTCATATGCAAAAATATGTATATTTAAATTTGATCGATTAGGTAAATAAGAAGCGAATTCGAGCTCGTTTAAAC",
           "tags": [],
           "uid": null
         },
         {
           "id": 60,
-          "name": "fwd",
+          "name": "fwd_restriction_ligation_assembly",
           "sequence": "TAAGCAGTCGACatgcaaacagtaatgatggatg",
           "tags": [],
           "uid": null
         },
         {
           "id": 61,
-          "name": "rvs",
+          "name": "rvs_restriction_ligation_assembly",
           "sequence": "TAAGCAGGCGCGCCttaaaagccttcttctccccatt",
           "tags": [],
           "uid": null
