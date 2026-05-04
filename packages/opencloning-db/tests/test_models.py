@@ -255,7 +255,7 @@ class TestPrimer(_MemoryDbTestCase):
             Primer(
                 workspace_id=1,
                 uid_workspace_id=2,
-                sequence='A',
+                sequence='AT',
                 uid=None,
             )
 
@@ -265,9 +265,34 @@ class TestPrimer(_MemoryDbTestCase):
             Primer(
                 workspace_id=1,
                 uid_workspace_id=1,
-                sequence='A',
+                sequence='AT',
                 uid='',
             )
+
+    def test_sequence_invalid_characters_rejected_on_instantiation(self):
+        """Primer sequence must be ACGT only (ORM ``@validates``)."""
+        with self.assertRaisesRegex(ValueError, 'only contain ACGT'):
+            Primer(workspace_id=1, uid_workspace_id=1, name='p', sequence='ATNX')
+
+    def test_sequence_too_short_rejected_on_instantiation(self):
+        """Primer sequence must be at least two bases."""
+        with self.assertRaisesRegex(ValueError, 'at least 2 characters'):
+            Primer(workspace_id=1, uid_workspace_id=1, name='p', sequence='A')
+
+    def test_from_pydantic_rejects_sequence_too_short(self):
+        """``from_pydantic`` applies the same sequence rules as direct construction."""
+        with Session(self.engine) as session:
+            ws = Workspace(name='W')
+            session.add(ws)
+            session.flush()
+            pp = opencloning_models.Primer(
+                id=0,
+                name='p1',
+                sequence='G',
+                database_id=None,
+            )
+            with self.assertRaisesRegex(ValueError, 'at least 2 characters'):
+                Primer.from_pydantic(pp, workspace_id=ws.id)
 
 
 class TestSource(_MemoryDbTestCase):

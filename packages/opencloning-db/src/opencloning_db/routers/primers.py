@@ -2,12 +2,19 @@
 
 from typing import Annotated
 
-import opencloning_linkml.datamodel.models as opencloning_models
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy import and_, select
 from sqlalchemy.orm import selectinload
 
-from opencloning_db.apimodels import IdResponse, PrimerRef, SequenceRef, TagRead, sequence_ref, PrimerUpdate
+from opencloning_db.apimodels import (
+    IdResponse,
+    PrimerRef,
+    SequenceRef,
+    TagRead,
+    sequence_ref,
+    PrimerUpdate,
+    PrimerCreate,
+)
 from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 from opencloning_db.models import InputEntity, Primer, Sequence, Source, SourceInput, Tag, WorkspaceRole
@@ -49,12 +56,26 @@ def get_primers(
 @router.post('/primer', response_model=IdResponse)
 def post_primer(
     ctx: Annotated[WorkspaceContext, Depends(get_editor_workspace_ctx)],
-    primer: opencloning_models.Primer,
+    primer: PrimerCreate,
 ):
     """Submit a standalone primer (unlinked to any cloning strategy)."""
     current_user, session, workspace_id = ctx
 
-    db_primer = Primer.from_pydantic(primer, workspace_id)
+    if primer.uid is not None:
+        existing_uid = session.scalar(
+            select(Primer).where(Primer.uid == primer.uid, Primer.workspace_id == workspace_id)
+        )
+        if existing_uid is not None:
+            raise HTTPException(status_code=409, detail=f"Primer UID '{primer.uid}' already exists")
+
+    db_primer = Primer(
+        name=primer.name,
+        uid=primer.uid,
+        workspace_id=workspace_id,
+        uid_workspace_id=workspace_id,
+        sequence=primer.sequence,
+    )
+
     session.add(db_primer)
     session.commit()
     session.refresh(db_primer)

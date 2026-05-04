@@ -174,11 +174,8 @@ def primers_client(engine_client_config):
 
 
 _VALID_PRIMER_JSON = {
-    'id': 0,
-    'type': 'Primer',
     'name': 'new',
     'sequence': 'GGCC',
-    'database_id': None,
 }
 
 
@@ -490,3 +487,44 @@ def test_post_primer_empty_sequence_rejected_422(primers_client):
     )
     assert r.status_code == 422
     assert r.json()['detail']
+
+
+def test_post_primer_wrong_sequence_rejected(primers_client):
+    """One-base sequence passes linkml validation but is rejected by the ORM on create."""
+    c = primers_client['client']
+    body = {'name': 'one-base', 'sequence': 'A'}
+
+    resp = c.post(
+        '/primer',
+        headers=workspace_headers(
+            primers_client['token_owner_w1'],
+            primers_client['w1'],
+        ),
+        json=body,
+    )
+
+    assert resp.status_code == 422
+
+    body = {'name': 'one-base', 'sequence': 'ANAAAAAAAG'}
+    resp = c.post(
+        '/primer',
+        headers=workspace_headers(
+            primers_client['token_owner_w1'],
+            primers_client['w1'],
+        ),
+        json=body,
+    )
+    assert resp.status_code == 422
+
+
+def test_post_primer_repeated_uid_returns_409(primers_client):
+    """POSTing a primer with a repeated UID returns 409."""
+    c = primers_client['client']
+    body = {**_VALID_PRIMER_JSON, 'uid': 'UID-PRIMER-1'}
+    r = c.post(
+        '/primer',
+        headers=workspace_headers(primers_client['token_owner_w1'], primers_client['w1']),
+        json=body,
+    )
+    assert r.status_code == 409
+    assert 'already exists' in r.json()['detail']

@@ -32,6 +32,7 @@ from sqlalchemy.orm import (
 import opencloning_linkml.datamodel.models as opencloning_models
 from pydantic import BaseModel as PydanticBaseModel
 from pydna.readers import read
+import re
 
 from opencloning_db.config import get_config
 
@@ -298,6 +299,14 @@ class Primer(InputEntity):
         other = getattr(self, other_key, None)
         if other is not None and value != other:
             raise ValueError('Primer uid_workspace_id must equal workspace_id on the input_entity row.')
+        return value
+
+    @validates('sequence')
+    def _validate_sequence(self, key, value: str) -> str:
+        if not re.match(r'^[ACGTacgt]+$', value):
+            raise ValueError('Primer sequence must only contain ACGT characters')
+        if len(value) < 2:
+            raise ValueError('Primer sequence must be at least 2 characters long')
         return value
 
     @validates('uid')

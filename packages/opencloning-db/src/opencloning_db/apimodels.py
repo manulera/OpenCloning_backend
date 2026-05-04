@@ -156,6 +156,12 @@ class PrimerUpdate(BaseModel):
         return v
 
 
+class PrimerCreate(BaseModel):
+    name: str
+    uid: str | None = None
+    sequence: str = Field(min_length=2, pattern=r'^[ACGTacgt]+$')
+
+
 class PrimerRef(BaseModel):
     id: int
     name: str | None
