@@ -345,21 +345,80 @@ def test_post_primer_editor_ok(primers_client):
     assert body['id'] > 0
 
 
-def test_patch_primer_editor_ok(primers_client):
+def test_patch_primer_updates_name_only(primers_client):
+    """PATCH with only name updates the primer."""
     c = primers_client['client']
+    pid = primers_client['primer_uid_id']
     r = c.patch(
-        f"/primer/{primers_client['primer_id']}",
+        f"/primer/{pid}",
         headers=workspace_headers(primers_client['token_owner_w1'], primers_client['w1']),
-        json={'name': 'seed_primer_renamed'},
+        json={'name': 'primer_renamed'},
     )
     assert r.status_code == 200
-    assert r.json()['name'] == 'seed_primer_renamed'
+    # uid is unchanged when submitted is None
+    assert r.json()['name'] == 'primer_renamed'
+    assert r.json()['uid'] == 'UID-PRIMER-1'
     get_r = c.get(
-        f"/primer/{primers_client['primer_id']}",
+        f"/primer/{pid}",
         headers=workspace_headers(primers_client['token_owner_w1'], primers_client['w1']),
     )
     assert get_r.status_code == 200
-    assert get_r.json()['name'] == 'seed_primer_renamed'
+    assert get_r.json()['name'] == 'primer_renamed'
+    assert get_r.json()['uid'] == 'UID-PRIMER-1'
+
+
+def test_patch_primer_updates_uid_only(primers_client):
+    """PATCH with only uid sets uid on a primer that had none."""
+    c = primers_client['client']
+    pid = primers_client['primer_id']
+    r = c.patch(
+        f"/primer/{pid}",
+        headers=workspace_headers(primers_client['token_owner_w1'], primers_client['w1']),
+        json={'uid': 'PATCHED-UID-ONLY'},
+    )
+    assert r.status_code == 200
+    body = r.json()
+    assert body['uid'] == 'PATCHED-UID-ONLY'
+    assert body['name'] == 'seed_primer'
+    get_r = c.get(
+        f"/primer/{pid}",
+        headers=workspace_headers(primers_client['token_owner_w1'], primers_client['w1']),
+    )
+    assert get_r.status_code == 200
+    assert get_r.json()['uid'] == 'PATCHED-UID-ONLY'
+
+
+def test_patch_primer_uid_conflict_returns_409(primers_client):
+    """PATCH uid to one already used by another primer in the workspace returns 409."""
+    c = primers_client['client']
+    pid = primers_client['primer_id']
+    r = c.patch(
+        f"/primer/{pid}",
+        headers=workspace_headers(primers_client['token_owner_w1'], primers_client['w1']),
+        json={'uid': 'UID-PRIMER-1'},
+    )
+    assert r.status_code == 409
+    assert 'already exists' in r.json()['detail']
+    get_r = c.get(
+        f"/primer/{pid}",
+        headers=workspace_headers(primers_client['token_owner_w1'], primers_client['w1']),
+    )
+    assert get_r.status_code == 200
+    assert get_r.json().get('uid') is None
+
+
+@pytest.mark.parametrize('clear_payload', [{'uid': ''}, {'uid': '   '}])
+def test_patch_primer_clears_uid(primers_client, clear_payload):
+    """Explicit empty / whitespace / null uid in PATCH clears stored uid."""
+    c = primers_client['client']
+    pid = primers_client['primer_uid_id']
+    headers = workspace_headers(primers_client['token_owner_w1'], primers_client['w1'])
+    r = c.patch(f"/primer/{pid}", headers=headers, json=clear_payload)
+    assert r.status_code == 200
+    assert r.json()['uid'] is None
+    get_r = c.get(f"/primer/{pid}", headers=headers)
+    assert get_r.status_code == 200
+    assert get_r.json().get('uid') is None
 
 
 def test_unauthenticated_401(primers_client):

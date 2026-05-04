@@ -3,7 +3,7 @@
 from typing import Annotated
 
 import opencloning_linkml.datamodel.models as opencloning_models
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy import and_, select
 from sqlalchemy.orm import selectinload
 
@@ -131,13 +131,25 @@ def patch_primer(
     ctx: Annotated[WorkspaceContext, Depends(get_editor_workspace_ctx)],
 ):
     """
-    Update primer name.
+    Update primer name and/or uid. Sending an empty or whitespace-only uid clears it.
 
     Note: the primer "type" is fixed by polymorphic identity and cannot be changed.
     """
+
     current_user, session, workspace_id = ctx
     primer = get_primer_in_workspace_for_user(session, current_user, workspace_id, primer_id, WorkspaceRole.editor)
-    primer.name = body.name
+    if body.name is not None:
+        primer.name = body.name
+    if body.uid is not None:
+        if body.uid == '':
+            primer.uid = None
+        else:
+            existing_primer = session.scalar(
+                select(Primer).where(Primer.uid == body.uid, Primer.workspace_id == workspace_id)
+            )
+            if existing_primer is not None:
+                raise HTTPException(status_code=409, detail=f"Primer UID '{body.uid}' already exists")
+            primer.uid = body.uid
 
     session.commit()
     session.refresh(primer)

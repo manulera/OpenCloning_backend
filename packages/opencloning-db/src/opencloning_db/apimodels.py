@@ -134,7 +134,25 @@ class SequenceUpdate(BaseModel):
 
 
 class PrimerUpdate(BaseModel):
-    name: str = Field(min_length=2)
+    name: str | None = None
+    uid: str | None = None
+
+    @field_validator('uid', mode='before')
+    @classmethod
+    def strip_uid(cls, v: object) -> object:
+        if isinstance(v, str):
+            return v.strip()
+        return v
+
+    @field_validator('name', mode='before')
+    @classmethod
+    def strip_name(cls, v: object) -> object:
+        if isinstance(v, str):
+            stripped_name = v.strip()
+            if len(stripped_name) < 2:
+                raise ValueError('Primer name must be at least 2 characters long')
+            return stripped_name
+        return v
 
 
 class PrimerRef(BaseModel):
