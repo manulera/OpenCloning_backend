@@ -5,6 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from opencloning_db.apimodels import (
+    DeletedResponse,
     SequenceSampleCreate,
     SequenceSampleCreated,
     SequenceSampleRead,
@@ -99,3 +100,17 @@ def patch_sequence_sample(
     session.commit()
     session.refresh(ps)
     return SequenceSampleRead(id=ps.id, uid=ps.uid, sequence_id=ps.sequence_id)
+
+
+@router.delete('/sequence_sample/{uid}', response_model=DeletedResponse)
+def delete_sequence_sample(
+    uid: str,
+    ctx: Annotated[WorkspaceContext, Depends(get_editor_workspace_ctx)],
+):
+    """Delete a sequence sample."""
+    current_user, session, workspace_id = ctx
+    ps = get_sequence_sample_in_workspace_for_user(session, current_user, workspace_id, uid, WorkspaceRole.editor)
+    sequence_id = ps.sequence_id
+    session.delete(ps)
+    session.commit()
+    return DeletedResponse(deleted=ps.id, data={'sequence_id': sequence_id, 'uid': uid})

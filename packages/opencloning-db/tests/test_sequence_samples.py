@@ -293,3 +293,84 @@ def test_post_sequence_sample_invalid_sequence_id_404(seq_samples_client):
     )
     assert response.status_code == 404
     assert response.json()['detail'] == 'Sequence not found'
+
+
+def test_delete_sequence_sample_viewer_forbidden(seq_samples_client):
+    """Viewer cannot DELETE a sequence sample."""
+    c = seq_samples_client['client']
+    tok = seq_samples_client['token_viewer_w1']
+    response = c.delete(
+        f"/sequence_sample/{seq_samples_client['sample_w1_uid']}",
+        headers=workspace_headers(tok, seq_samples_client['w1']),
+    )
+    assert response.status_code == 403
+    assert 'Not allowed' in response.json()['detail']
+
+
+def test_delete_sequence_sample_owner_ok(seq_samples_client):
+    """Owner can delete a sample; response includes id and metadata; GET then 404."""
+    c = seq_samples_client['client']
+    tok = seq_samples_client['token_owner_w1']
+    w1 = seq_samples_client['w1']
+    uid = seq_samples_client['sample_w1_uid']
+    h = workspace_headers(tok, w1)
+    sample_id = c.get(f'/sequence_sample/{uid}', headers=h).json()['id']
+    response = c.delete(f'/sequence_sample/{uid}', headers=h)
+    assert response.status_code == 200
+    assert response.json() == {
+        'deleted': sample_id,
+        'data': {
+            'sequence_id': seq_samples_client['seq_w1_id'],
+            'uid': uid,
+        },
+    }
+    get_after = c.get(f'/sequence_sample/{uid}', headers=h)
+    assert get_after.status_code == 404
+    assert get_after.json()['detail'] == 'Sequence sample not found'
+
+
+def test_delete_sequence_sample_not_found_404(seq_samples_client):
+    """DELETE /sequence_sample/{uid} returns 404 if sample not found."""
+    c = seq_samples_client['client']
+    tok = seq_samples_client['token_owner_w1']
+    response = c.delete(
+        '/sequence_sample/MISSING-UID',
+        headers=workspace_headers(tok, seq_samples_client['w1']),
+    )
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Sequence sample not found'
+
+
+def test_delete_sequence_sample_forbidden_for_non_member(seq_samples_client):
+    """Non-member cannot delete a sample with another workspace header."""
+    c = seq_samples_client['client']
+    tok = seq_samples_client['token_owner_w2']
+    response = c.delete(
+        f"/sequence_sample/{seq_samples_client['sample_w1_uid']}",
+        headers=workspace_headers(tok, seq_samples_client['w1']),
+    )
+    assert response.status_code == 403
+    assert 'Not allowed' in response.json()['detail']
+
+
+def test_delete_sequence_sample_other_workspace_uid_returns_404(seq_samples_client):
+    """UID that exists only in another workspace is not found under this header."""
+    c = seq_samples_client['client']
+    tok = seq_samples_client['token_owner_w1']
+    response = c.delete(
+        '/sequence_sample/S-W2',
+        headers=workspace_headers(tok, seq_samples_client['w1']),
+    )
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Sequence sample not found'
+
+
+def test_delete_sequence_sample_unauthenticated_401(seq_samples_client):
+    """DELETE /sequence_sample/{uid} without Authorization is rejected."""
+    c = seq_samples_client['client']
+    uid = seq_samples_client['sample_w1_uid']
+    response = c.delete(
+        f'/sequence_sample/{uid}',
+        headers={'X-Workspace-Id': str(seq_samples_client['w1'])},
+    )
+    assert response.status_code == 401

@@ -105,6 +105,7 @@ class RemovedResponse(BaseModel):
 
 class DeletedResponse(BaseModel):
     deleted: int
+    data: dict | None = None
 
 
 # --- Cloning strategy ---

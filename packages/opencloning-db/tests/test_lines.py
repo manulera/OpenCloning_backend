@@ -561,7 +561,7 @@ def test_delete_line_without_children_deletes(lines_client):
         headers=workspace_headers(lines_client['token_owner_w1'], lines_client['w1']),
     )
     assert response.status_code == 200
-    assert response.json() == {'deleted': line_id}
+    assert response.json() == {'deleted': line_id, 'data': None}
 
     get_response = c.get(
         f"/line/{line_id}",

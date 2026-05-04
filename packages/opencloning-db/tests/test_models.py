@@ -199,7 +199,7 @@ class TestSequence(_MemoryDbTestCase):
         seq_root = Path(app_config.get_config().sequence_files_dir)
         full = seq_root / rel
         full.parent.mkdir(parents=True)
-        full.write_text('LOCUS       X\n//\n', encoding='utf-8')
+        full.write_text(pcr_product.format('genbank'), encoding='utf-8')
 
         with Session(self.engine) as session:
             ws = Workspace(name='W')
