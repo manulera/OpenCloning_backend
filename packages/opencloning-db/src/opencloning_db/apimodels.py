@@ -1,67 +1,73 @@
 """Shared Pydantic request/response models for the API."""
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 import opencloning_linkml.datamodel.models as opencloning_models
 from opencloning_db.models import SequenceType, Sequence
 
 
+class ApiModel(BaseModel):
+    """Reject unknown JSON keys on all API request/response models in this module."""
+
+    model_config = ConfigDict(extra='forbid')
+
+
 # --- Auth (OAuth2 password + JWT) ---
-class Token(BaseModel):
+class Token(ApiModel):
     access_token: str
     token_type: str = 'bearer'
 
 
-class UserPublic(BaseModel):
+class UserPublic(ApiModel):
     id: int
     email: str
     display_name: str | None
     is_instance_admin: bool
 
 
-class WorkspaceRef(BaseModel):
+class WorkspaceRef(ApiModel):
     id: int
     name: str
     role: str
 
 
-class WorkspaceCreate(BaseModel):
+class WorkspaceCreate(ApiModel):
     name: str = Field(min_length=1)
 
 
-class WorkspaceRename(BaseModel):
+class WorkspaceRename(ApiModel):
     name: str = Field(min_length=1)
 
 
-class RegisterBody(BaseModel):
+class RegisterBody(ApiModel):
     email: EmailStr
     password: str = Field(min_length=1)
     display_name: str | None = None
 
 
 # --- Sequence sample ---
-class SequenceSampleCreate(BaseModel):
+class SequenceSampleCreate(ApiModel):
     uid: str
     sequence_id: int
 
 
-class SequenceSampleUpdate(BaseModel):
+class SequenceSampleUpdate(ApiModel):
     sequence_id: int
 
 
-class SequenceSampleRead(BaseModel):
+class SequenceSampleRead(ApiModel):
     id: int
     uid: str
     sequence_id: int
 
 
-class SequenceSampleCreated(BaseModel):
+class SequenceSampleCreated(ApiModel):
     id: int
     uid: str
 
 
 # --- Tags ---
-class TagCreate(BaseModel):
+class TagCreate(ApiModel):
     name: str = Field(min_length=1)
 
     @field_validator('name', mode='before')
@@ -73,54 +79,54 @@ class TagCreate(BaseModel):
         return v
 
 
-class TagRead(BaseModel):
+class TagRead(ApiModel):
     id: int
     name: str
 
 
-class EntityTagAttach(BaseModel):
+class EntityTagAttach(ApiModel):
     tag_id: int
 
 
 # --- Entity refs ---
-class InputEntityRef(BaseModel):
+class InputEntityRef(ApiModel):
     id: int
     type: str
     name: str | None
 
 
-class SequencingFileRef(BaseModel):
+class SequencingFileRef(ApiModel):
     id: int
     original_name: str
 
 
 # --- Common responses ---
-class IdResponse(BaseModel):
+class IdResponse(ApiModel):
     id: int
 
 
-class RemovedResponse(BaseModel):
+class RemovedResponse(ApiModel):
     removed: int
 
 
-class DeletedResponse(BaseModel):
+class DeletedResponse(ApiModel):
     deleted: int
     data: dict | None = None
 
 
 # --- Cloning strategy ---
-class CloningStrategyIdMapping(BaseModel):
+class CloningStrategyIdMapping(ApiModel):
     localId: int
     databaseId: int
 
 
-class CloningStrategyResponse(BaseModel):
+class CloningStrategyResponse(ApiModel):
     id: int
     mappings: list[CloningStrategyIdMapping]
 
 
 # --- Sequence / primer refs ---
-class SequenceRef(BaseModel):
+class SequenceRef(ApiModel):
     id: int
     name: str | None
     sequence_type: SequenceType
@@ -129,12 +135,12 @@ class SequenceRef(BaseModel):
     seguid: str | None = None
 
 
-class SequenceUpdate(BaseModel):
+class SequenceUpdate(ApiModel):
     name: str | None = None
     sequence_type: SequenceType | None = None
 
 
-class PrimerUpdate(BaseModel):
+class PrimerUpdate(ApiModel):
     name: str | None = None
     uid: str | None = None
 
@@ -156,13 +162,13 @@ class PrimerUpdate(BaseModel):
         return v
 
 
-class PrimerCreate(BaseModel):
+class PrimerCreate(ApiModel):
     name: str
     uid: str | None = None
     sequence: str = Field(min_length=2, pattern=r'^[ACGTacgt]+$')
 
 
-class PrimerRef(BaseModel):
+class PrimerRef(ApiModel):
     id: int
     name: str | None
     sequence: str
@@ -170,7 +176,7 @@ class PrimerRef(BaseModel):
     tags: list[TagRead] = []
 
 
-class SequenceSampleWithSequence(BaseModel):
+class SequenceSampleWithSequence(ApiModel):
     id: int
     uid: str
     sequence_id: int
@@ -178,14 +184,14 @@ class SequenceSampleWithSequence(BaseModel):
 
 
 # --- Line ---
-class SequenceInLineRef(BaseModel):
+class SequenceInLineRef(ApiModel):
     """Sequence in a line, including the SequenceInLine instance id."""
 
     id: int
     sequence: SequenceRef
 
 
-class LineRef(BaseModel):
+class LineRef(ApiModel):
     id: int
     uid: str
     sequences_in_line: list[SequenceInLineRef]
@@ -193,14 +199,14 @@ class LineRef(BaseModel):
     tags: list[TagRead]
 
 
-class LineCreate(BaseModel):
+class LineCreate(ApiModel):
     uid: str
     allele_ids: list[int] = []
     plasmid_ids: list[int] = []
     parent_ids: list[int] = []
 
 
-class LineUpdate(BaseModel):
+class LineUpdate(ApiModel):
     uid: str | None = None
     allele_ids: list[int] | None = None
     plasmid_ids: list[int] | None = None
@@ -218,7 +224,7 @@ def sequence_ref(sequence: Sequence) -> SequenceRef:
     )
 
 
-class SequenceSearchResult(BaseModel):
+class SequenceSearchResult(ApiModel):
     sequence_ref: SequenceRef
     sequence: opencloning_models.TextFileSequence
     shift: int = 0

@@ -233,6 +233,8 @@ def create_stub(
         request_kwargs['files'] = files
 
     response = requester(stub.endpoint, **request_kwargs)
+    if response.status_code != stub.expected_status_code:
+        raise ValueError(f'Expected status code {stub.expected_status_code} but got {response.status_code}')
 
     if stub.binary_response:
         response_body = base64.b64encode(response.content).decode('ascii')

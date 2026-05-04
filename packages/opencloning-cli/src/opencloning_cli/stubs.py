@@ -14,6 +14,7 @@ class StubRequest(BaseModel):
     multipart_files: list[dict[str, str]] | None = None
     binary_response: bool = False
     reset_db: bool = False
+    expected_status_code: int = 200
 
 
 class StubResponse(BaseModel):
@@ -69,7 +70,7 @@ def stubs(dirname: str) -> Generator[StubRequest, None, None]:
         name='post_primer',
         endpoint='/primer',
         method='POST',
-        body={'id': 0, 'name': 'new', 'sequence': 'GGCC'},
+        body={'name': 'new', 'sequence': 'GGCC'},
         reset_db=True,
     )
     yield StubRequest(
