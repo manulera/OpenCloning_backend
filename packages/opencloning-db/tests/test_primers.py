@@ -659,3 +659,44 @@ def test_post_primers_bulk_invalid_sequence_returns_409_and_is_atomic(primers_cl
     list_r = c.get('/primers?name=would_not_be_created', headers=headers)
     assert list_r.status_code == 200
     assert len(list_r.json()['items']) == 0
+
+
+def test_post_primers_bulk_non_strict_allows_name_and_sequence_conflicts(primers_client):
+    c = primers_client['client']
+    headers = workspace_headers(primers_client['token_owner_w1'], primers_client['w1'])
+    payload = [
+        {'name': 'seed_primer', 'sequence': 'AACC', 'uid': 'NON-STRICT-UID-1'},
+        {'name': 'fresh_non_strict', 'sequence': 'ATGC', 'uid': 'NON-STRICT-UID-2'},
+        {'name': 'same_name', 'sequence': 'GGGGG', 'uid': 'NON-STRICT-UID-3'},
+        {'name': 'same_name', 'sequence': 'GGGGG', 'uid': 'NON-STRICT-UID-4'},
+    ]
+
+    r = c.post('/primers/bulk?strict=false', headers=headers, json=payload)
+    assert r.status_code == 200
+    rows = r.json()
+    assert len(rows) == 4
+    assert rows[0]['name'] == 'seed_primer'
+    assert rows[1]['sequence'] == 'ATGC'
+    assert rows[2]['name'] == 'same_name'
+    assert rows[3]['name'] == 'same_name'
+
+    list_r = c.get('/primers?uid=NON-STRICT-UID', headers=headers)
+    assert list_r.status_code == 200
+    assert len(list_r.json()['items']) == 4
+
+
+def test_post_primers_bulk_non_strict_still_rejects_uid_and_invalid_sequence(primers_client):
+    c = primers_client['client']
+    headers = workspace_headers(primers_client['token_owner_w1'], primers_client['w1'])
+    ok_payload = [{'name': 'non_strict_ok', 'sequence': 'GGTT', 'uid': 'NON-STRICT-OK'}]
+    for wrong_payload in [
+        [{'name': 'non_strict_bad_uid', 'sequence': 'AAAAAAAAAAA', 'uid': 'UID-PRIMER-1'}],  # Existing UID
+        [{'name': 'non_strict_bad_seq', 'sequence': 'AX', 'uid': 'NON-STRICT'}],  # Invalid sequence
+        [{'name': 'non_strict_duplicated_UID', 'sequence': 'AAA', 'uid': 'NON-STRICT-OK'}],  # Duplicated name
+    ]:
+        payload = ok_payload + wrong_payload
+        r = c.post('/primers/bulk?strict=false', headers=headers, json=payload)
+        assert r.status_code == 409
+        list_r = c.get('/primers?name=non_strict', headers=headers)
+        assert list_r.status_code == 200
+        assert len(list_r.json()['items']) == 0
