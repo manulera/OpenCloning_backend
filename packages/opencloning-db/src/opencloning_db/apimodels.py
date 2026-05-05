@@ -3,7 +3,7 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 import opencloning_linkml.datamodel.models as opencloning_models
-from opencloning_db.models import SequenceType, Sequence
+from opencloning_db.models import SequenceType, Sequence, Primer
 
 
 class ApiModel(BaseModel):
@@ -168,6 +168,15 @@ class PrimerCreate(ApiModel):
     sequence: str = Field(min_length=2, pattern=r'^[ACGTacgt]+$')
 
 
+class PrimerBulkRow(PrimerCreate):
+    name_exists: bool
+    sequence_exists: bool
+    uid_exists: bool
+    name_duplicated: bool
+    sequence_duplicated: bool
+    uid_duplicated: bool
+
+
 class PrimerRef(ApiModel):
     id: int
     name: str | None
@@ -221,6 +230,16 @@ def sequence_ref(sequence: Sequence) -> SequenceRef:
         tags=[TagRead(id=t.id, name=t.name) for t in sequence.tags],
         sample_uids=sequence.sample_uids,
         seguid=sequence.seguid,
+    )
+
+
+def primer_ref(primer: Primer) -> PrimerRef:
+    return PrimerRef(
+        id=primer.id,
+        name=primer.name,
+        sequence=primer.sequence,
+        uid=primer.uid,
+        tags=[TagRead(id=t.id, name=t.name) for t in primer.tags],
     )
 
 

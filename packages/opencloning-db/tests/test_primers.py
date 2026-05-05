@@ -528,3 +528,93 @@ def test_post_primer_repeated_uid_returns_409(primers_client):
     )
     assert r.status_code == 409
     assert 'already exists' in r.json()['detail']
+
+
+def test_validate_upload_returns_primer_refs_with_flags(primers_client):
+    c = primers_client['client']
+    headers = workspace_headers(primers_client['token_viewer_w1'], primers_client['w1'])
+    payload = [
+        {'name': ' seed_primer ', 'sequence': 'atgc', 'uid': ' uid-primer-1 '},
+        {'name': 'dup_name', 'sequence': 'GGGG', 'uid': 'X-1'},
+        {'name': ' DUP_NAME ', 'sequence': 'gggg', 'uid': ' x-1 '},
+        {'name': 'fresh', 'sequence': 'TATA', 'uid': None},
+    ]
+
+    r = c.post('/primers/validate-upload', headers=headers, json=payload)
+    assert r.status_code == 200
+    rows = r.json()
+    assert len(rows) == 4
+
+    assert rows[0]['name_exists'] is True
+    assert rows[0]['sequence_exists'] is True
+    assert rows[0]['uid_exists'] is True
+    assert rows[0]['name_duplicated'] is False
+    assert rows[0]['sequence_duplicated'] is False
+    assert rows[0]['uid_duplicated'] is False
+
+    assert rows[1]['name_exists'] is False
+    assert rows[1]['sequence_exists'] is False
+    assert rows[1]['uid_exists'] is False
+    assert rows[1]['name_duplicated'] is True
+    assert rows[1]['sequence_duplicated'] is True
+    assert rows[1]['uid_duplicated'] is True
+
+    assert rows[2]['name_exists'] is False
+    assert rows[2]['sequence_exists'] is False
+    assert rows[2]['uid_exists'] is False
+    assert rows[2]['name_duplicated'] is True
+    assert rows[2]['sequence_duplicated'] is True
+    assert rows[2]['uid_duplicated'] is True
+
+    assert rows[3]['name_exists'] is False
+    assert rows[3]['sequence_exists'] is False
+    assert rows[3]['uid_exists'] is False
+    assert rows[3]['name_duplicated'] is False
+    assert rows[3]['sequence_duplicated'] is False
+    assert rows[3]['uid_duplicated'] is False
+
+
+def test_post_primers_bulk_success_returns_primer_refs(primers_client):
+    c = primers_client['client']
+    headers = workspace_headers(primers_client['token_owner_w1'], primers_client['w1'])
+    payload = [
+        {'name': 'bulk_new_1', 'sequence': 'AACC', 'uid': 'BULK-UID-1'},
+        {'name': 'bulk_new_2', 'sequence': 'GGTT', 'uid': None},
+    ]
+
+    r = c.post('/primers/bulk', headers=headers, json=payload)
+    assert r.status_code == 200
+    rows = r.json()
+    assert len(rows) == 2
+    assert set(rows[0]) == {'id', 'name', 'sequence', 'uid', 'tags'}
+    assert set(rows[1]) == {'id', 'name', 'sequence', 'uid', 'tags'}
+    assert rows[0]['id'] > 0
+    assert rows[1]['id'] > 0
+    assert rows[0]['name'] == 'bulk_new_1'
+    assert rows[0]['sequence'] == 'AACC'
+    assert rows[0]['uid'] == 'BULK-UID-1'
+    assert rows[1]['name'] == 'bulk_new_2'
+    assert rows[1]['sequence'] == 'GGTT'
+    assert rows[1]['uid'] is None
+
+
+def test_post_primers_bulk_conflict_returns_409_and_is_atomic(primers_client):
+    c = primers_client['client']
+    headers = workspace_headers(primers_client['token_owner_w1'], primers_client['w1'])
+    payload = [
+        {'name': 'seed_primer', 'sequence': 'AACC', 'uid': 'UNUSED-NEW-UID'},
+        {'name': 'would_be_created', 'sequence': 'GGTT', 'uid': 'BULK-ATOMIC-1'},
+    ]
+
+    r = c.post('/primers/bulk', headers=headers, json=payload)
+    assert r.status_code == 409
+    rows = r.json()
+    assert len(rows) == 2
+    assert rows[0]['name_exists'] is True
+    assert rows[1]['name_exists'] is False
+    assert rows[0]['name_duplicated'] is False
+    assert rows[1]['name_duplicated'] is False
+
+    list_r = c.get('/primers?name=would_be_created', headers=headers)
+    assert list_r.status_code == 200
+    assert len(list_r.json()['items']) == 0

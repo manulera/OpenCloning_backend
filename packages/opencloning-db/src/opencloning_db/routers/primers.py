@@ -1,13 +1,17 @@
 """Primer endpoints."""
 
+from collections import Counter
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, HTTPException
-from sqlalchemy import and_, select
+from fastapi.responses import JSONResponse
+from sqlalchemy import and_, func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
 from opencloning_db.apimodels import (
     IdResponse,
+    PrimerBulkRow,
     PrimerRef,
     SequenceRef,
     TagRead,
@@ -27,6 +31,99 @@ from opencloning_db.workspace_deps import (
 )
 
 router = APIRouter(tags=['primers'])
+
+
+def _normalize_name(value: str) -> str:
+    return value.strip().casefold()
+
+
+def _normalize_sequence(value: str) -> str:
+    return value.upper()
+
+
+def _normalize_uid(value: str | None) -> str | None:
+    if value is None:
+        return None
+    stripped = value.strip()
+    if stripped == '':
+        return None
+    return stripped.casefold()
+
+
+def _frequency_duplicates(values: list[str]) -> set[str]:
+    return {value for value, count in Counter(values).items() if count > 1}
+
+
+def _primer_bulk_rows_with_flags(
+    primers: list[PrimerCreate],
+    session,
+    workspace_id: int,
+) -> list[PrimerBulkRow]:
+    normalized_names = [_normalize_name(primer.name) for primer in primers]
+    normalized_sequences = [_normalize_sequence(primer.sequence) for primer in primers]
+    normalized_uids = [_normalize_uid(primer.uid) for primer in primers]
+
+    duplicate_names = _frequency_duplicates(normalized_names)
+    duplicate_sequences = _frequency_duplicates(normalized_sequences)
+    duplicate_uids = _frequency_duplicates([uid for uid in normalized_uids if uid is not None])
+
+    db_name_matches = set(
+        session.scalars(
+            select(func.lower(func.trim(Primer.name))).where(
+                Primer.workspace_id == workspace_id,
+                func.lower(func.trim(Primer.name)).in_(set(normalized_names)),
+            )
+        ).all()
+    )
+    db_sequence_matches = set(
+        session.scalars(
+            select(func.upper(Primer.sequence)).where(
+                Primer.workspace_id == workspace_id,
+                func.upper(Primer.sequence).in_(set(normalized_sequences)),
+            )
+        ).all()
+    )
+    uid_candidates = {uid for uid in normalized_uids if uid is not None}
+    db_uid_matches = set(
+        session.scalars(
+            select(func.lower(func.trim(Primer.uid))).where(
+                Primer.workspace_id == workspace_id,
+                Primer.uid.isnot(None),
+                func.lower(func.trim(Primer.uid)).in_(uid_candidates),
+            )
+        ).all()
+    )
+
+    rows: list[PrimerBulkRow] = []
+    for primer, name_norm, sequence_norm, uid_norm in zip(
+        primers, normalized_names, normalized_sequences, normalized_uids
+    ):
+        rows.append(
+            PrimerBulkRow(
+                name=primer.name,
+                sequence=primer.sequence,
+                uid=primer.uid,
+                name_exists=name_norm in db_name_matches,
+                sequence_exists=sequence_norm in db_sequence_matches,
+                uid_exists=uid_norm is not None and uid_norm in db_uid_matches,
+                name_duplicated=name_norm in duplicate_names,
+                sequence_duplicated=sequence_norm in duplicate_sequences,
+                uid_duplicated=uid_norm in duplicate_uids,
+            )
+        )
+    return rows
+
+
+def _has_any_conflict(rows: list[PrimerBulkRow]) -> bool:
+    return any(
+        row.name_exists
+        or row.sequence_exists
+        or row.uid_exists
+        or row.name_duplicated
+        or row.sequence_duplicated
+        or row.uid_duplicated
+        for row in rows
+    )
 
 
 @router.get('/primers', response_model=Page[PrimerRef])
@@ -80,6 +177,66 @@ def post_primer(
     session.commit()
     session.refresh(db_primer)
     return IdResponse(id=db_primer.id)
+
+
+@router.post('/primers/validate-upload', response_model=list[PrimerBulkRow])
+def validate_upload_primers(
+    ctx: Annotated[WorkspaceContext, Depends(get_viewer_workspace_ctx)],
+    primers: list[PrimerCreate],
+):
+    current_user, session, workspace_id = ctx
+    return _primer_bulk_rows_with_flags(primers, session, workspace_id)
+
+
+@router.post('/primers/bulk', response_model=list[PrimerRef])
+def post_primers_bulk(
+    ctx: Annotated[WorkspaceContext, Depends(get_editor_workspace_ctx)],
+    primers: list[PrimerCreate],
+):
+    current_user, session, workspace_id = ctx
+    validation_rows = _primer_bulk_rows_with_flags(primers, session, workspace_id)
+    if _has_any_conflict(validation_rows):
+        return JSONResponse(
+            status_code=409,
+            content=[row.model_dump(mode='json') for row in validation_rows],
+        )
+
+    db_primers: list[Primer] = []
+    for primer in primers:
+        db_primers.append(
+            Primer(
+                name=primer.name,
+                uid=primer.uid,
+                workspace_id=workspace_id,
+                uid_workspace_id=workspace_id,
+                sequence=primer.sequence,
+            )
+        )
+    session.add_all(db_primers)
+    try:
+        session.commit()
+    except IntegrityError:
+        # In case someone would have created the primers in the meantime, we need to return the conflict rows
+        session.rollback()
+        conflict_rows = _primer_bulk_rows_with_flags(primers, session, workspace_id)
+        return JSONResponse(
+            status_code=409,
+            content=[row.model_dump(mode='json') for row in conflict_rows],
+        )
+
+    for db_primer in db_primers:
+        session.refresh(db_primer)
+
+    return [
+        PrimerRef(
+            id=db_primer.id,
+            name=db_primer.name,
+            sequence=db_primer.sequence,
+            uid=db_primer.uid,
+            tags=[TagRead(id=t.id, name=t.name) for t in db_primer.tags],
+        )
+        for db_primer in db_primers
+    ]
 
 
 @router.get('/primer/{primer_id}', response_model=PrimerRef)

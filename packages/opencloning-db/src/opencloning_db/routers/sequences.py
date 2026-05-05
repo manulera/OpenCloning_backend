@@ -22,7 +22,7 @@ from opencloning_db.apimodels import (
     SequenceUpdate,
     SequencingFileRef,
     PrimerRef,
-    TagRead,
+    primer_ref,
     sequence_ref,
 )
 from opencloning_db.config import Config, get_config
@@ -57,16 +57,6 @@ T = TypeVar('T')
 
 def unique_and_sorted(items: List[T]) -> List[T]:
     return list(sorted(set(items), key=lambda x: x.id))
-
-
-def _primer_ref(primer: Primer) -> PrimerRef:
-    return PrimerRef(
-        id=primer.id,
-        name=primer.name,
-        sequence=primer.sequence,
-        uid=primer.uid,
-        tags=[TagRead(id=t.id, name=t.name) for t in primer.tags],
-    )
 
 
 @router.get('/sequences', response_model=Page[SequenceRef])
@@ -341,8 +331,8 @@ def get_sequence_primers(
     products = session.execute(product_primers_stmt).scalars().all()
 
     return {
-        'templates': [_primer_ref(p) for p in sorted(templates, key=lambda p: p.id)],
-        'products': [_primer_ref(p) for p in sorted(products, key=lambda p: p.id)],
+        'templates': [primer_ref(p) for p in sorted(templates, key=lambda p: p.id)],
+        'products': [primer_ref(p) for p in sorted(products, key=lambda p: p.id)],
     }
 
 
