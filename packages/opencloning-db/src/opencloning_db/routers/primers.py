@@ -121,16 +121,14 @@ def _primer_bulk_rows_with_flags(
     return rows
 
 
-def _has_any_conflict(rows: list[PrimerBulkRow]) -> bool:
+def _has_any_conflict(rows: list[PrimerBulkRow], strict: bool) -> bool:
+    if any(row.uid_duplicated or row.uid_exists or row.sequence_invalid for row in rows):
+        return True
+    if not strict:
+        return False
+
     return any(
-        row.name_exists
-        or row.sequence_exists
-        or row.uid_exists
-        or row.sequence_invalid
-        or row.name_duplicated
-        or row.sequence_duplicated
-        or row.uid_duplicated
-        for row in rows
+        row.name_exists or row.sequence_exists or row.name_duplicated or row.sequence_duplicated for row in rows
     )
 
 
@@ -200,10 +198,11 @@ def validate_upload_primers(
 def post_primers_bulk(
     ctx: Annotated[WorkspaceContext, Depends(get_editor_workspace_ctx)],
     primers: list[PrimerBulkSubmission],
+    strict: bool = Query(description='Fail if duplicate name or sequence exists', default=True),
 ):
     current_user, session, workspace_id = ctx
     validation_rows = _primer_bulk_rows_with_flags(primers, session, workspace_id)
-    if _has_any_conflict(validation_rows):
+    if _has_any_conflict(validation_rows, strict):
         return JSONResponse(
             status_code=409,
             content=[row.model_dump(mode='json') for row in validation_rows],
