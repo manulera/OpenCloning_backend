@@ -548,6 +548,7 @@ def test_validate_upload_returns_primer_refs_with_flags(primers_client):
     assert rows[0]['name_exists'] is True
     assert rows[0]['sequence_exists'] is True
     assert rows[0]['uid_exists'] is True
+    assert rows[0]['sequence_invalid'] is False
     assert rows[0]['name_duplicated'] is False
     assert rows[0]['sequence_duplicated'] is False
     assert rows[0]['uid_duplicated'] is False
@@ -555,6 +556,7 @@ def test_validate_upload_returns_primer_refs_with_flags(primers_client):
     assert rows[1]['name_exists'] is False
     assert rows[1]['sequence_exists'] is False
     assert rows[1]['uid_exists'] is False
+    assert rows[1]['sequence_invalid'] is False
     assert rows[1]['name_duplicated'] is True
     assert rows[1]['sequence_duplicated'] is True
     assert rows[1]['uid_duplicated'] is True
@@ -562,6 +564,7 @@ def test_validate_upload_returns_primer_refs_with_flags(primers_client):
     assert rows[2]['name_exists'] is False
     assert rows[2]['sequence_exists'] is False
     assert rows[2]['uid_exists'] is False
+    assert rows[2]['sequence_invalid'] is False
     assert rows[2]['name_duplicated'] is True
     assert rows[2]['sequence_duplicated'] is True
     assert rows[2]['uid_duplicated'] is True
@@ -569,9 +572,27 @@ def test_validate_upload_returns_primer_refs_with_flags(primers_client):
     assert rows[3]['name_exists'] is False
     assert rows[3]['sequence_exists'] is False
     assert rows[3]['uid_exists'] is False
+    assert rows[3]['sequence_invalid'] is False
     assert rows[3]['name_duplicated'] is False
     assert rows[3]['sequence_duplicated'] is False
     assert rows[3]['uid_duplicated'] is False
+
+
+def test_validate_upload_flags_invalid_sequence(primers_client):
+    c = primers_client['client']
+    headers = workspace_headers(primers_client['token_viewer_w1'], primers_client['w1'])
+    payload = [
+        {'name': 'bad_char', 'sequence': 'AXTT', 'uid': None},
+        {'name': 'too_short', 'sequence': 'AT', 'uid': None},
+        {'name': 'ok_seq', 'sequence': 'ATG', 'uid': None},
+    ]
+
+    r = c.post('/primers/validate-upload', headers=headers, json=payload)
+    assert r.status_code == 200
+    rows = r.json()
+    assert rows[0]['sequence_invalid'] is True
+    assert rows[1]['sequence_invalid'] is True
+    assert rows[2]['sequence_invalid'] is False
 
 
 def test_post_primers_bulk_success_returns_primer_refs(primers_client):
@@ -616,5 +637,25 @@ def test_post_primers_bulk_conflict_returns_409_and_is_atomic(primers_client):
     assert rows[1]['name_duplicated'] is False
 
     list_r = c.get('/primers?name=would_be_created', headers=headers)
+    assert list_r.status_code == 200
+    assert len(list_r.json()['items']) == 0
+
+
+def test_post_primers_bulk_invalid_sequence_returns_409_and_is_atomic(primers_client):
+    c = primers_client['client']
+    headers = workspace_headers(primers_client['token_owner_w1'], primers_client['w1'])
+    payload = [
+        {'name': 'invalid_seq', 'sequence': 'AT', 'uid': 'BULK-BAD-1'},
+        {'name': 'would_not_be_created', 'sequence': 'GGTT', 'uid': 'BULK-BAD-2'},
+    ]
+
+    r = c.post('/primers/bulk', headers=headers, json=payload)
+    assert r.status_code == 409
+    rows = r.json()
+    assert len(rows) == 2
+    assert rows[0]['sequence_invalid'] is True
+    assert rows[1]['sequence_invalid'] is False
+
+    list_r = c.get('/primers?name=would_not_be_created', headers=headers)
     assert list_r.status_code == 200
     assert len(list_r.json()['items']) == 0

@@ -168,7 +168,14 @@ class PrimerCreate(ApiModel):
     sequence: str = Field(min_length=2, pattern=r'^[ACGTacgt]+$')
 
 
-class PrimerBulkRow(PrimerCreate):
+class PrimerBulkSubmission(ApiModel):
+    name: str
+    uid: str | None = None
+    sequence: str
+
+
+class PrimerBulkRow(PrimerBulkSubmission):
+    sequence_invalid: bool
     name_exists: bool
     sequence_exists: bool
     uid_exists: bool

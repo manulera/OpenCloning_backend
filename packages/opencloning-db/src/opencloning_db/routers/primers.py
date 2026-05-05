@@ -1,6 +1,7 @@
 """Primer endpoints."""
 
 from collections import Counter
+import re
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, HTTPException
@@ -11,6 +12,7 @@ from sqlalchemy.orm import selectinload
 
 from opencloning_db.apimodels import (
     IdResponse,
+    PrimerBulkSubmission,
     PrimerBulkRow,
     PrimerRef,
     SequenceRef,
@@ -54,8 +56,12 @@ def _frequency_duplicates(values: list[str]) -> set[str]:
     return {value for value, count in Counter(values).items() if count > 1}
 
 
+def _is_invalid_sequence(value: str) -> bool:
+    return len(value) <= 2 or re.fullmatch(r'[ACGTacgt]+', value) is None
+
+
 def _primer_bulk_rows_with_flags(
-    primers: list[PrimerCreate],
+    primers: list[PrimerBulkSubmission],
     session,
     workspace_id: int,
 ) -> list[PrimerBulkRow]:
@@ -103,6 +109,7 @@ def _primer_bulk_rows_with_flags(
                 name=primer.name,
                 sequence=primer.sequence,
                 uid=primer.uid,
+                sequence_invalid=_is_invalid_sequence(primer.sequence),
                 name_exists=name_norm in db_name_matches,
                 sequence_exists=sequence_norm in db_sequence_matches,
                 uid_exists=uid_norm is not None and uid_norm in db_uid_matches,
@@ -119,6 +126,7 @@ def _has_any_conflict(rows: list[PrimerBulkRow]) -> bool:
         row.name_exists
         or row.sequence_exists
         or row.uid_exists
+        or row.sequence_invalid
         or row.name_duplicated
         or row.sequence_duplicated
         or row.uid_duplicated
@@ -182,7 +190,7 @@ def post_primer(
 @router.post('/primers/validate-upload', response_model=list[PrimerBulkRow])
 def validate_upload_primers(
     ctx: Annotated[WorkspaceContext, Depends(get_viewer_workspace_ctx)],
-    primers: list[PrimerCreate],
+    primers: list[PrimerBulkSubmission],
 ):
     current_user, session, workspace_id = ctx
     return _primer_bulk_rows_with_flags(primers, session, workspace_id)
@@ -191,7 +199,7 @@ def validate_upload_primers(
 @router.post('/primers/bulk', response_model=list[PrimerRef])
 def post_primers_bulk(
     ctx: Annotated[WorkspaceContext, Depends(get_editor_workspace_ctx)],
-    primers: list[PrimerCreate],
+    primers: list[PrimerBulkSubmission],
 ):
     current_user, session, workspace_id = ctx
     validation_rows = _primer_bulk_rows_with_flags(primers, session, workspace_id)
